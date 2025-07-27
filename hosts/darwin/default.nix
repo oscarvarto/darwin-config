@@ -61,59 +61,56 @@ in
     agenix.packages."${pkgs.stdenv.hostPlatform.system}".default
   ] ++ (import ../../modules/shared/packages.nix { inherit pkgs; });
 
-  # Add fish and nushell to available shells
-  environment.shells = [ "/Users/${user}/.nix-profile/bin/fish" "/Users/${user}/.nix-profile/bin/nu"];
+  # Add nushell to available shells
+  environment.shells = [ "/Users/${user}/.nix-profile/bin/nu" ];
 
   security.pam.services.sudo_local.touchIdAuth = true;
 
-  # Enable fish shell system-wide
   programs = {
-    fish.enable = true;
     zsh.enable = true;
   };
 
   # User-level launchd agent to set environment variables for GUI applications
   # This works with SIP enabled and provides the same functionality as system-level launchd.envVariables
-    # launchd.user.agents.setEnvVars = {
-    #   serviceConfig = {
-    #     Label = "org.nixos.setEnvVars";
-    #     ProgramArguments = [
-    #       "/bin/launchctl"
-    #       "setenv"
-    #       "PATH"
-    #       (builtins.concatStringsSep ":" [
-    #         # User script directories
-    #         "/Users/oscarvarto/.local/bin"
-    #         "/Users/oscarvarto/.local/share/bin"
-    #         "/Users/oscarvarto/.cargo/bin"
-    #         "/Users/oscarvarto/.emacs.d/bin"
-    #         "/Users/oscarvarto/.volta/bin"
-    #         "/Users/oscarvarto/Library/Application Support/Coursier/bin"
-    #         # Nix paths (essential for Nix-managed tools)
-    #         "/Users/oscarvarto/.nix-profile/bin"
-    #         "/run/current-system/sw/bin"
-    #         "/nix/var/nix/profiles/default/bin"
-    #         
-    #         # Homebrew paths
-    #         # "/opt/homebrew/bin"
-    #         # "/opt/homebrew/opt/mise/bin"
-    #         # "/opt/homebrew/opt/llvm/bin"
-    #         # "/opt/homebrew/opt/mysql@8.4/bin"
-    #         # "/opt/homebrew/opt/gnu-tar/libexec/gnubin"
-    #         
-    #         # System paths
-    #         "/usr/local/bin"
-    #         "/usr/bin"
-    #         "/bin"
-    #         "/usr/sbin"
-    #         "/sbin"
-    #         "/Library/Apple/usr/bin"
-    #         "/Library/TeX/texbin"
-    #       ])
-    #     ];
-    #     RunAtLoad = true;
-    #   };
-    # };
+  launchd.user.agents.setEnvVars = {
+    serviceConfig = {
+      Label = "org.nixos.setEnvVars";
+      ProgramArguments = [
+        "/bin/launchctl"
+        "setenv"
+        "PATH"
+        (builtins.concatStringsSep ":" [
+          # User script directories
+          "/Users/oscarvarto/.local/bin"
+          "/Users/oscarvarto/.local/share/bin"
+          "/Users/oscarvarto/.cargo/bin"
+          "/Users/oscarvarto/.emacs.d/bin"
+          "/Users/oscarvarto/.volta/bin"
+          "/Users/oscarvarto/Library/Application Support/Coursier/bin"
+          # Nix paths (essential for Nix-managed tools)
+          "/Users/oscarvarto/.nix-profile/bin"
+          "/run/current-system/sw/bin"
+          "/nix/var/nix/profiles/default/bin"
+          
+          # Homebrew paths
+          "/opt/homebrew/bin"
+          "/opt/homebrew/opt/llvm/bin"
+          "/opt/homebrew/opt/mysql@8.4/bin"
+          "/opt/homebrew/opt/gnu-tar/libexec/gnubin"
+          
+          # System paths
+          "/usr/local/bin"
+          "/usr/bin"
+          "/bin"
+          "/usr/sbin"
+          "/sbin"
+          "/Library/Apple/usr/bin"
+          "/Library/TeX/texbin"
+        ])
+      ];
+      RunAtLoad = true;
+    };
+  };
 
   # Additional launchd agents for locale settings to fix "LANG=en_MX.UTF-8 cannot be used" warning
   launchd.user.agents.setLangVar = {

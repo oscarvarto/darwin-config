@@ -111,7 +111,6 @@ def pin_essentials [] {
   let essential_packages = [
     "nixpkgs#git",
     "nixpkgs#curl", 
-    "nixpkgs#fish",
     "nixpkgs#starship",
     "nixpkgs#helix",
     "nixpkgs#yazi",

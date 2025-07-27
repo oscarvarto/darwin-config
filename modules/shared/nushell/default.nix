@@ -40,6 +40,16 @@ in
           }
 
         '' + (builtins.readFile ./env.nu);
+
+        plugins = with pkgs.nushellPlugins; [
+          formats
+          gstat
+          highlight
+          polars
+          query
+          semver
+          units
+        ];
       };
 
       direnv.enableNushellIntegration = true;

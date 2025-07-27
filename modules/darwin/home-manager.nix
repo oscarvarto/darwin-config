@@ -19,7 +19,7 @@ in
     name = "${user}";
     home = "/Users/${user}";
     isHidden = false;
-    shell = "/Users/${user}/.nix-profile/bin/fish";
+    shell = "/Users/${user}/.nix-profile/bin/nu";
   };
 
   environment.variables = {
@@ -36,7 +36,6 @@ in
     extraSpecialArgs = { inherit inputs; };
     users.${user} = { pkgs, config, lib, ... }: {
       imports = [
-        ./fish-config.nix
         ../shared/nushell
         ../shared/home-manager.nix
         catppuccin.homeModules.catppuccin
@@ -62,7 +61,7 @@ in
 
       programs = {
         _1password-shell-plugins = {
-          # enable 1Password shell plugins for bash, zsh, and fish shell
+          # enable 1Password shell plugins for bash, zsh
           enable = true;
           # the specified packages as well as 1Password CLI will be
           # automatically installed and configured to use shell plugins
@@ -72,7 +71,6 @@ in
         atuin = {
           enable = true;
           daemon.enable = true;
-          enableFishIntegration = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
         };
@@ -92,7 +90,6 @@ in
 
         mise = {
           enable = true;
-          enableFishIntegration = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
         };
@@ -100,14 +97,12 @@ in
         starship = {
           enable = true;
           enableZshIntegration = true;
-          enableFishIntegration = true;
           enableNushellIntegration = true;
           settings = fromTOML(builtins.readFile ./starship.toml);
         };
 
         yazi = {
           enable = true;
-          enableFishIntegration = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
           settings = {
@@ -119,7 +114,6 @@ in
 
         zoxide = {
           enable = true;
-          enableFishIntegration = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
         };

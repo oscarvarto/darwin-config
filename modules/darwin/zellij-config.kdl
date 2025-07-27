@@ -266,7 +266,7 @@ default_mode "locked"
 // Choose the path to the default shell that zellij will use for opening new panes
 // Default: $SHELL
 // Using shell wrapper to detect current shell and use nix-profile versions
-default_shell "fish"
+default_shell "nu"
  
 // Choose the path to override cwd that zellij will use for opening new panes
 // 

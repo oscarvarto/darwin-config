@@ -37,7 +37,6 @@
         link = true;
       }
       "eza"
-      "fish-lsp"
       "ffmpeg"
       "gradle"
       "git-filter-repo"
