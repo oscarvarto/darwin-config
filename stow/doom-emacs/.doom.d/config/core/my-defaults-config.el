@@ -99,7 +99,7 @@
 
 ;; Explicitly disable line numbers for specific modes where they're not wanted
 (dolist (mode '(treemacs-mode-hook
-                ;;vterm-mode-hook
+                vterm-mode-hook
                 mu4e-headers-mode-hook
                 mu4e-view-mode-hook
                 mu4e-compose-mode-hook
@@ -125,12 +125,12 @@
 (require 'saveplace-pdf-view)
 (save-place-mode 1)
 
-;;(require 'vterm)
+(require 'vterm)
 
 ;; Use nushell as default shell
-(setq shell-file-name (executable-find "fish"))
+(setq shell-file-name (executable-find "zsh"))
 (setq-default vterm-shell (executable-find "nu"))
-(setq-default explicit-shell-file-name (executable-find "fish"))
+(setq-default explicit-shell-file-name (executable-find "zsh"))
 
 ;; Workaround for debugging Java tests with nushell
 ;; When debugging, temporarily use bash to ensure proper environment variable handling

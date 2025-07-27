@@ -10,6 +10,7 @@ _:
   "gg"
   "jetbrains-toolbox"
   "mactex"
+  "miniforge"
   "ollama"
   "postman"
   "powershell"

@@ -3,7 +3,6 @@
 let 
   name = "Oscar Vargas Torres";
   user = "oscarvarto";
-  email = "contact@oscarvarto.mx";
   shellConfig = import ./shell-config.nix { inherit config pkgs lib; };
   gitIgnores = import ./git-ignores.nix { inherit config pkgs lib; };
   gitSecurityScripts = import ./git-security-scripts.nix { inherit config pkgs lib user; };
@@ -43,9 +42,7 @@ in
           "/opt/homebrew/*"
         ];
         # Conditional includes for work directory
-        includeIf."gitdir:/Users/${user}/ir/**".path = "/Users/${user}/.local/share/git/config-work";
-        # Conditional include for Doom Emacs directory (with hooks)
-        includeIf."gitdir:/Users/${user}/.emacs.d/".path = "/Users/${user}/.config/git/config-doom";
+        includeIf."gitdir:/Users/${user}/ir/**".path = "/Users/${user}/.config/git/config-work";
         # Include personal config as fallback for all other directories
         include.path = "/Users/${user}/.config/git/config-personal";
       };
