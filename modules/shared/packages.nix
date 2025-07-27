@@ -54,12 +54,14 @@ with pkgs;
   unrar
   unzip
 
+  qt6.full
   # Python packages
   (python3.withPackages (python-pkgs: with python-pkgs; [
     jupyterlab
     matplotlib
     polars
     pyqt6
+    pysocks
     python
     sympy
     uv

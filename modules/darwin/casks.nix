@@ -15,7 +15,6 @@ _:
   "powershell"
   "qt-creator"
   "qt-design-studio"
-  "unity-hub"
 
   # Communication Tools
   "discord"
@@ -23,7 +22,6 @@ _:
   "microsoft-outlook"
   "microsoft-teams"
   "nheko"
-  "notion"
   "slack"
   "teamviewer"
   "whatsapp"
@@ -34,11 +32,8 @@ _:
   "1password-cli"
   "dropbox"
   "figma"
-  "hammerspoon"  # Lua scripting for macOS automation
-  "jordanbaird-ice"
   "obsidian"
   "nordvpn"
-  "proton-drive"
   "snagit"
   "unnaturalscrollwheels"
 
@@ -52,6 +47,5 @@ _:
   # Browsers
   "google-chrome"
   "microsoft-edge"
-  "vivaldi"
   "zen"
 ]

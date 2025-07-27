@@ -4,12 +4,11 @@ let
   xdg_configHome = "${config.users.users.${user}.home}/.config";
   xdg_dataHome   = "${config.users.users.${user}.home}/.local/share";
   xdg_stateHome  = "${config.users.users.${user}.home}/.local/state";
-  hammerspoonDir = "${config.users.users.${user}.home}/.hammerspoon";
 in
 {
   # NOTE: Raycast scripts are now managed via stow (nix-scripts package)
   # Run: cd ~/nixos-config/stow && stow nix-scripts
-  # Scripts: yabai_toggle_split.sh, yabai_toggle_float.sh, delete_clipboard.sh, emacsclient
+  # Scripts: delete_clipboard.sh, emacsclient
 
   # Create a template config file with just the biometric settings
   "${xdg_configHome}/op/biometric-config.json" = {
@@ -40,12 +39,6 @@ in
         # If no config exists yet, just copy the biometric config
         cp "$HOME/.config/op/biometric-config.json" "$HOME/.config/op/config"
       fi
-    '';
-  };
-
-  # Hammerspoon configuration
-  "${hammerspoonDir}/init.lua" = {
-    text = ''
     '';
   };
 

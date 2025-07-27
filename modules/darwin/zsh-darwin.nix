@@ -5,8 +5,7 @@
     # Darwin-specific zsh configuration
     shellInit = ''
       # macOS-specific PATH configurations
-      PATH="/opt/homebrew/bin:$PATH"
-
+      PATH="$PATH:/opt/homebrew/bin"
       PATH="/opt/homebrew/opt/llvm/bin:$PATH"
       export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
       export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
@@ -18,7 +17,6 @@
       PATH="/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH"
       PATH="/run/current-system/sw/bin:$PATH"
 
-      eval "$(mise activate zsh)"
       export PATH
     '';
   };

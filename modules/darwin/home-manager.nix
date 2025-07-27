@@ -94,6 +94,7 @@ in
           enable = true;
           enableFishIntegration = true;
           enableNushellIntegration = true;
+          enableZshIntegration = true;
         };
 
         starship = {
@@ -151,7 +152,7 @@ in
         { path = "/Applications/Ghostty.app/"; }
         { path = "/Applications/WarpPreview.app/"; }
         { path = "/Applications/Zen.app/"; }
-        { path = "/Applications/Safari Technology Preview.app/"; }
+        { path = "/Applications/Safari.app/"; }
         { path = "/Applications/Parallels Desktop.app/"; }
         { path = "/Applications/Beekeeper Studio.app/"; }
         { path = "/System/Applications/Music.app/"; }

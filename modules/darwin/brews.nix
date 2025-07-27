@@ -30,7 +30,6 @@
       "ccache"
       "cmake"
       "cmake-language-server"
-      "coursier"
       "difftastic"
       {
         name = "emacs-plus@31";
@@ -42,12 +41,10 @@
       "ffmpeg"
       "gradle"
       "git-filter-repo"
-      "gnuplot"
       "go"
       "helix"
       "hugo"
       "imagemagick"
-      "isync"
       "jq"
       "libedit"
       "libvterm"
@@ -58,9 +55,7 @@
       "markdown-oxide"
       "marksman"
       "maven"
-      "mise"
       "mosh"
-      "mu"
       "mysql@8.4"
       "nasm"
       "ncurses"
@@ -102,7 +97,7 @@
     # This message is safe to ignore. (https://github.com/dustinlyons/nixos-config/issues/83)
 
     masApps = {
-      "1Password for Safari" = 1569813296;  # Temporarily disabled
+      "1Password for Safari" = 1569813296;
       "neptunes" = 1006739057;
       "rcmd" = 1596283165;
       "XCode" = 497799835;

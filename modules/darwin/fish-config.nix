@@ -20,18 +20,24 @@
       set fish_greeting
       set -gx fish_color_autosuggestion brmagenta
 
-      # Check if we're in an interactive shell
-      if status is-interactive
-          # At this point, specify the Zellij config dir, so we can launch it manually if we want to
-          export ZELLIJ_CONFIG_DIR=$HOME/.config/zellij
+      # Environment variables
+      set -gx LC_ALL "en_US.UTF-8"
+      set -gx ALTERNATE_EDITOR ""
+      set -gx EDITOR nvim
+      set -gx VISUAL nvim
 
-          # Check if our Terminal emulator is Ghostty, we're not already in zellij,
-          # and fish is the login shell (not invoked from another shell)
-          if [ "$TERM" = "xterm-ghostty" ] && not set -q ZELLIJ && [ "$SHLVL" = "1" ]
-              # Launch zellij with fish as the default shell
-              exec zellij
-          end
-      end
+      # Check if we're in an interactive shell
+      # if status is-interactive
+      #     # At this point, specify the Zellij config dir, so we can launch it manually if we want to
+      #     export ZELLIJ_CONFIG_DIR=$HOME/.config/zellij
+
+      #     # Check if our Terminal emulator is Ghostty, we're not already in zellij,
+      #     # and fish is the login shell (not invoked from another shell)
+      #     if [ "$TERM" = "xterm-ghostty" ] && not set -q ZELLIJ && [ "$SHLVL" = "1" ]
+      #         # Launch zellij with fish as the default shell
+      #         exec zellij
+      #     end
+      # end
 
       # PATH configuration
       fish_add_path /usr/local/bin
@@ -49,12 +55,7 @@
       set -gx DOTNET_ROOT /usr/local/share/dotnet
       fish_add_path $DOTNET_ROOT
       fish_add_path $HOME/.dotnet/tools
-
-      # Mise activation (if available)
-      if command -v mise > /dev/null 2>&1
-        mise activate fish | source
-      end
-
+      
       # Define variables for directories
       set -gx EMACSDIR $HOME/.emacs.d
       set -gx DOOMDIR $HOME/.doom.d
@@ -77,13 +78,7 @@
       fish_add_path "$HOME/.nix-profile/bin"
       fish_add_path "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
       fish_add_path "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
-
-      # Environment variables
-      set -gx LC_ALL "en_US.UTF-8"
-      set -gx ALTERNATE_EDITOR ""
-      set -gx EDITOR nvim
-      set -gx VISUAL nvim
-    '';
+      '';
 
     functions = {
       ppath = {
