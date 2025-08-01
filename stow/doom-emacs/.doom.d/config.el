@@ -80,7 +80,6 @@
 (my/load-config 'python 'languages)
 
 ;;; Tool-specific configurations
-(my/load-config 'mu4e 'misc)
 (my/load-config 'vterm 'misc)
 (my/load-config 'eat 'misc)
 

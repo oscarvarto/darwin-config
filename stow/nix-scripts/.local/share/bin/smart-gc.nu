@@ -109,15 +109,15 @@ def pin_essentials [] {
   print $"($BLUE)📌 Pinning essential derivations to prevent removal($NC)"
   
   let essential_packages = [
-    "nixpkgs#git",
-    "nixpkgs#curl", 
-    "nixpkgs#starship",
-    "nixpkgs#helix",
-    "nixpkgs#yazi",
-    "nixpkgs#zoxide",
-    "nixpkgs#atuin",
-    "nixpkgs#jujutsu",
-    "nixpkgs#lazygit"
+    # "nixpkgs#git",
+    # "nixpkgs#curl", 
+    # "nixpkgs#starship",
+    # "nixpkgs#helix",
+    # "nixpkgs#yazi",
+    # "nixpkgs#zoxide",
+    # "nixpkgs#atuin",
+    # "nixpkgs#jujutsu",
+    # "nixpkgs#lazygit"
   ]
   
   # Create a gcroot for current system configuration if it exists

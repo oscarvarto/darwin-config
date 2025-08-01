@@ -17,7 +17,7 @@
     brews = [
       "7-zip"
       "angular-cli"
-      "atuin"
+      "aria2"
       "autoconf"
       "autoconf-archive"
       "automake"

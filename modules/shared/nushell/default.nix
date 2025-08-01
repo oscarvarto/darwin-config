@@ -7,6 +7,11 @@ in
 {
   options.local.nushell = {
     enable = mkEnableOption "nushell";
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = pkgs.nushell;
+      description = "The nushell package to use";
+    };
     left_prompt_cmd = lib.mkOption { default = "hostname -s"; type = lib.types.str; description = "Command to use to generate left prompt text"; };
     history_file_format = lib.mkOption { default = "sqlite"; type = lib.types.str; description = "History file format, either sqlite or plaintext"; };
   };
@@ -15,6 +20,7 @@ in
     programs = {
       nushell = {
         enable = true;
+        package = cfg.package;
         configFile.text = (builtins.replaceStrings [
           "HISTORY_FILE_FORMAT"
           "NIX_BASH_ENV_NU_MODULE"
@@ -41,14 +47,16 @@ in
 
         '' + (builtins.readFile ./env.nu);
 
+        # plugins temporarily disabled due to version compatibility issues
         plugins = with pkgs.nushellPlugins; [
-          formats
-          gstat
-          highlight
           polars
+          gstat
+          formats
           query
-          semver
-          units
+
+          # highlight
+          # semver
+          # units
         ];
       };
 
@@ -59,6 +67,7 @@ in
       packages = with pkgs; [
         inputs.bash-env-json.packages.${pkgs.stdenv.hostPlatform.system}.default
         inputs.bash-env-nushell.packages.${pkgs.stdenv.hostPlatform.system}.default
+        jc
       ];
     };
 

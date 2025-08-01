@@ -57,11 +57,16 @@ with pkgs;
   qt6.full
   # Python packages
   (python3.withPackages (python-pkgs: with python-pkgs; [
+    pandas
+    requests
+    sexpdata tld
+    pyqt6 pyqt6-sip
+    pyqt6-webengine epc lxml # for eaf
+    pysocks # eaf-browser
+
     jupyterlab
     matplotlib
     polars
-    pyqt6
-    pysocks
     python
     sympy
     uv

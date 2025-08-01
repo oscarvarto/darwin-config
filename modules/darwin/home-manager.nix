@@ -4,6 +4,24 @@ let
   sharedFiles = import ../shared/files.nix { inherit config pkgs user; };
   additionalFiles = import ./files.nix { inherit user config pkgs; };
   inherit (builtins) fromTOML;
+  
+  # Custom nushell 0.106.0 built from source
+  # nushell-custom = pkgs.nushell.overrideAttrs (oldAttrs: rec {
+  #   version = "0.106.0";
+  #   src = pkgs.fetchFromGitHub {
+  #     owner = "nushell";
+  #     repo = "nushell";
+  #     rev = "0.106.0";
+  #     hash = "sha256-kFDbLt/1rB+8aqNulc0Wm6ZcMa2VXRPYvu0NFLoYCNQ=";
+  #   };
+  #   # Let Nix automatically handle cargo dependencies for the new source
+  #   cargoDeps = pkgs.rustPlatform.importCargoLock {
+  #     lockFile = "${src}/Cargo.lock";
+  #   };
+  # });
+  
+  # TODO: Build custom nushell plugins from the same source
+  # For now, we'll install them manually using cargo to avoid complexity
 in
 {
 
@@ -47,6 +65,7 @@ in
         packages = (pkgs.callPackage ./packages.nix {}) ++ [
           # Add neovim-nightly from overlay
           neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.neovim
+          # TODO: Add custom nushell plugins when building is resolved
         ];
         file = lib.mkMerge [
           sharedFiles
@@ -122,10 +141,11 @@ in
         # We use external config file instead of home-manager settings
       };
 
-      # Enable nushell via shared module
+      # Enable nushell via shared module with custom 0.106.0 package
       local = {
         nushell = {
           enable = true;
+          # package = nushell-custom;
         };
       };
 
@@ -147,6 +167,8 @@ in
         { path = "/Applications/WarpPreview.app/"; }
         { path = "/Applications/Zen.app/"; }
         { path = "/Applications/Safari.app/"; }
+        { path = "/Applications/Microsoft Teams.app/"; }
+        { path = "/Applications/Microsoft Outlook.app/"; }
         { path = "/Applications/Parallels Desktop.app/"; }
         { path = "/Applications/Beekeeper Studio.app/"; }
         { path = "/System/Applications/Music.app/"; }
