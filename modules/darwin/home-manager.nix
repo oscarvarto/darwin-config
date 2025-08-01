@@ -90,7 +90,7 @@ in
         atuin = {
           enable = true;
           daemon.enable = true;
-          enableNushellIntegration = true;
+          enableNushellIntegration = false;
           enableZshIntegration = true;
         };
 
