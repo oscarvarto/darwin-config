@@ -1,10 +1,10 @@
-{ config, pkgs, lib, catppuccin, neovim-nightly-overlay, op-shell-plugins, user ? "oscarvarto", ... } @ inputs:
+{ config, pkgs, catppuccin, neovim-nightly-overlay, nixd-ls, op-shell-plugins, user ? "oscarvarto", ... } @ inputs:
 
 let
   sharedFiles = import ../shared/files.nix { inherit config pkgs user; };
   additionalFiles = import ./files.nix { inherit user config pkgs; };
   inherit (builtins) fromTOML;
-  
+
   # Custom nushell 0.106.0 built from source
   # nushell-custom = pkgs.nushell.overrideAttrs (oldAttrs: rec {
   #   version = "0.106.0";
@@ -19,7 +19,7 @@ let
   #     lockFile = "${src}/Cargo.lock";
   #   };
   # });
-  
+
   # TODO: Build custom nushell plugins from the same source
   # For now, we'll install them manually using cargo to avoid complexity
 in
@@ -66,6 +66,7 @@ in
           # Add neovim-nightly from overlay
           neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.neovim
           # TODO: Add custom nushell plugins when building is resolved
+          nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.nixd
         ];
         file = lib.mkMerge [
           sharedFiles
@@ -120,6 +121,11 @@ in
           settings = fromTOML(builtins.readFile ./starship.toml);
         };
 
+        vscode = {
+          enable = true;
+          mutableExtensionsDir = true;
+        };
+
         yazi = {
           enable = true;
           enableNushellIntegration = true;
@@ -145,7 +151,6 @@ in
       local = {
         nushell = {
           enable = true;
-          # package = nushell-custom;
         };
       };
 

@@ -17,11 +17,10 @@
            :files (:defaults "*.el")
            :depth 1))
 (package! centered-cursor-mode)
-(package! claude-code
+(package! claude-code-ide
   :recipe (:host github
-           :repo "stevemolitor/claude-code.el"
-           :branch "main"
-           :files ("*.el" (:exclude "images/*"))))
+           :repo "manzaltu/claude-code-ide.el"
+           :depth 1))
 (package! clomacs)
 (package! combobulate)
 (package! dash)
@@ -73,6 +72,7 @@
 (package! mermaid-mode)
 (package! mise)
 (package! modus-themes)
+(package! nix-mode)
 (package! nushell-mode
   :recipe (:host github
            :repo "mrkkrp/nushell-mode"))

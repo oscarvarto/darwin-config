@@ -1,0 +1,49 @@
+# Sample .authinfo file for database credentials
+# This is an example file showing how to format entries for your .authinfo.gpg file
+# WARNING: DO NOT USE THIS UNENCRYPTED FILE FOR ACTUAL CREDENTIALS!
+
+# Format: machine DATABASE-NAME-db login USERNAME password PASSWORD
+
+# SQLNovel database credentials
+machine sqlnovel-db login oscarvarto password your_secure_password_here
+
+# usqa3 database credentials
+machine usqa3-db login sqa_automation password your_secure_password_here
+
+# ===========================================================================
+# INSTRUCTIONS
+# ===========================================================================
+
+# 1. How to create/update your encrypted .authinfo.gpg file:
+#    a. Copy the entries you need from this example (without the comments)
+#    b. If you already have a .authinfo.gpg file:
+#       - Decrypt it: gpg -d ~/.authinfo.gpg > ~/.authinfo.temp
+#       - Add your new entries to ~/.authinfo.temp
+#       - Encrypt it again: gpg -e -r YOUR_GPG_ID ~/.authinfo.temp > ~/.authinfo.gpg
+#       - Remove the temporary file: rm ~/.authinfo.temp
+#    c. If you don't have a .authinfo.gpg file:
+#       - Create a new file with your entries: ~/.authinfo
+#       - Encrypt it: gpg -e -r YOUR_GPG_ID ~/.authinfo > ~/.authinfo.gpg
+#       - Remove the plaintext file: rm ~/.authinfo
+
+# 2. Setting up equivalent entries in 1Password:
+#    a. Create a new login item in 1Password for each database
+#    b. Name the item exactly as you reference it in the code
+#       - For SQLNovel: Name should be "SQLNovel"
+#       - For usqa3: Name should be "usqa3"
+#    c. Add the following fields to each item:
+#       - Username: the database username (e.g., "oscarvarto" or "sqa_automation")
+#       - Password: the database password
+#    d. You can add additional fields like:
+#       - Database: the database name
+#       - Host: the database host
+#       - Port: the database port
+#    e. Make sure the 1Password CLI is authenticated:
+#       - Run `op signin` in your terminal
+#       - For longer sessions, see 1Password CLI documentation
+
+# 3. Important security notes:
+#    - The auth-source approach with .authinfo.gpg is native to Emacs and works offline
+#    - The 1Password approach requires the CLI to be authenticated but is more secure and centralized
+#    - If you use both methods, auth-source (.authinfo.gpg) is tried first, then 1Password
+

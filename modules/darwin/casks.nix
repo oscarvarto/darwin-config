@@ -31,6 +31,7 @@ _:
   # Utility Tools
   "1password@nightly"
   "1password-cli"
+  "balenaetcher"
   "dropbox"
   "figma"
   "obsidian"

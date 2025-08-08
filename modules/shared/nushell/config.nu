@@ -1073,3 +1073,4 @@ def "ke" [tag_to_kill?: string] {
     job list | where tag == ($tag_to_kill | default 'emacs') | each { job kill $in.id }
 }
 
+source ~/.local/share/atuin/init.nu
