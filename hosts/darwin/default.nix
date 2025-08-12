@@ -139,6 +139,16 @@ in
     };
   };
 
+  # Install Noto fonts (including emoji and symbols) for use by apps and LaTeX
+  fonts = {
+    packages = with pkgs; [
+      noto-fonts
+      noto-fonts-color-emoji
+      unifont
+      symbola
+    ];
+  };
+
   system = {
     stateVersion = 4;
     primaryUser = "oscarvarto";

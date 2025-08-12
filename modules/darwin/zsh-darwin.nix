@@ -16,6 +16,7 @@
       PATH="/opt/homebrew/opt/mysql@8.4/bin:$PATH"
       PATH="/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH"
       PATH="/run/current-system/sw/bin:$PATH"
+      PATH="/Library/TeX/texbin:$PATH"
 
       export PATH
     '';

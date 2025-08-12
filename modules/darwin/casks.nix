@@ -6,6 +6,8 @@ _:
   # Development Tools
   # "homebrew/cask/docker"
   "chromedriver"
+  "claude"
+  "claude-code"
   "dotnet-sdk"
   "gg"
   "jetbrains-toolbox"
@@ -22,7 +24,6 @@ _:
   "element"
   "microsoft-outlook"
   "microsoft-teams"
-  "nheko"
   "slack"
   "teamviewer"
   "whatsapp"

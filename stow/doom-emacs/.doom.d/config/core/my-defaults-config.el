@@ -57,15 +57,6 @@
   ;; useful beyond Corfu.
   (read-extended-command-predicate #'command-completion-default-include-p))
 
-;;; Claude Code
-(use-package! claude-code
-  :config
-  (claude-code-mode))
-
-;; Bind claude-code-command-map using Doom's map! macro
-(map! :leader
-      :desc "Claude Code" "<f8>" claude-code-command-map)
-
 ;; Enable auto completion and configure quitting
 ;; (setq org-special-ctrl-a/e t)
 (setq corfu-auto nil ; Disable auto completion popup
