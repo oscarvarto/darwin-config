@@ -63,6 +63,7 @@
 (my/load-config 'tree-sitter 'misc)
 (my/load-config 'large-files 'misc)
 (my/load-config 'yasnippet 'misc)
+(my/load-config 'spell 'misc)
 
 (my/load-config 'treemacs 'ui)
 

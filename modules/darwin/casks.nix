@@ -20,6 +20,7 @@ _:
   "qt-design-studio"
 
   # Communication Tools
+  "anytype"
   "discord"
   "element"
   "microsoft-outlook"
@@ -41,7 +42,6 @@ _:
   "unnaturalscrollwheels"
 
   # Entertainment Tools
-  # "vlc"
 
   # Productivity Tools
   "gimp"

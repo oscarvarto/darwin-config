@@ -5,14 +5,12 @@ with pkgs;
   coreutils
   curl
   alejandra
-  aspell
-  aspellDicts.en
   bash-completion
   btop
   jujutsu
   killall
   neofetch
-  nil
+  nixd
   openssh
   pixi
   sqlite
@@ -42,8 +40,9 @@ with pkgs;
   nodejs
 
   # Text and terminal utilities
+  (aspellWithDicts (dicts: with dicts; [ en en-computers en-science es]))
+  enchant
   htop
-  hunspell
   iftop
   jetbrains-mono
   jq
@@ -57,6 +56,7 @@ with pkgs;
   qt6.full
   # Python packages
   (python3.withPackages (python-pkgs: with python-pkgs; [
+    debugpy
     pandas
     requests
     sexpdata tld

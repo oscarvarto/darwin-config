@@ -94,9 +94,9 @@
        ;;term              ; basic terminal emulator for Emacs
        ;;vterm             ; the best terminal emulation in Emacs
 
-       :checkers
+:checkers
        ;; syntax              ; tasing you for every semicolon you forget
-       ;; (spell +enchant) ; tasing you for misspelling mispelling
+       (spell +flyspell) ; aspell-based spell checking with Flyspell
        ;;grammar           ; tasing grammar mistake every you make
 
        :tools

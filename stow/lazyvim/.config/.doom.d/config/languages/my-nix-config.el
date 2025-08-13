@@ -11,14 +11,12 @@
   (lsp-disabled-clients '((nix-mode . nix-nil))) ;; Disable nil so that nixd will be used as lsp-server
   :config
   (setq lsp-nix-nixd-server-path "nixd"
-        ;; For flake users, use flake input nixpkgs
-        lsp-nix-nixd-nixpkgs-expr "import (builtins.getFlake \"/Users/oscarvarto/nixos-config\").inputs.nixpkgs { }"
-        ;; Alternative: use standard nixpkgs if the above doesn't work
-        ;; lsp-nix-nixd-nixpkgs-expr "import <nixpkgs> { }"
-        ;; Use your actual flake path and configuration name
-        lsp-nix-nixd-nixos-options-expr "(builtins.getFlake \"/Users/oscarvarto/nixos-config\").darwinConfigurations.predator.options"
-        ;; For home-manager integrated with nix-darwin
-        lsp-nix-nixd-home-manager-options-expr "(builtins.getFlake \"/Users/oscarvarto/nixos-config\").darwinConfigurations.predator.options.home-manager.users.type.getSubOptions []"))
+        ;; Use simple nixpkgs path to avoid hanging on flake evaluation
+        lsp-nix-nixd-nixpkgs-expr "import <nixpkgs> { }"
+        ;; Comment out heavy option evaluations that can cause hanging
+        ;; lsp-nix-nixd-nixos-options-expr "(builtins.getFlake \"/Users/oscarvarto/nixos-config\").darwinConfigurations.predator.options"
+        ;; lsp-nix-nixd-home-manager-options-expr "(builtins.getFlake \"/Users/oscarvarto/nixos-config\").darwinConfigurations.predator.options.home-manager.users.type.getSubOptions []"
+        ))
 
 
 ;; Configure corfu for nix-mode (avoid slow idle completion)

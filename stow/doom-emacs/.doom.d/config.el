@@ -76,6 +76,7 @@
 (my/load-config 'clojure 'jvm)
 (my/load-config 'scala 'jvm)
 
+(my/load-config 'nix 'languages)
 (my/load-config 'rust 'languages)
 (my/load-config 'python 'languages)
 

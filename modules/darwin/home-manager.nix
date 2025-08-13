@@ -45,6 +45,9 @@ in
     LANG = "en_US.UTF-8";
     LC_ALL = "en_US.UTF-8";
     BAT_THEME="ansi";
+    # Force Enchant to use aspell and point aspell to the Nix-provided dictionaries
+    ENCHANT_ORDERING = "en:aspell,es:aspell,*:aspell";
+    ASPELL_CONF = "dict-dir ${pkgs.aspellWithDicts (dicts: with dicts; [ en en-computers en-science es ])}/lib/aspell";
   };
 
   # Enable home-manager
@@ -65,13 +68,18 @@ in
         packages = (pkgs.callPackage ./packages.nix {}) ++ [
           # Add neovim-nightly from overlay
           neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.neovim
-          # TODO: Add custom nushell plugins when building is resolved
-          nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.nixd
+          # nixd is provided via pkgs.nixd in modules/shared/packages.nix to avoid duplicate versions
         ];
         file = lib.mkMerge [
           sharedFiles
           additionalFiles
         ];
+
+        # Ensure user shells and GUI apps see Enchant/Aspell settings
+        sessionVariables = {
+          ENCHANT_ORDERING = "en:aspell,es:aspell,*:aspell";
+          ASPELL_CONF = "dict-dir ${pkgs.aspellWithDicts (dicts: with dicts; [ en en-computers en-science es ])}/lib/aspell; data-dir ${pkgs.aspell}/share/aspell";
+        };
 
         stateVersion = "25.05";
       };

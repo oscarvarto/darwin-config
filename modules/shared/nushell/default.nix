@@ -40,6 +40,10 @@ in
               $env.PATH = ($env.PATH | split row (char esep) | prepend '/nix/var/nix/profiles/default/bin' | uniq | str join (char esep))
           }
 
+          # Ensure Enchant uses aspell and aspell finds Nix-installed dictionaries
+          $env.ENCHANT_ORDERING = 'en:aspell,es:aspell,*:aspell'
+          $env.ASPELL_CONF = 'dict-dir ${pkgs.aspellWithDicts (dicts: with dicts; [ en en-computers en-science es ])}/lib/aspell; data-dir ${pkgs.aspell}/share/aspell'
+
           def create_left_prompt [] {
               let hostname_color = (if (is-admin) { ansi red_bold } else { ansi green_bold })
               $"($hostname_color)(${config.local.nushell.left_prompt_cmd})(ansi reset)"
