@@ -51,7 +51,8 @@
 (require 'my-defaults-config)
 (require 'my-banner-config)
 (require 'my-gui-appearance-config)
-(require 'my-project-cleanup-config)
+;; Load project cleanup config later, after all modules are initialized
+;; (moved to end of file)
 
 ;; Helper function for loading
 (defun my/load-config (feature group) ; Group is mandatory
@@ -97,3 +98,8 @@
 
 ;;; External application interfaces
 (my/load-config 'eaf 'misc)
+
+;;; Load project cleanup configuration after all other modules
+;; This ensures that projectile, treemacs, and other modules are fully loaded
+;; before we set up cleanup hooks and timers
+(require 'my-project-cleanup-config)

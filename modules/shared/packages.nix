@@ -10,7 +10,6 @@ with pkgs;
   jujutsu
   killall
   neofetch
-  nixd
   openssh
   pixi
   sqlite

@@ -17,6 +17,7 @@
       PATH="/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH"
       PATH="/run/current-system/sw/bin:$PATH"
       PATH="/Library/TeX/texbin:$PATH"
+      PATH="$HOME/mvn4/apache-maven-4.0.0-rc-4/bin:$PATH"
 
       export PATH
     '';

@@ -68,7 +68,8 @@ in
         packages = (pkgs.callPackage ./packages.nix {}) ++ [
           # Add neovim-nightly from overlay
           neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.neovim
-          # nixd is provided via pkgs.nixd in modules/shared/packages.nix to avoid duplicate versions
+          # Add nixd nightly from flake input
+          nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
         ];
         file = lib.mkMerge [
           sharedFiles
@@ -178,12 +179,8 @@ in
         { path = "/Applications/Zed Preview.app/"; }
         { path = "/Applications/Ghostty.app/"; }
         { path = "/Applications/WarpPreview.app/"; }
-        { path = "/Applications/Zen.app/"; }
         { path = "/Applications/Safari.app/"; }
-        { path = "/Applications/Microsoft Teams.app/"; }
-        { path = "/Applications/Microsoft Outlook.app/"; }
-        { path = "/Applications/Parallels Desktop.app/"; }
-        { path = "/Applications/Beekeeper Studio.app/"; }
+        { path = "/Applications/Google Chrome.app/"; }
         { path = "/System/Applications/Music.app/"; }
         { path = "/System/Applications/Calendar.app/"; }
         { path = "/System/Applications/System Settings.app/"; }

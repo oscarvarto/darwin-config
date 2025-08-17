@@ -46,14 +46,18 @@ in
         export EMACSDIR=$HOME/.emacs.d
         export DOOMDIR=$HOME/.doom.d
         export DOOMLOCALDIR=$HOME/.emacs.d/.local
-        export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
-        export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
-        export PATH=$HOME/.local/share/bin:$PATH
-        export PATH=$HOME/.local/bin:$PATH
-        export PATH=$HOME/.cargo/bin:$PATH
-        export PATH=$EMACSDIR/bin:$PATH
-        export PATH=$HOME/bin:$PATH
-        export PATH="$HOME/Library/Application Support/Coursier/bin:$PATH"
+
+        # Add Maven 4 to PATH first (before Homebrew Maven 3.9.11)
+        PATH="$HOME/mvn4/apache-maven-4.0.0-rc-4/bin:$PATH"
+        PATH="$HOME/nixos-config/modules/shared/elisp-formatter:$PATH"
+        PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
+        PATH=$HOME/.local/share/bin:$PATH
+        PATH=$HOME/.local/bin:$PATH
+        PATH=$HOME/.cargo/bin:$PATH
+        PATH=$EMACSDIR/bin:$PATH
+        PATH=$HOME/bin:$PATH
+        PATH="$HOME/Library/Application Support/Coursier/bin:$PATH"
+
         export PATH="$HOME/.volta/bin:$PATH"
 
         # Remove history data we don't want to see

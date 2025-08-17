@@ -993,6 +993,7 @@ def gp [] {
 # Doom Emacs shortcuts
 alias ds = doom sync --aot --gc -j (nproc)
 alias dup = doom sync -u --aot --gc -j (nproc)
+alias sdup = doom sync -u --aot --gc -j (nproc) --rebuild
 
 # Nix shortcuts
 def nb [] {
@@ -1071,6 +1072,16 @@ def "et" [tag?: string] {
 
 def "ke" [tag_to_kill?: string] {
     job list | where tag == ($tag_to_kill | default 'emacs') | each { job kill $in.id }
+}
+
+def --env y [...args] {
+	let tmp = (mktemp -t "yazi-cwd.XXXXXX")
+	yazi ...$args --cwd-file $tmp
+	let cwd = (open $tmp)
+	if $cwd != "" and $cwd != $env.PWD {
+		cd $cwd
+	}
+	rm -fp $tmp
 }
 
 source ~/.local/share/atuin/init.nu
