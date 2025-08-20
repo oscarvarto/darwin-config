@@ -8,7 +8,7 @@ in
   imports = [
     ../../modules/darwin/secrets.nix
     ../../modules/darwin/home-manager.nix
-    ../../modules/shared
+    ../../modules/darwin/overlays.nix
     agenix.darwinModules.default
   ];
 
@@ -60,7 +60,7 @@ in
   # Load configuration that is shared across systems
   environment.systemPackages = with pkgs; [
     agenix.packages."${pkgs.stdenv.hostPlatform.system}".default
-  ] ++ (import ../../modules/shared/packages.nix { inherit pkgs; });
+  ] ++ (import ../../modules/darwin/packages.nix { inherit pkgs; });
 
   # Add nushell to available shells
   environment.shells = [ "/Users/${user}/.nix-profile/bin/nu" ];

@@ -1,7 +1,7 @@
 { config, pkgs, user ? "oscarvarto", ... } @ inputs:
 
 let
-  sharedFiles = import ../shared/files.nix { inherit config pkgs user; };
+  sharedFiles = import ./files.nix { inherit config pkgs; };
   additionalFiles = import ./files.nix { inherit user config pkgs; };
   inherit (builtins) fromTOML;
 
@@ -57,8 +57,8 @@ in
     extraSpecialArgs = { inherit inputs; };
     users.${user} = { pkgs, config, lib, ... }: {
       imports = [
-        ../shared/nushell
-        ../shared/home-manager.nix
+        ./nushell
+        ./git-security-scripts.nix
         inputs.catppuccin.homeModules.catppuccin
         inputs.op-shell-plugins.hmModules.default
       ];
@@ -162,7 +162,48 @@ in
 
         # zellij is installed via homebrew and configured manually
         # We use external config file instead of home-manager settings
-      };
+        
+        # Git configuration
+        git = {
+          enable = true;
+          ignores = (import ./git-ignores.nix { inherit config pkgs lib; }).git.ignores;
+          userName = "Oscar Vargas Torres";
+          lfs.enable = true;
+          extraConfig = {
+            init.defaultBranch = "main";
+            core = {
+              editor = "nvim";
+              autocrlf = false;
+              eol = "lf";
+              ignorecase = false;
+            };
+            commit.gpgsign = false;
+            diff.colorMoved = "zebra";
+            fetch.prune = true;
+            pull.rebase = true;
+            push.autoSetupRemote = true;
+            rebase.autoStash = true;
+            safe.directory = [
+              "*"
+              "/Users/${user}/nixos-config"
+              "/nix/store/*"
+              "/opt/homebrew/*"
+            ];
+            includeIf."gitdir:/Users/${user}/ir/**".path = "/Users/${user}/.config/git/config-work";
+            include.path = "/Users/${user}/.config/git/config-personal";
+          };
+        };
+
+        # SSH configuration
+        ssh = {
+          enable = true;
+          includes = [ "/Users/${user}/.ssh/config_external" ];
+          matchBlocks."github.com" = {
+            identitiesOnly = true;
+            identityFile = [ "/Users/${user}/.ssh/id_ed25519" ];
+          };
+        };
+      } // (import ./shell-config.nix { inherit config pkgs lib; }).programs;
 
       # Enable nushell via shared module with custom 0.106.0 package
       local = {
