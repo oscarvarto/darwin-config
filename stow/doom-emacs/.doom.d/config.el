@@ -89,6 +89,7 @@
 (my/load-config 'gptel 'ai)
 
 (my/load-config 'db 'misc)
+(my/load-config 'enhanced-auth 'misc)
 
 (my/load-config 'dap 'lsp)
 

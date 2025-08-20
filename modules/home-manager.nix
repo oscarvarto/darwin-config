@@ -6,8 +6,9 @@ let
   
   # User configuration based on hostSettings  
   userConfig = {
-    name = if hostSettings.enablePersonalConfig then "Oscar Vargas Torres" else user;
-    email = if hostSettings.enablePersonalConfig then "contact@oscarvarto.mx" else "${user}@example.com";
+    # Use secure fallback names - actual credentials will be retrieved dynamically
+    name = if hostSettings.enablePersonalConfig then user else user;
+    email = if hostSettings.enablePersonalConfig then "${user}@users.noreply.github.com" else "${user}@company.com";
     workDir = if hostSettings.workProfile then "ir" else "dev";
   };
 

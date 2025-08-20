@@ -137,6 +137,46 @@
         "create-keys" = mkApp "create-keys" system;
         "check-keys" = mkApp "check-keys" system;
         "rollback" = mkApp "rollback" system;
+        "configure-user" = {
+          type = "app";
+          program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "configure-user" ''
+            #!/usr/bin/env bash
+            # Run the zsh script - compatible with any macOS system
+            exec ${self}/scripts/configure-user.sh "$@"
+          '')}/bin/configure-user";
+        };
+        "add-host" = {
+          type = "app";
+          program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "add-host" ''
+            #!/usr/bin/env bash
+            # Run the zsh script - compatible with any macOS system
+            exec ${self}/scripts/add-host.sh "$@"
+          '')}/bin/add-host";
+        };
+        "setup-1password-secrets" = {
+          type = "app";
+          program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "setup-1password-secrets" ''
+            #!/usr/bin/env bash
+            # Set up 1Password for secure git credentials
+            exec ${self}/scripts/setup-1password-secrets.sh "$@"
+          '')}/bin/setup-1password-secrets";
+        };
+        "setup-pass-secrets" = {
+          type = "app";
+          program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "setup-pass-secrets" ''
+            #!/usr/bin/env bash
+            # Set up pass for secure git credentials
+            exec ${self}/scripts/setup-pass-secrets.sh "$@"
+          '')}/bin/setup-pass-secrets";
+        };
+        "sanitize-repo" = {
+          type = "app";
+          program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "sanitize-repo" ''
+            #!/usr/bin/env bash
+            # Sanitize repository of sensitive information
+            exec ${self}/scripts/sanitize-sensitive-data.sh "$@"
+          '')}/bin/sanitize-repo";
+        };
       };
       
       # Helper function to create darwin configurations with host-specific settings

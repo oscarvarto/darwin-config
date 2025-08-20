@@ -8,6 +8,7 @@ in
 {
   imports = [
     ./modules/secrets.nix
+    ./modules/secure-credentials.nix
     ./modules/home-manager.nix
     ./modules/overlays.nix
     agenix.darwinModules.default

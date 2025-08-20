@@ -23,8 +23,6 @@ This stow package contains various utility scripts extracted from the nix config
 - `ghostty-shell-pwsh.nu` - Switch to PowerShell
 
 ### Raycast Scripts (Bash)
-- `yabai_toggle_split.sh` - Toggle yabai window split
-- `yabai_toggle_float.sh` - Toggle yabai window float
 - `delete_clipboard.sh` - Clear macOS clipboard
 - `emacsclient` - Launch Emacs via daemon
 

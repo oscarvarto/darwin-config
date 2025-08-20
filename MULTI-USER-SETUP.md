@@ -71,6 +71,51 @@ nix run .#build-switch --extra-experimental-features "nix-command flakes"
 darwin-rebuild switch --flake .#your-hostname
 ```
 
+## Automated Setup Tools
+
+This configuration includes helpful Nix apps to automate the setup process:
+
+### Adding New Hosts
+
+Use the `add-host` app to automatically add new host configurations:
+
+```bash
+# Add a new personal machine
+nix run .#add-host -- --hostname alice-macbook --user alice --personal-config
+
+# Add a new work machine
+nix run .#add-host -- --hostname work-laptop --user bob --work-profile --system x86_64-darwin
+
+# Preview changes without applying
+nix run .#add-host -- --hostname test --user test --dry-run
+```
+
+This tool will:
+- Add the host configuration to `flake.nix`
+- Test the build to ensure it works
+- Provide next steps for setup
+
+### Configuring for Different Users
+
+Use the `configure-user` app to check and configure for different users/hostnames:
+
+```bash
+# Check current configuration
+nix run .#configure-user -- --dry-run
+
+# Configure for a specific user/hostname
+nix run .#configure-user -- --user alice --hostname alice-macbook
+
+# Preview what would change for a different setup
+nix run .#configure-user -- --user bob --hostname work-machine --work-profile --dry-run
+```
+
+This tool will:
+- Verify the hostname exists in the configuration
+- Check for potential issues (missing user directories, etc.)
+- Test builds for the target configuration
+- Provide guidance on next steps
+
 ## Host Configuration Options
 
 ### System Architecture
