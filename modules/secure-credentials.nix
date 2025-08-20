@@ -182,15 +182,12 @@ let
 
 in
 {
-  # Install credential management tools
+  # Install credential management tools and helper scripts
   environment.systemPackages = with pkgs; [
     _1password-cli  # 1Password CLI
     pass           # pass (password-store) as alternative
     gnupg          # Required for pass
-  ];
-
-  # Create helper scripts for secret management
-  environment.systemPackages = [
+  ] ++ [
     (pkgs.writeShellScriptBin "update-git-secrets" ''
       exec ${updateGitConfigScript}
     '')
