@@ -1,8 +1,19 @@
-{ agenix, config, pkgs, user, hostname, hostSettings, /* nixCats, */ ... }:
+{ agenix, config, pkgs, user, hostname, hostSettings, defaultShell ? "zsh", /* nixCats, */ ... }:
 
 let 
   # user and hostname are passed from flake.nix
   # hostSettings contains host-specific configuration flags
+  # defaultShell specifies which shell to use as default login shell
+  
+  # Shell path mapping
+  shellPaths = {
+    zsh = "/run/current-system/sw/bin/zsh";
+    fish = "/Users/${user}/.nix-profile/bin/fish";
+    nushell = "/Users/${user}/.nix-profile/bin/nu";
+  };
+  
+  # Get the shell path, fallback to zsh if invalid shell specified
+  selectedShellPath = shellPaths.${defaultShell} or shellPaths.zsh;
 in
 
 {
@@ -65,13 +76,25 @@ in
     agenix.packages."${pkgs.stdenv.hostPlatform.system}".default
   ] ++ (import ./modules/packages.nix { inherit pkgs; });
 
-  # Add nushell to available shells  
-  environment.shells = [ "/Users/${user}/.nix-profile/bin/nu" ];
+  # Add selected shell and commonly used shells to available shells
+  environment.shells = [ selectedShellPath ] ++ 
+    (if defaultShell != "zsh" then [ shellPaths.zsh ] else []) ++
+    (if defaultShell != "fish" then [ shellPaths.fish ] else []) ++
+    (if defaultShell != "nushell" then [ shellPaths.nushell ] else []);
+  
+  # Configure the selected user with the chosen shell
+  users.users.${user} = {
+    name = "${user}";
+    home = "/Users/${user}";
+    isHidden = false;
+    shell = selectedShellPath;
+  };
 
   security.pam.services.sudo_local.touchIdAuth = true;
 
   programs = {
     zsh.enable = true;
+    fish.enable = (defaultShell == "fish");
   };
 
   # User-level launchd agent to set environment variables for GUI applications

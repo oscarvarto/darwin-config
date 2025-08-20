@@ -7,6 +7,7 @@
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
+;; Updated by update-doom-config.sh on Wed Aug 20 15:15:54 CST 2025
 (setq user-full-name "Oscar Vargas Torres"
       user-mail-address "contact@oscarvarto.mx")
 
@@ -120,6 +121,7 @@
 
 ;; Use nushell as default shell
 (setq shell-file-name (executable-find "zsh"))
+;; Updated by update-doom-config.sh on Wed Aug 20 15:15:54 CST 2025
 (setq-default vterm-shell (executable-find "nu"))
 (setq-default explicit-shell-file-name (executable-find "zsh"))
 
@@ -207,8 +209,7 @@
 (setq projectile-globally-ignored-directories
       (list (my/expand-home-path "")
             (my/expand-home-path "OneDrive/")
-            (my/get-path :onedrive)
-            (my/expand-home-path "Library/CloudStorage/ProtonDrive-oscarvarto@protonmail.com-folder/")))
+            (my/get-path :onedrive)))
 (setq gc-cons-threshold (* 100 1024 1024)) ; Set garbage collection threshold higher (e.g., 100MB) for potentially smoother performance
 (setq projectile-enable-caching nil) ; Disable projectile caching (can help if stale or slow)
 (setq projectile-completion-system 'default) ; Explicitly use default completion for projectile

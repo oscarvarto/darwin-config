@@ -90,6 +90,7 @@
         predator = {
           user = "oscarvarto";
           system = "aarch64-darwin";
+          defaultShell = "nushell";  # Options: "zsh", "fish", "nushell"
           # Add host-specific settings here
           hostSettings = {
             enablePersonalConfig = true;
@@ -100,6 +101,7 @@
         # macbook-pro = {
         #   user = "otheruser";
         #   system = "x86_64-darwin";
+        #   defaultShell = "zsh";  # Options: "zsh", "fish", "nushell"
         #   hostSettings = {
         #     enablePersonalConfig = false;
         #     workProfile = true;
@@ -177,6 +179,14 @@
             exec ${self}/scripts/sanitize-sensitive-data.sh "$@"
           '')}/bin/sanitize-repo";
         };
+        "update-doom-config" = {
+          type = "app";
+          program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "update-doom-config" ''
+            #!/usr/bin/env zsh
+            # Update Doom Emacs configuration with user details and shell settings
+            exec ${self}/scripts/update-doom-config.sh "$@"
+          '')}/bin/update-doom-config";
+        };
       };
       
       # Helper function to create darwin configurations with host-specific settings
@@ -186,6 +196,7 @@
           inherit (hostConfig) user;
           inherit hostname;
           hostSettings = hostConfig.hostSettings;
+          defaultShell = hostConfig.defaultShell or "zsh";  # Default to zsh if not specified
         };
         modules = [
           home-manager.darwinModules.home-manager

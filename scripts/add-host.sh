@@ -229,6 +229,7 @@ if nix build ".#darwinConfigurations.$HOSTNAME_ARG.system" --show-trace 2>/dev/n
     echo "2. Copy this flake to the new system"
     echo "3. Run 'nix run .#configure-user --hostname $HOSTNAME_ARG --user $USER_ARG' on the target system"
     echo "4. Apply the configuration with 'nix run .#build-switch'"
+    echo "5. Update Doom Emacs configuration with 'nix run .#update-doom-config --hostname $HOSTNAME_ARG --user $USER_ARG'"
     
     # Remove backup since everything worked
     rm -f flake.nix.backup
