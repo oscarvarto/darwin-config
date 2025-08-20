@@ -26,7 +26,7 @@ in
           "NIX_BASH_ENV_NU_MODULE"
         ] [
           config.local.nushell.history_file_format
-"${inputs.bash-env-nushell.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/nu-scripts/bash-env.nu"
+"${inputs.bash-env-nushell.packages.${pkgs.stdenv.hostPlatform.system}.default}/bash-env.nu"
         ]
           (builtins.readFile ./config.nu));
         envFile.text = ''
