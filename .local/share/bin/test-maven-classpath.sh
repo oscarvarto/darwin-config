@@ -1,1 +1,0 @@
-../../../stow/aux-scripts/.local/share/bin/test-maven-classpath.sh

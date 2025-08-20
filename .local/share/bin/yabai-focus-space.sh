@@ -1,1 +1,0 @@
-../../../stow/raycast-scripts/.local/share/bin/yabai-focus-space.sh

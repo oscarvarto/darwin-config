@@ -1,1 +1,0 @@
-../../../stow/nix-scripts/.local/share/bin/delete_clipboard.sh
