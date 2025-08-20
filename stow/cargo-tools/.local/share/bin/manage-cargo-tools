@@ -4,11 +4,11 @@
 # Usage: manage-cargo-tools <command>
 
 def main [command: string = "help"] {
-    let cargo_tools_dir = $"($env.HOME)/nixos-config/stow/cargo-tools"
+    let cargo_tools_dir = $"($env.HOME)/darwin-config/stow/cargo-tools"
     let config_file = $"($cargo_tools_dir)/cargo-tools.toml"
     
     if not ($config_file | path exists) {
-        print "❌ Error: Cargo tools config file not found at ~/nixos-config/stow/cargo-tools/cargo-tools.toml"
+        print "❌ Error: Cargo tools config file not found at ~/darwin-config/stow/cargo-tools/cargo-tools.toml"
         exit 1
     }
     
@@ -157,7 +157,7 @@ def main [command: string = "help"] {
             print $"   Version: ($final_version)"
             print $"   Description: ($final_description)"
             print ""
-            print "⚠️  You'll need to manually edit ~/nixos-config/stow/cargo-tools/cargo-tools.toml"
+            print "⚠️  You'll need to manually edit ~/darwin-config/stow/cargo-tools/cargo-tools.toml"
             print $"   Add this under [packages]:"
             print $"   ($package_name) = {{ version = \"($final_version)\", description = \"($final_description)\" }}"
         }
@@ -177,13 +177,13 @@ def main [command: string = "help"] {
             print "  add               Interactive tool to add new package to config"
             print "  help              Show this help message"
             print ""
-            print "Configuration file: ~/nixos-config/stow/cargo-tools/cargo-tools.toml"
+            print "Configuration file: ~/darwin-config/stow/cargo-tools/cargo-tools.toml"
             print "Packages are installed to: ~/.cargo/bin/"
             print ""
             print "💡 Tips:"
             print "  - After system restore: run 'manage-cargo-tools install'"
             print "  - To update tools: run 'manage-cargo-tools update'"
-            print "  - Configuration is version-controlled with your nixos-config"
+            print "  - Configuration is version-controlled with your darwin-config"
         }
     }
 }

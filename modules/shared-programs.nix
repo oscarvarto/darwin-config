@@ -1,8 +1,8 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, user ? "oscarvarto", userConfig ? { name = user; email = "${user}@example.com"; workDir = "dev"; }, ... }:
 
 let 
-  name = "Oscar Vargas Torres";
-  user = "oscarvarto";
+  name = userConfig.name;
+  # user is passed as parameter
   shellConfig = import ./shell-config.nix { inherit config pkgs lib; };
   gitIgnores = import ./git-ignores.nix { inherit config pkgs lib; };
   gitSecurityScripts = import ./git-security-scripts.nix { inherit config pkgs lib user; };
@@ -37,7 +37,7 @@ in
         rebase.autoStash = true;
         safe.directory = [
           "*"  # Trust all directories (most comprehensive)
-          "/Users/${user}/nixos-config"
+          "/Users/${user}/darwin-config"
           "/nix/store/*"
           "/opt/homebrew/*"
         ];

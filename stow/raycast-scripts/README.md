@@ -19,7 +19,7 @@ This directory contains Raycast scripts that replace the previous skhd configura
 Scripts are deployed using stow:
 
 ```bash
-cd ~/nixos-config/stow
+cd ~/darwin-config/stow
 stow -t ~ raycast-scripts
 ```
 

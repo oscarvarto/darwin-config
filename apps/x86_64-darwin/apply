@@ -102,9 +102,9 @@ ask_for_star() {
   response=${response:-yes} # Set default response to 'yes' if input is empty
   if [[ "$response" =~ ^[Yy](es)?$ ]] || [[ -z "$response" ]]; then
     if [[ "$OS" == "Darwin" ]]; then
-      open "https://github.com/dustinlyons/nixos-config"
+      open "https://github.com/dustinlyons/darwin-config"
     else
-      xdg-open "https://github.com/dustinlyons/nixos-config"
+      xdg-open "https://github.com/dustinlyons/darwin-config"
     fi
   fi
 }

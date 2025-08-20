@@ -4,11 +4,11 @@
 # Usage: manage-doom-config <command>
 
 def main [command: string = "help"] {
-    let stow_dir = $"($env.HOME)/nixos-config/stow"
+    let stow_dir = $"($env.HOME)/darwin-config/stow"
     let doom_config_dir = $"($stow_dir)/doom-emacs/.doom.d"
     
     if not ($doom_config_dir | path exists) {
-        print "❌ Error: Doom Emacs config directory not found at ~/nixos-config/stow/doom-emacs/.doom.d"
+        print "❌ Error: Doom Emacs config directory not found at ~/darwin-config/stow/doom-emacs/.doom.d"
         exit 1
     }
     
@@ -178,7 +178,7 @@ def main [command: string = "help"] {
             print "  info        Show configuration information and git status"
             print "  help        Show this help message"
             print ""
-            print "Configuration is managed via stow in ~/nixos-config/stow/doom-emacs/"
+            print "Configuration is managed via stow in ~/darwin-config/stow/doom-emacs/"
             print "Files are symlinked to ~/.doom.d/ for use by Doom Emacs"
             print ""
             print "💡 Tips:"

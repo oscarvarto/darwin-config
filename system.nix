@@ -1,7 +1,8 @@
-{ agenix, config, pkgs, /* nixCats, */ ... }:
+{ agenix, config, pkgs, user, hostname, hostSettings, /* nixCats, */ ... }:
 
 let 
-  user = "oscarvarto";
+  # user and hostname are passed from flake.nix
+  # hostSettings contains host-specific configuration flags
 in
 
 {
@@ -45,12 +46,13 @@ in
     allowBroken = true;    # Allow broken packages to work around SDK issues
   };
   
-  # Global overlay to silence 1password rename warning
+  # Global overlay to provide _1password for shell plugins
   nixpkgs.overlays = [
     (final: prev: {
       _1password = prev._1password-cli;
     })
   ];
+  
 
   ids.gids.nixbld = 350;
 
@@ -62,7 +64,7 @@ in
     agenix.packages."${pkgs.stdenv.hostPlatform.system}".default
   ] ++ (import ./modules/packages.nix { inherit pkgs; });
 
-  # Add nushell to available shells
+  # Add nushell to available shells  
   environment.shells = [ "/Users/${user}/.nix-profile/bin/nu" ];
 
   security.pam.services.sudo_local.touchIdAuth = true;
@@ -82,14 +84,14 @@ in
         "PATH"
         (builtins.concatStringsSep ":" [
           # User script directories
-          "/Users/oscarvarto/.local/bin"
-          "/Users/oscarvarto/.local/share/bin"
-          "/Users/oscarvarto/.cargo/bin"
-          "/Users/oscarvarto/.emacs.d/bin"
-          "/Users/oscarvarto/.volta/bin"
-          "/Users/oscarvarto/Library/Application Support/Coursier/bin"
+          "/Users/${user}/.local/bin"
+          "/Users/${user}/.local/share/bin"
+          "/Users/${user}/.cargo/bin"
+          "/Users/${user}/.emacs.d/bin"
+          "/Users/${user}/.volta/bin"
+          "/Users/${user}/Library/Application Support/Coursier/bin"
           # Nix paths (essential for Nix-managed tools)
-          "/Users/oscarvarto/.nix-profile/bin"
+          "/Users/${user}/.nix-profile/bin"
           "/run/current-system/sw/bin"
           "/nix/var/nix/profiles/default/bin"
           
@@ -145,7 +147,7 @@ in
 
   system = {
     stateVersion = 4;
-    primaryUser = "oscarvarto";
+    primaryUser = user;
 
     defaults = {
       NSGlobalDomain = {

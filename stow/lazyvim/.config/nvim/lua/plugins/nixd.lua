@@ -15,10 +15,10 @@ return {
                 -- Disable heavy option evaluations to prevent hanging
                 -- These can be enabled later if needed for completion
                 -- nixos = {
-                --   expr = '(builtins.getFlake "/Users/oscarvarto/nixos-config").darwinConfigurations.predator.options',
+                --   expr = '(builtins.getFlake "/Users/oscarvarto/darwin-config").darwinConfigurations.predator.options',
                 -- },
                 -- home_manager = {
-                --   expr = '(builtins.getFlake "/Users/oscarvarto/nixos-config").darwinConfigurations.predator.options.home-manager.users.type.getSubOptions []',
+                --   expr = '(builtins.getFlake "/Users/oscarvarto/darwin-config").darwinConfigurations.predator.options.home-manager.users.type.getSubOptions []',
                 -- },
               },
             },

@@ -4,10 +4,10 @@
 # Usage: manage-aux-scripts <command>
 
 def main [command: string = "help"] {
-    let stow_dir = $"($env.HOME)/nixos-config/stow"
+    let stow_dir = $"($env.HOME)/darwin-config/stow"
     
     if not ($stow_dir | path exists) {
-        print "❌ Error: Stow directory not found at ~/nixos-config/stow"
+        print "❌ Error: Stow directory not found at ~/darwin-config/stow"
         exit 1
     }
     
@@ -97,12 +97,12 @@ def main [command: string = "help"] {
             print "  list               List available scripts"
             print "  help               Show this help message"
             print ""
-            print "Scripts are managed in ~/nixos-config/stow/aux-scripts/"
-            print "Cargo tools are managed in ~/nixos-config/stow/cargo-tools/"
-            print "Node.js tools are managed in ~/nixos-config/stow/nodejs-tools/"
-            print ".NET tools are managed in ~/nixos-config/stow/dotnet-tools/"
-            print "Mise runtimes are managed in ~/nixos-config/stow/mise-tools/"
-            print "Doom Emacs configuration is managed in ~/nixos-config/stow/doom-emacs/"
+            print "Scripts are managed in ~/darwin-config/stow/aux-scripts/"
+            print "Cargo tools are managed in ~/darwin-config/stow/cargo-tools/"
+            print "Node.js tools are managed in ~/darwin-config/stow/nodejs-tools/"
+            print ".NET tools are managed in ~/darwin-config/stow/dotnet-tools/"
+            print "Mise runtimes are managed in ~/darwin-config/stow/mise-tools/"
+            print "Doom Emacs configuration is managed in ~/darwin-config/stow/doom-emacs/"
             print "Scripts will be deployed to ~/.local/share/bin/ as symlinks"
             print "Doom Emacs config will be deployed to ~/.doom.d/ as symlinks"
         }

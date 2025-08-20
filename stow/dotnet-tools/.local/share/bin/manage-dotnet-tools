@@ -4,11 +4,11 @@
 # Usage: manage-dotnet-tools <command>
 
 def main [command: string = "help"] {
-    let dotnet_tools_dir = $"($env.HOME)/nixos-config/stow/dotnet-tools"
+    let dotnet_tools_dir = $"($env.HOME)/darwin-config/stow/dotnet-tools"
     let config_file = $"($dotnet_tools_dir)/dotnet-tools.toml"
     
     if not ($config_file | path exists) {
-        print "❌ Error: .NET tools config file not found at ~/nixos-config/stow/dotnet-tools/dotnet-tools.toml"
+        print "❌ Error: .NET tools config file not found at ~/darwin-config/stow/dotnet-tools/dotnet-tools.toml"
         exit 1
     }
     
@@ -234,7 +234,7 @@ def main [command: string = "help"] {
             print $"   Version: ($final_version)"
             print $"   Description: ($final_description)"
             print ""
-            print "⚠️  You'll need to manually edit ~/nixos-config/stow/dotnet-tools/dotnet-tools.toml"
+            print "⚠️  You'll need to manually edit ~/darwin-config/stow/dotnet-tools/dotnet-tools.toml"
             print $"   Add this under [global_tools]:"
             print $"   ($tool_name) = {{ version = \"($final_version)\", description = \"($final_description)\" }}"
         }
@@ -255,13 +255,13 @@ def main [command: string = "help"] {
             print "  add               Interactive tool to add new tool to config"
             print "  help              Show this help message"
             print ""
-            print "Configuration file: ~/nixos-config/stow/dotnet-tools/dotnet-tools.toml"
+            print "Configuration file: ~/darwin-config/stow/dotnet-tools/dotnet-tools.toml"
             print "Tools are installed globally via 'dotnet tool install --global'"
             print ""
             print "💡 Tips:"
             print "  - After system restore: run 'manage-dotnet-tools install'"
             print "  - To update tools: run 'manage-dotnet-tools update'"
-            print "  - Configuration is version-controlled with your nixos-config"
+            print "  - Configuration is version-controlled with your darwin-config"
         }
     }
 }

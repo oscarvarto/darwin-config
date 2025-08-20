@@ -7,7 +7,7 @@ This stow package contains my Neovim configuration based on LazyVim.
 To install this configuration, run:
 
 ```bash
-cd ~/nixos-config/stow
+cd ~/darwin-config/stow
 stow lazyvim
 ```
 
@@ -16,7 +16,7 @@ stow lazyvim
 To remove this configuration, run:
 
 ```bash
-cd ~/nixos-config/stow
+cd ~/darwin-config/stow
 stow -D lazyvim
 ```
 

@@ -1,13 +1,12 @@
-{ pkgs, config, ... }:
+{ pkgs, config, user ? "oscarvarto", ... }:
 
 let
-  # Get user from the nixos-config function to avoid absolute paths
-  user = config.users.users.oscarvarto.name or "oscarvarto";
+  # User is passed as parameter or falls back to default
 in
 {
   
   # NOTE: Nix cleanup scripts are now managed via stow (nix-scripts package)
-  # Run: cd ~/nixos-config/stow && stow nix-scripts
+  # Run: cd ~/darwin-config/stow && stow nix-scripts
 
   # Ghostty base configuration (managed by Nix)
   ".config/ghostty/config" = {
@@ -55,7 +54,7 @@ in
   # This allows users to edit it directly without rebuilding the Nix configuration
 
   # NOTE: Ghostty configuration scripts are now managed via stow (nix-scripts package)
-  # Run: cd ~/nixos-config/stow && stow nix-scripts
+  # Run: cd ~/darwin-config/stow && stow nix-scripts
 
   # Zellij configuration
   ".config/zellij/config.kdl" = {

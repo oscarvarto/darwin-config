@@ -979,8 +979,8 @@ $env.EDITOR = "nvim"
 # Terminal and editor shortcuts
 alias tg  = ^$env.EDITOR ~/.config/ghostty/config
 alias tgg = ^$env.EDITOR ~/.config/ghostty/overrides.conf
-alias nnc = ^$env.EDITOR ~/nixos-config/modules/nushell/config.nu
-alias nne = ^$env.EDITOR ~/nixos-config/modules/nushell/env.nu
+alias nnc = ^$env.EDITOR ~/darwin-config/modules/nushell/config.nu
+alias nne = ^$env.EDITOR ~/darwin-config/modules/nushell/env.nu
 alias gd = ghostty +show-config --default --docs
 
 # Git shortcuts
@@ -997,13 +997,13 @@ alias sdup = doom sync -u --aot --gc -j (nproc) --rebuild
 
 # Nix shortcuts
 def nb [] {
-    dirs add ~/nixos-config
+    dirs add ~/darwin-config
     nix run .#build
     dirs drop
 }
 
 def ns [] {
-    dirs add ~/nixos-config
+    dirs add ~/darwin-config
     nix run .#build-switch
     dirs drop
 }

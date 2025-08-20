@@ -49,7 +49,7 @@ manage-aux-scripts deploy
 ```
 
 ### Update Configuration
-1. Edit files in `~/nixos-config/stow/doom-emacs/.doom.d/`
+1. Edit files in `~/darwin-config/stow/doom-emacs/.doom.d/`
 2. Test changes in Doom Emacs
 3. Commit changes to version control
 4. Configuration is automatically active via stow symlinks
@@ -63,7 +63,7 @@ manage-aux-scripts remove doom-emacs
 ### System Restoration Workflow
 On a new system or after fresh installation:
 
-1. Clone nixos-config repository
+1. Clone darwin-config repository
 2. Deploy doom-emacs stow package: `manage-aux-scripts deploy doom-emacs`  
 3. Install Doom Emacs itself (if not already installed)
 4. Run Doom sync: `doom sync`
@@ -96,7 +96,7 @@ On a new system or after fresh installation:
 
 ### With Other Stow Packages
 - Complements other development tool configurations
-- Part of the unified nixos-config management system
+- Part of the unified darwin-config management system
 - Consistent with other declarative tool setups
 
 ### With Nix Configuration
@@ -161,4 +161,4 @@ On a new system or after fresh installation:
 
 - [Doom Emacs Documentation](https://github.com/doomemacs/doomemacs)
 - [GNU Stow Manual](https://www.gnu.org/software/stow/manual/)
-- Your nixos-config repository structure and conventions
+- Your darwin-config repository structure and conventions

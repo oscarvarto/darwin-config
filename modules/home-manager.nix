@@ -1,8 +1,15 @@
-{ config, pkgs, user ? "oscarvarto", ... } @ inputs:
+{ config, pkgs, user, hostname, hostSettings, ... } @ inputs:
 
 let
-  sharedFiles = import ./files.nix { inherit config pkgs; };
+  sharedFiles = import ./files.nix { inherit config pkgs user; };
   inherit (builtins) fromTOML;
+  
+  # User configuration based on hostSettings  
+  userConfig = {
+    name = if hostSettings.enablePersonalConfig then "Oscar Vargas Torres" else user;
+    email = if hostSettings.enablePersonalConfig then "contact@oscarvarto.mx" else "${user}@example.com";
+    workDir = if hostSettings.workProfile then "ir" else "dev";
+  };
 
   # Custom nushell 0.106.0 built from source
   # nushell-custom = pkgs.nushell.overrideAttrs (oldAttrs: rec {
@@ -113,8 +120,8 @@ in
           settings = {
             ui.editor = "nvim";
             user = {
-              email = "contact@oscarvarto.mx";
-              name = "Oscar Vargas Torres";
+              email = userConfig.email;
+              name = userConfig.name;
             };
           };
         };
@@ -163,7 +170,7 @@ in
         git = {
           enable = true;
           ignores = (import ./git-ignores.nix { inherit config pkgs lib; }).git.ignores;
-          userName = "Oscar Vargas Torres";
+          userName = userConfig.name;
           lfs.enable = true;
           extraConfig = {
             init.defaultBranch = "main";
@@ -181,11 +188,11 @@ in
             rebase.autoStash = true;
             safe.directory = [
               "*"
-              "/Users/${user}/nixos-config"
+              "/Users/${user}/darwin-config"
               "/nix/store/*"
               "/opt/homebrew/*"
             ];
-            includeIf."gitdir:/Users/${user}/ir/**".path = "/Users/${user}/.config/git/config-work";
+            includeIf."gitdir:/Users/${user}/${userConfig.workDir}/**".path = "/Users/${user}/.config/git/config-work";
             include.path = "/Users/${user}/.config/git/config-personal";
           };
         };

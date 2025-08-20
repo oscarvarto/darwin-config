@@ -6,7 +6,7 @@ This stow package provides version-controlled management of .NET SDKs and global
 
 1. **Configuration Tracking**: `dotnet-tools.toml` tracks your desired .NET global tools and SDK version.
 2. **Management Script**: `manage-dotnet-tools` provides commands to install, update, and manage tools.
-3. **Version Control**: Your .NET tool configuration is tracked in git with your nixos-config.
+3. **Version Control**: Your .NET tool configuration is tracked in git with your darwin-config.
 4. **System Restoration**: After a system wipe, easily reinstall your entire .NET environment.
 
 ## Files
@@ -18,7 +18,7 @@ This stow package provides version-controlled management of .NET SDKs and global
 
 ### Deploy the management script:
 ```bash
-cd ~/nixos-config/stow
+cd ~/darwin-config/stow
 stow dotnet-tools
 ```
 
@@ -101,8 +101,8 @@ install_timeout = 300
 
 After a system wipe:
 1. Install .NET SDK via system package manager or official installer.
-2. Clone your nixos-config.
-3. Run `cd ~/nixos-config/stow && stow dotnet-tools`.
+2. Clone your darwin-config.
+3. Run `cd ~/darwin-config/stow && stow dotnet-tools`.
 4. Run `manage-dotnet-tools install`.
 
 Your entire .NET development environment will be automatically restored!

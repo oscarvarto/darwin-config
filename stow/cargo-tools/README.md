@@ -6,7 +6,7 @@ This stow package provides version-controlled management of cargo-installed Rust
 
 1. **Configuration Tracking**: `cargo-tools.toml` tracks which cargo packages you want installed
 2. **Management Script**: `manage-cargo-tools` provides commands to install, update, and manage tools
-3. **Version Control**: Your cargo tool configuration is tracked in git with your nixos-config
+3. **Version Control**: Your cargo tool configuration is tracked in git with your darwin-config
 4. **System Restoration**: After a system wipe, easily reinstall all your cargo tools
 
 ## Files
@@ -18,7 +18,7 @@ This stow package provides version-controlled management of cargo-installed Rust
 
 ### Deploy the management script:
 ```bash
-cd ~/nixos-config/stow
+cd ~/darwin-config/stow
 stow cargo-tools
 ```
 
@@ -77,8 +77,8 @@ use_locked = false
 
 After a system wipe:
 1. Install Rust/Cargo
-2. Clone your nixos-config
-3. Run `cd ~/nixos-config/stow && stow cargo-tools`
+2. Clone your darwin-config
+3. Run `cd ~/darwin-config/stow && stow cargo-tools`
 4. Run `manage-cargo-tools install`
 
 All your cargo tools will be automatically restored!

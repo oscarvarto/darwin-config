@@ -35,7 +35,7 @@ def show-help [] {
     print "  CompanySecretName"
     print ""
     print "Prerequisites:"
-    print "  - bfg package must be installed (available via nixos-config)"
+    print "  - bfg package must be installed (available via darwin-config)"
     print "  - Repository must be clean (no uncommitted changes)"
     print "  - Create backup branch before running"
 }
@@ -103,7 +103,7 @@ def main [args: list<string>] {
 
     # Verify bfg is installed
     if (which bfg | is-empty) {
-        print $"($RED)❌ BFG not found. Install it via nixos-config.($NC)"
+        print "❌ BFG not found. Install it via darwin-config."
         print $"($YELLOW)💡 Add 'bfg-repo-cleaner' to your packages list($NC)"
         exit 1
     }

@@ -33,7 +33,7 @@ This stow package contains various utility scripts extracted from the nix config
 Use stow to symlink these scripts:
 
 ```bash
-cd ~/nixos-config/stow
+cd ~/darwin-config/stow
 stow nix-scripts
 ```
 

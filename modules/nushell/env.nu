@@ -88,7 +88,7 @@ path add "~/.local/share/bin"
 path add "~/.local/bin"
 $env.CARGO_HOME = ($env.HOME | path join ".cargo")
 path add ($env.CARGO_HOME | path join "bin")
-path add "~/nixos-config/modules/elisp-formatter"
+path add "~/darwin-config/modules/elisp-formatter"
 
 $env.EMACSDIR = "~/.emacs.d"
 $env.DOOMDIR  = "~/.doom.d"

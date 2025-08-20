@@ -1,7 +1,7 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, user ? "oscarvarto", ... }:
 
 let 
-  user = "oscarvarto";
+  # user is passed as parameter or falls back to default
 in
 {
   programs = {
@@ -49,7 +49,7 @@ in
 
         # Add Maven 4 to PATH first (before Homebrew Maven 3.9.11)
         # PATH="$HOME/mvn4/apache-maven-4.0.0-rc-4/bin:$PATH"
-        PATH="$HOME/nixos-config/modules/elisp-formatter:$PATH"
+        PATH="$HOME/darwin-config/modules/elisp-formatter:$PATH"
         PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
         PATH=$HOME/.local/share/bin:$PATH
         PATH=$HOME/.local/bin:$PATH
@@ -89,8 +89,8 @@ in
         }
 
         # Source shell functions from external file
-        if [[ -f "$HOME/nixos-config/modules/shell-functions.sh" ]]; then
-            source "$HOME/nixos-config/modules/shell-functions.sh"
+        if [[ -f "$HOME/darwin-config/modules/shell-functions.sh" ]]; then
+            source "$HOME/darwin-config/modules/shell-functions.sh"
         fi
 
         # Always color ls and group directories
@@ -106,8 +106,8 @@ in
         alias ds="doom sync --aot --gc -j \\$(nproc)"
         alias dup="doom sync -u --aot --gc -j \\$(nproc)"
         alias diff="difft"
-        alias nb="pushd \\$HOME/nixos-config > /dev/null; nix run .#build; popd > /dev/null"
-        alias ns="pushd \\$HOME/nixos-config > /dev/null; nix run .#build-switch; popd > /dev/null"
+        alias nb="pushd \\$HOME/darwin-config > /dev/null; nix run .#build; popd > /dev/null"
+        alias ns="pushd \\$HOME/darwin-config > /dev/null; nix run .#build-switch; popd > /dev/null"
       '';
     };
   };

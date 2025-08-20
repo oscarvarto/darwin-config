@@ -6,7 +6,7 @@ This stow package provides version-controlled management of Node.js tools and gl
 
 1. **Configuration Tracking**: `nodejs-tools.toml` tracks your desired Node.js toolchain and global packages
 2. **Management Script**: `manage-nodejs-tools` provides commands to install, update, and manage tools
-3. **Version Control**: Your Node.js tool configuration is tracked in git with your nixos-config
+3. **Version Control**: Your Node.js tool configuration is tracked in git with your darwin-config
 4. **System Restoration**: After a system wipe, easily reinstall your entire Node.js environment
 
 ## Files
@@ -18,7 +18,7 @@ This stow package provides version-controlled management of Node.js tools and gl
 
 ### Deploy the management script:
 ```bash
-cd ~/nixos-config/stow
+cd ~/darwin-config/stow
 stow nodejs-tools
 ```
 
@@ -117,8 +117,8 @@ use_volta = true
 
 After a system wipe:
 1. Install Volta (via homebrew/nix)
-2. Clone your nixos-config
-3. Run `cd ~/nixos-config/stow && stow nodejs-tools`
+2. Clone your darwin-config
+3. Run `cd ~/darwin-config/stow && stow nodejs-tools`
 4. Run `manage-nodejs-tools install`
 
 Your entire Node.js development environment will be automatically restored!

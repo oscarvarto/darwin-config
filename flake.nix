@@ -82,9 +82,34 @@
               # mise  # not needed - using nixpkgs version
               } @inputs:
     let
-      user = "oscarvarto";
+      # Default user configuration - can be overridden per hostname
+      defaultUser = "oscarvarto";
+      
+      # Host configurations - add new hosts here
+      hostConfigs = {
+        predator = {
+          user = "oscarvarto";
+          system = "aarch64-darwin";
+          # Add host-specific settings here
+          hostSettings = {
+            enablePersonalConfig = true;
+            workProfile = false;
+          };
+        };
+        # Example of additional host:
+        # macbook-pro = {
+        #   user = "otheruser";
+        #   system = "x86_64-darwin";
+        #   hostSettings = {
+        #     enablePersonalConfig = false;
+        #     workProfile = true;
+        #   };
+        # };
+      };
+      
       darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
       forAllSystems = f: nixpkgs.lib.genAttrs darwinSystems f;
+      
       devShell = system: let pkgs = nixpkgs.legacyPackages.${system}; in {
         default = with pkgs; mkShell {
           nativeBuildInputs = with pkgs; [ bashInteractive git ];
@@ -93,6 +118,7 @@
           '';
         };
       };
+      
       mkApp = scriptName: system: {
         type = "app";
         program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin scriptName ''
@@ -102,6 +128,7 @@
           exec ${self}/apps/${system}/${scriptName}
         '')}/bin/${scriptName}";
       };
+      
       mkDarwinApps = system: {
         "apply" = mkApp "apply" system;
         "build" = mkApp "build" system;
@@ -111,16 +138,21 @@
         "check-keys" = mkApp "check-keys" system;
         "rollback" = mkApp "rollback" system;
       };
-      # Helper function to create darwin configurations
-      mkDarwinConfig = system: darwin.lib.darwinSystem {
-        inherit system;
-        specialArgs = inputs // { inherit user; };
+      
+      # Helper function to create darwin configurations with host-specific settings
+      mkDarwinConfig = hostname: hostConfig: darwin.lib.darwinSystem {
+        system = hostConfig.system;
+        specialArgs = inputs // { 
+          inherit (hostConfig) user;
+          inherit hostname;
+          hostSettings = hostConfig.hostSettings;
+        };
         modules = [
           home-manager.darwinModules.home-manager
           nix-homebrew.darwinModules.nix-homebrew
           {
             nix-homebrew = {
-              inherit user;
+              user = hostConfig.user;
               enable = true;
               taps = {
                 "homebrew/homebrew-core" = homebrew-core;
@@ -140,8 +172,6 @@
       devShells = forAllSystems devShell;
       apps = nixpkgs.lib.genAttrs darwinSystems mkDarwinApps;
 
-      darwinConfigurations = {
-        predator = mkDarwinConfig "aarch64-darwin";
-      } // nixpkgs.lib.genAttrs darwinSystems mkDarwinConfig;
+      darwinConfigurations = nixpkgs.lib.mapAttrs mkDarwinConfig hostConfigs;
   };
 }

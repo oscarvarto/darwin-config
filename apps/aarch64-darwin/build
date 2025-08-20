@@ -6,7 +6,9 @@ RED='\033[1;31m'
 NC='\033[0m'
 
 SYSTEM_TYPE="aarch64-darwin"
-FLAKE_SYSTEM="darwinConfigurations.${SYSTEM_TYPE}.system"
+# Try to get the hostname, fall back to predator if not found
+HOSTNAME="$(hostname -s 2>/dev/null || echo 'predator')"
+FLAKE_SYSTEM="darwinConfigurations.${HOSTNAME}.system"
 
 # Smart detection and handling for Emacs.app installation/linking
 ensure_emacs_postinstall_and_alias() {

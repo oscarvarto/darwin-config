@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Shell functions for nixos-config
+# Shell functions for darwin-config
 # This file is sourced by shell-config.nix
 
 # Yazi file manager function with directory change

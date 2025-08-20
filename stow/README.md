@@ -29,7 +29,7 @@ stow/
 ### Install/Deploy All Packages
 To deploy all managed tools and scripts:
 ```bash
-cd ~/nixos-config/stow
+cd ~/darwin-config/stow
 manage-aux-scripts deploy
 ```
 
@@ -47,7 +47,7 @@ This will create symlinks from `~/.local/share/bin/` to the scripts in `stow/aux
 ### Remove All Packages
 To remove all symlinks:
 ```bash
-cd ~/nixos-config/stow
+cd ~/darwin-config/stow
 manage-aux-scripts remove
 ```
 
@@ -60,7 +60,7 @@ manage-aux-scripts remove
 After a system wipe:
 1. Install GNU Stow via Nix (already configured in home-manager.nix)
 2. Clone this repository
-3. Run `cd ~/nixos-config/stow && stow aux-scripts`
+3. Run `cd ~/darwin-config/stow && stow aux-scripts`
 
 ## Managed Packages
 
@@ -101,7 +101,7 @@ After a system wipe:
 ## Benefits
 
 1. **Avoid Nix Parsing Issues**: Scripts remain as separate files, avoiding complex escaping
-2. **Version Control**: All scripts are tracked in your nixos-config repository
+2. **Version Control**: All scripts are tracked in your darwin-config repository
 3. **Easy Deployment**: Single command deploys all scripts
 4. **System Restoration**: Easily restore all scripts after system rebuilds
 5. **Selective Management**: Can manage different script packages independently

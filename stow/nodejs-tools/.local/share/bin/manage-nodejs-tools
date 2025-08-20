@@ -4,11 +4,11 @@
 # Usage: manage-nodejs-tools <command>
 
 def main [command: string = "help"] {
-    let nodejs_tools_dir = $"($env.HOME)/nixos-config/stow/nodejs-tools"
+    let nodejs_tools_dir = $"($env.HOME)/darwin-config/stow/nodejs-tools"
     let config_file = $"($nodejs_tools_dir)/nodejs-tools.toml"
     
     if not ($config_file | path exists) {
-        print "❌ Error: Node.js tools config file not found at ~/nixos-config/stow/nodejs-tools/nodejs-tools.toml"
+        print "❌ Error: Node.js tools config file not found at ~/darwin-config/stow/nodejs-tools/nodejs-tools.toml"
         exit 1
     }
     
@@ -154,7 +154,7 @@ def main [command: string = "help"] {
             print $"   Version: ($final_version)"
             print $"   Description: ($final_description)"
             print ""
-            print "⚠️  You'll need to manually edit ~/nixos-config/stow/nodejs-tools/nodejs-tools.toml"
+            print "⚠️  You'll need to manually edit ~/darwin-config/stow/nodejs-tools/nodejs-tools.toml"
             print $"   Add this under [global_packages]:"
             print $"   ($package_name) = {{ version = \"($final_version)\", description = \"($final_description)\" }}"
         }
@@ -173,7 +173,7 @@ def main [command: string = "help"] {
             print "  add               Interactive tool to add new package to config"
             print "  help              Show this help message"
             print ""
-            print "Configuration file: ~/nixos-config/stow/nodejs-tools/nodejs-tools.toml"
+            print "Configuration file: ~/darwin-config/stow/nodejs-tools/nodejs-tools.toml"
             print "Managed packages will be installed globally via npm/yarn/pnpm"
             print "Node.js version is managed via volta"
         }

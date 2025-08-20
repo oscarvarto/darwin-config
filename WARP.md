@@ -2,7 +2,7 @@
 
 This file provides guidance to WARP (warp.dev) when working with code in this repository.
 
-- Repository: nixos-config (macOS and NixOS system configuration managed with flakes)
+- Repository: darwin-config (macOS and NixOS system configuration managed with flakes)
 - Primary focus here: macOS aarch64-darwin workflows, plus shared structure used by both macOS and NixOS
 
 Common commands (macOS aarch64-darwin)

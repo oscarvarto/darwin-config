@@ -21,7 +21,7 @@ def main [] {
         let has_op = try { which op | is-not-empty } catch { false }
         if not $has_op {
             print "⚠️ 1Password CLI not available. Using placeholder email."
-            print "💡 Install via nixos-config and sign in with: op signin"
+            print "💡 Install via darwin-config and sign in with: op signin"
             "YOUR-WORK-EMAIL@company.com"
         } else {
             let signed_in = try { op account get | is-not-empty } catch { false }

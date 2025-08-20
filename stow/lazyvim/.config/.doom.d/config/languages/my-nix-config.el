@@ -14,8 +14,8 @@
         ;; Use simple nixpkgs path to avoid hanging on flake evaluation
         lsp-nix-nixd-nixpkgs-expr "import <nixpkgs> { }"
         ;; Comment out heavy option evaluations that can cause hanging
-        ;; lsp-nix-nixd-nixos-options-expr "(builtins.getFlake \"/Users/oscarvarto/nixos-config\").darwinConfigurations.predator.options"
-        ;; lsp-nix-nixd-home-manager-options-expr "(builtins.getFlake \"/Users/oscarvarto/nixos-config\").darwinConfigurations.predator.options.home-manager.users.type.getSubOptions []"
+        ;; lsp-nix-nixd-nixos-options-expr "(builtins.getFlake \"/Users/oscarvarto/darwin-config\").darwinConfigurations.predator.options"
+        ;; lsp-nix-nixd-home-manager-options-expr "(builtins.getFlake \"/Users/oscarvarto/darwin-config\").darwinConfigurations.predator.options.home-manager.users.type.getSubOptions []"
         ))
 
 
