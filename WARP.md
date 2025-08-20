@@ -43,18 +43,20 @@ High-level architecture
   - devShells: per-system shells (default shell includes git and sets EDITOR=nvim)
   - apps: System-specific CLI entrypoints that execute scripts under apps/<system>/ (e.g., build, build-switch, check-keys, create-keys, copy-keys, rollback)
   - darwinConfigurations: Built via mkDarwinConfig(system)
-    - Modules include: home-manager.darwinModules.home-manager, nix-homebrew.darwinModules.nix-homebrew, taps (core/cask/bundle/emacs-plus), and hosts/darwin
+    - Modules include: home-manager.darwinModules.home-manager, nix-homebrew.darwinModules.nix-homebrew, taps (core/cask/bundle/emacs-plus), and system.nix
     - A host named predator is explicitly defined for aarch64-darwin; flake also maps mkDarwinConfig across supported darwin systems
   - nixosConfigurations: Includes disko, home-manager (users.${user} from modules/nixos/home-manager.nix), and hosts/nixos
 
 - Modules layout (summaries from module READMEs)
-  - modules/darwin/
-    - default.nix: system-level config
+  - modules/ (formerly darwin-specific, now unified)
     - home-manager.nix: user programs
     - packages.nix: macOS packages
     - casks.nix: Homebrew casks
     - files.nix: immutable non-Nix files
     - dock/: macOS Dock config
+    - nushell/: Nushell configuration
+    - scripts/: Nushell utility scripts
+    - elisp-formatter/: Emacs Lisp formatting tool
   - modules/nixos/
     - default.nix: system-level config
     - home-manager.nix: user programs
@@ -81,6 +83,7 @@ Repo-specific practices and conventions
 Cross-references
 - Root flake: flake.nix (inputs, apps, devShells, darwin/nixos configurations)
 - macOS helper scripts: apps/aarch64-darwin/
-- Module overviews: modules/darwin/README.md, modules/nixos/README.md, modules/shared/README.md
+- Module overviews: modules/README.md, modules/nixos/README.md, modules/shared/README.md
+- System configuration: system.nix (Darwin configuration at root level)
 - Stow-managed scripts and usage: stow/README.md and package READMEs under stow/
 
