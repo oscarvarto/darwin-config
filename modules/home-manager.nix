@@ -2,7 +2,6 @@
 
 let
   sharedFiles = import ./files.nix { inherit config pkgs; };
-  additionalFiles = import ./files.nix { inherit user config pkgs; };
   inherit (builtins) fromTOML;
 
   # Custom nushell 0.106.0 built from source
@@ -74,10 +73,7 @@ in
           # Add nixd nightly from flake input
           inputs.nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
         ];
-        file = lib.mkMerge [
-          sharedFiles
-          additionalFiles
-        ];
+        file = sharedFiles;
 
         # Ensure user shells and GUI apps see Enchant/Aspell settings
         sessionVariables = {
