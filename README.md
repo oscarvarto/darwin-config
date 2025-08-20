@@ -250,6 +250,11 @@ nix run .#build-switch
 | `manage-nodejs-tools install` | Install/update Node.js tools and toolchain |
 | `manage-dotnet-tools install` | Install/update .NET SDK and global tools |
 
+### Development Utilities
+| Command | Description |
+|---------|-------------|
+| `cleanup-intellij [project]` | Clean IntelliJ IDEA caches and fix broken state |
+
 ## ✨ Key Features
 
 - **🔄 Multi-User/Multi-Host**: Easily configure for different users and machines
@@ -439,6 +444,427 @@ If you're setting up on a system without commercial fonts:
 - **Consistent Experience**: Same ligatures and features across fonts
 - **Easy Migration**: Add commercial fonts later without reconfiguration
 - **Developer Friendly**: Optimized for programming with proper ligature support
+
+## ✏️ Editor Configurations
+
+This repository includes comprehensive configurations for both Doom Emacs and Neovim (LazyVim), managed through the stow system for easy deployment and version control.
+
+### 🚀 Doom Emacs Configuration
+
+A complete, modular Doom Emacs configuration with advanced features, language support, and development tools.
+
+#### Quick Setup
+
+```bash
+# 1. Install Doom Emacs (if not already installed)
+git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs
+~/.config/emacs/bin/doom install
+
+# 2. Deploy configuration via stow
+manage-aux-scripts deploy doom-emacs
+# OR deploy all packages: manage-aux-scripts deploy
+
+# 3. Sync Doom with new configuration
+doom sync
+```
+
+#### Configuration Structure
+
+```
+~/.doom.d/  (symlinked from ~/darwin-config/stow/doom-emacs/.doom.d/)
+├── init.el          # Doom modules configuration
+├── packages.el      # Package declarations and configuration  
+├── config.el        # Main configuration loader
+├── custom.el        # Emacs custom variables
+├── config/          # Modular configuration files
+│   ├── ai/          # AI tools (Tabnine, Copilot, etc.)
+│   ├── core/        # Core Emacs functionality
+│   ├── jvm/         # JVM languages (Java, Scala)
+│   ├── languages/   # Programming language configurations
+│   ├── lsp/         # Language Server Protocol setup
+│   ├── misc/        # Miscellaneous configurations
+│   ├── ui/          # User interface customizations
+│   └── writing/     # Writing and documentation tools
+├── snippets/        # YASnippet templates
+└── docs/           # Configuration documentation
+```
+
+#### Key Features
+
+- **🧠 AI Integration**: Tabnine, GitHub Copilot support
+- **🛠️ LSP Support**: Language servers for 15+ programming languages
+- **🎨 Advanced UI**: Custom themes, fonts, ligatures, modeline
+- **📁 Project Management**: Projectile, Treemacs, smart project detection
+- **🔍 Search & Navigation**: Vertico, Consult, advanced search capabilities
+- **📝 Writing Tools**: Org-mode, Markdown, LaTeX, presentations
+- **🚀 Performance**: Lazy loading, optimized startup
+- **🔧 Modular Design**: Easy to customize and extend
+
+#### Available Commands & Aliases
+
+| Command | Description |
+|---------|-------------|
+| `e [files...]` | Open files in GUI Emacs (with daemon) |
+| `et` | Start Emacs in background |
+| `edd` | Open current directory in Emacs |
+| `manage-doom-config status` | Check configuration deployment status |
+| `manage-doom-config validate` | Validate all elisp files for syntax |
+| `manage-doom-config sync` | Validate config and run `doom sync` |
+| `manage-doom-config edit` | Open configuration in Emacs |
+| `manage-doom-config backup` | Create timestamped backup |
+| `doom sync` | Sync Doom with configuration changes |
+| `doom upgrade` | Update Doom Emacs itself |
+| `doom doctor` | Diagnose configuration issues |
+
+#### Font Integration
+
+- **Smart Font Detection**: Automatically uses best available programming font
+- **Font Cycling**: Press `F8` to cycle between MonoLisa → PragmataPro → JetBrains Mono
+- **Ligature Support**: Optimized ligatures for each font
+- **Size Optimization**: Each font uses its optimal size settings
+
+#### Configuration Management
+
+```bash
+# Edit configuration (preserves version control)
+cd ~/darwin-config/stow/doom-emacs/.doom.d/
+# Make changes to files here
+
+# Validate changes before committing
+manage-doom-config validate
+
+# Sync changes to Doom
+manage-doom-config sync
+
+# Commit to version control
+git add . && git commit -m "Update Doom config"
+```
+
+#### Language Support
+
+**Supported Languages:**
+- **Systems**: Rust, Go, C/C++, Zig
+- **JVM**: Java, Scala, Clojure, Kotlin
+- **Web**: TypeScript, JavaScript, HTML, CSS
+- **Data**: Python, R, SQL, JSON, YAML
+- **Markup**: Markdown, LaTeX, Org-mode
+- **Config**: Nix, TOML, INI, Dockerfile
+- **And many more...**
+
+#### Troubleshooting
+
+```bash
+# Check configuration status
+manage-doom-config status
+
+# Validate elisp syntax
+manage-doom-config validate
+
+# Diagnose issues
+doom doctor
+
+# Re-deploy configuration
+manage-aux-scripts remove doom-emacs
+manage-aux-scripts deploy doom-emacs
+doom sync
+```
+
+### 🌟 Neovim (LazyVim) Configuration
+
+A modern Neovim configuration based on LazyVim with sensible defaults and extensive plugin ecosystem.
+
+#### Quick Setup
+
+```bash
+# 1. Neovim is already installed via Nix (see modules/packages.nix)
+
+# 2. Deploy LazyVim configuration
+cd ~/darwin-config/stow
+stow lazyvim
+# OR: manage-aux-scripts deploy lazyvim
+
+# 3. Start Neovim (plugins auto-install on first run)
+nvim
+```
+
+#### Configuration Structure
+
+```
+~/.config/nvim/  (symlinked from ~/darwin-config/stow/lazyvim/.config/nvim/)
+├── init.lua         # Main configuration entry point
+├── lazy-lock.json   # Plugin version lockfile
+├── lazyvim.json     # LazyVim configuration
+└── lua/
+    ├── config/      # Core configuration
+    │   ├── autocmds.lua    # Auto-commands
+    │   ├── keymaps.lua     # Key bindings
+    │   ├── lazy.lua        # Plugin manager setup
+    │   └── options.lua     # Neovim options
+    └── plugins/     # Plugin configurations
+        ├── nixd.lua        # Nix language support
+        ├── python.lua      # Python development
+        └── example.lua     # Plugin examples
+```
+
+#### Key Features
+
+- **📦 Plugin Management**: Lazy.nvim with automatic plugin installation
+- **🛠️ LSP Integration**: Built-in language server support
+- **🔍 Fuzzy Finding**: Telescope for files, buffers, grep
+- **📁 File Explorer**: Neo-tree for project navigation
+- **🎨 Modern UI**: Beautiful statusline, bufferline, themes
+- **⚡ Performance**: Lazy loading, fast startup
+- **🔧 Extensible**: Easy to add custom plugins and configurations
+
+#### Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `nvim` | Start Neovim with LazyVim configuration |
+| `nvim +Lazy` | Open plugin manager |
+| `nvim +Mason` | Open LSP installer |
+| `nvim +checkhealth` | Check configuration health |
+
+#### Basic Usage
+
+**Key Bindings (LazyVim defaults):**
+- `<leader>` = `<Space>`
+- `<leader>ff` - Find files
+- `<leader>fg` - Live grep
+- `<leader>e` - Toggle file explorer
+- `<leader>gg` - Open lazygit
+- `<leader>l` - LSP commands
+
+#### Configuration Management
+
+```bash
+# Edit configuration
+cd ~/darwin-config/stow/lazyvim/.config/nvim/
+# Make changes to Lua files
+
+# Test configuration
+nvim +checkhealth
+
+# Commit changes
+git add . && git commit -m "Update LazyVim config"
+```
+
+### 🛠️ Editor Management with Stow
+
+Both editor configurations use the stow system for deployment and management.
+
+#### Deploying Editor Configurations
+
+```bash
+# Deploy both editors
+manage-aux-scripts deploy
+
+# Deploy specific editor
+stow -t ~ doom-emacs    # Deploy Doom Emacs config
+stow -t ~ lazyvim       # Deploy LazyVim config
+
+# Check deployment status
+manage-aux-scripts status
+```
+
+#### Removing Editor Configurations
+
+```bash
+# Remove specific editor config (preserves files)
+stow -D -t ~ doom-emacs
+stow -D -t ~ lazyvim
+
+# Remove all stow packages
+manage-aux-scripts remove
+```
+
+#### Benefits of Stow Management
+
+- **Version Control**: Full history of configuration changes
+- **Portability**: Easy to deploy on new systems
+- **Safety**: Symlinks preserve original structure
+- **Modularity**: Independent editor configurations
+- **Backup**: Configurations are part of darwin-config repository
+
+#### Creating Custom Editor Configurations
+
+1. **Create stow package structure:**
+   ```bash
+   mkdir -p ~/darwin-config/stow/my-editor/.config/my-editor
+   # Add configuration files
+   ```
+
+2. **Deploy with stow:**
+   ```bash
+   cd ~/darwin-config/stow
+   stow -t ~ my-editor
+   ```
+
+3. **Add to management system:**
+   - Update `manage-aux-scripts` to include new package
+   - Add documentation to package README.md
+
+### 🎯 Editor Recommendations
+
+**Choose Doom Emacs if you:**
+- Want extensive customization capabilities
+- Need advanced org-mode and writing features
+- Prefer elisp for configuration
+- Use Emacs ecosystem tools (mu4e, magit, etc.)
+
+**Choose LazyVim/Neovim if you:**
+- Prefer faster startup times
+- Want modern Lua-based configuration
+- Need excellent terminal integration
+- Prefer minimal, focused editing experience
+
+**Use Both:**
+- Both configurations can coexist
+- Doom Emacs for heavy development and writing
+- LazyVim for quick edits and terminal work
+
+## 🧠 IntelliJ IDEA Development Utilities
+
+### 🛠️ IntelliJ Cache Cleanup Tool
+
+The `cleanup-intellij` script is a powerful utility for fixing broken IntelliJ IDEA states that can interfere with development. IntelliJ often accumulates corrupt caches, project files, and configuration states that cause issues like:
+
+- Folder structure not being recognized properly
+- IDE freezing or becoming unresponsive
+- Projects not loading correctly
+- Build system integration problems
+- Corrupted indexing and caching
+
+#### Quick Usage
+
+```bash
+# Clean all IntelliJ caches (most common)
+cleanup-intellij
+
+# Clean specific project + all caches
+cleanup-intellij ~/my-project
+
+# Clean only project files
+cleanup-intellij -p ~/my-project
+
+# Clean only system caches
+cleanup-intellij -s
+
+# Nuclear option - clean EVERYTHING system-wide
+cleanup-intellij -g
+```
+
+#### Available Options
+
+| Option | Description |
+|--------|-------------|
+| `cleanup-intellij` | Clean all IntelliJ system caches |
+| `cleanup-intellij <project>` | Clean all caches + specific project files |
+| `cleanup-intellij -p <project>` | Clean only project-specific files (.idea, .iml, etc.) |
+| `cleanup-intellij -s` | Clean only system caches and application data |
+| `cleanup-intellij -g` | **Aggressive**: Clean ALL project files system-wide |
+| `cleanup-intellij -h` | Show help and usage examples |
+
+#### What Gets Cleaned
+
+**System Caches (`-s` or default):**
+- `~/Library/Caches/JetBrains/IntelliJIdea*` - IDE caches
+- `~/Library/Logs/JetBrains/IntelliJIdea*` - IDE logs
+- `~/Library/Application Support/JetBrains/IntelliJIdea*/workspace` - Workspace data
+- `~/Library/Application Support/JetBrains/IntelliJIdea*/system` - System data
+- `~/Library/Application Support/JetBrains/IntelliJIdea*/scratches_and_consoles` - Scratches
+- Recent projects configuration
+
+**Project-Specific Files (`-p`):**
+- `.idea/` directory (project configuration)
+- `*.iml` files (module files)
+- `*.ipr` files (legacy project files)
+- `*.iws` files (workspace files)
+- Project references from trusted-paths.xml
+
+**Aggressive Cleanup (`-g`):**
+- **ALL** `.idea` directories system-wide (excluding system directories)
+- **ALL** `.iml`, `.ipr`, `.iws` files system-wide
+- All system caches and application data
+- ⚠️ **Warning**: This will reset ALL IntelliJ projects!
+
+#### Common Use Cases
+
+**Project Won't Load Correctly:**
+```bash
+# Clean specific project + caches
+cleanup-intellij ~/problematic-project
+```
+
+**IntelliJ Feels Slow/Corrupted:**
+```bash
+# Clean all system caches
+cleanup-intellij -s
+```
+
+**Fresh Start for Specific Project:**
+```bash
+# Clean only project files (preserves other projects)
+cleanup-intellij -p ~/my-project
+```
+
+**Nuclear Reset (Use with Caution):**
+```bash
+# Clean everything - like fresh IntelliJ install
+cleanup-intellij -g
+# You'll be prompted for confirmation
+```
+
+#### Safety Features
+
+- **Colored output** with clear status messages
+- **Confirmation prompt** for aggressive mode
+- **Safe removal** - only deletes files if they exist
+- **Path validation** - ensures project paths are valid
+- **Exclusions** - skips system directories, node_modules, .Trash
+
+#### When to Use This Tool
+
+✅ **Use when experiencing:**
+- Project import/loading failures
+- Incorrect folder structure recognition
+- IntelliJ freezing or crashes
+- Build system not working properly
+- Indexing problems
+- "Cannot resolve symbol" errors that won't go away
+
+⚠️ **Be careful with:**
+- `-g` (aggressive) mode - resets ALL projects
+- Projects with custom IntelliJ configurations you want to keep
+- Shared projects where team members rely on specific IDE settings
+
+#### Post-Cleanup Steps
+
+ After running the cleanup:
+
+1. **Restart IntelliJ IDEA** completely
+2. **Re-import your project** if using aggressive cleanup
+3. **Wait for indexing** to complete
+4. **Reconfigure** any custom project settings if needed
+
+#### Integration with Development Workflow
+
+```bash
+# After pulling major changes
+git pull origin main
+cleanup-intellij ~/my-project  # Clean project state
+# Restart IntelliJ
+
+# Before switching branches with major structural changes
+cleanup-intellij -p ~/my-project
+git checkout feature-branch
+# Restart IntelliJ
+
+# Monthly maintenance
+cleanup-intellij -s  # Clean system caches
+```
+
+This tool is particularly useful in JVM development environments where IntelliJ's complex project models can become corrupted, especially when working with large codebases, multi-module projects, or frequently switching between branches with different project structures.
 
 ## 📁 What's Included
 
