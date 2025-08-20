@@ -2,36 +2,177 @@
 
 A comprehensive macOS system configuration using Nix-Darwin and Home Manager with flakes support. While designed as a single-user repository, it includes tools to easily adapt the configuration for different users, machines, and environments.
 
-## 🚀 Quick Start
+## 🚀 Installation Guide for macOS
 
-### Initial Setup
+This configuration supports both Apple Silicon (M1/M2/M3) and Intel Macs running macOS Monterey (12.0) or later.
 
-1. **Clone the Repository:**
-   ```bash
-   git clone <your-repo-url> ~/darwin-config
-   cd ~/darwin-config
-   ```
+### Prerequisites
 
-2. **Configure for Your Environment:**
-   ```bash
-   # Add your hostname to flake.nix
-   nix run .#add-host -- --hostname $(hostname -s) --user $USER
-   
-   # Or configure for different user/hostname combinations
-   nix run .#configure-user -- --user $USER --hostname $(hostname -s)
-   ```
+Make sure you have:
+- macOS Monterey (12.0) or later
+- Admin privileges on your Mac
+- Internet connection for downloading packages
 
-3. **Build and Switch:**
-   ```bash
-   # Using preferred aliases (if available)
-   nb   # Build the nix configuration
-   ns   # Build and switch to the new configuration
-   
-   # Or using nix run commands
-   nix run .#build-switch
-   ```
+### 1. Install Xcode Command Line Tools
 
-### Development Workflow
+```bash
+xcode-select --install
+```
+
+### 2. Install Nix Package Manager
+
+We recommend using the Determinate Systems installer for the best macOS experience:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+```
+
+**After installation, open a new terminal session** to make the `nix` command available in your `$PATH`.
+
+> **⚠️ Important Notes:**
+>
+> - The installer will ask if you want to install Determinate Nix. Answer **No** as it currently conflicts with `nix-darwin`.
+> - If you're on macOS Sequoia, read [Nix Support for macOS Sequoia](https://determinate.systems/posts/nix-support-for-macos-sequoia/) before installing.
+>
+> **Alternative: Official Nix Installation**
+>
+> If using the [official Nix installer](https://nixos.org/download) instead, you'll need to enable flakes and nix-command:
+>
+> Add this line to `/etc/nix/nix.conf`:
+> ```
+> experimental-features = nix-command flakes
+> ```
+
+### 3. Clone and Initialize Repository
+
+```bash
+# Clone the repository
+git clone <your-repo-url> ~/darwin-config
+cd ~/darwin-config
+
+# Make scripts executable
+find apps/$(uname -m | sed 's/arm64/aarch64/')-darwin -type f -exec chmod +x {} \;
+```
+
+### 4. Configure for Your Environment
+
+```bash
+# Configure for your user and hostname
+nix run .#configure-user -- --user $USER --hostname $(hostname -s)
+
+# OR add your hostname if it doesn't exist in flake.nix
+nix run .#add-host -- --hostname $(hostname -s) --user $USER
+
+# Apply user information to configuration files
+nix run .#apply
+```
+
+> **📝 Note**: If you're using a git repository, run `git add .` before building to ensure all files are included in the Nix store.
+
+### 5. Review and Customize Packages
+
+Before building, review what will be installed:
+
+**Package Configuration Files:**
+- `modules/packages.nix` - Nix packages (CLI tools, development tools)
+- `modules/casks.nix` - Homebrew casks (GUI applications)
+- `modules/brews.nix` - Homebrew formulas (additional CLI tools)
+
+**Search for packages:**
+- [NixOS Package Search](https://search.nixos.org/packages)
+- [Homebrew Cask Search](https://formulae.brew.sh/cask/)
+- [Homebrew Formula Search](https://formulae.brew.sh/formula/)
+
+### 6. Optional: Setup SSH Keys and Secrets
+
+If you want to use the full secrets management features:
+
+#### Option A: Create New Keys
+```bash
+nix run .#create-keys
+```
+
+> After creating keys, add the public key to your GitHub account:
+> ```bash
+> cat ~/.ssh/id_ed25519.pub | pbcopy  # Copy to clipboard
+> ```
+
+#### Option B: Copy Existing Keys
+If you have existing SSH keys on a USB drive:
+```bash
+nix run .#copy-keys
+```
+
+#### Option C: Check Existing Keys
+If you already have keys installed:
+```bash
+nix run .#check-keys
+```
+
+### 7. Test Build Configuration
+
+Before switching to the new configuration, test that it builds successfully:
+
+```bash
+nix run .#build
+```
+
+> **⚠️ Common Issues:**
+>
+> **File Conflicts**: If you encounter "Unexpected files in /etc, aborting activation":
+> ```bash
+> # Backup conflicting files (example)
+> sudo mv /etc/nix/nix.conf /etc/nix/nix.conf.before-nix-darwin
+> sudo mv /etc/bashrc /etc/bashrc.before-nix-darwin
+> ```
+>
+> **Sequoia GID Issues**: If you see "Build user group has mismatching GID":
+> - You may need to uninstall and reinstall Nix with `--nix-build-group-id 30000`
+> - See [macOS Sequoia support documentation](https://determinate.systems/posts/nix-support-for-macos-sequoia/)
+
+### 8. Deploy Configuration
+
+Once the build succeeds, switch to your new configuration:
+
+```bash
+# Build and switch to new configuration
+nix run .#build-switch
+
+# OR use aliases (after first successful switch)
+nb   # Build configuration
+ns   # Build and switch
+```
+
+### 9. Deploy Stow Packages
+
+After the initial Nix configuration is deployed, set up additional tools and scripts:
+
+```bash
+# Deploy all stow-managed scripts and configurations
+manage-aux-scripts deploy
+
+# Install development toolchains
+manage-cargo-tools install     # Rust tools
+manage-nodejs-tools install    # Node.js tools
+manage-dotnet-tools install    # .NET tools
+```
+
+### 10. Optional: Setup Enhanced Secrets
+
+For full credential management integration:
+
+```bash
+# Setup 1Password integration
+nix run .#setup-1password-secrets
+
+# OR setup pass as backup credential store
+nix run .#setup-pass-secrets
+
+# Check secret management status
+secret status
+```
+
+## 🔄 Development Workflow
 
 ```bash
 # Validate configuration
@@ -42,6 +183,14 @@ nix fmt .
 
 # Enter development shell
 nix develop
+
+# Make configuration changes
+# ... edit files ...
+
+# Apply changes
+nb && ns  # Build and switch with aliases
+# OR
+nix run .#build-switch
 ```
 
 ## 🛠️ Available Nix Apps
