@@ -1,47 +1,79 @@
-# Darwin Configuration with Multi-User Support
+# Darwin Configuration
 
-A comprehensive macOS configuration using Nix-Darwin and Home Manager, designed to be easily portable across different users and machines.
+A comprehensive macOS system configuration using Nix-Darwin and Home Manager with flakes support. While designed as a single-user repository, it includes tools to easily adapt the configuration for different users, machines, and environments.
 
 ## 🚀 Quick Start
 
-### For Your First Machine
+### Initial Setup
 
-1. **Clone and Setup:**
+1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/your-username/darwin-config.git ~/darwin-config
+   git clone <your-repo-url> ~/darwin-config
    cd ~/darwin-config
    ```
 
-2. **Add Your Host:**
+2. **Configure for Your Environment:**
    ```bash
-   # Automatically add your machine configuration
-   nix run .#add-host -- --hostname $(hostname -s) --user $USER --personal-config
+   # Add your hostname to flake.nix
+   nix run .#add-host -- --hostname $(hostname -s) --user $USER
+   
+   # Or configure for different user/hostname combinations
+   nix run .#configure-user -- --user $USER --hostname $(hostname -s)
    ```
 
 3. **Build and Switch:**
    ```bash
+   # Using preferred aliases (if available)
+   nb   # Build the nix configuration
+   ns   # Build and switch to the new configuration
+   
+   # Or using nix run commands
    nix run .#build-switch
    ```
 
-### For Additional Machines
+### Development Workflow
 
 ```bash
-# Configure for different user/hostname combinations
-nix run .#configure-user -- --user alice --hostname work-laptop --work-profile
+# Validate configuration
+nix flake check
+
+# Format Nix files
+nix fmt .
+
+# Enter development shell
+nix develop
 ```
 
 ## 🛠️ Available Nix Apps
 
+### Core Build Commands
 | Command | Description |
 |---------|-------------|
 | `nix run .#build` | Build the configuration |
 | `nix run .#build-switch` | Build and switch to new configuration |
-| `nix run .#add-host` | Add new host configuration to flake.nix |
-| `nix run .#configure-user` | Configure for different user/hostname |
-| `nix run .#setup-1password-secrets` | Set up 1Password for secure credentials |
-| `nix run .#setup-pass-secrets` | Set up pass for secure credentials |
 | `nix run .#apply` | Apply configuration changes |
 | `nix run .#rollback` | Rollback to previous generation |
+
+### Configuration Management
+| Command | Description |
+|---------|-------------|
+| `nix run .#add-host` | Add new host configuration to flake.nix |
+| `nix run .#configure-user` | Configure for different user/hostname combinations |
+| `nix run .#update-doom-config` | Update Doom Emacs configuration with user details |
+
+### Security & Secrets
+| Command | Description |
+|---------|-------------|
+| `nix run .#setup-1password-secrets` | Set up 1Password for secure git credentials |
+| `nix run .#setup-pass-secrets` | Set up pass for secure git credentials |
+| `nix run .#check-keys` | Check if required SSH keys exist |
+| `nix run .#create-keys` | Create SSH keys (id_ed25519, id_ed25519_agenix) |
+| `nix run .#copy-keys` | Copy SSH keys from mounted USB to ~/.ssh |
+
+### Repository Management
+| Command | Description |
+|---------|-------------|
+| `nix run .#sanitize-repo` | Sanitize repository of sensitive information |
 
 ## ✨ Key Features
 
@@ -76,17 +108,30 @@ nix run .#configure-user -- --user alice --hostname work-laptop --work-profile
 ## 🏗️ Architecture
 
 ```
-flake.nix              # Main configuration with hostConfigs
-├── system.nix         # System-level configuration
-├── modules/           # Modular configuration
-│   ├── home-manager.nix   # User environment
-│   ├── packages.nix       # Package lists
+flake.nix              # Main flake with inputs, hostConfigs, and apps
+├── system.nix         # System-level macOS configuration
+├── apps/              # System-specific executable scripts
+│   ├── aarch64-darwin/    # Apple Silicon scripts
+│   └── x86_64-darwin/     # Intel Mac scripts
+├── modules/           # Modular configuration components
+│   ├── home-manager.nix   # User environment & programs
+│   ├── packages.nix       # Nix packages
+│   ├── casks.nix          # Homebrew casks
 │   ├── secrets.nix        # Age-encrypted secrets
-│   └── ...
-├── scripts/           # Helper scripts
-│   ├── configure-user.sh  # User configuration tool
-│   └── add-host.sh        # Host addition tool
-└── stow/             # User scripts and dotfiles
+│   ├── dock/              # macOS Dock configuration
+│   ├── nushell/           # Nushell shell configuration
+│   ├── elisp-formatter/   # Emacs Lisp formatting tool
+│   └── scripts/nu/        # Nushell utility scripts
+├── scripts/           # Configuration helper scripts
+│   ├── configure-user.sh  # User/hostname configuration
+│   ├── add-host.sh        # Add new host to flake
+│   └── setup-*-secrets.sh # Secrets management scripts
+├── stow/              # GNU Stow packages for dotfiles
+│   ├── raycast-scripts/   # Raycast automation scripts
+│   ├── nix-scripts/       # Nix-related utilities
+│   ├── doom-emacs/        # Doom Emacs configuration
+│   └── .../               # Various tool configurations
+└── overlays/          # Nix package overlays
 ```
 
 ## 📖 Documentation

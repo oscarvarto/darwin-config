@@ -2,8 +2,9 @@
 
 This file provides guidance to WARP (warp.dev) when working with code in this repository.
 
-- Repository: darwin-config (macOS and NixOS system configuration managed with flakes)
-- Primary focus here: macOS aarch64-darwin workflows, plus shared structure used by both macOS and NixOS
+- Repository: darwin-config (macOS system configuration managed with Nix flakes)
+- Primary focus: macOS workflows for both aarch64-darwin (Apple Silicon) and x86_64-darwin (Intel)
+- Single-user repository design with multi-user adaptation capabilities
 
 Common commands (macOS aarch64-darwin)
 - Preferred aliases
@@ -41,35 +42,31 @@ High-level architecture
 
 - Flake outputs
   - devShells: per-system shells (default shell includes git and sets EDITOR=nvim)
-  - apps: System-specific CLI entrypoints that execute scripts under apps/<system>/ (e.g., build, build-switch, check-keys, create-keys, copy-keys, rollback)
-  - darwinConfigurations: Built via mkDarwinConfig(system)
-    - Modules include: home-manager.darwinModules.home-manager, nix-homebrew.darwinModules.nix-homebrew, taps (core/cask/bundle/emacs-plus), and system.nix
-    - A host named predator is explicitly defined for aarch64-darwin; flake also maps mkDarwinConfig across supported darwin systems
-  - nixosConfigurations: Includes disko, home-manager (users.${user} from modules/nixos/home-manager.nix), and hosts/nixos
+  - apps: System-specific CLI entrypoints that execute scripts under apps/<system>/ (e.g., build, build-switch, check-keys, create-keys, copy-keys, rollback, apply, configure-user, add-host, setup-secrets, etc.)
+  - darwinConfigurations: Built via mkDarwinConfig for each hostname in hostConfigs
+    - Modules include: home-manager.darwinModules.home-manager, agenix.darwinModules.default, and local modules from ./modules/
+    - Host named predator is explicitly defined for aarch64-darwin with user "oscarvarto"
+    - Each host configuration supports custom user, system, defaultShell, and hostSettings
 
-- Modules layout (summaries from module READMEs)
-  - modules/ (formerly darwin-specific, now unified)
-    - home-manager.nix: user programs
-    - packages.nix: macOS packages
-    - casks.nix: Homebrew casks
+- Modules layout (actual structure)
+  - modules/ (macOS-focused configuration modules)
+    - home-manager.nix: user programs and home-manager configuration
+    - packages.nix: Nix packages for macOS
+    - casks.nix: Homebrew casks (GUI applications)
+    - brews.nix: Homebrew formulas (CLI tools)
+    - secrets.nix: agenix-encrypted secrets management
+    - secure-credentials.nix: secure git credential configuration
     - files.nix: immutable non-Nix files
-    - dock/: macOS Dock config
-    - nushell/: Nushell configuration
-    - scripts/: Nushell utility scripts
+    - overlays.nix: Nix package overlays
+    - shell-config.nix: shell configuration and aliases
+    - zsh-darwin.nix: Zsh shell configuration
+    - dock/: macOS Dock configuration
+    - nushell/: Nushell shell configuration
+    - scripts/nu/: Nushell utility scripts
     - elisp-formatter/: Emacs Lisp formatting tool
-  - modules/nixos/
-    - default.nix: system-level config
-    - home-manager.nix: user programs
-    - packages.nix: NixOS packages
-    - disk-config.nix: partitions/filesystems
-    - files.nix: immutable non-Nix files
-    - secrets.nix: agenix-encrypted secrets
-  - modules/shared/
-    - default.nix: overlays import
-    - home-manager.nix: most shared user-level configuration (git, shells, vim/neovim, tmux, etc.)
-    - packages.nix: shared packages
-    - files.nix: immutable non-Nix files
-    - cachix/: cache settings
+    - shared-programs.nix: shared program configurations
+    - window-manager.nix: window management settings
+    - git-*.nix: Git-related configurations
 
 - Auxiliary scripts via stow/
   - stow/aux-scripts, stow/nix-scripts, stow/raycast-scripts, etc., are symlinked into the home directory
@@ -81,9 +78,11 @@ Repo-specific practices and conventions
 - Secrets are handled with agenix and a separate non-flake Git repo (flake inputs.secrets). Use the check-keys/create-keys/copy-keys/apply scripts to prepare SSH keys and update placeholders.
 
 Cross-references
-- Root flake: flake.nix (inputs, apps, devShells, darwin/nixos configurations)
+- Root flake: flake.nix (inputs, apps, devShells, darwin configurations)
 - macOS helper scripts: apps/aarch64-darwin/
-- Module overviews: modules/README.md, modules/nixos/README.md, modules/shared/README.md
+- Module overviews: modules/README.md
 - System configuration: system.nix (Darwin configuration at root level)
 - Stow-managed scripts and usage: stow/README.md and package READMEs under stow/
+- Configuration helper scripts: scripts/ (configure-user.sh, add-host.sh, setup-secrets scripts)
+- Overlays: overlays/ (Nix package overlays)
 
