@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# detect-fonts - Simple font availability detection utility
+# Designed to work alongside existing font configuration systems
+
+set -euo pipefail
+
+# Check if a font is available on macOS
+check_font_available() {
+    local font_name="$1"
+    if command -v fc-list &> /dev/null; then
+        # Use fontconfig if available (more reliable)
+        # Check for font family name match (handle comma-separated families)
+        fc-list : family | sed 's/,.*$//' | grep -q "^$font_name$" 2>/dev/null
+    else
+        # Fallback to system_profiler on macOS
+        system_profiler SPFontsDataType 2>/dev/null | grep -q "$font_name" 2>/dev/null
+    fi
+}
+
+# Get appropriate font for Ghostty (respecting existing preferences)
+get_ghostty_font() {
+    if check_font_available "MonoLisaVariable Nerd Font"; then
+        echo "MonoLisaVariable Nerd Font"
+    elif check_font_available "PragmataPro Liga"; then
+        echo "PragmataPro Liga"
+    elif check_font_available "PragmataPro Mono Liga"; then
+        echo "PragmataPro Mono Liga"
+    else
+        echo "JetBrains Mono"
+    fi
+}
+
+# Get appropriate font for Emacs (respecting existing preferences)
+get_emacs_font() {
+    if check_font_available "MonoLisaVariable Nerd Font"; then
+        echo "monolisa"
+    elif check_font_available "PragmataPro Liga"; then
+        echo "pragmatapro"
+    else
+        echo "jetbrains"
+    fi
+}
+
+# Show font availability status
+show_status() {
+    echo "Font Availability Status:"
+    echo
+    
+    fonts=(
+        "MonoLisaVariable Nerd Font"
+        "PragmataPro Liga"
+        "PragmataPro Mono Liga"
+        "JetBrains Mono"
+    )
+    
+    for font in "${fonts[@]}"; do
+        if check_font_available "$font"; then
+            echo "  ✓ $font"
+        else
+            echo "  ✗ $font"
+        fi
+    done
+    echo
+}
+
+# Main command dispatcher
+main() {
+    local command="${1:-help}"
+    
+    case "$command" in
+        "status")
+            show_status
+            ;;
+        "ghostty-font")
+            get_ghostty_font
+            ;;
+        "emacs-font")
+            get_emacs_font
+            ;;
+        "check")
+            if [[ $# -lt 2 ]]; then
+                echo "Error: check requires a font name argument" >&2
+                exit 1
+            fi
+            if check_font_available "$2"; then
+                echo "✓ Font '$2' is available"
+                exit 0
+            else
+                echo "✗ Font '$2' is not available"
+                exit 1
+            fi
+            ;;
+        "help"|"--help"|"-h"|*)
+            echo "detect-fonts - Simple font availability detection"
+            echo
+            echo "Usage: detect-fonts [COMMAND]"
+            echo
+            echo "Commands:"
+            echo "  status          Show font availability status"
+            echo "  ghostty-font    Get recommended font for Ghostty"
+            echo "  emacs-font      Get recommended font config for Emacs"
+            echo "  check FONT      Check if specific font is available"
+            echo "  help            Show this help"
+            ;;
+    esac
+}
+
+main "$@"

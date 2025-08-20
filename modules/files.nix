@@ -19,9 +19,9 @@ in
       shell-integration = none
       shell-integration-features = cursor,sudo,title
 
-      # Default font (can be overridden)
+      # Default font with fallbacks (can be overridden)
       # font-family = PragmataPro Mono Liga
-      font-family = MonoLisaVariable Nerd Font
+      font-family = MonoLisaVariable Nerd Font, JetBrains Mono, SF Mono, monospace
       font-size = 18
  
       # Default theme (can be overridden)

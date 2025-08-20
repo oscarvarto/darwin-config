@@ -43,6 +43,12 @@ Common commands (macOS aarch64-darwin)
   - backup-secrets         # Backup all secrets, keys, and configurations
   - setup-secrets-repo     # Clone and setup secrets repository
 
+- Font management and fallback system
+  - detect-fonts status    # Show availability of programming fonts
+  - detect-fonts emacs-font # Get recommended font key for Emacs
+  - detect-fonts ghostty-font # Get recommended font name for terminals
+  - ghostty-config font "Font Name" # Switch terminal font
+
 - GNU Stow package management
   - cd ~/darwin-config/stow                 # Navigate to stow directory
   - manage-aux-scripts deploy               # Deploy all stow packages
@@ -113,6 +119,15 @@ Repo-specific practices and conventions
   - pass: Backup credential store (offline, GPG-encrypted)
   - Use the unified 'secret' command for all credential operations
   - Traditional scripts still available: check-keys/create-keys/copy-keys/apply
+- Font fallback system approach:
+  - Intelligent font detection using fc-list for accurate family name matching
+  - Preference hierarchy: MonoLisa Variable → PragmataPro Liga → JetBrains Mono → system fonts
+  - Emacs configuration supports three-way font cycling with F8 key (preserving existing functionality)
+  - Ghostty terminal includes font fallback chain in base configuration
+  - JetBrains Mono provided as open-source fallback via Nix packages (jetbrains-mono)
+  - Each font includes optimized ligature configuration and size settings
+  - detect-fonts utility provides programmatic font availability checking
+  - All applications gracefully handle missing commercial fonts without breaking
 
 Cross-references
 - Root flake: flake.nix (inputs, apps, devShells, darwin configurations)

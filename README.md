@@ -343,6 +343,103 @@ manage-doom-config            # Update Doom Emacs with user settings
 3. Deploy with `stow -t ~ my-package`
 4. Add documentation to the package's README.md
 
+## 🔤 Font Management & Fallback System
+
+This configuration includes an intelligent font fallback system that provides seamless support for both commercial and open-source programming fonts.
+
+### 🎯 Font Hierarchy
+
+The system automatically detects available fonts and uses them in this priority order:
+
+1. **MonoLisa Variable** (commercial) - Premium programming font with extensive ligature support
+2. **PragmataPro Liga** (commercial) - Compact, feature-rich programming font
+3. **JetBrains Mono** (open source) - High-quality fallback with excellent readability
+4. **System fonts** (SF Mono, monospace) - Final fallback
+
+### 🛠️ Font Detection Utility
+
+After deploying stow packages, the `detect-fonts` utility becomes available:
+
+```bash
+# Check font availability status
+detect-fonts status
+
+# Get recommended font for current system
+detect-fonts emacs-font    # Returns: monolisa, pragmatapro, or jetbrains
+detect-fonts ghostty-font  # Returns: actual font name for terminal
+
+# Check specific font availability
+detect-fonts check "JetBrains Mono"
+```
+
+### 📱 Application Integration
+
+#### Emacs/Doom Emacs
+- **Font cycling**: Press `F8` to cycle through all available fonts
+- **Automatic ligatures**: Each font includes optimized ligature configuration
+- **Size optimization**: Fonts use their optimal sizes (MonoLisa: 16pt, PragmataPro: 18pt, JetBrains: 14pt)
+- **PragmataPro ligatures**: Custom ligature engine with 200+ programming symbols
+
+#### Ghostty Terminal
+- **Base configuration**: Font fallback built into `~/.config/ghostty/config`
+- **Runtime switching**: Use `ghostty-config font "Font Name"` to switch fonts
+- **Automatic fallback**: Missing fonts don't break the configuration
+
+### 📋 Available Font Commands
+
+| Command | Description |
+|---------|-------------|
+| `detect-fonts status` | Show availability of all programming fonts |
+| `detect-fonts emacs-font` | Get recommended font key for Emacs |
+| `detect-fonts ghostty-font` | Get recommended font name for terminals |
+| `ghostty-config font "Font Name"` | Switch terminal font (with restart) |
+| `ghostty-config list` | Show all available font options |
+
+### 🎨 Font Features
+
+**MonoLisa Variable:**
+- Variable font technology
+- Extensive ligature set
+- Script variants
+- Optimal at 16pt
+
+**PragmataPro Liga:**
+- Ultra-compact design
+- Custom ligature engine
+- Mathematical symbols
+- Optimal at 18pt
+
+**JetBrains Mono (Fallback):**
+- Open source alternative
+- Good ligature support
+- Excellent readability
+- Optimal at 14pt
+- Available via Nix packages
+
+### 🔧 How It Works
+
+1. **Detection**: System scans available fonts using `fc-list`
+2. **Fallback Chain**: Applications automatically use the best available font
+3. **Configuration**: Each app includes font-specific optimizations
+4. **Runtime Switching**: Tools allow manual font switching when desired
+
+### 💡 For New Installations
+
+If you're setting up on a system without commercial fonts:
+
+1. The system automatically detects JetBrains Mono is available
+2. Emacs, Ghostty, and other apps default to JetBrains Mono
+3. All ligatures and features work seamlessly
+4. You can later add commercial fonts and switch to them using `F8` in Emacs
+
+### 🎯 Benefits
+
+- **Zero Configuration**: Works out of the box on any system
+- **Graceful Degradation**: Missing fonts don't break anything
+- **Consistent Experience**: Same ligatures and features across fonts
+- **Easy Migration**: Add commercial fonts later without reconfiguration
+- **Developer Friendly**: Optimized for programming with proper ligature support
+
 ## 📁 What's Included
 
 ### Core Tools
@@ -360,7 +457,7 @@ manage-doom-config            # Update Doom Emacs with user settings
 ### macOS Integration
 - **System Preferences**: Dock, Finder, trackpad settings
 - **GUI Applications**: Development tools, productivity apps
-- **Fonts**: Programming fonts and icon fonts
+- **Fonts**: Programming fonts with intelligent fallback system
 - **Services**: LaunchAgent configurations
 
 ## 🏗️ Architecture

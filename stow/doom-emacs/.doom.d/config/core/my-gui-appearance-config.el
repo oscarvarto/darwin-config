@@ -2,7 +2,7 @@
 
 ;; Variables to track current configuration state
 (defvar my/current-font-config 'monolisa
-  "Stores the currently loaded font configuration ('pragmatapro or 'monolisa).")
+  "Stores the currently loaded font configuration ('pragmatapro, 'monolisa, or 'jetbrains).")
 
 (defvar my/light-theme 'modus-operandi-deuteranopia
   "The light theme to use.")
@@ -52,7 +52,7 @@
 
 ;; Function to load font configuration
 (defun my/load-font-config (font-type)
-  "Load the specified font configuration FONT-TYPE ('pragmatapro or 'monolisa)."
+  "Load the specified font configuration FONT-TYPE ('pragmatapro, 'monolisa, or 'jetbrains)."
   (when (not (eq my/current-font-config font-type))
     (message "Loading %s font configuration" font-type)
 
@@ -63,7 +63,10 @@
       (my/load-monolisa-font-config))
      ((eq font-type 'pragmatapro)
       ;; Load PragmataPro configuration
-      (my/load-pragmatapro-font-config)))
+      (my/load-pragmatapro-font-config))
+     ((eq font-type 'jetbrains)
+      ;; Load JetBrains Mono configuration
+      (my/load-jetbrains-font-config)))
     (setq my/current-font-config font-type)))
 
 ;; Function to load MonoLisa font configuration
@@ -107,6 +110,31 @@
   (enable-pragmatapro-lig-hooks)
   (turn-on-pragmatapro-lig-mode))
 
+;; Function to load JetBrains Mono font configuration
+(defun my/load-jetbrains-font-config ()
+  "Load the JetBrains Mono font configuration (fallback option)."
+  ;; Font configuration  
+  (setq doom-font (font-spec :family "JetBrains Mono" :size 14 :weight 'regular)
+        doom-variable-pitch-font (font-spec :family "JetBrains Mono" :size 14 :weight 'regular)
+        doom-symbol-font (font-spec :family "JetBrains Mono" :size 14 :weight 'regular))
+
+  (turn-off-pragmatapro-lig-mode) ;; implies (ligature-mode-turn-on)
+  (disable-pragmatapro-lig-hooks)
+  ;; Enable standard ligature mode
+  (set-font-ligatures! 'eww-mode "ff" "fi" "ffi")
+
+  ;; JetBrains Mono ligatures (subset of standard programming ligatures)
+  (set-font-ligatures! '(prog-mode text-mode org-mode doom-docs-mode markdown-mode) nil)
+  (set-font-ligatures! '(prog-mode text-mode org-mode doom-docs-mode markdown-mode)
+    ;; Basic coding ligatures that work well with JetBrains Mono
+    "-->" "->" "=>" "==>" "=>>" "=<<" "=/=" ">=" "<=" "!="
+    "===" "==" "=<" "=>" "<-" "->" "<->" "<==" "==>" "<==>"
+    "<=>" "=/" "/=" "!==" "!=" "<!>" "<~>" "~~>" "~>" "~="
+    "<|" "|>" "|>>" "<||>" "||" "||>" "||"
+    "++" "--" "**" "***" "//" "///" "/*" "*/" "#?"
+    "::" ":::" "::=" ":=" ":.>" ":>" ".="
+    ".." "..." "?" "?:" "??" ".?" "?.")
+
 ;; Custom theme toggle function
 (defun my/toggle-theme ()
   "Toggle between light and dark themes without changing font."
@@ -121,11 +149,13 @@
 
 ;; Custom font toggle function
 (defun my/toggle-font ()
-  "Toggle between PragmataPro Liga and MonoLisa Variable fonts."
+  "Cycle between PragmataPro Liga, MonoLisa Variable, and JetBrains Mono fonts."
   (interactive)
-  (let ((new-font-config (if (eq my/current-font-config 'pragmatapro)
-                             'monolisa
-                           'pragmatapro)))
+  (let ((new-font-config (cond
+                         ((eq my/current-font-config 'pragmatapro) 'monolisa)
+                         ((eq my/current-font-config 'monolisa) 'jetbrains)
+                         ((eq my/current-font-config 'jetbrains) 'pragmatapro)
+                         (t 'pragmatapro))))
     (my/load-font-config new-font-config)
     (doom/reload-font)
     (message "Switched to %s font configuration" new-font-config)))
