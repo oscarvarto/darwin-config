@@ -82,4 +82,8 @@ with pkgs;
   dockutil
   mas
   netcoredbg
+
+  # Shell completion tools
+  fish
+  carapace
 ]

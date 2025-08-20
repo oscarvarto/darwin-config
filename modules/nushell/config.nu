@@ -206,7 +206,53 @@ $env.config = {
             enable: true # set to false to prevent nushell looking into $env.PATH to find more suggestions, `false` recommended for WSL users as this look up may be very slow
             max_results: 100 # setting it lower can improve completion performance at the cost of omitting some options
             completer: {|spans|
-                carapace $spans.0 nushell ...$spans | from json
+                # Multiple completer setup with carapace, fish, and git completers
+                let carapace_completer = {|spans| 
+                    carapace $spans.0 nushell ...$spans | from json
+                }
+                
+                let fish_completer = {|spans|
+                    fish --command $"complete '--do-complete=($spans | str replace --all "'" "'\''" | str join ' ')'" |
+                    from tsv --flexible --noheaders --no-infer |
+                    rename value description |
+                    update value {|row|
+                        let value = $row.value
+                        let need_quote = [ '\' ',' '[' ']' '(' ')' ' ' '\t' "'" '"' "`" ] | any { $in in $value }
+                        if ($need_quote and ($value | path exists)) {
+                            let expanded_path = if ($value starts-with "~") {
+                                $value | path expand --no-symlink
+                            } else {
+                                $value
+                            }
+                            $'"($expanded_path | str replace --all '"' '\\"')"'
+                        } else {
+                            $value
+                        }
+                    }
+                }
+                
+                let git_completer = {|spans|
+                    if ($spans.0 == "git") {
+                        git $"--list-cmds=($spans | skip 1 | str join ",")" |
+                        lines |
+                        each { {value: $in} }
+                    } else {
+                        []
+                    }
+                }
+                
+                # Try completers in order: carapace first, then fish, then git
+                let carapace_result = do $carapace_completer $spans
+                if ($carapace_result | length) > 0 {
+                    $carapace_result
+                } else {
+                    let fish_result = try { do $fish_completer $spans } catch { [] }
+                    if ($fish_result | length) > 0 {
+                        $fish_result
+                    } else {
+                        try { do $git_completer $spans } catch { [] }
+                    }
+                }
             }
         }
         use_ls_colors: true # set this to true to enable file/path/directory completions using LS_COLORS
