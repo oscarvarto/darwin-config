@@ -7,7 +7,7 @@
 ;; Database credentials are retrieved securely using either:
 ;; 1. ~/.authinfo.gpg - Create entries in this encrypted file using the format:
 ;;    machine DATABASE-NAME-db login USERNAME password PASSWORD
-;;    Example: machine sqlnovel-db login oscarvarto password your_secure_password
+;;    Example: machine personal-db login your_user password your_secure_password
 ;;
 ;; 2. 1Password CLI - Create items in 1Password with the database name as the item name
 ;;    and standard username/password fields
@@ -16,13 +16,13 @@
 
 ;; MySQL example with secure credential retrieval
 (my/ejc-create-connection-with-auth
- "SQLNovel"
+ "PersonalDB"
  :classpath (concat "~/.m2/repository/mysql/mysql-connector-java/8.0.26/"
                     "mysql-connector-java-8.0.26.jar")
  :subprotocol "mysql"
- :subname "//localhost:3306/SQLNovel?autoReconnect=true&useSSL=false"
- :auth-source-user "oscarvarto"
- :op-item "SQLNovel")
+ :subname "//localhost:3306/personal_db?autoReconnect=true&useSSL=false"
+ :auth-source-user "your_user"
+ :op-item "PersonalDB")
 
 (provide 'ejc-databases)
 

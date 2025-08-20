@@ -4,11 +4,11 @@
 
 # Format: machine DATABASE-NAME-db login USERNAME password PASSWORD
 
-# SQLNovel database credentials
-machine sqlnovel-db login oscarvarto password your_secure_password_here
+# Personal database credentials
+machine personal-db login your_user password your_secure_password_here
 
-# usqa3 database credentials
-machine usqa3-db login sqa_automation password your_secure_password_here
+# Work database credentials
+machine work-db login work_user password your_secure_password_here
 
 # ===========================================================================
 # INSTRUCTIONS
@@ -29,10 +29,10 @@ machine usqa3-db login sqa_automation password your_secure_password_here
 # 2. Setting up equivalent entries in 1Password:
 #    a. Create a new login item in 1Password for each database
 #    b. Name the item exactly as you reference it in the code
-#       - For SQLNovel: Name should be "SQLNovel"
-#       - For usqa3: Name should be "usqa3"
+#       - For PersonalDB: Name should be "PersonalDB"
+#       - For WorkDB: Name should be "WorkDB"
 #    c. Add the following fields to each item:
-#       - Username: the database username (e.g., "oscarvarto" or "sqa_automation")
+#       - Username: the database username (e.g., "your_user" or "work_user")
 #       - Password: the database password
 #    d. You can add additional fields like:
 #       - Database: the database name

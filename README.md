@@ -70,6 +70,21 @@ nix develop
 | `nix run .#create-keys` | Create SSH keys (id_ed25519, id_ed25519_agenix) |
 | `nix run .#copy-keys` | Copy SSH keys from mounted USB to ~/.ssh |
 
+### Enhanced Secret Management
+| Command | Description |
+|---------|-------------|
+| `secret status` | Show status of all credential systems |
+| `secret list` | List all available agenix secrets |
+| `secret create <name>` | Create new agenix secret |
+| `secret edit <name>` | Edit existing agenix secret |
+| `secret show <name>` | Display decrypted secret content |
+| `secret rekey` | Re-encrypt all agenix secrets with current keys |
+| `secret sync-git` | Update git configs from 1Password/pass credentials |
+| `secret op-get <item>` | Get 1Password item |
+| `secret pass-get <path>` | Get pass entry |
+| `backup-secrets` | Backup all secrets, keys, and configurations |
+| `setup-secrets-repo` | Clone and setup secrets repository |
+
 ### Repository Management
 | Command | Description |
 |---------|-------------|
@@ -80,10 +95,15 @@ nix develop
 - **🔄 Multi-User/Multi-Host**: Easily configure for different users and machines
 - **⚙️ Dynamic Configuration**: User paths and settings automatically adapt
 - **🏢 Work/Personal Profiles**: Conditional configurations for different use cases
-- **🔐 Secrets Management**: Age-encrypted secrets with dynamic user paths
+- **🔐 Hybrid Secrets Management**: Multi-layered security with agenix, 1Password, and pass
+  - **agenix**: SSH keys, certificates, system secrets (encrypted with age)
+  - **1Password**: User credentials, API tokens (authenticated, enterprise-grade)
+  - **pass**: Backup credential store (offline, GPG-encrypted)
+  - **Unified CLI**: Single `secret` command for all credential systems
 - **📦 Package Management**: Nix packages + Homebrew integration
 - **🐚 Shell Configuration**: Nushell, Zsh with smart aliases and PATH management
 - **🔧 Development Tools**: Complete development environment with LSPs, formatters, etc.
+- **🔒 Security First**: Automated backups, key rotation, and credential synchronization
 
 ## 📁 What's Included
 
@@ -117,7 +137,9 @@ flake.nix              # Main flake with inputs, hostConfigs, and apps
 │   ├── home-manager.nix   # User environment & programs
 │   ├── packages.nix       # Nix packages
 │   ├── casks.nix          # Homebrew casks
-│   ├── secrets.nix        # Age-encrypted secrets
+│   ├── secrets.nix        # Age-encrypted secrets configuration
+│   ├── secure-credentials.nix # 1Password/pass integration
+│   ├── enhanced-secrets.nix   # Unified secret management CLI
 │   ├── dock/              # macOS Dock configuration
 │   ├── nushell/           # Nushell shell configuration
 │   ├── elisp-formatter/   # Emacs Lisp formatting tool

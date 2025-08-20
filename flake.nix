@@ -95,16 +95,36 @@
           hostSettings = {
             enablePersonalConfig = true;
             workProfile = false;
+            # Work-specific configuration
+            workConfig = {
+              companyName = "YourCompany";  # Replace with actual company name
+              gitWorkDirPattern = "~/work/**";  # Pattern for work git directories
+              databaseName = "your_db";  # Work database name
+              databaseHost = "localhost";
+              databasePort = "3306";
+              opVaultName = "Work";  # 1Password vault for work credentials
+              opItemName = "CompanyName";  # 1Password item name for work credentials
+            };
           };
         };
-        # Example of additional host:
-        # macbook-pro = {
-        #   user = "otheruser";
-        #   system = "x86_64-darwin";
+        # Example of work host configuration:
+        # work-macbook = {
+        #   user = "alice";
+        #   system = "aarch64-darwin";
         #   defaultShell = "zsh";  # Options: "zsh", "fish", "nushell"
         #   hostSettings = {
         #     enablePersonalConfig = false;
         #     workProfile = true;
+        #     # Work-specific configuration
+        #     workConfig = {
+        #       companyName = "ACME Corp";  # Your actual company name
+        #       gitWorkDirPattern = "~/acme/**";  # Pattern for work git directories
+        #       databaseName = "acme_db";  # Work database name
+        #       databaseHost = "db.internal.acme.com";
+        #       databasePort = "5432";
+        #       opVaultName = "Work";  # 1Password vault for work credentials
+        #       opItemName = "ACME Corp";  # 1Password item name for work credentials
+        #     };
         #   };
         # };
       };

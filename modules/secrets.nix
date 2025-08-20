@@ -6,23 +6,16 @@ in
 {
   age.identityPaths = [
     "/Users/${user}/.ssh/id_ed25519"
+    "/Users/${user}/.ssh/id_ed25519_agenix"  # Dedicated agenix key
   ];
 
-  # Your secrets go here
-  #
-  # Note: the installWithSecrets command you ran to boostrap the machine actually copies over
-  #       a Github key pair. However, if you want to store the keypair in your nix-secrets repo
-  #       instead, you can reference the age files and specify the symlink path here. Then add your
-  #       public key in shared/files.nix.
-  #
-  #       If you change the key name, you'll need to update the SSH configuration in shared/home-manager.nix
-  #       so Github reads it correctly.
-
-  #
+  # SSH Keys (Deploy-time secrets - perfect for agenix)
+  # Uncomment these when you have the corresponding .age files in your secrets repo
+  
   # age.secrets."github-ssh-key" = {
   #   symlink = true;
   #   path = "/Users/${user}/.ssh/id_github";
-  #   file =  "${secrets}/github-ssh-key.age";
+  #   file = "${secrets}/github-ssh-key.age";
   #   mode = "600";
   #   owner = "${user}";
   #   group = "staff";
@@ -31,7 +24,44 @@ in
   # age.secrets."github-signing-key" = {
   #   symlink = false;
   #   path = "/Users/${user}/.ssh/pgp_github.key";
-  #   file =  "${secrets}/github-signing-key.age";
+  #   file = "${secrets}/github-signing-key.age";
+  #   mode = "600";
+  #   owner = "${user}";
+  # };
+
+  # API Keys & Tokens (System-level secrets)
+  # Uncomment and create corresponding .age files as needed
+  
+  # age.secrets."openai-api-key" = {
+  #   file = "${secrets}/openai-api-key.age";
+  #   mode = "600";
+  #   owner = "${user}";
+  # };
+
+  # age.secrets."anthropic-api-key" = {
+  #   file = "${secrets}/anthropic-api-key.age";
+  #   mode = "600";
+  #   owner = "${user}";
+  # };
+
+  # Development Certificates and Keys
+  # age.secrets."dev-certificate" = {
+  #   file = "${secrets}/dev-certificate.age";
+  #   path = "/Users/${user}/.config/certs/dev.pem";
+  #   mode = "600";
+  #   owner = "${user}";
+  # };
+
+  # Service Configuration Files
+  # age.secrets."tailscale-auth-key" = {
+  #   file = "${secrets}/tailscale-auth-key.age";
+  #   mode = "600";
+  #   owner = "${user}";
+  # };
+
+  # Database passwords for local development
+  # age.secrets."postgres-password" = {
+  #   file = "${secrets}/postgres-password.age";
   #   mode = "600";
   #   owner = "${user}";
   # };

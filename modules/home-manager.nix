@@ -9,8 +9,12 @@ let
     # Use secure fallback names - actual credentials will be retrieved dynamically
     name = if hostSettings.enablePersonalConfig then user else user;
     email = if hostSettings.enablePersonalConfig then "${user}@users.noreply.github.com" else "${user}@company.com";
-    workDir = if hostSettings.workProfile then "ir" else "dev";
+    workDir = if hostSettings.workProfile then "work" else "dev";
   };
+  
+  # Work configuration - extract pattern without '/**' suffix for directory name
+  workConfig = hostSettings.workConfig or {};
+  workDirName = builtins.replaceStrings ["~/" "/**"] ["" ""] (workConfig.gitWorkDirPattern or "~/work/**");
 
   # Custom nushell 0.106.0 built from source
   # nushell-custom = pkgs.nushell.overrideAttrs (oldAttrs: rec {
@@ -78,10 +82,18 @@ in
         ];
         file = sharedFiles;
 
-        # Ensure user shells and GUI apps see Enchant/Aspell settings
+        # Ensure user shells and GUI apps see Enchant/Aspell settings + work configuration
         sessionVariables = {
           ENCHANT_ORDERING = "en:aspell,es:aspell,*:aspell";
           ASPELL_CONF = "dict-dir ${pkgs.aspellWithDicts (dicts: with dicts; [ en en-computers en-science es ])}/lib/aspell; data-dir ${pkgs.aspell}/share/aspell";
+          # Work configuration environment variables
+          WORK_COMPANY_NAME = workConfig.companyName or "CompanyName";
+          WORK_GIT_DIR_PATTERN = workConfig.gitWorkDirPattern or "~/work/**";
+          WORK_DB_NAME = workConfig.databaseName or "your_db";
+          WORK_DB_HOST = workConfig.databaseHost or "localhost";
+          WORK_DB_PORT = workConfig.databasePort or "3306";
+          WORK_OP_VAULT = workConfig.opVaultName or "Work";
+          WORK_OP_ITEM = workConfig.opItemName or "CompanyName";
         };
 
         stateVersion = "25.05";
@@ -335,7 +347,7 @@ in
               "/nix/store/*"
               "/opt/homebrew/*"
             ];
-            includeIf."gitdir:/Users/${user}/${userConfig.workDir}/**".path = "/Users/${user}/.config/git/config-work";
+            includeIf."gitdir:/Users/${user}/${workDirName}/**".path = "/Users/${user}/.config/git/config-work";
             include.path = "/Users/${user}/.config/git/config-personal";
           };
         };

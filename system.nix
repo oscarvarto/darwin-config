@@ -20,6 +20,7 @@ in
   imports = [
     ./modules/secrets.nix
     ./modules/secure-credentials.nix
+    ./modules/enhanced-secrets.nix
     ./modules/home-manager.nix
     ./modules/overlays.nix
     agenix.darwinModules.default

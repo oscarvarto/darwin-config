@@ -12,7 +12,7 @@
 ;; Credentials are no longer hardcoded in this file. Instead, they are retrieved from:
 ;; 1. ~/.authinfo.gpg - Emacs' built-in encrypted credential store
 ;;    Format: machine DATABASE-NAME-db login USERNAME password PASSWORD
-;;    Example: machine sqlnovel-db login oscarvarto password your_secure_password
+;;    Example: machine personal-db login your_user password your_secure_password
 ;;
 ;; 2. 1Password CLI - If credentials aren't found in authinfo
 ;;    Make sure to create entries in 1Password with the database name as the item name
@@ -87,49 +87,52 @@
 ;;(require 'ejc-databases nil 'noerror)
 ;; mvn org.apache.maven.plugins:maven-dependency-plugin:get -Dartifact=com.mysql:mysql-connector-j:9.0.0
 
-;; SQLNovel connection - using secure credential retrieval
-;; SQLNovel connection - using secure credential retrieval
+;; Personal database connection - using secure credential retrieval
 ;; Use a lazy-loading approach to avoid authentication requests at startup
 
-(defvar sql-novel-connection nil
-  "Lazy-loaded SQLNovel database connection.")
+(defvar personal-db-connection nil
+  "Lazy-loaded personal database connection.")
 
-(defun my/connect-sql-novel ()
-  "Connect to SQLNovel database, creating connection if needed."
+(defun my/connect-personal-db ()
+  "Connect to personal database, creating connection if needed."
   (interactive)
-  (unless sql-novel-connection
-    (setq sql-novel-connection
+  (unless personal-db-connection
+    (setq personal-db-connection
           (my/ejc-create-connection-with-auth
-           "SQLNovel"
+           "PersonalDB"
            :classpath (concat "~/.m2/repository/com/mysql/mysql-connector-j/9.1.0/"
                             "mysql-connector-j-9.1.0.jar")
-           :connection-uri "jdbc:mysql://localhost:3306/SQLNovel"
-           :auth-source-user "oscarvarto"
-           :op-item "SQLNovel")))
-  sql-novel-connection)
+           :connection-uri "jdbc:mysql://localhost:3306/personal_db"
+           :auth-source-user "your_user"
+           :op-item "PersonalDB")))
+  personal-db-connection)
 
-;; usqa3 connection - using secure credential retrieval
+;; Work database connection - using configurable settings and secure credential retrieval
 
-(defvar usqa3-connection nil
-  "Lazy-loaded usqa3 database connection.")
+(defvar work-db-connection nil
+  "Lazy-loaded work database connection.")
 
-(defun my/connect-usqa3 ()
-  "Connect to usqa3 database, creating connection if needed."
+(defun my/connect-work-db ()
+  "Connect to work database, creating connection if needed."
   (interactive)
-  (unless usqa3-connection
-    (setq usqa3-connection
-          (my/ejc-create-connection-with-auth
-           "usqa3"
-           :classpath (concat "~/.m2/repository/com/mysql/mysql-connector-j/9.1.0/"
-                            "mysql-connector-j-9.1.0.jar")
-           :dbtype "mysql"
-           :dbname "irhythmd"
-           :host "localhost"
-           :port "3306"
-           :sslmode "false"
-           :auth-source-user "sqa_automation"
-           :op-item "irhythmd")))
-  usqa3-connection)
+  (unless work-db-connection
+    (let ((db-name (or (getenv "WORK_DB_NAME") "your_db"))
+          (db-host (or (getenv "WORK_DB_HOST") "localhost"))
+          (db-port (or (getenv "WORK_DB_PORT") "3306"))
+          (op-item (or (getenv "WORK_OP_ITEM") "WorkDB")))
+      (setq work-db-connection
+            (my/ejc-create-connection-with-auth
+             "work-db"
+             :classpath (concat "~/.m2/repository/com/mysql/mysql-connector-j/9.1.0/"
+                              "mysql-connector-j-9.1.0.jar")
+             :dbtype "mysql"
+             :dbname db-name
+             :host db-host
+             :port db-port
+             :sslmode "false"
+             :auth-source-user "work_user"
+             :op-item op-item))))
+  work-db-connection)
 (provide 'my-db-config)
 
 ;;; my-db-config.el ends here

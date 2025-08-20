@@ -30,6 +30,19 @@ Common commands (macOS aarch64-darwin)
   - Copy keys from mounted USB to ~/.ssh: ./apps/aarch64-darwin/copy-keys
   - Apply user/secrets repo placeholders into files: ./apps/aarch64-darwin/apply
 
+- Enhanced secret management (unified CLI)
+  - secret status           # Show status of all credential systems
+  - secret list            # List available agenix secrets
+  - secret create <name>   # Create new agenix secret
+  - secret edit <name>     # Edit existing agenix secret
+  - secret show <name>     # Display decrypted secret content
+  - secret rekey           # Re-encrypt all agenix secrets with current keys
+  - secret sync-git        # Update git configs from 1Password/pass credentials
+  - secret op-get <item>   # Get 1Password item
+  - secret pass-get <path> # Get pass entry
+  - backup-secrets         # Backup all secrets, keys, and configurations
+  - setup-secrets-repo     # Clone and setup secrets repository
+
 Notes
 - There is no traditional test suite in this repo; use nix flake check for validation.
 - Many developer scripts are managed via stow and symlinked to ~/.local/share/bin (see stow/README.md).
@@ -54,8 +67,9 @@ High-level architecture
     - packages.nix: Nix packages for macOS
     - casks.nix: Homebrew casks (GUI applications)
     - brews.nix: Homebrew formulas (CLI tools)
-    - secrets.nix: agenix-encrypted secrets management
-    - secure-credentials.nix: secure git credential configuration
+    - secrets.nix: agenix-encrypted secrets configuration
+    - secure-credentials.nix: 1Password/pass integration for git credentials
+    - enhanced-secrets.nix: unified secret management CLI tools
     - files.nix: immutable non-Nix files
     - overlays.nix: Nix package overlays
     - shell-config.nix: shell configuration and aliases
@@ -75,7 +89,12 @@ High-level architecture
 Repo-specific practices and conventions
 - Use the nb and ns aliases to build and switch the macOS configuration when available.
 - Scripts intended for Raycast should live in ~/.local/share/bin; this repo achieves that with stow packages (see stow/README.md).
-- Secrets are handled with agenix and a separate non-flake Git repo (flake inputs.secrets). Use the check-keys/create-keys/copy-keys/apply scripts to prepare SSH keys and update placeholders.
+- Hybrid secret management approach:
+  - agenix: SSH keys, certificates, system secrets (encrypted with age)
+  - 1Password: User credentials, API tokens (authenticated, enterprise-grade)
+  - pass: Backup credential store (offline, GPG-encrypted)
+  - Use the unified 'secret' command for all credential operations
+  - Traditional scripts still available: check-keys/create-keys/copy-keys/apply
 
 Cross-references
 - Root flake: flake.nix (inputs, apps, devShells, darwin configurations)
