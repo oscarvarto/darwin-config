@@ -17,9 +17,10 @@ def create_right_prompt [] {
 }
 
 # Use nushell functions to define your right and left prompt
-$env.PROMPT_COMMAND = {|| create_left_prompt }
+# Disabled to allow starship to handle the prompt
+#$env.PROMPT_COMMAND = {|| create_left_prompt }
 #$env.PROMPT_COMMAND_RIGHT = {|| create_right_prompt }
-$env.PROMPT_COMMAND_RIGHT = ""
+#$env.PROMPT_COMMAND_RIGHT = ""
 
 # The prompt indicators are environmental variables that represent
 # the state of the prompt
@@ -71,34 +72,45 @@ $env.NU_PLUGIN_DIRS = [
 $env.AWS_REGION = "us-east-1"
 $env.AWS_DEFAULT_REGION = "us-east-1"
 
-# To add entries to PATH (on Windows you might use Path), you can use the following pattern:
-# $env.PATH = ($env.PATH | split row (char esep) | prepend '/some/path')
-use std/util "path add"
+# Starship configuration path
+$env.STARSHIP_CONFIG = ($env.HOME | path join ".config" "starship.toml")
 
-path add "/opt/homebrew/bin"
-path add "/opt/homebrew/opt/llvm/bin"
-path add "/opt/homebrew/opt/mysql@8.4/bin"
-path add "/opt/homebrew/opt/gnu-tar/libexec/gnubin"
-path add "/run/current-system/sw/bin"
+# Set up clean PATH with deduplication - define our desired order
+# This ensures consistent PATH across shells and removes duplicates
+let desired_paths = [
+    ($env.HOME | path join ".volta" "bin")
+    ($env.HOME | path join "Library" "Application Support" "Coursier" "bin") 
+    ($env.HOME | path join "bin")
+    ($env.HOME | path join ".emacs.d" "bin")
+    ($env.HOME | path join ".cargo" "bin")
+    ($env.HOME | path join ".local" "bin")
+    ($env.HOME | path join ".local" "share" "bin")
+    ($env.HOME | path join ".npm-packages" "bin")
+    ($env.HOME | path join "darwin-config" "modules" "elisp-formatter")
+    ($env.HOME | path join ".nix-profile" "bin")
+    "/nix/var/nix/profiles/default/bin"
+    "/opt/homebrew/bin"
+    "/opt/homebrew/sbin"
+    "/Library/TeX/texbin"
+    "/run/current-system/sw/bin"
+    "/opt/homebrew/opt/gnu-tar/libexec/gnubin"
+    "/opt/homebrew/opt/mysql@8.4/bin"
+    "/usr/local/share/dotnet"
+    ($env.HOME | path join ".dotnet" "tools")
+    "/opt/homebrew/opt/llvm/bin"
+    "/usr/local/bin"
+    "/usr/bin"
+    "/bin"
+    "/usr/sbin"
+    "/sbin"
+]
 
+# Build clean PATH by filtering for existing directories and removing duplicates
+$env.PATH = ($desired_paths | where {|p| $p | path exists} | uniq)
+
+# Set environment variables that apps might need
 $env.DOTNET_ROOT = "/usr/local/share/dotnet"
-path add $env.DOTNET_ROOT
-path add "~/.dotnet/tools"
-path add "~/.local/share/bin"
-path add "~/.local/bin"
 $env.CARGO_HOME = ($env.HOME | path join ".cargo")
-path add ($env.CARGO_HOME | path join "bin")
-path add "~/darwin-config/modules/elisp-formatter"
-
 $env.EMACSDIR = "~/.emacs.d"
 $env.DOOMDIR  = "~/.doom.d"
 $env.DOOMLOCALDIR = "~/.emacs.d/.local"
-path add ($env.EMACSDIR | path join "bin")
-path add "~/Library/Application Support/Coursier/bin"
-path add "~/.volta/bin"
-path add "~/Library/Application Support/JetBrains/Toolbox/scripts"
-path add "~/.nix-profile/bin"
-path add "/opt/homebrew/opt/trash-cli/bin"
-path add "/usr/local/bin"
-path add "/Library/TeX/texbin"
-# path add "~/mvn4/apache-maven-4.0.0-rc-4/bin"

@@ -21,6 +21,7 @@ in
     ./modules/secrets.nix
     ./modules/secure-credentials.nix
     ./modules/enhanced-secrets.nix
+    ./modules/path-config.nix
     ./modules/home-manager.nix
     ./modules/overlays.nix
     agenix.darwinModules.default

@@ -85,5 +85,6 @@ with pkgs;
 
   # Shell completion tools
   fish
+  nushell
   carapace
 ]

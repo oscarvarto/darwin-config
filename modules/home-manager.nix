@@ -1,4 +1,4 @@
-{ config, pkgs, user, hostname, hostSettings, defaultShell ? "zsh", ... } @ inputs:
+{ config, pkgs, user, hostname, hostSettings, defaultShell ? "zsh", pathConfig ? null, ... } @ inputs:
 
 let
   sharedFiles = import ./files.nix { inherit config pkgs user; };
@@ -65,7 +65,7 @@ in
         ./git-security-scripts.nix
         inputs.catppuccin.homeModules.catppuccin
         inputs.op-shell-plugins.hmModules.default
-      ] ++ (if defaultShell == "nushell" then [ ./nushell ] else []);
+      ] ++ [ ./nushell ]; # Always include nushell module for starship integration
       # Fish configuration is handled inline in programs.fish below
       # No separate fish module needed
 
@@ -86,6 +86,7 @@ in
         sessionVariables = {
           ENCHANT_ORDERING = "en:aspell,es:aspell,*:aspell";
           ASPELL_CONF = "dict-dir ${pkgs.aspellWithDicts (dicts: with dicts; [ en en-computers en-science es ])}/lib/aspell; data-dir ${pkgs.aspell}/share/aspell";
+          STARSHIP_CONFIG = "${config.home.homeDirectory}/.config/starship.toml";
           # Work configuration environment variables
           WORK_COMPANY_NAME = workConfig.companyName or "CompanyName";
           WORK_GIT_DIR_PATTERN = workConfig.gitWorkDirPattern or "~/work/**";
@@ -105,6 +106,9 @@ in
       catppuccin.flavor = "mocha";
       catppuccin.enable = true;
 
+      # Enable the local nushell module
+      local.nushell.enable = true;
+
       programs = {
         _1password-shell-plugins = {
           # enable 1Password shell plugins for bash, zsh
@@ -117,9 +121,9 @@ in
         atuin = {
           enable = true;
           daemon.enable = true;
-          enableNushellIntegration = (defaultShell == "nushell");
-          enableZshIntegration = (defaultShell == "zsh");
-          enableFishIntegration = (defaultShell == "fish");
+          enableNushellIntegration = true;
+          enableZshIntegration = true;
+          enableFishIntegration = true;
         };
 
         helix.enable = true;
@@ -137,9 +141,10 @@ in
 
         mise = {
           enable = true;
-          enableNushellIntegration = true;
-          enableZshIntegration = true;
-          enableFishIntegration = true;
+          # Disable shell integrations to prevent PATH conflicts - we manage PATH manually
+          enableNushellIntegration = false;
+          enableZshIntegration = false;
+          enableFishIntegration = false;
           # Use nixpkgs mise package instead of flake to avoid SDK issues
           # package = inputs.mise.packages.${pkgs.stdenv.hostPlatform.system}.default;
         };
@@ -177,7 +182,7 @@ in
         };
 
         fish = {
-          enable = (defaultShell == "fish");
+          enable = true;
           shellInit = ''
             # Nix daemon initialization (equivalent to Nushell initialization)
             if test -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
@@ -200,27 +205,8 @@ in
             set -gx ENCHANT_ORDERING 'en:aspell,es:aspell,*:aspell'
             set -gx ASPELL_CONF 'dict-dir ${pkgs.aspellWithDicts (dicts: with dicts; [ en en-computers en-science es ])}/lib/aspell; data-dir ${pkgs.aspell}/share/aspell'
 
-            # PATH configuration (matching nushell env.nu order exactly)
-            # Note: fish_add_path automatically prevents duplicates and maintains order
-            fish_add_path "/opt/homebrew/bin"
-            fish_add_path "/opt/homebrew/opt/llvm/bin"
-            fish_add_path "/opt/homebrew/opt/mysql@8.4/bin"
-            fish_add_path "/opt/homebrew/opt/gnu-tar/libexec/gnubin"
-            fish_add_path "/run/current-system/sw/bin"
-            fish_add_path "$DOTNET_ROOT"
-            fish_add_path "~/.dotnet/tools"
-            fish_add_path "~/.local/share/bin"
-            fish_add_path "~/.local/bin"
-            fish_add_path "$CARGO_HOME/bin"
-            fish_add_path "~/darwin-config/modules/elisp-formatter"
-            fish_add_path "$EMACSDIR/bin"
-            fish_add_path "~/Library/Application Support/Coursier/bin"
-            fish_add_path "~/.volta/bin"
-            fish_add_path "~/Library/Application Support/JetBrains/Toolbox/scripts"
-            fish_add_path "~/.nix-profile/bin"
-            fish_add_path "/opt/homebrew/opt/trash-cli/bin"
-            fish_add_path "/usr/local/bin"
-            fish_add_path "/Library/TeX/texbin"
+            # Use centralized PATH configuration from modules/path-config.nix
+            ${pathConfig.fish.pathSetup or "# PATH config not available"}
 
             # Editor configuration
             set -gx EDITOR "nvim"
@@ -233,6 +219,9 @@ in
 
             # Let Starship handle the prompt - no custom fish_prompt function
             # This allows starship.toml configuration to work properly
+            
+            # Authoritative PATH override - ensures our configuration takes precedence over all tools
+            ${pathConfig.fish.pathOverride or "# PATH override not available"}
           '';
 
           # Function definitions (matching some nushell functions)

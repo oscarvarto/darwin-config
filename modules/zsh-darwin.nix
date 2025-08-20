@@ -1,24 +1,28 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, ... } @ args:
 
+let
+  # Access pathConfig from module args if available
+  pathConfig = args.pathConfig or null;
+in
 {
   programs.zsh = {
     # Darwin-specific zsh configuration
     shellInit = ''
-      # macOS-specific PATH configurations
-      PATH="$PATH:/opt/homebrew/bin"
-      PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+      # Environment variables
+      export DOTNET_ROOT=/usr/local/share/dotnet
       export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
       export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
-
-      export DOTNET_ROOT=/usr/local/share/dotnet
-      PATH="$DOTNET_ROOT:$HOME/.dotnet/tools:$PATH"
-
-      PATH="/opt/homebrew/opt/mysql@8.4/bin:$PATH"
-      PATH="/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH"
-      PATH="/run/current-system/sw/bin:$PATH"
-      PATH="/Library/TeX/texbin:$PATH"
-
-      export PATH
+      export CARGO_HOME="$HOME/.cargo"
+      export EMACSDIR="~/.emacs.d"
+      
+      # Use centralized PATH configuration from modules/path-config.nix
+      ${if pathConfig != null then pathConfig.zsh.pathSetup else "# Centralized PATH config not available"}
+    '';
+    
+    # Add final PATH cleanup in interactive shells to match fish and nushell consistency
+    interactiveShellInit = ''
+      # Authoritative PATH override - ensures our configuration takes precedence over all tools
+      ${if pathConfig != null then pathConfig.zsh.pathOverride else "# Centralized PATH override not available"}
     '';
   };
 }

@@ -1131,3 +1131,6 @@ def --env y [...args] {
 }
 
 source ~/.local/share/atuin/init.nu
+
+# Final PATH cleanup - remove duplicates after all integrations have loaded
+$env.PATH = ($env.PATH | uniq)
