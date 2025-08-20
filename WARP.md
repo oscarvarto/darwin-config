@@ -43,6 +43,16 @@ Common commands (macOS aarch64-darwin)
   - backup-secrets         # Backup all secrets, keys, and configurations
   - setup-secrets-repo     # Clone and setup secrets repository
 
+- GNU Stow package management
+  - cd ~/darwin-config/stow                 # Navigate to stow directory
+  - manage-aux-scripts deploy               # Deploy all stow packages
+  - manage-aux-scripts remove               # Remove all stow packages  
+  - stow -t ~ PACKAGE                       # Deploy specific package
+  - stow -D -t ~ PACKAGE                    # Remove specific package
+  - manage-cargo-tools install              # Install Rust/Cargo tools
+  - manage-nodejs-tools install             # Install Node.js toolchain
+  - manage-dotnet-tools install             # Install .NET SDK and tools
+
 Notes
 - There is no traditional test suite in this repo; use nix flake check for validation.
 - Many developer scripts are managed via stow and symlinked to ~/.local/share/bin (see stow/README.md).
@@ -83,12 +93,20 @@ High-level architecture
     - git-*.nix: Git-related configurations
 
 - Auxiliary scripts via stow/
-  - stow/aux-scripts, stow/nix-scripts, stow/raycast-scripts, etc., are symlinked into the home directory
-  - Raycast- and other user-invoked scripts end up in ~/.local/share/bin (see stow/README.md and stow/*/README.md)
+  - GNU Stow manages dotfiles and scripts that are difficult to embed in Nix
+  - Creates symlinks from home directory to repository files
+  - Main packages: aux-scripts, doom-emacs, lazyvim, raycast-scripts, nix-scripts
+  - Tool management: cargo-tools, nodejs-tools, dotnet-tools
+  - Most scripts symlinked to ~/.local/share/bin (see stow/README.md for details)
+  - Package structure mirrors home directory layout for automatic placement
 
 Repo-specific practices and conventions
 - Use the nb and ns aliases to build and switch the macOS configuration when available.
-- Scripts intended for Raycast should live in ~/.local/share/bin; this repo achieves that with stow packages (see stow/README.md).
+- GNU Stow package deployment approach:
+  - Scripts intended for Raycast should live in ~/.local/share/bin; this repo achieves that with stow packages
+  - Use 'manage-aux-scripts deploy' for initial setup or 'stow -t ~ PACKAGE' for individual packages
+  - Complex configurations (Doom Emacs, LazyVim) are managed as stow packages to avoid Nix escaping issues
+  - Tool management (cargo, nodejs, dotnet) uses declarative TOML configs deployed via stow
 - Hybrid secret management approach:
   - agenix: SSH keys, certificates, system secrets (encrypted with age)
   - 1Password: User credentials, API tokens (authenticated, enterprise-grade)

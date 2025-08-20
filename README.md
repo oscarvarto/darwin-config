@@ -90,6 +90,17 @@ nix develop
 |---------|-------------|
 | `nix run .#sanitize-repo` | Sanitize repository of sensitive information |
 
+### GNU Stow Package Management
+| Command | Description |
+|---------|-------------|
+| `manage-aux-scripts deploy` | Deploy all stow-managed scripts and configurations |
+| `manage-aux-scripts remove` | Remove all stow-managed symlinks |
+| `stow -t ~ PACKAGE` | Deploy specific stow package (e.g., doom-emacs, raycast-scripts) |
+| `stow -D -t ~ PACKAGE` | Remove specific stow package |
+| `manage-cargo-tools install` | Install/update Rust/Cargo tools from configuration |
+| `manage-nodejs-tools install` | Install/update Node.js tools and toolchain |
+| `manage-dotnet-tools install` | Install/update .NET SDK and global tools |
+
 ## ✨ Key Features
 
 - **🔄 Multi-User/Multi-Host**: Easily configure for different users and machines
@@ -104,6 +115,84 @@ nix develop
 - **🐚 Shell Configuration**: Nushell, Zsh with smart aliases and PATH management
 - **🔧 Development Tools**: Complete development environment with LSPs, formatters, etc.
 - **🔒 Security First**: Automated backups, key rotation, and credential synchronization
+
+## 🗂️ GNU Stow Package Management
+
+This repository uses **GNU Stow** to manage auxiliary scripts, dotfiles, and tools that are difficult to embed directly in Nix configuration. Stow creates symlinks from your home directory to files in the repository, providing version control and easy deployment.
+
+### Available Stow Packages
+
+| Package | Description | Target Location |
+|---------|-------------|----------------|
+| **aux-scripts** | Utility scripts and tools | `~/.local/share/bin/` |
+| **doom-emacs** | Complete Doom Emacs configuration | `~/.doom.d/` |
+| **lazyvim** | Neovim LazyVim configuration | `~/.config/nvim/` |
+| **raycast-scripts** | Raycast automation scripts | `~/.local/share/bin/` |
+| **nix-scripts** | Nix-related utility scripts | `~/.local/share/bin/` |
+| **cargo-tools** | Rust/Cargo tools management | `~/.local/share/bin/` |
+| **nodejs-tools** | Node.js tools and toolchain management | `~/.local/share/bin/` |
+| **dotnet-tools** | .NET SDK and global tools management | `~/.local/share/bin/` |
+
+### Quick Stow Commands
+
+```bash
+# Navigate to stow directory
+cd ~/darwin-config/stow
+
+# Deploy all packages at once
+manage-aux-scripts deploy
+
+# Deploy specific packages
+stow -t ~ doom-emacs      # Deploy Doom Emacs config
+stow -t ~ raycast-scripts # Deploy Raycast scripts
+stow -t ~ aux-scripts     # Deploy utility scripts
+
+# Remove packages
+stow -D -t ~ doom-emacs   # Remove Doom Emacs config
+manage-aux-scripts remove # Remove all packages
+```
+
+### Tool Management Scripts
+
+After deploying the appropriate stow packages, these management commands become available:
+
+```bash
+# Development toolchain management
+manage-cargo-tools install    # Install Rust tools from cargo-tools.toml
+manage-nodejs-tools install   # Install Node.js toolchain from nodejs-tools.toml
+manage-dotnet-tools install   # Install .NET SDK from dotnet-tools.toml
+
+# Configuration management
+manage-doom-config            # Update Doom Emacs with user settings
+```
+
+### When to Use Stow vs. Nix
+
+**Use Stow for:**
+- Complex shell scripts that are hard to escape in Nix
+- Editor configurations with many files (Doom Emacs, LazyVim)
+- Raycast scripts that need specific file locations
+- Development tool management scripts
+
+**Use Nix for:**
+- System packages and services
+- Environment variables and PATH management
+- Application configurations that can be templated
+- Secrets and credential management
+
+### Adding New Stow Packages
+
+1. Create a new directory in `stow/` with the package name
+2. Structure files to mirror your home directory:
+   ```
+   stow/my-package/
+   └── .local/
+       └── share/
+           └── bin/
+               └── my-script
+   ```
+3. Deploy with `stow -t ~ my-package`
+4. Add documentation to the package's README.md
 
 ## 📁 What's Included
 
