@@ -1,4 +1,4 @@
-{ agenix, config, pkgs, nixCats, ... }:
+{ agenix, config, pkgs, /* nixCats, */ ... }:
 
 let 
   user = "oscarvarto";
@@ -42,6 +42,7 @@ in
   # Global nixpkgs configuration to silence evaluation warnings
   nixpkgs.config = {
     allowAliases = false;  # Disable package aliases to prevent warnings
+    allowBroken = true;    # Allow broken packages to work around SDK issues
   };
   
   # Global overlay to silence 1password rename warning
@@ -139,15 +140,8 @@ in
     };
   };
 
-  # Install Noto fonts (including emoji and symbols) for use by apps and LaTeX
-  fonts = {
-    packages = with pkgs; [
-      noto-fonts
-      noto-fonts-color-emoji
-      unifont
-      symbola
-    ];
-  };
+  # Font packages removed to avoid SDK compatibility issues
+  # Fonts can be installed via system preferences or homebrew if needed
 
   system = {
     stateVersion = 4;

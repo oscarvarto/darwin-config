@@ -24,9 +24,9 @@ in
         init.defaultBranch = "main";
         core = {
           editor = "nvim";
-          autocrlf = false;  # Better for macOS/Linux - preserves line endings as-is
-          eol = "lf";        # Use LF line endings on macOS/Linux
-          ignorecase = false; # Case-sensitive file names (better for cross-platform)
+          autocrlf = false;  # Better for macOS - preserves line endings as-is
+          eol = "lf";        # Use LF line endings on macOS
+          ignorecase = false; # Case-sensitive file names
           # hooksPath removed - now configured conditionally
         };
         commit.gpgsign = false;
@@ -51,23 +51,13 @@ in
     ssh = {
       enable = true;
       includes = [
-        (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
-          "/home/${user}/.ssh/config_external"
-        )
-        (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
-          "/Users/${user}/.ssh/config_external"
-        )
+        "/Users/${user}/.ssh/config_external"
       ];
       matchBlocks = {
         "github.com" = {
           identitiesOnly = true;
           identityFile = [
-            (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
-              "/home/${user}/.ssh/id_ed25519"
-            )
-            (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
-              "/Users/${user}/.ssh/id_ed25519"
-            )
+            "/Users/${user}/.ssh/id_ed25519"
           ];
         };
       };

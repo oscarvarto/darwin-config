@@ -1,15 +1,11 @@
 {
-  description = "Starter Configuration with secrets for MacOS and NixOS";
+  description = "macOS Configuration with nix-darwin and home-manager";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     agenix.url = "github:ryantm/agenix";
     catppuccin.url = "github:catppuccin/nix";
     darwin = {
       url = "github:LnL7/nix-darwin/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    disko = {
-      url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
@@ -61,6 +57,10 @@
       url = "git+ssh://git@github.com/oscarvarto/nix-secrets.git";
       flake = false;
     };
+    # mise = {  # Not needed - using nixpkgs version to avoid SDK issues
+    #   url = "github:jdx/mise";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
   outputs = { self,
               nixpkgs,
@@ -69,7 +69,6 @@
               bash-env-nushell,
               catppuccin,
               darwin,
-              disko,
               home-manager,
               homebrew-bundle,
               homebrew-cask,
@@ -79,16 +78,16 @@
               nix-homebrew,
               nixd-ls,
               op-shell-plugins,
-              secrets
+              secrets,
+              # mise  # not needed - using nixpkgs version
               } @inputs:
     let
       user = "oscarvarto";
-      linuxSystems = [ "x86_64-linux" "aarch64-linux" ];
       darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
-      forAllSystems = f: nixpkgs.lib.genAttrs (linuxSystems ++ darwinSystems) f;
+      forAllSystems = f: nixpkgs.lib.genAttrs darwinSystems f;
       devShell = system: let pkgs = nixpkgs.legacyPackages.${system}; in {
         default = with pkgs; mkShell {
-          nativeBuildInputs = with pkgs; [ bashInteractive git /* age age-plugin-yubikey */ ];
+          nativeBuildInputs = with pkgs; [ bashInteractive git ];
           shellHook = with pkgs; ''
             export EDITOR=nvim
           '';
@@ -102,15 +101,6 @@
           echo "Running ${scriptName} for ${system}"
           exec ${self}/apps/${system}/${scriptName}
         '')}/bin/${scriptName}";
-      };
-      mkLinuxApps = system: {
-        "apply" = mkApp "apply" system;
-        "build-switch" = mkApp "build-switch" system;
-        "copy-keys" = mkApp "copy-keys" system;
-        "create-keys" = mkApp "create-keys" system;
-        "check-keys" = mkApp "check-keys" system;
-        "install" = mkApp "install" system;
-        "install-with-secrets" = mkApp "install-with-secrets" system;
       };
       mkDarwinApps = system: {
         "apply" = mkApp "apply" system;
@@ -148,26 +138,10 @@
     in
     {
       devShells = forAllSystems devShell;
-      apps = nixpkgs.lib.genAttrs linuxSystems mkLinuxApps // nixpkgs.lib.genAttrs darwinSystems mkDarwinApps;
+      apps = nixpkgs.lib.genAttrs darwinSystems mkDarwinApps;
 
       darwinConfigurations = {
         predator = mkDarwinConfig "aarch64-darwin";
       } // nixpkgs.lib.genAttrs darwinSystems mkDarwinConfig;
-
-      nixosConfigurations = nixpkgs.lib.genAttrs linuxSystems (system: nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = inputs;
-        modules = [
-          disko.nixosModules.disko
-          home-manager.nixosModules.home-manager {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              users.${user} = import ./modules/nixos/home-manager.nix;
-            };
-          }
-          ./hosts/nixos
-        ];
-      });
   };
 }

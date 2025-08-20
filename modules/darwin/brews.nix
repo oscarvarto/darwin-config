@@ -21,7 +21,6 @@
       "autoconf"
       "autoconf-archive"
       "automake"
-      "awscli"
       "bat"
       "bat-extras"
       "bfg"

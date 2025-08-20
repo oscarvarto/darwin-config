@@ -68,6 +68,9 @@ $env.NU_PLUGIN_DIRS = [
     ($nu.default-config-dir | path join 'plugins') # add <nushell-config-dir>/plugins
 ]
 
+$env.AWS_REGION = "us-east-1"
+$env.AWS_DEFAULT_REGION = "us-east-1"
+
 # To add entries to PATH (on Windows you might use Path), you can use the following pattern:
 # $env.PATH = ($env.PATH | split row (char esep) | prepend '/some/path')
 use std/util "path add"
@@ -98,4 +101,4 @@ path add "~/.nix-profile/bin"
 path add "/opt/homebrew/opt/trash-cli/bin"
 path add "/usr/local/bin"
 path add "/Library/TeX/texbin"
-path add "~/mvn4/apache-maven-4.0.0-rc-4/bin"
+# path add "~/mvn4/apache-maven-4.0.0-rc-4/bin"

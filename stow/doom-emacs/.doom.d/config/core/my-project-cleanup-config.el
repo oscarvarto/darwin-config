@@ -144,7 +144,7 @@
         (dolist (project treemacs-projects)
           (let ((project-path (directory-file-name (treemacs-project->path project))))
             (unless (member project-path projectile-paths)
-              (treemacs-remove-project-from-workspace project)))))))
+              (treemacs-remove-project-from-workspace project))))))
   
   ;; Also sync treemacs projects with projectile periodically
   (run-with-timer 900 900 ; Every 15 minutes

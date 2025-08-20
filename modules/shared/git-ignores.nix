@@ -73,6 +73,7 @@
 
     # Programming Languages
     # Java
+    "bin/"
     "*.class"
     "*.log"
     "*.ctxt"
@@ -100,7 +101,6 @@
     ".scala-build/"
 
     # Clojure
-    "pom.xml"
     "pom.xml.asc"
     "*.jar"
     "*.class"

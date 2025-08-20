@@ -2,19 +2,31 @@
 
 with pkgs;
 [
+  # Basic system packages
   coreutils
   curl
   alejandra
   bash-completion
-  btop
-  jujutsu
   killall
-  neofetch
   openssh
-  pixi
   sqlite
   wget
   zip
+  btop
+  jujutsu
+  neofetch
+  pixi
+
+  # Text and terminal utilities
+  htop
+  iftop
+  jq
+  (ripgrep.override {withPCRE2 = true;})
+  nurl
+  tree
+  unrar
+  unzip
+  fd
 
   # Encryption and security tools
   age
@@ -28,46 +40,40 @@ with pkgs;
 
   # Media-related packages
   ffmpeg
-  fd
-  font-awesome
-  noto-fonts
-  noto-fonts-emoji-blob-bin
 
   # JVM (Java, ...)
 
   # Node.js development tools
   nodejs
 
-  # Text and terminal utilities
+  # Spell checking
   (aspellWithDicts (dicts: with dicts; [ en en-computers en-science es]))
   enchant
-  htop
-  iftop
-  jetbrains-mono
-  jq
-  (ripgrep.override {withPCRE2 = true;})
   isync
-  nurl
-  tree
-  unrar
-  unzip
 
+  # Qt6 packages
   qt6.full
-  # Python packages
+  
+  # Font packages
+  jetbrains-mono
+  font-awesome
+  
+  # Python packages with GUI dependencies
   (python3.withPackages (python-pkgs: with python-pkgs; [
     debugpy
     pandas
     requests
-    sexpdata tld
-    pyqt6 pyqt6-sip
-    pyqt6-webengine epc lxml # for eaf
-    pysocks # eaf-browser
-
-    jupyterlab
-    matplotlib
+    sexpdata
+    tld
+    epc
+    pysocks
     polars
-    python
     sympy
     uv
+    # GUI-related packages
+    pyqt6
+    matplotlib
+    scipy
+    numpy
   ]))
 ]

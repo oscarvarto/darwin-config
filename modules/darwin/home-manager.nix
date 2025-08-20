@@ -1,4 +1,4 @@
-{ config, pkgs, catppuccin, neovim-nightly-overlay, nixd-ls, op-shell-plugins, user ? "oscarvarto", ... } @ inputs:
+{ config, pkgs, user ? "oscarvarto", ... } @ inputs:
 
 let
   sharedFiles = import ../shared/files.nix { inherit config pkgs user; };
@@ -59,17 +59,20 @@ in
       imports = [
         ../shared/nushell
         ../shared/home-manager.nix
-        catppuccin.homeModules.catppuccin
-        op-shell-plugins.hmModules.default
+        inputs.catppuccin.homeModules.catppuccin
+        inputs.op-shell-plugins.hmModules.default
       ];
+
+      # Test: re-enable font management now that mise SDK issues are fixed
+      # disabledModules = [ "targets/darwin/fonts.nix" ];
 
       home = {
         enableNixpkgsReleaseCheck = false;
         packages = (pkgs.callPackage ./packages.nix {}) ++ [
           # Add neovim-nightly from overlay
-          neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.neovim
+          inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.neovim
           # Add nixd nightly from flake input
-          nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
+          inputs.nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
         ];
         file = lib.mkMerge [
           sharedFiles
@@ -85,6 +88,9 @@ in
         stateVersion = "25.05";
       };
 
+      # Test: re-enable font management to see if it still causes issues
+      fonts.fontconfig.enable = true;
+
       catppuccin.flavor = "mocha";
       catppuccin.enable = true;
 
@@ -94,7 +100,7 @@ in
           enable = true;
           # the specified packages as well as 1Password CLI will be
           # automatically installed and configured to use shell plugins
-          plugins = with pkgs; [ awscli cachix gh glab ];
+          plugins = with pkgs; [ cachix gh glab ];
         };
 
         atuin = {
@@ -121,6 +127,8 @@ in
           enable = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
+          # Use nixpkgs mise package instead of flake to avoid SDK issues
+          # package = inputs.mise.packages.${pkgs.stdenv.hostPlatform.system}.default;
         };
 
         starship = {

@@ -24,7 +24,7 @@ in
       enableFishIntegration = true;
     };
 
-    # Consolidated zsh configuration for both Darwin and shared use
+    # Consolidated zsh configuration for macOS
     zsh = {
       enable = true;
       autocd = false;
@@ -48,7 +48,7 @@ in
         export DOOMLOCALDIR=$HOME/.emacs.d/.local
 
         # Add Maven 4 to PATH first (before Homebrew Maven 3.9.11)
-        PATH="$HOME/mvn4/apache-maven-4.0.0-rc-4/bin:$PATH"
+        # PATH="$HOME/mvn4/apache-maven-4.0.0-rc-4/bin:$PATH"
         PATH="$HOME/nixos-config/modules/shared/elisp-formatter:$PATH"
         PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
         PATH=$HOME/.local/share/bin:$PATH
@@ -87,6 +87,11 @@ in
         shell() {
             nix-shell '<nixpkgs>' -A "$1"
         }
+
+        # Source shell functions from external file
+        if [[ -f "$HOME/nixos-config/modules/shared/shell-functions.sh" ]]; then
+            source "$HOME/nixos-config/modules/shared/shell-functions.sh"
+        fi
 
         # Always color ls and group directories
         alias ls='ls --color=auto'
