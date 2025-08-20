@@ -132,7 +132,7 @@
               autoMigrate = true;
             };
           }
-          ./hosts/darwin
+          ./system.nix
         ];
       };
     in

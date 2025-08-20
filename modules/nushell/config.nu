@@ -979,8 +979,8 @@ $env.EDITOR = "nvim"
 # Terminal and editor shortcuts
 alias tg  = ^$env.EDITOR ~/.config/ghostty/config
 alias tgg = ^$env.EDITOR ~/.config/ghostty/overrides.conf
-alias nnc = ^$env.EDITOR ~/nixos-config/modules/darwin/nushell/config.nu
-alias nne = ^$env.EDITOR ~/nixos-config/modules/darwin/nushell/env.nu
+alias nnc = ^$env.EDITOR ~/nixos-config/modules/nushell/config.nu
+alias nne = ^$env.EDITOR ~/nixos-config/modules/nushell/env.nu
 alias gd = ghostty +show-config --default --docs
 
 # Git shortcuts
