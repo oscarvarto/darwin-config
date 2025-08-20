@@ -49,7 +49,7 @@ in
 
         # Add Maven 4 to PATH first (before Homebrew Maven 3.9.11)
         # PATH="$HOME/mvn4/apache-maven-4.0.0-rc-4/bin:$PATH"
-        PATH="$HOME/nixos-config/modules/shared/elisp-formatter:$PATH"
+        PATH="$HOME/nixos-config/modules/darwin/elisp-formatter:$PATH"
         PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
         PATH=$HOME/.local/share/bin:$PATH
         PATH=$HOME/.local/bin:$PATH
@@ -89,8 +89,8 @@ in
         }
 
         # Source shell functions from external file
-        if [[ -f "$HOME/nixos-config/modules/shared/shell-functions.sh" ]]; then
-            source "$HOME/nixos-config/modules/shared/shell-functions.sh"
+        if [[ -f "$HOME/nixos-config/modules/darwin/shell-functions.sh" ]]; then
+            source "$HOME/nixos-config/modules/darwin/shell-functions.sh"
         fi
 
         # Always color ls and group directories
