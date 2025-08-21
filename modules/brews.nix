@@ -97,6 +97,8 @@
     masApps = {
       "1Password for Safari" = 1569813296;
       "neptunes" = 1006739057;
+      "Okta Verify" = 490179405;
+      "Okta Extension App" = 1439967473;
       "rcmd" = 1596283165;
       "XCode" = 497799835;
     };

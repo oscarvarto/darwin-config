@@ -15,24 +15,6 @@ let
   # Work configuration - extract pattern without '/**' suffix for directory name
   workConfig = hostSettings.workConfig or {};
   workDirName = builtins.replaceStrings ["~/" "/**"] ["" ""] (workConfig.gitWorkDirPattern or "~/work/**");
-
-  # Custom nushell 0.106.0 built from source
-  # nushell-custom = pkgs.nushell.overrideAttrs (oldAttrs: rec {
-  #   version = "0.106.0";
-  #   src = pkgs.fetchFromGitHub {
-  #     owner = "nushell";
-  #     repo = "nushell";
-  #     rev = "0.106.0";
-  #     hash = "sha256-kFDbLt/1rB+8aqNulc0Wm6ZcMa2VXRPYvu0NFLoYCNQ=";
-  #   };
-  #   # Let Nix automatically handle cargo dependencies for the new source
-  #   cargoDeps = pkgs.rustPlatform.importCargoLock {
-  #     lockFile = "${src}/Cargo.lock";
-  #   };
-  # });
-
-  # TODO: Build custom nushell plugins from the same source
-  # For now, we'll install them manually using cargo to avoid complexity
 in
 {
 
@@ -371,7 +353,12 @@ in
         { path = "/Applications/Ghostty.app/"; }
         { path = "/Applications/WarpPreview.app/"; }
         { path = "/Applications/Safari.app/"; }
+        { path = "/Applications/Zen.app/"; }
         { path = "/Applications/Google Chrome.app/"; }
+        { path = "/Applications/Microsoft Edge.app/"; }
+        { path = "/Applications/Microsoft Teams.app/"; }
+        { path = "/Applications/Microsoft Outlook.app/"; }
+        { path = "/Applications/Discord.app/"; }
         { path = "/System/Applications/Music.app/"; }
         { path = "/System/Applications/Calendar.app/"; }
         { path = "/System/Applications/System Settings.app/"; }
