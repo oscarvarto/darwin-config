@@ -87,7 +87,7 @@ Optionally specify VAULT name."
                     (with-temp-buffer
                       (insert-file-contents temp-file)
                       (goto-char (point-min))
-                      (when (re-search-forward "^\\([^\n]+\\)\n\\([^\n]+\\)$" nil t)
+                      (when (re-search-forward "^\([^\n]+\)\n\([^\n]+\)$" nil t)
                         (let ((creds (cons (match-string 1) (match-string 2))))
                           (puthash cache-key creds my/op-credentials-cache)
                           creds)))))
@@ -181,11 +181,11 @@ Example: (my/get-secret :host \"mysql.example.com\" :user \"admin\"
 If PASSWORD-ONLY is non-nil, returns only the password.
 Otherwise, returns (username . password) pair."
   (let* ((db-host (format "%s-db" db-name))
-         (password (my/get-secret) 
+         (password (my/get-secret
                    :host db-host
                    :user username
                    :op-item db-name
-                   :type 'password))
+                   :type 'password)))
     (if password-only
         password
       (cons username password))))

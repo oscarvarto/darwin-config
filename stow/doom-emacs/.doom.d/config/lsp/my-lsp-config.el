@@ -17,14 +17,14 @@
   ;;                     (message "LSP daemon initialization delay completed"))))
 
   ;; Add comprehensive ignore patterns for Rust projects
-  (cl-pushnew "[/\\\\]target\\(/.*\\)?\\'" lsp-file-watch-ignored-directories :test #'equal)
-  (cl-pushnew "[/\\\\]\\.cargo\\(/.*\\)?\\'" lsp-file-watch-ignored-directories :test #'equal)
-  (cl-pushnew "/Users/oscarvarto/\\.cargo\\(/.*\\|\\'\\)"
+  (cl-pushnew "[/\\]target\(/.*\)?'" lsp-file-watch-ignored-directories :test #'equal)
+  (cl-pushnew "[/\\]\.cargo\(/.*\)?'" lsp-file-watch-ignored-directories :test #'equal)
+  (cl-pushnew "/Users/oscarvarto/\.cargo\(/.*\|'\)"
               lsp-file-watch-ignored-directories
               :test #'equal)
-  (cl-pushnew "[/\\\\]dependencies\\'" lsp-file-watch-ignored-directories :test #'equal)
-  (cl-pushnew "[/\\\\]node_modules\\(/.*\\)?\\'" lsp-file-watch-ignored-directories :test #'equal)
-  (cl-pushnew "[/\\\\]\\.git\\(/.*\\)?\\'" lsp-file-watch-ignored-directories :test #'equal)
+  (cl-pushnew "[/\\]dependencies'" lsp-file-watch-ignored-directories :test #'equal)
+  (cl-pushnew "[/\\]node_modules\(/.*\)?'" lsp-file-watch-ignored-directories :test #'equal)
+  (cl-pushnew "[/\\]\.git\(/.*\)?'" lsp-file-watch-ignored-directories :test #'equal)
 
   ;; Add file patterns to ignore
   (cl-pushnew "\\.zip\\'" lsp-file-watch-ignored-files :test #'equal)

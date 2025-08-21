@@ -21,10 +21,10 @@ For example, 'com.example.M$Person' becomes ('M' 'Person') or ('com.example.M' '
 Also handles Clojure constructor notation with trailing dot, e.g., 'M$Person.'."
     (when mangled-name
       ;; Remove trailing dot from Clojure constructor invocation syntax (e.g., "M$Person.")
-      (let ((cleaned-name (if (string-match "\\(.*\\)\\.$" mangled-name)
+      (let ((cleaned-name (if (string-match "\(.*\)\.$" mangled-name)
                               (match-string 1 mangled-name)
                             mangled-name)))
-        (if (string-match "\\([^$]+\\)\\$\\([^$]+\\)" cleaned-name)
+        (if (string-match "\([^$]+\)\$\([^$]+\)" cleaned-name)
             (let ((outer-class (match-string 1 cleaned-name))
                   (inner-class (match-string 2 cleaned-name)))
               (cons outer-class inner-class))
@@ -124,8 +124,8 @@ Allows selecting which language pattern to search with."
                             ("Scala Export" . "export\\s+([A-Za-z0-9_]+)\\.\\*")
                             ("Java Class" . "class\\s+([A-Za-z0-9_]+)")
                             ("Java Interface" . "interface\\s+([A-Za-z0-9_]+)")
-                            ("Clojure Namespace" . "\\(ns\\s+([A-Za-z0-9_.\\-]+)")
-                            ("Clojure Function" . "\\(defn\\s+([A-Za-z0-9_\\-!?]+)")))
+                            ("Clojure Namespace" . "(ns\\s+([A-Za-z0-9_.\\-]+)")
+                            ("Clojure Function" . "(defn\\s+([A-Za-z0-9_\\-!?]+)")))
            (selected (completing-read "Search pattern: " lang-patterns nil t))
            (pattern (cdr (assoc selected lang-patterns))))
       (consult-ripgrep (projectile-project-root) pattern)))

@@ -61,7 +61,7 @@
 
 ;;;###autoload
 
-(defvar my/mill-nrepl-port-regex "^nREPL server started on port \\([0-9]+\\)$"
+(defvar my/mill-nrepl-port-regex "^nREPL server started on port \([0-9]+\)$"
   "Regex to capture the nREPL port from Mill output.")
 
 (defun my/mill-nrepl-filter (proc string)

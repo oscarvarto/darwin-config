@@ -191,7 +191,7 @@
       (with-temp-buffer
         (insert-file-contents (expand-file-name "recentf" cache-dir))
         (goto-char (point-min))
-        (while (re-search-forward "\"\\([^\"]+\\)\"" nil t)
+        (while (re-search-forward "\"\([^\"]+\)\"" nil t)
           (let ((file (match-string 1)))
             (when (and (string-prefix-p "~/" file)
                        (not (file-exists-p (expand-file-name (substring file 2) "~"))))

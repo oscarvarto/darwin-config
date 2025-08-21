@@ -187,8 +187,8 @@
 ;;                                          (string-match-p "Test\\.java$" (buffer-file-name)))
 ;;                                 (my/setup-java-debug-env)))))  ;; Close with-eval-after-load block
 
-(add-to-list 'auto-mode-alist '("\\.json$" . json-mode)) ; Use json-mode for .json files
-(add-to-list 'auto-mode-alist '("\\.mill$" . scala-mode)) ; Use scala-mode for Mill build files
+(add-to-list 'auto-mode-alist '("\.json$" . json-mode)) ; Use json-mode for .json files
+(add-to-list 'auto-mode-alist '("\.mill$" . scala-mode)) ; Use scala-mode for Mill build files
 
 ;; which-key
 (after! which-key
@@ -215,11 +215,11 @@
 (setq projectile-completion-system 'default) ; Explicitly use default completion for projectile
 
 ;; Popup rules (Doom specific) - control where certain buffers appear
-(set-popup-rule! "^\\*Ollama\\*$" :actions '(display-buffer-in-side-window) :side 'right :width 0.4 :select t :quit nil) ; Ollama buffer on the right
+(set-popup-rule! "^\*Ollama\*$" :actions '(display-buffer-in-side-window) :side 'right :width 0.4 :select t :quit nil) ; Ollama buffer on the right
 
 (after! cider-mode
   (set-popup-rules!
-    '(("^\\*Ollama\\*$"
+    '(("^\*Ollama\*$"
        :actions (+popup-display-buffer-stacked-side-window-fn)
        :side right
        :slot 1
@@ -228,7 +228,7 @@
        :select t
        :quit nil
        :ttl nil)
-      ("^\\*cider-repl" ; Stack CIDER REPLs on the right
+      ("^\*cider-repl" ; Stack CIDER REPLs on the right
        :actions (+popup-display-buffer-stacked-side-window-fn)
        :side right
        :slot -1
@@ -239,7 +239,7 @@
        :ttl nil))))
 
 (set-popup-rule!
-  "^\\*xwidget-webkit:.*(?:- Grip|\.html)\\*$"
+  "^\*xwidget-webkit:.*(?:- Grip|\.html)\*$"
   :side 'right
   :width 0.5
   :select t
@@ -247,7 +247,7 @@
   :ttl nil)
 
 (set-popup-rule!
-  "^\\*tabnine-chat\\*$"
+  "^\*tabnine-chat\*$"
   :side 'right
   :width 0.35
   :select t
@@ -255,7 +255,7 @@
   :ttl nil)
 
 (set-popup-rule! ; Show LSP documentation at the bottom
-  "^\\*lsp-bridge-doc\\*$"
+  "^\*lsp-bridge-doc\*$"
   :side 'bottom
   :height 0.20
   :select t

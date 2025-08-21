@@ -9,9 +9,9 @@
                     :major-modes '(nushell-mode)
                     :server-id 'nushell)))
 
-;;(add-to-list 'auto-mode-alist '("\\.nu\\'" . nushell-mode))
+;;(add-to-list 'auto-mode-alist '("\.nu\'" . nushell-mode))
 (mapc (lambda (extension)
-        (add-to-list 'auto-mode-alist (cons (concat "\\." extension "\\'") 'nushell-mode)))
+        (add-to-list 'auto-mode-alist (cons (concat "\." extension "\'" ) 'nushell-mode)))
       '("nu" "nuon"))
 
 (provide 'my-lsp-nu-config)

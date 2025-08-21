@@ -143,7 +143,7 @@ Tries both 1Password and auth-source."
 (add-hook 'prog-mode-hook
           (lambda ()
             (when (and buffer-file-name
-                      (string-match-p "\\.(el\\|nix\\|sh\\|py\\|js\\|ts\\)$" buffer-file-name))
+                      (string-match-p "\.(el\|nix\|sh\|py\|js\|ts)$" buffer-file-name))
               (run-with-idle-timer 2 nil #'my/check-hardcoded-credentials))))
 
 (provide 'my-enhanced-auth-config)

@@ -137,7 +137,7 @@
         (with-temp-buffer
           (insert-file-contents gradle-wrapper-properties)
           ;; Regex to find gradle version like "gradle-X.Y.Z" or "gradle-X.Y"
-          (if (re-search-forward "gradle-\\([0-9]+\\.[0-9]+\\(\\.[0-9]+\\)?\\)" nil t)
+          (if (re-search-forward "gradle-\([0-9]+\.[0-9]+\(\.[0-9]+\)?\)" nil t)
               (let ((gradle-version (match-string 1)))
                 (if (fboundp 'version<)
                     (if (not (version< gradle-version "8.5")) ; If Gradle version >= 8.5
