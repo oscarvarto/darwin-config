@@ -103,7 +103,7 @@ program
   .command('indent')
   .description('Format using Indent Mode (indentation drives structure)')
   .argument('<file>', 'File to format')
-  .option('-w, --write', 'Write changes to file instead of stdout')
+  .option('-s, --stdout', 'Output to stdout instead of writing file')
   .option('-c, --check', 'Check if file needs formatting (exit code 1 if changes needed)')
   .action((file, options) => {
     const content = readFile(file);
@@ -124,15 +124,15 @@ program
       }
     }
     
-    if (options.write) {
+    if (options.stdout) {
+      process.stdout.write(result.text);
+    } else {
       if (content !== result.text) {
         writeFile(file, result.text);
-        console.log(`Formatted ${file}`);
+        console.log(`✓ Formatted ${file}`);
       } else {
-        console.log(`${file} already formatted`);
+        console.log(`✓ ${file} already formatted`);
       }
-    } else {
-      process.stdout.write(result.text);
     }
   });
 
@@ -141,7 +141,7 @@ program
   .command('paren')
   .description('Format using Paren Mode (parentheses drive structure)')
   .argument('<file>', 'File to format')
-  .option('-w, --write', 'Write changes to file instead of stdout')
+  .option('-s, --stdout', 'Output to stdout instead of writing file')
   .option('-c, --check', 'Check if file needs formatting (exit code 1 if changes needed)')
   .action((file, options) => {
     const content = readFile(file);
@@ -162,15 +162,15 @@ program
       }
     }
     
-    if (options.write) {
+    if (options.stdout) {
+      process.stdout.write(result.text);
+    } else {
       if (content !== result.text) {
         writeFile(file, result.text);
-        console.log(`Formatted ${file}`);
+        console.log(`✓ Formatted ${file}`);
       } else {
-        console.log(`${file} already formatted`);
+        console.log(`✓ ${file} already formatted`);
       }
-    } else {
-      process.stdout.write(result.text);
     }
   });
 
@@ -179,7 +179,7 @@ program
   .command('smart')
   .description('Format using Smart Mode (intelligent hybrid)')
   .argument('<file>', 'File to format')
-  .option('-w, --write', 'Write changes to file instead of stdout')
+  .option('-s, --stdout', 'Output to stdout instead of writing file')
   .option('-c, --check', 'Check if file needs formatting (exit code 1 if changes needed)')
   .action((file, options) => {
     const content = readFile(file);
@@ -200,29 +200,73 @@ program
       }
     }
     
-    if (options.write) {
+    if (options.stdout) {
+      process.stdout.write(result.text);
+    } else {
       if (content !== result.text) {
         writeFile(file, result.text);
-        console.log(`Formatted ${file}`);
+        console.log(`✓ Formatted ${file}`);
       } else {
-        console.log(`${file} already formatted`);
+        console.log(`✓ ${file} already formatted`);
       }
-    } else {
-      process.stdout.write(result.text);
     }
   });
+
+// Apply Elisp-specific formatting rules
+function applyElispFormatting(text) {
+  let formattedText = text;
+  
+  // Fix function definitions where parameters are on separate lines
+  // This handles cases like:
+  // (defun my/function
+  //   ()
+  // and turns them into:
+  // (defun my/function ()
+  formattedText = formattedText.replace(
+    /(\(defun\s+[^\s\(\)]+)\s*\n\s*(\([^\)]*\))/g,
+    '$1 $2'
+  );
+  
+  // Fix other definition forms similarly
+  formattedText = formattedText.replace(
+    /(\(def(?:macro|var|custom|group|face)\s+[^\s\(\)]+)\s*\n\s*(\([^\)]*\)|[^\s\(\)]+)/g,
+    '$1 $2'
+  );
+  
+  // Ensure proper spacing after opening parens for common Elisp forms
+  formattedText = formattedText.replace(
+    /\((defun|defmacro|defvar|defcustom|defgroup|defface|lambda|let|let\*|when|unless|if|cond|case|progn|save-excursion|save-window-excursion|with-current-buffer|while|dolist|dotimes)([^\s])/g,
+    '($1 $2'
+  );
+  
+  // Preserve meaningful whitespace while cleaning up excessive spaces
+  // 1. Remove trailing spaces from lines but preserve the newlines
+  formattedText = formattedText.replace(/[ \t]+$/gm, '');
+  
+  // 2. Normalize whitespace: preserve single blank lines, reduce excessive blank lines
+  // This preserves intentional spacing between code blocks while removing excessive whitespace
+  formattedText = formattedText.replace(/\n{4,}/g, '\n\n\n'); // Max 2 blank lines between blocks
+  
+  // 3. Clean up any trailing whitespace at the very end of the file
+  formattedText = formattedText.replace(/\s+$/, '\n');
+  
+  // 4. Ensure file doesn't start with blank lines
+  formattedText = formattedText.replace(/^\n+/, '');
+  
+  return formattedText;
+}
 
 // Elisp command (custom rules for Elisp)
 program
   .command('elisp')
   .description('Format specifically for Elisp with custom rules')
   .argument('<file>', 'File to format')
-  .option('-w, --write', 'Write changes to file instead of stdout')
+  .option('-s, --stdout', 'Output to stdout instead of writing file')
   .option('-c, --check', 'Check if file needs formatting (exit code 1 if changes needed)')
   .action((file, options) => {
     const content = readFile(file);
     
-    // For Elisp, we'll use smart mode with some additional processing
+    // For Elisp, we'll use smart mode first
     let result = parinfer.smartMode(content);
     
     const processed = processResult(result, file, 'elisp');
@@ -231,19 +275,7 @@ program
     }
     
     // Apply Elisp-specific formatting rules
-    let formattedText = result.text;
-    
-    // Ensure proper spacing around certain forms
-    formattedText = formattedText
-      // Add space after opening parens for common Elisp forms
-      .replace(/\((defun|defmacro|defvar|defcustom|defgroup|defface|lambda|let|let\*|when|unless|if|cond|case|progn|save-excursion|save-window-excursion|with-current-buffer)([^\s])/g, '($1 $2')
-      // Ensure newlines after certain opening forms
-      .replace(/\((defun|defmacro|defvar|defcustom|defgroup|defface)\s+([^\s\)]+)\s*([^\n]*)/g, (match, form, name, rest) => {
-        if (rest.trim() && !rest.startsWith('\n')) {
-          return `(${form} ${name}\n  ${rest.trim()}`;
-        }
-        return match;
-      });
+    let formattedText = applyElispFormatting(result.text);
     
     if (options.check) {
       if (content !== formattedText) {
@@ -255,15 +287,15 @@ program
       }
     }
     
-    if (options.write) {
+    if (options.stdout) {
+      process.stdout.write(formattedText);
+    } else {
       if (content !== formattedText) {
         writeFile(file, formattedText);
-        console.log(`Formatted ${file}`);
+        console.log(`✓ Formatted ${file}`);
       } else {
-        console.log(`${file} already formatted`);
+        console.log(`✓ ${file} already formatted`);
       }
-    } else {
-      process.stdout.write(formattedText);
     }
   });
 
@@ -272,9 +304,9 @@ program
   .command('batch')
   .description('Process all .el files in directory')
   .argument('<directory>', 'Directory to process')
-  .option('-m, --mode <mode>', 'Formatting mode to use', 'smart')
-  .option('-w, --write', 'Write changes to files instead of just checking')
-  .option('-c, --check', 'Check if files need formatting (exit code 1 if any changes needed)')
+  .option('-m, --mode <mode>', 'Formatting mode to use', 'elisp')
+  .option('-c, --check', 'Check if files need formatting without writing changes')
+  .option('-s, --stdout', 'Output results to stdout instead of writing files')
   .action((directory, options) => {
     const elFiles = getElispFiles(directory);
     
@@ -291,25 +323,25 @@ program
     for (const file of elFiles) {
       const content = readFile(file);
       let result;
+      let formattedText;
       
       // Choose the formatting mode
       switch (options.mode) {
         case 'indent':
           result = parinfer.indentMode(content);
+          formattedText = result.success ? result.text : null;
           break;
         case 'paren':
           result = parinfer.parenMode(content);
+          formattedText = result.success ? result.text : null;
           break;
         case 'smart':
           result = parinfer.smartMode(content);
+          formattedText = result.success ? result.text : null;
           break;
         case 'elisp':
           result = parinfer.smartMode(content);
-          // Apply Elisp-specific rules (simplified version)
-          if (result.success) {
-            result.text = result.text
-              .replace(/\((defun|defmacro|defvar|defcustom|defgroup|defface|lambda|let|let\*|when|unless|if|cond|case|progn|save-excursion|save-window-excursion|with-current-buffer)([^\s])/g, '($1 $2');
-          }
+          formattedText = result.success ? applyElispFormatting(result.text) : null;
           break;
         default:
           console.error(`Unknown mode: ${options.mode}`);
@@ -317,19 +349,23 @@ program
       }
       
       const processed = processResult(result, file, options.mode);
-      if (!processed) {
+      if (!processed || !formattedText) {
         hasErrors = true;
         continue;
       }
       
-      if (content !== result.text) {
+      if (content !== formattedText) {
         needsFormatting.push(file);
         
-        if (options.write) {
-          writeFile(file, result.text);
-          console.log(`✓ Formatted ${file}`);
-        } else {
+        if (options.check) {
           console.log(`- ${file} needs formatting`);
+        } else if (options.stdout) {
+          console.log(`\n=== ${file} ===`);
+          process.stdout.write(formattedText);
+          console.log(`\n=== End ${file} ===\n`);
+        } else {
+          writeFile(file, formattedText);
+          console.log(`✓ Formatted ${file}`);
         }
       } else {
         if (!options.check) {
@@ -350,7 +386,7 @@ program
     
     if (needsFormatting.length === 0) {
       console.log('\nAll files are properly formatted!');
-    } else if (options.write) {
+    } else if (!options.check && !options.stdout) {
       console.log(`\nFormatted ${needsFormatting.length} files`);
     }
   });

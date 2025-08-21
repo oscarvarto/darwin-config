@@ -113,7 +113,7 @@
 ;; Function to load JetBrains Mono font configuration
 (defun my/load-jetbrains-font-config ()
   "Load the JetBrains Mono font configuration (fallback option)."
-  ;; Font configuration  
+  ;; Font configuration
   (setq doom-font (font-spec :family "JetBrains Mono" :size 14 :weight 'regular)
         doom-variable-pitch-font (font-spec :family "JetBrains Mono" :size 14 :weight 'regular)
         doom-symbol-font (font-spec :family "JetBrains Mono" :size 14 :weight 'regular))
@@ -133,7 +133,7 @@
     "<|" "|>" "|>>" "<||>" "||" "||>" "||"
     "++" "--" "**" "***" "//" "///" "/*" "*/" "#?"
     "::" ":::" "::=" ":=" ":.>" ":>" ".="
-    ".." "..." "?" "?:" "??" ".?" "?.")
+    ".." "..." "?" "?:" "??" ".?" "?."))
 
 ;; Custom theme toggle function
 (defun my/toggle-theme ()
@@ -151,11 +151,11 @@
 (defun my/toggle-font ()
   "Cycle between PragmataPro Liga, MonoLisa Variable, and JetBrains Mono fonts."
   (interactive)
-  (let ((new-font-config (cond
+  (let ((new-font-config (cond )
                          ((eq my/current-font-config 'pragmatapro) 'monolisa)
                          ((eq my/current-font-config 'monolisa) 'jetbrains)
                          ((eq my/current-font-config 'jetbrains) 'pragmatapro)
-                         (t 'pragmatapro))))
+                         (t 'pragmatapro)))
     (my/load-font-config new-font-config)
     (doom/reload-font)
     (message "Switched to %s font configuration" new-font-config)))

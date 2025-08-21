@@ -5,6 +5,7 @@ A comprehensive macOS system configuration using Nix-Darwin and Home Manager wit
 ## 📋 Table of Contents
 
 ### 🚀 Getting Started
+
 - [🚀 Installation Guide for macOS](#-installation-guide-for-macos)
   - [Prerequisites](#prerequisites)
   - [1. Install Xcode Command Line Tools](#1-install-xcode-command-line-tools)
@@ -19,6 +20,7 @@ A comprehensive macOS system configuration using Nix-Darwin and Home Manager wit
   - [10. Optional: Setup Enhanced Secrets](#10-optional-setup-enhanced-secrets)
 
 ### 🔧 Development & Maintenance
+
 - [🔄 Development Workflow](#-development-workflow)
   - [📦 Updating Software Versions](#-updating-software-versions)
   - [🧹 System Maintenance](#-system-maintenance)
@@ -26,6 +28,7 @@ A comprehensive macOS system configuration using Nix-Darwin and Home Manager wit
 - [🛠️ Available Nix Apps](#%EF%B8%8F-available-nix-apps)
 
 ### ✨ Key Features & Systems
+
 - [✨ Key Features](#-key-features)
 - [🗂️ GNU Stow Package Management](#%EF%B8%8F-gnu-stow-package-management)
 - [🔤 Font Management & Fallback System](#-font-management--fallback-system)
@@ -37,12 +40,14 @@ A comprehensive macOS system configuration using Nix-Darwin and Home Manager wit
 - [🐚 Choosing Your Default Shell](#-choosing-your-default-shell)
 
 ### 📚 Architecture & Documentation
+
 - [📁 What's Included](#-whats-included)
 - [🏗️ Architecture](#%EF%B8%8F-architecture)
 - [📖 Documentation](#-documentation)
 - [🔧 Configuration Examples](#-configuration-examples)
 
 ### 🤝 Contributing & License
+
 - [🤝 Contributing](#-contributing)
 - [📝 License](#-license)
 
@@ -55,6 +60,7 @@ This configuration supports both Apple Silicon (M1/M2/M3) and Intel Macs running
 ### Prerequisites
 
 Make sure you have:
+
 - macOS Monterey (12.0) or later
 - Admin privileges on your Mac
 - Internet connection for downloading packages
@@ -85,6 +91,7 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 > If using the [official Nix installer](https://nixos.org/download) instead, you'll need to enable flakes and nix-command:
 >
 > Add this line to `/etc/nix/nix.conf`:
+>
 > ```
 > experimental-features = nix-command flakes
 > ```
@@ -120,11 +127,13 @@ nix run .#apply
 Before building, review what will be installed:
 
 **Package Configuration Files:**
+
 - `modules/packages.nix` - Nix packages (CLI tools, development tools)
 - `modules/casks.nix` - Homebrew casks (GUI applications)
 - `modules/brews.nix` - Homebrew formulas (additional CLI tools)
 
 **Search for packages:**
+
 - [NixOS Package Search](https://search.nixos.org/packages)
 - [Homebrew Cask Search](https://formulae.brew.sh/cask/)
 - [Homebrew Formula Search](https://formulae.brew.sh/formula/)
@@ -134,23 +143,29 @@ Before building, review what will be installed:
 If you want to use the full secrets management features:
 
 #### Option A: Create New Keys
+
 ```bash
 nix run .#create-keys
 ```
 
 > After creating keys, add the public key to your GitHub account:
+>
 > ```bash
 > cat ~/.ssh/id_ed25519.pub | pbcopy  # Copy to clipboard
 > ```
 
 #### Option B: Copy Existing Keys
+
 If you have existing SSH keys on a USB drive:
+
 ```bash
 nix run .#copy-keys
 ```
 
 #### Option C: Check Existing Keys
+
 If you already have keys installed:
+
 ```bash
 nix run .#check-keys
 ```
@@ -166,6 +181,7 @@ nix run .#build
 > **⚠️ Common Issues:**
 >
 > **File Conflicts**: If you encounter "Unexpected files in /etc, aborting activation":
+>
 > ```bash
 > # Backup conflicting files (example)
 > sudo mv /etc/nix/nix.conf /etc/nix/nix.conf.before-nix-darwin
@@ -173,6 +189,7 @@ nix run .#build
 > ```
 >
 > **Sequoia GID Issues**: If you see "Build user group has mismatching GID":
+>
 > - You may need to uninstall and reinstall Nix with `--nix-build-group-id 30000`
 > - See [macOS Sequoia support documentation](https://determinate.systems/posts/nix-support-for-macos-sequoia/)
 
@@ -256,6 +273,7 @@ nb && ns
 ```
 
 **What `nix flake update` does:**
+
 - Updates `flake.lock` with latest versions of nixpkgs, home-manager, and other inputs
 - Gets security updates and new package versions
 - May introduce breaking changes, so test after updating
@@ -283,6 +301,7 @@ smart-gc aggressive --force --optimize
 ```
 
 **Smart GC features:**
+
 - **Preserves recent generations** to avoid breaking your system
 - **Pins essential packages** to prevent removal
 - **Store optimization** to hard-link identical files and save space
@@ -290,6 +309,7 @@ smart-gc aggressive --force --optimize
 - **Multiple cleanup modes** for different maintenance needs
 
 **Recommended maintenance schedule:**
+
 - **After major changes**: Run `smart-gc dry-run` to check what can be cleaned
 - **Weekly**: `smart-gc clean` to keep 3 recent generations
 - **Monthly**: `smart-gc conservative --optimize` for deeper cleanup with optimization
@@ -302,11 +322,13 @@ The `smart-gc` utility includes a package pinning system to prevent accidental r
 #### Understanding Package Pinning
 
 **What pinning does:**
+
 - Creates GC roots for specified packages, preventing garbage collection
 - Ensures critical system tools remain available after cleanup
 - Protects the current system configuration from removal
 
 **What pinning does NOT do:**
+
 - ❌ **Does NOT prevent package updates** - pinned packages can still be updated normally
 - ❌ Does not pin to specific versions - only prevents garbage collection
 - ❌ Does not interfere with `nix flake update` or rebuilding the system
@@ -320,7 +342,7 @@ smart-gc pin
 # Check current pinning status
 smart-gc status  # Shows GC roots including pinned packages
 
-# Clean while respecting pinned packages  
+# Clean while respecting pinned packages
 smart-gc clean   # Pinned packages and dependencies are preserved
 ```
 
@@ -332,7 +354,7 @@ The essential packages list is defined in `smart-gc.nu`. Currently, most package
 # Edit the essential_packages list in smart-gc.nu
 let essential_packages = [
   # "nixpkgs#git",           # Uncomment to pin git
-  # "nixpkgs#curl",          # Uncomment to pin curl 
+  # "nixpkgs#curl",          # Uncomment to pin curl
   # "nixpkgs#starship",      # Uncomment to pin starship
   # "nixpkgs#helix",         # Uncomment to pin helix editor
   # Add your own essential packages here
@@ -342,15 +364,17 @@ let essential_packages = [
 **To add your own essential packages:**
 
 1. **Edit the script:**
+
    ```bash
    # Navigate to the script location
    cd ~/darwin-config/stow/nix-scripts/.local/share/bin/
-   
+
    # Edit smart-gc.nu to uncomment or add packages
    nvim smart-gc.nu
    ```
 
 2. **Add packages to the list:**
+
    ```nushell
    let essential_packages = [
      "nixpkgs#git",              # Version control
@@ -360,6 +384,7 @@ let essential_packages = [
    ```
 
 3. **Apply the pinning:**
+
    ```bash
    smart-gc pin
    ```
@@ -367,12 +392,14 @@ let essential_packages = [
 #### Pinning vs. Updates - Key Points
 
 **✅ Pinning is update-friendly:**
+
 - Pinned packages update normally with `nix flake update` and system rebuilds
 - Pinning only prevents garbage collection, not version changes
 - New versions of pinned packages replace old versions in the store
 - Only the cleanup process respects the pinning
 
 **Example workflow:**
+
 ```bash
 # 1. Pin essential packages
 smart-gc pin
@@ -390,12 +417,14 @@ smart-gc clean
 #### When to Use Pinning
 
 **✅ Good candidates for pinning:**
+
 - Core development tools (git, curl, text editors)
 - System utilities you always need
 - Packages that are expensive to rebuild
 - Tools required for system recovery
 
 **❌ Avoid pinning:**
+
 - Packages that update frequently
 - Large packages you rarely use
 - Packages already managed by your system configuration
@@ -420,6 +449,7 @@ smart-gc pin
 #### Technical Details
 
 The pinning system works by:
+
 1. **System Configuration**: Creates a GC root for the current system derivation
 2. **Essential Packages**: Uses `nix build --no-link --print-out-paths` to realize packages and create implicit GC roots
 3. **GC Root Storage**: Stores roots in `/nix/var/nix/gcroots/` where the garbage collector respects them
@@ -429,63 +459,70 @@ This approach ensures that while garbage collection won't remove pinned packages
 ## 🛠️ Available Nix Apps
 
 ### Core Build Commands
-| Command | Description |
-|---------|-------------|
-| `nix run .#build` | Build the configuration |
+
+| Command                  | Description                           |
+| ------------------------ | ------------------------------------- |
+| `nix run .#build`        | Build the configuration               |
 | `nix run .#build-switch` | Build and switch to new configuration |
-| `nix run .#apply` | Apply configuration changes |
-| `nix run .#rollback` | Rollback to previous generation |
+| `nix run .#apply`        | Apply configuration changes           |
+| `nix run .#rollback`     | Rollback to previous generation       |
 
 ### Configuration Management
-| Command | Description |
-|---------|-------------|
-| `nix run .#add-host` | Add new host configuration to flake.nix |
-| `nix run .#configure-user` | Configure for different user/hostname combinations |
-| `nix run .#update-doom-config` | Update Doom Emacs configuration with user details |
+
+| Command                        | Description                                        |
+| ------------------------------ | -------------------------------------------------- |
+| `nix run .#add-host`           | Add new host configuration to flake.nix            |
+| `nix run .#configure-user`     | Configure for different user/hostname combinations |
+| `nix run .#update-doom-config` | Update Doom Emacs configuration with user details  |
 
 ### Security & Secrets
-| Command | Description |
-|---------|-------------|
-| `nix run .#setup-1password-secrets` | Set up 1Password for secure git credentials |
-| `nix run .#setup-pass-secrets` | Set up pass for secure git credentials |
-| `nix run .#check-keys` | Check if required SSH keys exist |
-| `nix run .#create-keys` | Create SSH keys (id_ed25519, id_ed25519_agenix) |
-| `nix run .#copy-keys` | Copy SSH keys from mounted USB to ~/.ssh |
+
+| Command                             | Description                                     |
+| ----------------------------------- | ----------------------------------------------- |
+| `nix run .#setup-1password-secrets` | Set up 1Password for secure git credentials     |
+| `nix run .#setup-pass-secrets`      | Set up pass for secure git credentials          |
+| `nix run .#check-keys`              | Check if required SSH keys exist                |
+| `nix run .#create-keys`             | Create SSH keys (id_ed25519, id_ed25519_agenix) |
+| `nix run .#copy-keys`               | Copy SSH keys from mounted USB to ~/.ssh        |
 
 ### Enhanced Secret Management
-| Command | Description |
-|---------|-------------|
-| `secret status` | Show status of all credential systems |
-| `secret list` | List all available agenix secrets |
-| `secret create <name>` | Create new agenix secret |
-| `secret edit <name>` | Edit existing agenix secret |
-| `secret show <name>` | Display decrypted secret content |
-| `secret rekey` | Re-encrypt all agenix secrets with current keys |
-| `secret sync-git` | Update git configs from 1Password/pass credentials |
-| `secret op-get <item>` | Get 1Password item |
-| `secret pass-get <path>` | Get pass entry |
-| `backup-secrets` | Backup all secrets, keys, and configurations |
-| `setup-secrets-repo` | Clone and setup secrets repository |
+
+| Command                  | Description                                        |
+| ------------------------ | -------------------------------------------------- |
+| `secret status`          | Show status of all credential systems              |
+| `secret list`            | List all available agenix secrets                  |
+| `secret create <name>`   | Create new agenix secret                           |
+| `secret edit <name>`     | Edit existing agenix secret                        |
+| `secret show <name>`     | Display decrypted secret content                   |
+| `secret rekey`           | Re-encrypt all agenix secrets with current keys    |
+| `secret sync-git`        | Update git configs from 1Password/pass credentials |
+| `secret op-get <item>`   | Get 1Password item                                 |
+| `secret pass-get <path>` | Get pass entry                                     |
+| `backup-secrets`         | Backup all secrets, keys, and configurations       |
+| `setup-secrets-repo`     | Clone and setup secrets repository                 |
 
 ### Repository Management
-| Command | Description |
-|---------|-------------|
+
+| Command                   | Description                                  |
+| ------------------------- | -------------------------------------------- |
 | `nix run .#sanitize-repo` | Sanitize repository of sensitive information |
 
 ### GNU Stow Package Management
-| Command | Description |
-|---------|-------------|
-| `manage-aux-scripts deploy` | Deploy all stow-managed scripts and configurations |
-| `manage-aux-scripts remove` | Remove all stow-managed symlinks |
-| `stow -t ~ PACKAGE` | Deploy specific stow package (e.g., doom-emacs, raycast-scripts) |
-| `stow -D -t ~ PACKAGE` | Remove specific stow package |
-| `manage-cargo-tools install` | Install/update Rust/Cargo tools from configuration |
-| `manage-nodejs-tools install` | Install/update Node.js tools and toolchain |
-| `manage-dotnet-tools install` | Install/update .NET SDK and global tools |
+
+| Command                       | Description                                                      |
+| ----------------------------- | ---------------------------------------------------------------- |
+| `manage-aux-scripts deploy`   | Deploy all stow-managed scripts and configurations               |
+| `manage-aux-scripts remove`   | Remove all stow-managed symlinks                                 |
+| `stow -t ~ PACKAGE`           | Deploy specific stow package (e.g., doom-emacs, raycast-scripts) |
+| `stow -D -t ~ PACKAGE`        | Remove specific stow package                                     |
+| `manage-cargo-tools install`  | Install/update Rust/Cargo tools from configuration               |
+| `manage-nodejs-tools install` | Install/update Node.js tools and toolchain                       |
+| `manage-dotnet-tools install` | Install/update .NET SDK and global tools                         |
 
 ### Development Utilities
-| Command | Description |
-|---------|-------------|
+
+| Command                      | Description                                     |
+| ---------------------------- | ----------------------------------------------- |
 | `cleanup-intellij [project]` | Clean IntelliJ IDEA caches and fix broken state |
 
 ## ✨ Key Features
@@ -513,16 +550,16 @@ This repository uses **GNU Stow** to manage auxiliary scripts, dotfiles, and too
 
 ### Available Stow Packages
 
-| Package | Description | Target Location |
-|---------|-------------|----------------|
-| **aux-scripts** | Utility scripts and tools | `~/.local/share/bin/` |
-| **doom-emacs** | Complete Doom Emacs configuration | `~/.doom.d/` |
-| **lazyvim** | Neovim LazyVim configuration | `~/.config/nvim/` |
-| **raycast-scripts** | Raycast automation scripts | `~/.local/share/bin/` |
-| **nix-scripts** | Nix-related utility scripts | `~/.local/share/bin/` |
-| **cargo-tools** | Rust/Cargo tools management | `~/.local/share/bin/` |
-| **nodejs-tools** | Node.js tools and toolchain management | `~/.local/share/bin/` |
-| **dotnet-tools** | .NET SDK and global tools management | `~/.local/share/bin/` |
+| Package             | Description                            | Target Location       |
+| ------------------- | -------------------------------------- | --------------------- |
+| **aux-scripts**     | Utility scripts and tools              | `~/.local/share/bin/` |
+| **doom-emacs**      | Complete Doom Emacs configuration      | `~/.doom.d/`          |
+| **lazyvim**         | Neovim LazyVim configuration           | `~/.config/nvim/`     |
+| **raycast-scripts** | Raycast automation scripts             | `~/.local/share/bin/` |
+| **nix-scripts**     | Nix-related utility scripts            | `~/.local/share/bin/` |
+| **cargo-tools**     | Rust/Cargo tools management            | `~/.local/share/bin/` |
+| **nodejs-tools**    | Node.js tools and toolchain management | `~/.local/share/bin/` |
+| **dotnet-tools**    | .NET SDK and global tools management   | `~/.local/share/bin/` |
 
 ### Quick Stow Commands
 
@@ -560,12 +597,14 @@ manage-doom-config            # Update Doom Emacs with user settings
 ### When to Use Stow vs. Nix
 
 **Use Stow for:**
+
 - Complex shell scripts that are hard to escape in Nix
 - Editor configurations with many files (Doom Emacs, LazyVim)
 - Raycast scripts that need specific file locations
 - Development tool management scripts
 
 **Use Nix for:**
+
 - System packages and services
 - Environment variables and PATH management
 - Application configurations that can be templated
@@ -575,6 +614,7 @@ manage-doom-config            # Update Doom Emacs with user settings
 
 1. Create a new directory in `stow/` with the package name
 2. Structure files to mirror your home directory:
+
    ```
    stow/my-package/
    └── .local/
@@ -582,6 +622,7 @@ manage-doom-config            # Update Doom Emacs with user settings
            └── bin/
                └── my-script
    ```
+
 3. Deploy with `stow -t ~ my-package`
 4. Add documentation to the package's README.md
 
@@ -617,41 +658,46 @@ detect-fonts check "JetBrains Mono"
 ### 📱 Application Integration
 
 #### Emacs/Doom Emacs
+
 - **Font cycling**: Press `F8` to cycle through all available fonts
 - **Automatic ligatures**: Each font includes optimized ligature configuration
 - **Size optimization**: Fonts use their optimal sizes (MonoLisa: 16pt, PragmataPro: 18pt, JetBrains: 14pt)
 - **PragmataPro ligatures**: Custom ligature engine with 200+ programming symbols
 
 #### Ghostty Terminal
+
 - **Base configuration**: Font fallback built into `~/.config/ghostty/config`
 - **Runtime switching**: Use `ghostty-config font "Font Name"` to switch fonts
 - **Automatic fallback**: Missing fonts don't break the configuration
 
 ### 📋 Available Font Commands
 
-| Command | Description |
-|---------|-------------|
-| `detect-fonts status` | Show availability of all programming fonts |
-| `detect-fonts emacs-font` | Get recommended font key for Emacs |
-| `detect-fonts ghostty-font` | Get recommended font name for terminals |
-| `ghostty-config font "Font Name"` | Switch terminal font (with restart) |
-| `ghostty-config list` | Show all available font options |
+| Command                           | Description                                |
+| --------------------------------- | ------------------------------------------ |
+| `detect-fonts status`             | Show availability of all programming fonts |
+| `detect-fonts emacs-font`         | Get recommended font key for Emacs         |
+| `detect-fonts ghostty-font`       | Get recommended font name for terminals    |
+| `ghostty-config font "Font Name"` | Switch terminal font (with restart)        |
+| `ghostty-config list`             | Show all available font options            |
 
 ### 🎨 Font Features
 
 **MonoLisa Variable:**
+
 - Variable font technology
 - Extensive ligature set
 - Script variants
 - Optimal at 16pt
 
 **PragmataPro Liga:**
+
 - Ultra-compact design
 - Custom ligature engine
 - Mathematical symbols
 - Optimal at 18pt
 
 **JetBrains Mono (Fallback):**
+
 - Open source alternative
 - Good ligature support
 - Excellent readability
@@ -694,8 +740,8 @@ A complete, modular Doom Emacs configuration with advanced features, language su
 
 ```bash
 # 1. Install Doom Emacs (if not already installed)
-git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs
-~/.config/emacs/bin/doom install
+git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.emacs.d/bin
+~/.emacs.d/bin/doom install
 
 # 2. Deploy configuration via stow
 manage-aux-scripts deploy doom-emacs
@@ -710,7 +756,7 @@ doom sync
 ```
 ~/.doom.d/  (symlinked from ~/darwin-config/stow/doom-emacs/.doom.d/)
 ├── init.el          # Doom modules configuration
-├── packages.el      # Package declarations and configuration  
+├── packages.el      # Package declarations and configuration
 ├── config.el        # Main configuration loader
 ├── custom.el        # Emacs custom variables
 ├── config/          # Modular configuration files
@@ -739,19 +785,19 @@ doom sync
 
 #### Available Commands & Aliases
 
-| Command | Description |
-|---------|-------------|
-| `e [files...]` | Open files in GUI Emacs (with daemon) |
-| `et` | Start Emacs in background |
-| `edd` | Open current directory in Emacs |
-| `manage-doom-config status` | Check configuration deployment status |
-| `manage-doom-config validate` | Validate all elisp files for syntax |
-| `manage-doom-config sync` | Validate config and run `doom sync` |
-| `manage-doom-config edit` | Open configuration in Emacs |
-| `manage-doom-config backup` | Create timestamped backup |
-| `doom sync` | Sync Doom with configuration changes |
-| `doom upgrade` | Update Doom Emacs itself |
-| `doom doctor` | Diagnose configuration issues |
+| Command                       | Description                           |
+| ----------------------------- | ------------------------------------- |
+| `e [files...]`                | Open files in GUI Emacs (with daemon) |
+| `et`                          | Start Emacs in background             |
+| `edd`                         | Open current directory in Emacs       |
+| `manage-doom-config status`   | Check configuration deployment status |
+| `manage-doom-config validate` | Validate all elisp files for syntax   |
+| `manage-doom-config sync`     | Validate config and run `doom sync`   |
+| `manage-doom-config edit`     | Open configuration in Emacs           |
+| `manage-doom-config backup`   | Create timestamped backup             |
+| `doom sync`                   | Sync Doom with configuration changes  |
+| `doom upgrade`                | Update Doom Emacs itself              |
+| `doom doctor`                 | Diagnose configuration issues         |
 
 #### Font Integration
 
@@ -780,6 +826,7 @@ git add . && git commit -m "Update Doom config"
 #### Language Support
 
 **Supported Languages:**
+
 - **Systems**: Rust, Go, C/C++, Zig
 - **JVM**: Java, Scala, Clojure, Kotlin
 - **Web**: TypeScript, JavaScript, HTML, CSS
@@ -855,16 +902,17 @@ nvim
 
 #### Available Commands
 
-| Command | Description |
-|---------|-------------|
-| `nvim` | Start Neovim with LazyVim configuration |
-| `nvim +Lazy` | Open plugin manager |
-| `nvim +Mason` | Open LSP installer |
-| `nvim +checkhealth` | Check configuration health |
+| Command             | Description                             |
+| ------------------- | --------------------------------------- |
+| `nvim`              | Start Neovim with LazyVim configuration |
+| `nvim +Lazy`        | Open plugin manager                     |
+| `nvim +Mason`       | Open LSP installer                      |
+| `nvim +checkhealth` | Check configuration health              |
 
 #### Basic Usage
 
 **Key Bindings (LazyVim defaults):**
+
 - `<leader>` = `<Space>`
 - `<leader>ff` - Find files
 - `<leader>fg` - Live grep
@@ -926,12 +974,14 @@ manage-aux-scripts remove
 #### Creating Custom Editor Configurations
 
 1. **Create stow package structure:**
+
    ```bash
    mkdir -p ~/darwin-config/stow/my-editor/.config/my-editor
    # Add configuration files
    ```
 
 2. **Deploy with stow:**
+
    ```bash
    cd ~/darwin-config/stow
    stow -t ~ my-editor
@@ -944,18 +994,21 @@ manage-aux-scripts remove
 ### 🎯 Editor Recommendations
 
 **Choose Doom Emacs if you:**
+
 - Want extensive customization capabilities
 - Need advanced org-mode and writing features
 - Prefer elisp for configuration
 - Use Emacs ecosystem tools (mu4e, magit, etc.)
 
 **Choose LazyVim/Neovim if you:**
+
 - Prefer faster startup times
 - Want modern Lua-based configuration
 - Need excellent terminal integration
 - Prefer minimal, focused editing experience
 
 **Use Both:**
+
 - Both configurations can coexist
 - Doom Emacs for heavy development and writing
 - LazyVim for quick edits and terminal work
@@ -993,18 +1046,19 @@ cleanup-intellij -g
 
 #### Available Options
 
-| Option | Description |
-|--------|-------------|
-| `cleanup-intellij` | Clean all IntelliJ system caches |
-| `cleanup-intellij <project>` | Clean all caches + specific project files |
+| Option                          | Description                                           |
+| ------------------------------- | ----------------------------------------------------- |
+| `cleanup-intellij`              | Clean all IntelliJ system caches                      |
+| `cleanup-intellij <project>`    | Clean all caches + specific project files             |
 | `cleanup-intellij -p <project>` | Clean only project-specific files (.idea, .iml, etc.) |
-| `cleanup-intellij -s` | Clean only system caches and application data |
-| `cleanup-intellij -g` | **Aggressive**: Clean ALL project files system-wide |
-| `cleanup-intellij -h` | Show help and usage examples |
+| `cleanup-intellij -s`           | Clean only system caches and application data         |
+| `cleanup-intellij -g`           | **Aggressive**: Clean ALL project files system-wide   |
+| `cleanup-intellij -h`           | Show help and usage examples                          |
 
 #### What Gets Cleaned
 
 **System Caches (`-s` or default):**
+
 - `~/Library/Caches/JetBrains/IntelliJIdea*` - IDE caches
 - `~/Library/Logs/JetBrains/IntelliJIdea*` - IDE logs
 - `~/Library/Application Support/JetBrains/IntelliJIdea*/workspace` - Workspace data
@@ -1013,6 +1067,7 @@ cleanup-intellij -g
 - Recent projects configuration
 
 **Project-Specific Files (`-p`):**
+
 - `.idea/` directory (project configuration)
 - `*.iml` files (module files)
 - `*.ipr` files (legacy project files)
@@ -1020,6 +1075,7 @@ cleanup-intellij -g
 - Project references from trusted-paths.xml
 
 **Aggressive Cleanup (`-g`):**
+
 - **ALL** `.idea` directories system-wide (excluding system directories)
 - **ALL** `.iml`, `.ipr`, `.iws` files system-wide
 - All system caches and application data
@@ -1028,24 +1084,28 @@ cleanup-intellij -g
 #### Common Use Cases
 
 **Project Won't Load Correctly:**
+
 ```bash
 # Clean specific project + caches
 cleanup-intellij ~/problematic-project
 ```
 
 **IntelliJ Feels Slow/Corrupted:**
+
 ```bash
 # Clean all system caches
 cleanup-intellij -s
 ```
 
 **Fresh Start for Specific Project:**
+
 ```bash
 # Clean only project files (preserves other projects)
 cleanup-intellij -p ~/my-project
 ```
 
 **Nuclear Reset (Use with Caution):**
+
 ```bash
 # Clean everything - like fresh IntelliJ install
 cleanup-intellij -g
@@ -1063,6 +1123,7 @@ cleanup-intellij -g
 #### When to Use This Tool
 
 ✅ **Use when experiencing:**
+
 - Project import/loading failures
 - Incorrect folder structure recognition
 - IntelliJ freezing or crashes
@@ -1071,13 +1132,14 @@ cleanup-intellij -g
 - "Cannot resolve symbol" errors that won't go away
 
 ⚠️ **Be careful with:**
+
 - `-g` (aggressive) mode - resets ALL projects
 - Projects with custom IntelliJ configurations you want to keep
 - Shared projects where team members rely on specific IDE settings
 
 #### Post-Cleanup Steps
 
- After running the cleanup:
+After running the cleanup:
 
 1. **Restart IntelliJ IDEA** completely
 2. **Re-import your project** if using aggressive cleanup
@@ -1109,11 +1171,11 @@ This configuration supports three fully-configured shells: **Nushell**, **Fish**
 
 ### 🎯 Available Shells
 
-| Shell | Description | Best For |
-|-------|-------------|----------|
-| **Nushell** | Modern shell with structured data | Data manipulation, pipelines, modern workflows |
-| **Fish** | User-friendly with great defaults | Interactive use, beginners, excellent autocompletion |
-| **Zsh** | Traditional, highly configurable | Power users, legacy compatibility, extensive plugins |
+| Shell       | Description                       | Best For                                             |
+| ----------- | --------------------------------- | ---------------------------------------------------- |
+| **Nushell** | Modern shell with structured data | Data manipulation, pipelines, modern workflows       |
+| **Fish**    | User-friendly with great defaults | Interactive use, beginners, excellent autocompletion |
+| **Zsh**     | Traditional, highly configurable  | Power users, legacy compatibility, extensive plugins |
 
 ### 🔧 Setting Your Default Shell
 
@@ -1145,6 +1207,7 @@ hostConfigs = {
 #### For Existing Configurations
 
 1. **Edit your host configuration in `flake.nix`:**
+
    ```nix
    predator = {
      user = "oscarvarto";
@@ -1157,11 +1220,13 @@ hostConfigs = {
    ```
 
 2. **Rebuild your system:**
+
    ```bash
    nb && ns  # Build and switch
    ```
 
 3. **Update Emacs configuration (optional):**
+
    ```bash
    nix run .#update-doom-config
    ```
@@ -1171,6 +1236,7 @@ hostConfigs = {
 All shells include consistent features configured automatically:
 
 #### Shared Features
+
 - **Starship Prompt**: Modern, fast prompt with git integration
 - **Zoxide**: Smart directory jumping with `z` command
 - **Atuin**: Improved history with search and sync
@@ -1182,6 +1248,7 @@ All shells include consistent features configured automatically:
 #### Shell-Specific Strengths
 
 **Nushell Features:**
+
 ```bash
 # Structured data processing
 ls | where size > 1MB | sort-by modified
@@ -1194,6 +1261,7 @@ ps | where cpu > 50 | select name cpu
 ```
 
 **Fish Features:**
+
 ```bash
 # Excellent autocompletion
 cd /usr/loc[TAB]  # Completes to /usr/local/
@@ -1205,6 +1273,7 @@ cd /usr/loc[TAB]  # Completes to /usr/local/
 ```
 
 **Zsh Features:**
+
 ```bash
 # Advanced completion system
 # Glob patterns and extended matching
@@ -1217,24 +1286,24 @@ cd /usr/loc[TAB]  # Completes to /usr/local/
 
 #### Common Aliases (All Shells)
 
-| Alias | Command | Description |
-|-------|---------|-------------|
-| `nb` | `nix run .#build` | Build darwin configuration |
-| `ns` | `nix run .#build-switch` | Build and switch configuration |
-| `gp` | `git fetch --all -p; git pull; git submodule update --recursive` | Git pull with submodules |
-| `search` | `rg -p --glob '!node_modules/*'` | Ripgrep search excluding node_modules |
-| `diff` | `difft` | Better diff tool |
-| `edd` | `emacs --daemon=doom` | Start Emacs daemon |
-| `ds` | `doom sync --aot --gc` | Doom sync with optimization |
+| Alias    | Command                                                          | Description                           |
+| -------- | ---------------------------------------------------------------- | ------------------------------------- |
+| `nb`     | `nix run .#build`                                                | Build darwin configuration            |
+| `ns`     | `nix run .#build-switch`                                         | Build and switch configuration        |
+| `gp`     | `git fetch --all -p; git pull; git submodule update --recursive` | Git pull with submodules              |
+| `search` | `rg -p --glob '!node_modules/*'`                                 | Ripgrep search excluding node_modules |
+| `diff`   | `difft`                                                          | Better diff tool                      |
+| `edd`    | `emacs --daemon=doom`                                            | Start Emacs daemon                    |
+| `ds`     | `doom sync --aot --gc`                                           | Doom sync with optimization           |
 
 #### Shell Configuration Shortcuts
 
-| Command | Shell | Description |
-|---------|-------|-------------|
-| `nnc` | All | Edit Nushell config.nu |
-| `nne` | All | Edit Nushell env.nu |
-| `ffc` | All | Edit Fish config (in home-manager.nix) |
-| `tg` | All | Edit terminal config |
+| Command | Shell | Description                            |
+| ------- | ----- | -------------------------------------- |
+| `nnc`   | All   | Edit Nushell config.nu                 |
+| `nne`   | All   | Edit Nushell env.nu                    |
+| `ffc`   | All   | Edit Fish config (in home-manager.nix) |
+| `tg`    | All   | Edit terminal config                   |
 
 ### 🔄 Switching Between Shells
 
@@ -1251,16 +1320,19 @@ exit    # Return to default shell
 #### Changing Default Shell
 
 1. **Update flake.nix:**
+
    ```nix
    defaultShell = "fish";  # Change to desired shell
    ```
 
 2. **Rebuild system:**
+
    ```bash
    nb && ns
    ```
 
 3. **Verify change:**
+
    ```bash
    echo $SHELL
    # Should show new shell path
@@ -1281,12 +1353,14 @@ Each shell's configuration can be customized in specific files:
 Edit the appropriate configuration file for your shell:
 
 **For Nushell** (`modules/nushell/config.nu`):
+
 ```nushell
 # Add custom aliases
 alias myalias = "your-command"
 ```
 
 **For Fish** (`modules/home-manager.nix`):
+
 ```nix
 shellAbbrs = {
   myalias = "your-command";
@@ -1294,6 +1368,7 @@ shellAbbrs = {
 ```
 
 **For Zsh** (`modules/shell-config.nix`):
+
 ```nix
 initContent = lib.mkAfter ''
   alias myalias="your-command"
@@ -1303,18 +1378,21 @@ initContent = lib.mkAfter ''
 ### 🎯 Shell Recommendations
 
 **Choose Nushell if you:**
+
 - Work with structured data (JSON, CSV, XML)
 - Like modern, consistent command syntax
 - Want powerful data manipulation pipelines
 - Prefer type safety and structured output
 
 **Choose Fish if you:**
+
 - Want excellent out-of-the-box experience
 - Prefer intuitive, user-friendly interfaces
 - Value great autocompletion and history
 - Are new to advanced shell features
 
 **Choose Zsh if you:**
+
 - Need maximum compatibility with bash scripts
 - Want extensive plugin ecosystem (oh-my-zsh, etc.)
 - Prefer traditional Unix shell behavior
@@ -1334,6 +1412,7 @@ See [PATH Management Documentation](modules/PATH-MANAGEMENT.md) for detailed PAT
 ### 🔍 Troubleshooting Shell Issues
 
 #### Shell Not Changing
+
 ```bash
 # Check current shell
 echo $SHELL
@@ -1346,6 +1425,7 @@ nb && ns
 ```
 
 #### Missing Features
+
 ```bash
 # Check if shell programs are enabled
 nix run .#build --show-trace
@@ -1355,6 +1435,7 @@ manage-stow-packages deploy
 ```
 
 #### Configuration Not Loading
+
 ```bash
 # Check configuration files exist
 ls -la ~/.config/nushell/
@@ -1375,18 +1456,21 @@ nu --config modules/nushell/config.nu --commands "exit"
 ## 📁 What's Included
 
 ### Core Tools
+
 - **Nix Package Manager** with flakes
 - **Home Manager** for user configuration
 - **Homebrew** integration for GUI apps
 - **Stow** for dotfiles management
 
 ### Development Environment
+
 - **Languages**: Rust, Go, Node.js, Python, Java, C++
 - **Editors**: Neovim, Helix, Emacs, VS Code
 - **Version Control**: Git with smart conditional configs
 - **Terminals**: Nushell, Zsh with beautiful prompts
 
 ### macOS Integration
+
 - **System Preferences**: Dock, Finder, trackpad settings
 - **GUI Applications**: Development tools, productivity apps
 - **Fonts**: Programming fonts with intelligent fallback system
@@ -1432,6 +1516,7 @@ flake.nix              # Main flake with inputs, hostConfigs, and apps
 ## 🔧 Configuration Examples
 
 ### Personal Machine with Nushell
+
 ```nix
 your-hostname = {
   user = "alice";
@@ -1445,6 +1530,7 @@ your-hostname = {
 ```
 
 ### Work Machine with Fish
+
 ```nix
 work-laptop = {
   user = "alice";
@@ -1458,6 +1544,7 @@ work-laptop = {
 ```
 
 ### Traditional Setup with Zsh
+
 ```nix
 legacy-system = {
   user = "bob";
@@ -1473,6 +1560,7 @@ legacy-system = {
 ## 🤝 Contributing
 
 This configuration is designed to be a starting point. Feel free to:
+
 - Fork and customize for your needs
 - Submit issues for bugs or improvements
 - Share your own modifications and enhancements
