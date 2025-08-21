@@ -206,24 +206,9 @@
     (setq scroll-conservatively 30
           scroll-margin 0)
     :config
-    (ultra-scroll-mode 1))
+    (ultra-scroll-mode 1)))
 
-  ;; Temporarily disable indent-bars to avoid color and regex issues
-  ;; (use-package indent-bars
-  ;;   :hook (prog-mode . indent-bars-mode)
-  ;;   :custom
-  ;;   (indent-bars-no-descend-lists t) ; no extra bars in continued func arg lists
-  ;;   (indent-bars-treesit-support t)
-  ;;   :config
-  ;;   (setq indent-bars-color '(highlight :face-bg t :blend 0.8)
-  ;;         indent-bars-pattern "."
-  ;;         indent-bars-color-by-depth '(:regexp "outline-\([0-9]+\)" :blend 0.8)
-  ;;         indent-bars-highlight-current-depth '(:blend 1.0 :width 0.4 :pad 0.1 :pattern "!.!.!." :zigzag 0.1)
-  ;;         indent-bars-pad-frac 0.3
-  ;;         indent-bars-ts-highlight-current-depth nil
-  ;;         indent-bars-ts-color-by-depth nil
-  ;;         indent-bars-ts-color '(fringe :face-bg t :blend 0.2))))
-  ) ;; End of my/load-common-appearance-config function
+   ;; End of my/load-common-appearance-config function
 
 ;; Initialize the configuration
 (defun my/initialize-theme-aware-appearance ()
@@ -269,6 +254,7 @@
       (when (bound-and-true-p pragmatapro-lig-mode)
         (pragmatapro-lig-mode -1))))
 
+
   ;; Add keybindings [INFO]
   (define-key global-map (kbd "<f7>")  #'my/toggle-theme)
   (define-key global-map (kbd "<f8>")  #'my/toggle-font)
@@ -278,7 +264,7 @@
   (define-key global-map (kbd "<f10>")  (lambda ()
                                           (interactive)
                                           (pragmatapro-lig-mode 'toggle)))
-  ;; F11 disabled - was for indent-bars-reset
+  ;; F11 available for future use
   (define-key global-map (kbd "<f12>") (lambda ()
                                          (interactive)
                                          (global-centered-cursor-mode 'toggle))))

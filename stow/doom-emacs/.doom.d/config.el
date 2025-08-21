@@ -54,8 +54,6 @@
 (require 'my-defaults-config)
 (require 'my-banner-config)
 (require 'my-gui-appearance-config)
-;; Load project cleanup config later, after all modules are initialized
-;; (moved to end of file)
 
 ;; Helper function for loading
 (defun my/load-config (feature group) ; Group is mandatory
