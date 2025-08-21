@@ -130,10 +130,10 @@
     "-->" "->" "=>" "==>" "=>>" "=<<" "=/=" ">=" "<=" "!="
     "===" "==" "=<" "=>" "<-" "->" "<->" "<==" "==>" "<==>"
     "<=>" "=/" "/=" "!==" "!=" "<!>" "<~>" "~~>" "~>" "~="
-    "<|" "|>" "|>>" "<||>" "||" "||>" "||"
+    "<|" "|>" "|>>" "<||>" "||" "||>"
     "++" "--" "**" "***" "//" "///" "/*" "*/" "#?"
     "::" ":::" "::=" ":=" ":.>" ":>" ".="
-    ".." "..." "?" "?:" "??" ".?" "?."))
+    ".." "..." "?:" "??" ".?" "?."))
 
 ;; Custom theme toggle function
 (defun my/toggle-theme ()
@@ -151,11 +151,11 @@
 (defun my/toggle-font ()
   "Cycle between PragmataPro Liga, MonoLisa Variable, and JetBrains Mono fonts."
   (interactive)
-  (let ((new-font-config (cond )
-                         ((eq my/current-font-config 'pragmatapro) 'monolisa)
-                         ((eq my/current-font-config 'monolisa) 'jetbrains)
-                         ((eq my/current-font-config 'jetbrains) 'pragmatapro)
-                         (t 'pragmatapro)))
+  (let ((new-font-config (cond
+                          ((eq my/current-font-config 'pragmatapro) 'monolisa)
+                          ((eq my/current-font-config 'monolisa) 'jetbrains)
+                          ((eq my/current-font-config 'jetbrains) 'pragmatapro)
+                          (t 'pragmatapro))))
     (my/load-font-config new-font-config)
     (doom/reload-font)
     (message "Switched to %s font configuration" new-font-config)))
@@ -181,9 +181,7 @@
     (setq modus-themes-italic-constructs t
           modus-themes-bold-constructs t
           modus-themes-common-palette-overrides
-          '((cursor "#FEB000")))
-    ;; Theme toggle keybinding
-    (define-key global-map (kbd "<f8>") #'my/toggle-theme))
+          '((cursor "#FEB000"))))
 
   ;; Cursor configuration
   (blink-cursor-mode 1)
@@ -215,15 +213,15 @@
     :custom
     (indent-bars-no-descend-lists t) ; no extra bars in continued func arg lists
     (indent-bars-treesit-support t)
-    (setopt
-     indent-bars-color '(highlight :face-bg t :blend 0.8)
-     indent-bars-pattern "."
-     indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 0.8)
-     indent-bars-highlight-current-depth '(:blend 1.0 :width 0.4 :pad 0.1 :pattern "!.!.!." :zigzag 0.1)
-     indent-bars-pad-frac 0.3
-     indent-bars-ts-highlight-current-depth '(no-inherit) ; equivalent to nil
-     indent-bars-ts-color-by-depth '(no-inherit)
-     indent-bars-ts-color '(inherit fringe :face-bg t :blend 0.2))))
+    :config
+    (setq indent-bars-color '(highlight :face-bg t :blend 0.8)
+          indent-bars-pattern "."
+          indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 0.8)
+          indent-bars-highlight-current-depth '(:blend 1.0 :width 0.4 :pad 0.1 :pattern "!.!.!." :zigzag 0.1)
+          indent-bars-pad-frac 0.3
+          indent-bars-ts-highlight-current-depth nil ; explicitly set to nil instead of '(no-inherit)
+          indent-bars-ts-color-by-depth nil ; explicitly set to nil instead of '(no-inherit)
+          indent-bars-ts-color '(fringe :face-bg t :blend 0.2))))
 ;; End of my/load-common-appearance-config function
 
 ;; Initialize the configuration
@@ -246,29 +244,29 @@
           (gray4 "#2b3038"))
       (face-spec-set 'demap-minimap-font-face
                      `((t :background ,gray2
-                          :inherit    unspecified
+                          :inherit    nil
                           :family     "minimap"
                           :height     15)))
       (face-spec-set 'demap-visible-region-face
                      `((t :background ,gray4
-                          :inherit    unspecified)))
+                          :inherit    nil)))
       (face-spec-set 'demap-visible-region-inactive-face
                      `((t :background ,gray3
-                          :inherit    unspecified)))
+                          :inherit    nil)))
       (face-spec-set 'demap-current-line-face
                      `((t :background ,gray1
-                          :inherit    unspecified)))
+                          :inherit    nil)))
       (face-spec-set 'demap-current-line-inactive-face
                      `((t :background ,gray1
-                          :inherit    unspecified)))))
+                          :inherit    nil))))
 
-  (add-hook! 'demap-minimap-construct-hook
-    (when (bound-and-true-p org-modern-mode)
-      (org-modern-mode -1))
-    (when (bound-and-true-p ligature-mode)
-      (ligature-mode -1))
-    (when (bound-and-true-p pragmatapro-lig-mode)
-      (pragmatapro-lig-mode -1)))
+    (add-hook! 'demap-minimap-construct-hook
+      (when (bound-and-true-p org-modern-mode)
+        (org-modern-mode -1))
+      (when (bound-and-true-p ligature-mode)
+        (ligature-mode -1))
+      (when (bound-and-true-p pragmatapro-lig-mode)
+        (pragmatapro-lig-mode -1))))
 
   ;; Add keybindings [INFO]
   (define-key global-map (kbd "<f7>")  #'my/toggle-theme)
