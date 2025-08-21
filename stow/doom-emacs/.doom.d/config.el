@@ -50,10 +50,15 @@
 ;; Load early cleanup configuration FIRST - this prevents startup errors
 (require 'my-early-cleanup-config)
 
+;; Load lazy loading optimizations EARLY to affect subsequent loads
+(require 'my-lazy-loading-config)
+
 ;; Now load other core configs using require (they are in config/core/)
 (require 'my-defaults-config)
 (require 'my-banner-config)
 (require 'my-gui-appearance-config)
+(require 'my-terminal-config)
+(require 'my-startup-benchmark)
 
 ;; Helper function for loading
 (defun my/load-config (feature group) ; Group is mandatory

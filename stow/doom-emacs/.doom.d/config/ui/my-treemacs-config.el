@@ -14,10 +14,17 @@
         (setq projectile-known-projects valid-projects)
         (message "Cleaned %d invalid projectile paths" removed-count)))))
 
-;; Clean up before treemacs loads
-(my/simple-projectile-cleanup)
+;; Clean up before treemacs loads (only when treemacs actually loads)
+(defun my/treemacs-setup-hook ()
+  "Setup treemacs after it loads."
+  (my/simple-projectile-cleanup))
 
 (use-package! treemacs
+  :defer t  ;; Defer loading until explicitly called
+  :commands (treemacs treemacs-select-window treemacs-find-file)
+  :init
+  ;; Add setup hook for when treemacs actually loads
+  (add-hook 'treemacs-mode-hook #'my/treemacs-setup-hook)
   :config
   (defun my/treemacs-custom-font ()
     "Apply PragmataPro font to treemacs buffer."

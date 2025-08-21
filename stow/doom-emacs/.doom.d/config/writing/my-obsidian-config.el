@@ -1,6 +1,9 @@
 ;;; my-obsidian-config -*- lexical-binding: t; no-byte-compiling: t; -*-
 
 (use-package obsidian
+  :defer t  ;; Don't load at startup
+  :hook ((markdown-mode . obsidian-mode)
+         (gfm-mode . obsidian-mode))
   :custom
   ;; location of obsidian vault
   (obsidian-directory "~/obsidian")
@@ -9,7 +12,9 @@
   ;; Useful if you're going to be using wiki links
   (markdown-enable-wiki-links t)
   :config
-  (global-obsidian-mode t)
+  ;; Only enable global mode after first use
+  (unless (bound-and-true-p global-obsidian-mode)
+    (global-obsidian-mode t))
   ;;(obsidian-backlinks-mode t)
   
   ;; These bindings are only suggestions; it's okay to use other bindings
