@@ -100,7 +100,7 @@
       "Okta Verify" = 490179405;
       "Okta Extension App" = 1439967473;
       "rcmd" = 1596283165;
-      "XCode" = 497799835;
+      # "XCode" = 497799835; # Commented out - using Xcode beta instead
     };
   };
 }

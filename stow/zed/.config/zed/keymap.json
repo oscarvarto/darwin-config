@@ -1,0 +1,51 @@
+// Zed keymap
+//
+// For information on binding keys, see the Zed
+// documentation: https://zed.dev/docs/key-bindings
+//
+// To see the default key bindings run `zed: open default keymap`
+// from the command palette.
+[
+  {
+    "context": "Workspace",
+    "bindings": {
+      // "shift shift": "file_finder::Toggle"
+    }
+  },
+  {
+    "context": "Editor && vim_mode == normal",
+    "bindings": {
+      ";": "command_palette::Toggle"
+    }
+  },
+  {
+    "context": "Workspace",
+    // "context": "Editor && vim_mode == normal",
+    "bindings": {
+      "cmd-alt-shift-m": [
+        "task::Spawn",
+        {
+          "task_name": "mvn spotless:apply test-compile"
+        }
+      ],
+      "cmd-alt-shift-c": [
+        "task::Spawn",
+        {
+          "task_name": "mvn test-compile"
+        }
+      ],
+      "cmd-alt-shift-t": [
+        "task::Spawn",
+        {
+          "task_name": "mvn test class"
+        }
+      ],
+      "cmd-alt-shift-s": [
+        "task::Spawn",
+        {
+          "task_name": "mvn test method"
+        }
+      ]
+    }
+  }
+]

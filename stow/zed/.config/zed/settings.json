@@ -1,0 +1,211 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "ssh_connections": [
+    {
+      "host": "github.com",
+      "projects": []
+    }
+  ],
+  "edit_predictions": {
+    "mode": "subtle",
+    "copilot": {
+      "proxy": null,
+      "proxy_no_verify": null
+    },
+    "enabled_in_text_threads": false
+  },
+  "agent": {
+    "default_model": {
+      "provider": "copilot_chat",
+      "model": "gpt-4.1"
+    }
+  },
+  "features": {
+    "edit_prediction_provider": "zed"
+  },
+  "language_models": {
+    "ollama": {
+      "api_url": "http://localhost:11434"
+    }
+  },
+  "telemetry": {
+    "diagnostics": true,
+    "metrics": true
+  },
+  "vim_mode": true,
+  "ui_font_family": "PragmataPro Liga",
+  "ui_font_size": 16,
+  "buffer_font_family": "MonoLisaVariable Nerd Font",
+  "buffer_font_size": 16,
+  "buffer_line_height": "standard",
+  "terminal": {
+    "font_family": "PragmataPro Liga",
+    "font_size": 18,
+    "line_height": "standard",
+    "shell": {
+      "with_arguments": {
+        "program": "/Users/oscarvarto/.nix-profile/bin/nu",
+        "args": ["--login", "--interactive"]
+      }
+    }
+  },
+  "icon_theme": "Catppuccin Mocha",
+  "theme": {
+    "mode": "system",
+    "light": "Catppuccin Latte",
+    "dark": "Catppuccin Mocha"
+  },
+  "indent_guides": {
+    "enabled": true,
+    "coloring": "indent_aware"
+  },
+  "inlay_hints": {
+    "enabled": true,
+    "show_type_hints": true,
+    "show_parameter_hints": true,
+    "show_other_hints": true,
+    "show_background": false,
+    "edit_debounce_ms": 700,
+    "scroll_debounce_ms": 50
+  },
+  "lsp": {
+    "clangd": {
+      "binary": {
+        "path": "/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clangd",
+        "arguments": ["-background-index", "-compile-commands-dir=build"]
+      }
+    },
+    "pyrefly": {
+      "binary": {
+        "path": "/Users/oscarvarto/.local/bin/pyrefly",
+        "arguments": ["lsp"]
+      },
+      "settings": {
+        "python": {
+          "pythonPath": ".venv/bin/python"
+        },
+        "pyrefly": {
+          "project_includes": ["src/**/*.py", "tests/**/*.py"],
+          "project_excludes": ["**/.[!/.]*", "**/*venv/**"],
+          "search_path": ["src"],
+          "ignore_errors_in_generated_code": true
+        }
+      }
+    },
+    "metals": {
+      "binary": {
+        "arguments": ["-Dmetals.http=on"]
+      },
+      "initialization_options": {
+        "isHttpEnabled": true
+      },
+      "settings": {
+        "inlayHints": {
+          "inferredTypes": {
+            "enable": true
+          },
+          "implicitArguments": {
+            "enable": true
+          },
+          "implicitConversions": {
+            "enable": true
+          },
+          "typeParameters": {
+            "enable": true
+          },
+          "hintsInPatternMatch": {
+            "enable": true
+          }
+        }
+      }
+    },
+    "jdtls": {
+      "initialization_options": {
+        "bundles": [],
+        // "workspaceFolders": ["file:///home/snjeza/Project"],
+        "settings": {
+          "java": {
+            "home": "/Library/Java/JavaVirtualMachines/25.0.0.jdk/Contents/Home",
+            "errors": {
+              "incompleteClasspath": {
+                "severity": "warning"
+              }
+            },
+            "configuration": {
+              "updateBuildConfiguration": "interactive",
+              "maven": {
+                "userSettings": null
+              }
+            },
+            "trace": {
+              "server": "verbose"
+            },
+            "import": {
+              "gradle": {
+                "enabled": true
+              },
+              "maven": {
+                "enabled": true
+              },
+              "exclusions": [
+                "**/node_modules/**",
+                "**/.metadata/**",
+                "**/archetype-resources/**",
+                "**/META-INF/maven/**",
+                "/**/test/**"
+              ]
+            },
+            "jdt": {
+              "ls": {
+                "lombokSupport": {
+                  "enabled": true // Set this to true to enable lombok support
+                }
+              }
+            },
+            "referencesCodeLens": {
+              "enabled": true
+            },
+            "signatureHelp": {
+              "enabled": true
+            },
+            "implementationsCodeLens": {
+              "enabled": true
+            },
+            "format": {
+              "enabled": false
+            },
+            "saveActions": {
+              "format": false,
+              "organizeImports": false
+            },
+            "contentProvider": {
+              "preferred": null
+            },
+            "autobuild": {
+              "enabled": true
+            },
+            "completion": {
+              "favoriteStaticMembers": ["org.assertj.core.api.Assertions.*"]
+              // "importOrder": ["java", "javax", "com", "org"]
+            }
+          }
+        }
+      }
+    }
+  },
+  "languages": {
+    "Python": {
+      "language_servers": ["pyrefly", "!pyright", "!pylsp"]
+    },
+    "Java": {
+      "format_on_save": "off"
+    }
+  }
+}

@@ -69,6 +69,8 @@ in
           ENCHANT_ORDERING = "en:aspell,es:aspell,*:aspell";
           ASPELL_CONF = "dict-dir ${pkgs.aspellWithDicts (dicts: with dicts; [ en en-computers en-science es ])}/lib/aspell; data-dir ${pkgs.aspell}/share/aspell";
           STARSHIP_CONFIG = "${config.home.homeDirectory}/.config/starship.toml";
+          # Set Xcode developer directory to beta version for GUI applications
+          DEVELOPER_DIR = "/Applications/Xcode-beta.app/Contents/Developer";
           # Work configuration environment variables
           WORK_COMPANY_NAME = workConfig.companyName or "CompanyName";
           WORK_GIT_DIR_PATTERN = workConfig.gitWorkDirPattern or "~/work/**";
@@ -182,6 +184,9 @@ in
             set -gx DOOMDIR "~/.doom.d"
             set -gx DOOMLOCALDIR "~/.emacs.d/.local"
             set -gx CARGO_HOME "$HOME/.cargo"
+            
+            # Set Xcode developer directory to beta version
+            set -gx DEVELOPER_DIR "/Applications/Xcode-beta.app/Contents/Developer"
 
             # Enchant/Aspell configuration (matching nushell)
             set -gx ENCHANT_ORDERING 'en:aspell,es:aspell,*:aspell'

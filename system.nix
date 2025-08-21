@@ -169,6 +169,20 @@ in
     };
   };
 
+  # Set DEVELOPER_DIR to point to Xcode beta for GUI applications
+  launchd.user.agents.setDeveloperDirVar = {
+    serviceConfig = {
+      Label = "org.nixos.setDeveloperDirVar";
+      ProgramArguments = [
+        "/bin/launchctl"
+        "setenv"
+        "DEVELOPER_DIR"
+        "/Applications/Xcode-beta.app/Contents/Developer"
+      ];
+      RunAtLoad = true;
+    };
+  };
+
   # Font packages removed to avoid SDK compatibility issues
   # Fonts can be installed via system preferences or homebrew if needed
 

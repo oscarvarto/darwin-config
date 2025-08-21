@@ -30,11 +30,12 @@ def main [command: string = "help"] {
             # Editor configurations
             stow -t ~ doom-emacs
             stow -t ~ lazyvim
+            stow -t ~ zed
             
             if $env.LAST_EXIT_CODE == 0 {
                 print "✅ Stow packages deployed successfully!"
                 print $"📂 Scripts are now available in ($env.HOME)/.local/share/bin/"
-                print $"🎨 Editor configs deployed to ~/.doom.d/ and ~/.config/nvim/"
+                print $"🎨 Editor configs deployed to ~/.doom.d/, ~/.config/nvim/, and ~/.config/zed/"
             } else {
                 print "❌ Failed to deploy stow packages"
                 exit 1
@@ -59,6 +60,7 @@ def main [command: string = "help"] {
             # Editor configurations
             stow -D -t ~ doom-emacs
             stow -D -t ~ lazyvim
+            stow -D -t ~ zed
             
             if $env.LAST_EXIT_CODE == 0 {
                 print "✅ Stow packages removed successfully!"
@@ -123,11 +125,13 @@ def main [command: string = "help"] {
             print "  • dotnet-tools     - .NET SDK and global tools"
             print "  • doom-emacs       - Complete Doom Emacs configuration"
             print "  • lazyvim          - Neovim LazyVim configuration"
+            print "  • zed              - Zed editor configuration"
             print ""
             print "📂 Deployment Targets:"
             print "  • Scripts → ~/.local/share/bin/ (as symlinks)"
             print "  • Doom Emacs → ~/.doom.d/ (as symlinks)"
             print "  • LazyVim → ~/.config/nvim/ (as symlinks)"
+            print "  • Zed → ~/.config/zed/ (as symlinks)"
         }
     }
 }

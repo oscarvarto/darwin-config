@@ -114,3 +114,6 @@ $env.CARGO_HOME = ($env.HOME | path join ".cargo")
 $env.EMACSDIR = "~/.emacs.d"
 $env.DOOMDIR  = "~/.doom.d"
 $env.DOOMLOCALDIR = "~/.emacs.d/.local"
+
+# Set Xcode developer directory to beta version
+$env.DEVELOPER_DIR = "/Applications/Xcode-beta.app/Contents/Developer"
