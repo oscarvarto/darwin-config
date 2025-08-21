@@ -34,6 +34,7 @@ A comprehensive macOS system configuration using Nix-Darwin and Home Manager wit
   - [🌟 Neovim (LazyVim) Configuration](#-neovim-lazyvim-configuration)
   - [🛠️ Editor Management with Stow](#%EF%B8%8F-editor-management-with-stow)
 - [🧠 IntelliJ IDEA Development Utilities](#-intellij-idea-development-utilities)
+- [🐚 Choosing Your Default Shell](#-choosing-your-default-shell)
 
 ### 📚 Architecture & Documentation
 - [📁 What's Included](#-whats-included)
@@ -498,7 +499,11 @@ This approach ensures that while garbage collection won't remove pinned packages
   - **pass**: Backup credential store (offline, GPG-encrypted)
   - **Unified CLI**: Single `secret` command for all credential systems
 - **📦 Package Management**: Nix packages + Homebrew integration
-- **🐚 Shell Configuration**: Nushell, Zsh with smart aliases and PATH management
+- **🐚 Advanced Shell Configuration**: Choose between Nushell, Fish, and Zsh with:
+  - **Consistent Experience**: Same aliases, PATH, and tools across all shells
+  - **Smart Switching**: Easy shell changes via simple configuration updates
+  - **Modern Features**: Starship prompts, Zoxide navigation, Atuin history
+  - **Seamless Integration**: Terminal, editor, and development tool compatibility
 - **🔧 Development Tools**: Complete development environment with LSPs, formatters, etc.
 - **🔒 Security First**: Automated backups, key rotation, and credential synchronization
 
@@ -1098,6 +1103,275 @@ cleanup-intellij -s  # Clean system caches
 
 This tool is particularly useful in JVM development environments where IntelliJ's complex project models can become corrupted, especially when working with large codebases, multi-module projects, or frequently switching between branches with different project structures.
 
+## 🐚 Choosing Your Default Shell
+
+This configuration supports three fully-configured shells: **Nushell**, **Fish**, and **Zsh**. Each shell is intelligently configured with consistent features, aliases, and PATH management. You can choose your preferred shell and switch between them seamlessly.
+
+### 🎯 Available Shells
+
+| Shell | Description | Best For |
+|-------|-------------|----------|
+| **Nushell** | Modern shell with structured data | Data manipulation, pipelines, modern workflows |
+| **Fish** | User-friendly with great defaults | Interactive use, beginners, excellent autocompletion |
+| **Zsh** | Traditional, highly configurable | Power users, legacy compatibility, extensive plugins |
+
+### 🔧 Setting Your Default Shell
+
+#### For New Installations
+
+When adding a new host to your configuration, specify the `defaultShell` option:
+
+```bash
+# Add new host with shell preference
+nix run .#add-host -- --hostname $(hostname -s) --user $USER
+```
+
+Then edit `flake.nix` to set your shell preference:
+
+```nix
+hostConfigs = {
+  your-hostname = {
+    user = "youruser";
+    system = "aarch64-darwin";
+    defaultShell = "nushell";  # Options: "nushell", "fish", "zsh"
+    hostSettings = {
+      enablePersonalConfig = true;
+      workProfile = false;
+    };
+  };
+};
+```
+
+#### For Existing Configurations
+
+1. **Edit your host configuration in `flake.nix`:**
+   ```nix
+   predator = {
+     user = "oscarvarto";
+     system = "aarch64-darwin";
+     defaultShell = "fish";  # Change to your preferred shell
+     hostSettings = {
+       # ... existing settings
+     };
+   };
+   ```
+
+2. **Rebuild your system:**
+   ```bash
+   nb && ns  # Build and switch
+   ```
+
+3. **Update Emacs configuration (optional):**
+   ```bash
+   nix run .#update-doom-config
+   ```
+
+### 🌟 Shell Features
+
+All shells include consistent features configured automatically:
+
+#### Shared Features
+- **Starship Prompt**: Modern, fast prompt with git integration
+- **Zoxide**: Smart directory jumping with `z` command
+- **Atuin**: Improved history with search and sync
+- **Yazi**: File manager integration
+- **Consistent Aliases**: Same shortcuts across all shells
+- **PATH Management**: Unified PATH configuration
+- **Development Tools**: Same tools available in all shells
+
+#### Shell-Specific Strengths
+
+**Nushell Features:**
+```bash
+# Structured data processing
+ls | where size > 1MB | sort-by modified
+
+# Built-in data formats
+open package.json | get dependencies
+
+# Powerful pipelines
+ps | where cpu > 50 | select name cpu
+```
+
+**Fish Features:**
+```bash
+# Excellent autocompletion
+cd /usr/loc[TAB]  # Completes to /usr/local/
+
+# Visual command history
+# Use up arrow for intelligent history search
+
+# Syntax highlighting in real-time
+```
+
+**Zsh Features:**
+```bash
+# Advanced completion system
+# Glob patterns and extended matching
+
+# Plugin ecosystem compatibility
+# Customizable prompt systems
+```
+
+### 📋 Available Shell Commands
+
+#### Common Aliases (All Shells)
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `nb` | `nix run .#build` | Build darwin configuration |
+| `ns` | `nix run .#build-switch` | Build and switch configuration |
+| `gp` | `git fetch --all -p; git pull; git submodule update --recursive` | Git pull with submodules |
+| `search` | `rg -p --glob '!node_modules/*'` | Ripgrep search excluding node_modules |
+| `diff` | `difft` | Better diff tool |
+| `edd` | `emacs --daemon=doom` | Start Emacs daemon |
+| `ds` | `doom sync --aot --gc` | Doom sync with optimization |
+
+#### Shell Configuration Shortcuts
+
+| Command | Shell | Description |
+|---------|-------|-------------|
+| `nnc` | All | Edit Nushell config.nu |
+| `nne` | All | Edit Nushell env.nu |
+| `ffc` | All | Edit Fish config (in home-manager.nix) |
+| `tg` | All | Edit terminal config |
+
+### 🔄 Switching Between Shells
+
+#### Quick Shell Testing
+
+```bash
+# Try different shells temporarily
+fish    # Start fish session
+nu      # Start nushell session
+zsh     # Start zsh session
+exit    # Return to default shell
+```
+
+#### Changing Default Shell
+
+1. **Update flake.nix:**
+   ```nix
+   defaultShell = "fish";  # Change to desired shell
+   ```
+
+2. **Rebuild system:**
+   ```bash
+   nb && ns
+   ```
+
+3. **Verify change:**
+   ```bash
+   echo $SHELL
+   # Should show new shell path
+   ```
+
+### 🛠️ Advanced Shell Configuration
+
+#### Customizing Shell Behavior
+
+Each shell's configuration can be customized in specific files:
+
+**Nushell**: `modules/nushell/config.nu` and `modules/nushell/env.nu`
+**Fish**: `modules/home-manager.nix` (fish section)
+**Zsh**: `modules/shell-config.nix` and `modules/zsh-darwin.nix`
+
+#### Adding Custom Aliases
+
+Edit the appropriate configuration file for your shell:
+
+**For Nushell** (`modules/nushell/config.nu`):
+```nushell
+# Add custom aliases
+alias myalias = "your-command"
+```
+
+**For Fish** (`modules/home-manager.nix`):
+```nix
+shellAbbrs = {
+  myalias = "your-command";
+};
+```
+
+**For Zsh** (`modules/shell-config.nix`):
+```nix
+initContent = lib.mkAfter ''
+  alias myalias="your-command"
+'';
+```
+
+### 🎯 Shell Recommendations
+
+**Choose Nushell if you:**
+- Work with structured data (JSON, CSV, XML)
+- Like modern, consistent command syntax
+- Want powerful data manipulation pipelines
+- Prefer type safety and structured output
+
+**Choose Fish if you:**
+- Want excellent out-of-the-box experience
+- Prefer intuitive, user-friendly interfaces
+- Value great autocompletion and history
+- Are new to advanced shell features
+
+**Choose Zsh if you:**
+- Need maximum compatibility with bash scripts
+- Want extensive plugin ecosystem (oh-my-zsh, etc.)
+- Prefer traditional Unix shell behavior
+- Have existing zsh configurations to port
+
+### ⚡ PATH and Environment Management
+
+All shells use the centralized PATH configuration from `modules/path-config.nix`. This ensures:
+
+- **Consistent PATH**: Same paths across all shells
+- **Priority Control**: Your tools take precedence
+- **Tool Integration**: Automatic integration with development tools
+- **Override Capability**: Your configuration overrides mise, homebrew, etc.
+
+See [PATH Management Documentation](modules/PATH-MANAGEMENT.md) for detailed PATH customization.
+
+### 🔍 Troubleshooting Shell Issues
+
+#### Shell Not Changing
+```bash
+# Check current shell
+echo $SHELL
+
+# Verify configuration
+grep -A 5 "$(hostname -s)" flake.nix | grep defaultShell
+
+# Force rebuild
+nb && ns
+```
+
+#### Missing Features
+```bash
+# Check if shell programs are enabled
+nix run .#build --show-trace
+
+# Verify stow deployment
+manage-stow-packages deploy
+```
+
+#### Configuration Not Loading
+```bash
+# Check configuration files exist
+ls -la ~/.config/nushell/
+ls -la ~/.config/fish/
+
+# Test configuration syntax
+# For nushell:
+nu --config modules/nushell/config.nu --commands "exit"
+```
+
+### 💡 Shell Integration Tips
+
+- **Emacs Integration**: The default shell setting automatically configures vterm and shell-mode
+- **Terminal Integration**: All shells work seamlessly with Ghostty, Warp, and other terminals
+- **Script Compatibility**: Shell scripts in this repo use bash for maximum compatibility
+- **Interactive vs Script**: Your default shell affects interactive sessions, not system scripts
+
 ## 📁 What's Included
 
 ### Core Tools
@@ -1157,11 +1431,12 @@ flake.nix              # Main flake with inputs, hostConfigs, and apps
 
 ## 🔧 Configuration Examples
 
-### Personal Machine
+### Personal Machine with Nushell
 ```nix
 your-hostname = {
   user = "alice";
   system = "aarch64-darwin";
+  defaultShell = "nushell";  # Modern shell for data processing
   hostSettings = {
     enablePersonalConfig = true;
     workProfile = false;
@@ -1169,14 +1444,28 @@ your-hostname = {
 };
 ```
 
-### Work Machine
+### Work Machine with Fish
 ```nix
 work-laptop = {
   user = "alice";
   system = "aarch64-darwin";
+  defaultShell = "fish";     # User-friendly shell for work
   hostSettings = {
     enablePersonalConfig = false;
     workProfile = true;
+  };
+};
+```
+
+### Traditional Setup with Zsh
+```nix
+legacy-system = {
+  user = "bob";
+  system = "x86_64-darwin";
+  defaultShell = "zsh";      # Traditional shell with extensive plugins
+  hostSettings = {
+    enablePersonalConfig = true;
+    workProfile = false;
   };
 };
 ```
