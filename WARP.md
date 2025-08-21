@@ -51,8 +51,8 @@ Common commands (macOS aarch64-darwin)
 
 - GNU Stow package management
   - cd ~/darwin-config/stow                 # Navigate to stow directory
-  - manage-aux-scripts deploy               # Deploy all stow packages
-  - manage-aux-scripts remove               # Remove all stow packages  
+  - manage-stow-packages deploy             # Deploy all stow packages (renamed from manage-aux-scripts)
+  - manage-stow-packages remove             # Remove all stow packages  
   - stow -t ~ PACKAGE                       # Deploy specific package
   - stow -D -t ~ PACKAGE                    # Remove specific package
   - manage-cargo-tools install              # Install Rust/Cargo tools
@@ -110,9 +110,11 @@ Repo-specific practices and conventions
 - Use the nb and ns aliases to build and switch the macOS configuration when available.
 - GNU Stow package deployment approach:
   - Scripts intended for Raycast should live in ~/.local/share/bin; this repo achieves that with stow packages
-  - Use 'manage-aux-scripts deploy' for initial setup or 'stow -t ~ PACKAGE' for individual packages
+  - Use 'manage-stow-packages deploy' for initial setup or 'stow -t ~ PACKAGE' for individual packages
   - Complex configurations (Doom Emacs, LazyVim) are managed as stow packages to avoid Nix escaping issues
   - Tool management (cargo, nodejs, dotnet) uses declarative TOML configs deployed via stow
+  - CRITICAL: Always use 'stow -t ~' syntax - the target directory (-t ~) is REQUIRED for proper symlink creation
+  - Never omit the target directory flag when using stow commands in scripts or documentation
 - Hybrid secret management approach:
   - agenix: SSH keys, certificates, system secrets (encrypted with age)
   - 1Password: User credentials, API tokens (authenticated, enterprise-grade)

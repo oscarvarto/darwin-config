@@ -1,0 +1,133 @@
+#!/usr/bin/env nu
+
+# Script to manage stow packages using GNU Stow
+# Usage: manage-stow-packages <command>
+
+def main [command: string = "help"] {
+    let stow_dir = $"($env.HOME)/darwin-config/stow"
+    
+    if not ($stow_dir | path exists) {
+        print "❌ Error: Stow directory not found at ~/darwin-config/stow"
+        exit 1
+    }
+    
+    match $command {
+        "deploy" | "install" => {
+            print "🚀 Deploying stow packages..."
+            
+            cd $stow_dir
+            
+            # Core script packages
+            stow -t ~ aux-scripts
+            stow -t ~ nix-scripts  
+            stow -t ~ raycast-scripts
+            
+            # Development tool managers
+            stow -t ~ cargo-tools
+            stow -t ~ nodejs-tools
+            stow -t ~ dotnet-tools
+            
+            # Editor configurations
+            stow -t ~ doom-emacs
+            stow -t ~ lazyvim
+            
+            if $env.LAST_EXIT_CODE == 0 {
+                print "✅ Stow packages deployed successfully!"
+                print $"📂 Scripts are now available in ($env.HOME)/.local/share/bin/"
+                print $"🎨 Editor configs deployed to ~/.doom.d/ and ~/.config/nvim/"
+            } else {
+                print "❌ Failed to deploy stow packages"
+                exit 1
+            }
+        }
+        
+        "remove" | "uninstall" => {
+            print "🗑️  Removing stow packages..."
+            
+            cd $stow_dir
+            
+            # Core script packages  
+            stow -D -t ~ aux-scripts
+            stow -D -t ~ nix-scripts
+            stow -D -t ~ raycast-scripts
+            
+            # Development tool managers
+            stow -D -t ~ cargo-tools
+            stow -D -t ~ nodejs-tools
+            stow -D -t ~ dotnet-tools
+            
+            # Editor configurations
+            stow -D -t ~ doom-emacs
+            stow -D -t ~ lazyvim
+            
+            if $env.LAST_EXIT_CODE == 0 {
+                print "✅ Stow packages removed successfully!"
+            } else {
+                print "❌ Failed to remove stow packages"
+                exit 1
+            }
+        }
+        
+        "status" => {
+            print "📊 Checking status of auxiliary scripts..."
+            
+            let scripts = (ls $"($stow_dir)/aux-scripts/.local/share/bin" | get name | path basename)
+            
+            print $"\n📂 Available scripts in stow package: ($scripts | length)"
+            for script in $scripts {
+                print $"  • ($script)"
+            }
+            
+            print $"\n🔗 Deployed scripts:"
+            for script in $scripts {
+                let target_path = $"($env.HOME)/.local/share/bin/($script)"
+                if ($target_path | path exists) {
+                    let link_info = (ls -la $target_path | get 0)
+                    if ($link_info.type == "symlink") {
+                        print $"  ✅ ($script) -> correctly symlinked"
+                    } else {
+                        print $"  ⚠️  ($script) -> exists but not a symlink"
+                    }
+                } else {
+                    print $"  ❌ ($script) -> not deployed"
+                }
+            }
+        }
+        
+        "list" => {
+            print "📋 Available scripts in stow package:"
+            let scripts = (ls $"($stow_dir)/aux-scripts/.local/share/bin" | get name | path basename)
+            for script in $scripts {
+                print $"  • ($script)"
+            }
+        }
+        
+        "help" | _ => {
+            print "🛠️  Stow Package Manager"
+            print ""
+            print "Usage: manage-stow-packages <command>"
+            print ""
+            print "Commands:"
+            print "  deploy, install    Deploy all stow packages using stow"
+            print "  remove, uninstall  Remove all stow packages (unstow)"
+            print "  status             Check deployment status of scripts"
+            print "  list               List available scripts in aux-scripts"
+            print "  help               Show this help message"
+            print ""
+            print "📁 Available Stow Packages:"
+            print "  • aux-scripts      - Core utility scripts"
+            print "  • nix-scripts      - Nix-related utilities (smart-gc, etc.)"
+            print "  • raycast-scripts  - Raycast automation scripts"
+            print "  • cargo-tools      - Rust/Cargo tools management"
+            print "  • nodejs-tools     - Node.js tools and toolchain"
+            print "  • dotnet-tools     - .NET SDK and global tools"
+            print "  • doom-emacs       - Complete Doom Emacs configuration"
+            print "  • lazyvim          - Neovim LazyVim configuration"
+            print ""
+            print "📂 Deployment Targets:"
+            print "  • Scripts → ~/.local/share/bin/ (as symlinks)"
+            print "  • Doom Emacs → ~/.doom.d/ (as symlinks)"
+            print "  • LazyVim → ~/.config/nvim/ (as symlinks)"
+        }
+    }
+}

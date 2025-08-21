@@ -194,7 +194,7 @@ After the initial Nix configuration is deployed, set up additional tools and scr
 
 ```bash
 # Deploy all stow-managed scripts and configurations
-manage-aux-scripts deploy
+manage-stow-packages deploy
 
 # Install development toolchains
 manage-cargo-tools install     # Rust tools
