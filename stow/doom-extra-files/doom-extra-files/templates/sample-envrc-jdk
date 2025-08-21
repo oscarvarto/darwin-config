@@ -1,0 +1,53 @@
+# Sample .envrc file for project-specific JDK configuration
+# Place this file (renamed to .envrc) in your project root directory
+# Run `direnv allow` to authorize it
+
+# ----------------------------------------------------------------------
+# OPTION 1: Direct JDK Path
+# ----------------------------------------------------------------------
+# Set JAVA_HOME directly to a specific JDK installation
+# This is the simplest approach and works with the enhanced JDK detection
+
+# Example for JDK 21
+export JAVA_HOME="/Users/oscarvarto/Library/Caches/Coursier/arc/https/github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.6%252B7/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.6_7.tar.gz/jdk-21.0.6+7/Contents/Home/"
+
+# Example for JDK 24
+# export JAVA_HOME="/Users/oscarvarto/Library/Caches/Coursier/arc/https/github.com/adoptium/temurin24-binaries/releases/download/jdk-24%252B36/OpenJDK24U-jdk_aarch64_mac_hotspot_24_36.tar.gz/jdk-24+36/Contents/Home/"
+
+# ----------------------------------------------------------------------
+# OPTION 2: Using jenv (if installed)
+# ----------------------------------------------------------------------
+# Uncomment the following lines if you use jenv to manage Java versions
+# Make sure jenv is installed and configured in your shell first
+
+# use_jenv() {
+#   eval "$(jenv init -)"
+#   jenv local $1
+#   export JAVA_HOME="$(jenv prefix)"
+# }
+# use_jenv 21 # or another version managed by jenv
+
+# ----------------------------------------------------------------------
+# OPTION 3: Using jabba (if installed)
+# ----------------------------------------------------------------------
+# Uncomment the following lines if you use jabba to manage Java versions
+# Make sure jabba is installed and configured in your shell first
+
+# use_jabba() {
+#   export JABBA_HOME="$HOME/.jabba"
+#   [ -s "$JABBA_HOME/jabba.sh" ] && source "$JABBA_HOME/jabba.sh"
+#   jabba use $1
+# }
+# use_jabba adopt@1.21.0-0 # or another version managed by jabba
+
+# ----------------------------------------------------------------------
+# PATH Updates
+# ----------------------------------------------------------------------
+# Add JDK bin directory to PATH to ensure tools are available
+PATH_add "$JAVA_HOME/bin"
+
+# Optional: Display JDK information when entering the directory
+echo "Project JDK configuration:"
+echo "JAVA_HOME: $JAVA_HOME"
+java -version
+
