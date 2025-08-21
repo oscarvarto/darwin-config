@@ -75,10 +75,10 @@ def show_status [] {
 }
 
 def perform_dry_run [keep_generations: int] {
-  print $"($BLUE)💭 Smart GC Dry Run (keeping last ($keep_generations) generations)($NC)"
+  print $"($BLUE)💭 Smart GC Dry Run \(keeping last ($keep_generations) generations\)($NC)"
   
   print $"($YELLOW)📋 What would be cleaned:($NC)"
-  print $"($YELLOW)├─ Removing old home-manager generations (older than ($keep_generations) days)($NC)"
+  print $"($YELLOW)├─ Removing old home-manager generations \(older than ($keep_generations) days\)($NC)"
   
   let dry_run_cmd = $"nix-collect-garbage --delete-older-than ($keep_generations)d --dry-run"
   let result = (do { ^nix-collect-garbage --delete-older-than $"($keep_generations)d" --dry-run } | complete)
@@ -121,9 +121,11 @@ def pin_essentials [] {
   ]
   
   # Create a gcroot for current system configuration if it exists
-  let system_derivation = (do { ^nix-instantiate --add-root /nix/var/nix/gcroots/current-system '<nixpkgs/nixos>' -A system } | complete)
+  let system_derivation = (do { ^nix-instantiate --add-root /nix/var/nix/gcroots/current-system '\u003cnixpkgs/nixos\u003e' -A system } | complete)
   if $system_derivation.exit_code == 0 {
     print $"($GREEN)✅ Pinned current system configuration($NC)"
+  } else {
+    print $"($YELLOW)ℹ️ Could not pin system configuration \(not a NixOS system\)($NC)"
   }
   
   print $"($YELLOW)📦 Pinning essential packages:($NC)"
@@ -141,7 +143,7 @@ def pin_essentials [] {
 }
 
 def perform_cleanup [keep_generations: int, force: bool, verbose: bool, optimize: bool] {
-  print $"($BLUE)🧹 Starting smart garbage collection (keeping last ($keep_generations) generations)($NC)"
+  print $"($BLUE)🧹 Starting smart garbage collection \(keeping last ($keep_generations) generations\)($NC)"
   
   if not $force {
     print $"($YELLOW)⚠️ This will remove generations older than ($keep_generations) days($NC)"
@@ -155,7 +157,7 @@ def perform_cleanup [keep_generations: int, force: bool, verbose: bool, optimize
   let before_size = (do { ^du -sb /nix/store } | complete | get stdout | str trim | split row "\t" | get 0? | into int | default 0)
   
   # Remove old generations
-  print $"($YELLOW)🗑️ Removing old generations (older than ($keep_generations) days)($NC)"
+  print $"($YELLOW)🗑️ Removing old generations \(older than ($keep_generations) days\)($NC)"
   let cleanup_result = if $verbose {
     (do { ^nix-collect-garbage --delete-older-than $"($keep_generations)d" } | complete)
   } else {
@@ -187,7 +189,7 @@ def perform_cleanup [keep_generations: int, force: bool, verbose: bool, optimize
   
   # Optimize store if requested
   if $optimize {
-    print $"($YELLOW)⚡ Optimizing store (hard-linking identical files)($NC)"
+    print $"($YELLOW)⚡ Optimizing store \(hard-linking identical files\)($NC)"
     let optimize_result = if $verbose {
       (do { ^nix-store --optimise } | complete)
     } else {
@@ -215,44 +217,4 @@ def perform_cleanup [keep_generations: int, force: bool, verbose: bool, optimize
   }
 }
 
-# Main logic
-def main [
-  command?: string = "status"
-  count?: int
-  --force (-f)
-  --verbose (-v)
-  --help (-h)
-  --optimize
-] {
-  if $help {
-    show_help
-    return
-  }
-  
-  match $command {
-    "status" => { show_status }
-    "dry-run" => { perform_dry_run 3 }
-    "pin" => { pin_essentials }
-    "clean" => { 
-      let keep_gens = if $count != null { $count } else { 3 }
-      perform_cleanup $keep_gens $force $verbose $optimize
-    }
-    "aggressive" => { 
-      perform_cleanup 2 $force $verbose $optimize
-    }
-    "conservative" => { 
-      perform_cleanup 7 $force $verbose $optimize
-    }
-    _ => {
-      # Check if the command is a number (for backward compatibility)
-      let parsed_num = ($command | into int | default null)
-      if $parsed_num != null {
-        perform_cleanup $parsed_num $force $verbose $optimize
-      } else {
-        print $"($RED)❌ Unknown command: ($command)($NC)"
-        show_help
-        exit 1
-      }
-    }
-  }
-}
+# Functions are available when used as a module

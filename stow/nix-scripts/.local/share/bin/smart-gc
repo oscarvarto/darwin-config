@@ -1,0 +1,163 @@
+#!/usr/bin/env bash
+# Smart GC wrapper script for proper command line argument handling
+
+# Get the directory of this script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Path to the actual nushell script
+NU_SCRIPT="${SCRIPT_DIR}/smart-gc.nu"
+
+# Check if nushell is available
+if ! command -v nu &> /dev/null; then
+    echo "Error: nushell (nu) is required but not found in PATH"
+    exit 1
+fi
+
+# Check if the nu script exists
+if [[ ! -f "$NU_SCRIPT" ]]; then
+    echo "Error: smart-gc.nu not found at $NU_SCRIPT"
+    exit 1
+fi
+
+# Parse command line arguments and call appropriate nushell function
+case "${1:-status}" in
+    "help" | "-h" | "--help")
+        nu -c "source '${NU_SCRIPT}'; show_help"
+        ;;
+    "status")
+        nu -c "source '${NU_SCRIPT}'; show_status"
+        ;;
+    "dry-run")
+        nu -c "source '${NU_SCRIPT}'; perform_dry_run 3"
+        ;;
+    "pin")
+        nu -c "source '${NU_SCRIPT}'; pin_essentials"
+        ;;
+    "clean")
+        # Parse optional count argument and flags
+        COUNT=${2:-3}
+        FORCE_FLAG=""
+        VERBOSE_FLAG=""
+        OPTIMIZE_FLAG=""
+        
+        shift # Remove 'clean' command
+        while [[ $# -gt 0 ]]; do
+            case $1 in
+                -f|--force)
+                    FORCE_FLAG="true"
+                    shift
+                    ;;
+                -v|--verbose)
+                    VERBOSE_FLAG="true"
+                    shift
+                    ;;
+                --optimize)
+                    OPTIMIZE_FLAG="true"
+                    shift
+                    ;;
+                [0-9]*)
+                    COUNT="$1"
+                    shift
+                    ;;
+                *)
+                    shift
+                    ;;
+            esac
+        done
+        
+        nu -c "source '${NU_SCRIPT}'; perform_cleanup ${COUNT} ${FORCE_FLAG:-false} ${VERBOSE_FLAG:-false} ${OPTIMIZE_FLAG:-false}"
+        ;;
+    "aggressive")
+        # Parse flags for aggressive cleanup
+        FORCE_FLAG=""
+        VERBOSE_FLAG=""
+        OPTIMIZE_FLAG=""
+        
+        shift # Remove 'aggressive' command
+        while [[ $# -gt 0 ]]; do
+            case $1 in
+                -f|--force)
+                    FORCE_FLAG="true"
+                    shift
+                    ;;
+                -v|--verbose)
+                    VERBOSE_FLAG="true"
+                    shift
+                    ;;
+                --optimize)
+                    OPTIMIZE_FLAG="true"
+                    shift
+                    ;;
+                *)
+                    shift
+                    ;;
+            esac
+        done
+        
+        nu -c "source '${NU_SCRIPT}'; perform_cleanup 2 ${FORCE_FLAG:-false} ${VERBOSE_FLAG:-false} ${OPTIMIZE_FLAG:-false}"
+        ;;
+    "conservative")
+        # Parse flags for conservative cleanup
+        FORCE_FLAG=""
+        VERBOSE_FLAG=""
+        OPTIMIZE_FLAG=""
+        
+        shift # Remove 'conservative' command
+        while [[ $# -gt 0 ]]; do
+            case $1 in
+                -f|--force)
+                    FORCE_FLAG="true"
+                    shift
+                    ;;
+                -v|--verbose)
+                    VERBOSE_FLAG="true"
+                    shift
+                    ;;
+                --optimize)
+                    OPTIMIZE_FLAG="true"
+                    shift
+                    ;;
+                *)
+                    shift
+                    ;;
+            esac
+        done
+        
+        nu -c "source '${NU_SCRIPT}'; perform_cleanup 7 ${FORCE_FLAG:-false} ${VERBOSE_FLAG:-false} ${OPTIMIZE_FLAG:-false}"
+        ;;
+    [0-9]*)
+        # Backward compatibility: numeric argument
+        COUNT="$1"
+        FORCE_FLAG=""
+        VERBOSE_FLAG=""
+        OPTIMIZE_FLAG=""
+        
+        shift # Remove count
+        while [[ $# -gt 0 ]]; do
+            case $1 in
+                -f|--force)
+                    FORCE_FLAG="true"
+                    shift
+                    ;;
+                -v|--verbose)
+                    VERBOSE_FLAG="true"
+                    shift
+                    ;;
+                --optimize)
+                    OPTIMIZE_FLAG="true"
+                    shift
+                    ;;
+                *)
+                    shift
+                    ;;
+            esac
+        done
+        
+        nu -c "source '${NU_SCRIPT}'; perform_cleanup ${COUNT} ${FORCE_FLAG:-false} ${VERBOSE_FLAG:-false} ${OPTIMIZE_FLAG:-false}"
+        ;;
+    *)
+        echo "❌ Unknown command: $1"
+        nu -c "source '${NU_SCRIPT}'; show_help"
+        exit 1
+        ;;
+esac

@@ -278,7 +278,7 @@ smart-gc clean
 smart-gc conservative
 
 # Aggressive cleanup with store optimization
-smart-gc --force --optimize aggressive
+smart-gc aggressive --force --optimize
 ```
 
 **Smart GC features:**
@@ -291,7 +291,7 @@ smart-gc --force --optimize aggressive
 **Recommended maintenance schedule:**
 - **After major changes**: Run `smart-gc dry-run` to check what can be cleaned
 - **Weekly**: `smart-gc clean` to keep 3 recent generations
-- **Monthly**: `smart-gc --optimize conservative` for deeper cleanup with optimization
+- **Monthly**: `smart-gc conservative --optimize` for deeper cleanup with optimization
 - **Before major updates**: `smart-gc status` to check disk usage
 
 ### 📌 Package Pinning System
