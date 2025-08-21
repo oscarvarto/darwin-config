@@ -2,6 +2,51 @@
 
 A comprehensive macOS system configuration using Nix-Darwin and Home Manager with flakes support. While designed as a single-user repository, it includes tools to easily adapt the configuration for different users, machines, and environments.
 
+## 📋 Table of Contents
+
+### 🚀 Getting Started
+- [🚀 Installation Guide for macOS](#-installation-guide-for-macos)
+  - [Prerequisites](#prerequisites)
+  - [1. Install Xcode Command Line Tools](#1-install-xcode-command-line-tools)
+  - [2. Install Nix Package Manager](#2-install-nix-package-manager)
+  - [3. Clone and Initialize Repository](#3-clone-and-initialize-repository)
+  - [4. Configure for Your Environment](#4-configure-for-your-environment)
+  - [5. Review and Customize Packages](#5-review-and-customize-packages)
+  - [6. Optional: Setup SSH Keys and Secrets](#6-optional-setup-ssh-keys-and-secrets)
+  - [7. Test Build Configuration](#7-test-build-configuration)
+  - [8. Deploy Configuration](#8-deploy-configuration)
+  - [9. Deploy Stow Packages](#9-deploy-stow-packages)
+  - [10. Optional: Setup Enhanced Secrets](#10-optional-setup-enhanced-secrets)
+
+### 🔧 Development & Maintenance
+- [🔄 Development Workflow](#-development-workflow)
+  - [📦 Updating Software Versions](#-updating-software-versions)
+  - [🧹 System Maintenance](#-system-maintenance)
+  - [📌 Package Pinning System](#-package-pinning-system)
+- [🛠️ Available Nix Apps](#%EF%B8%8F-available-nix-apps)
+
+### ✨ Key Features & Systems
+- [✨ Key Features](#-key-features)
+- [🗂️ GNU Stow Package Management](#%EF%B8%8F-gnu-stow-package-management)
+- [🔤 Font Management & Fallback System](#-font-management--fallback-system)
+- [✏️ Editor Configurations](#%EF%B8%8F-editor-configurations)
+  - [🚀 Doom Emacs Configuration](#-doom-emacs-configuration)
+  - [🌟 Neovim (LazyVim) Configuration](#-neovim-lazyvim-configuration)
+  - [🛠️ Editor Management with Stow](#%EF%B8%8F-editor-management-with-stow)
+- [🧠 IntelliJ IDEA Development Utilities](#-intellij-idea-development-utilities)
+
+### 📚 Architecture & Documentation
+- [📁 What's Included](#-whats-included)
+- [🏗️ Architecture](#%EF%B8%8F-architecture)
+- [📖 Documentation](#-documentation)
+- [🔧 Configuration Examples](#-configuration-examples)
+
+### 🤝 Contributing & License
+- [🤝 Contributing](#-contributing)
+- [📝 License](#-license)
+
+---
+
 ## 🚀 Installation Guide for macOS
 
 This configuration supports both Apple Silicon (M1/M2/M3) and Intel Macs running macOS Monterey (12.0) or later.
