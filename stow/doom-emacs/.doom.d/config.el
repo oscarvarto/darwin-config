@@ -47,6 +47,9 @@
 (add-to-list 'load-path (expand-file-name "config/core" my/config-el-dir))
 (require 'my-paths) ; Make my/doom-private-dir available
 
+;; Load early cleanup configuration FIRST - this prevents startup errors
+(require 'my-early-cleanup-config)
+
 ;; Now load other core configs using require (they are in config/core/)
 (require 'my-defaults-config)
 (require 'my-banner-config)

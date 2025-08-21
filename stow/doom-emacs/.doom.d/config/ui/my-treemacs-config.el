@@ -3,6 +3,20 @@
 (after! doom-modeline
   (setq doom-modeline-buffer-file-name-style 'buffer-name))
 
+;; Simple fix: remove invalid projectile paths before treemacs loads
+(defun my/simple-projectile-cleanup ()
+  "Clean up invalid projectile projects before treemacs tries to use them."
+  (when (and (boundp 'projectile-known-projects)
+             projectile-known-projects)
+    (let* ((valid-projects (cl-remove-if-not #'file-exists-p projectile-known-projects))
+           (removed-count (- (length projectile-known-projects) (length valid-projects))))
+      (when (> removed-count 0)
+        (setq projectile-known-projects valid-projects)
+        (message "Cleaned %d invalid projectile paths" removed-count)))))
+
+;; Clean up before treemacs loads
+(my/simple-projectile-cleanup)
+
 (use-package! treemacs
   :config
   (defun my/treemacs-custom-font ()
