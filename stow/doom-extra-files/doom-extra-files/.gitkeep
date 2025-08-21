@@ -1,0 +1,9 @@
+# This file ensures the doom-extra-files directory is tracked by git
+# 
+# You can delete this file once you add actual content to this directory.
+#
+# This directory is intended for:
+# - Extra Doom Emacs templates
+# - Custom snippets
+# - Additional themes or resources
+# - Any other supplementary files that don't belong in .doom.d

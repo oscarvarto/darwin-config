@@ -13,6 +13,10 @@ stow/
 ├── cargo-tools/          # Rust/Cargo tools management
 │   ├── cargo-tools.toml # Configuration for cargo packages
 │   └── .local/share/bin/# Management script
+├── doom-emacs/           # Doom Emacs configuration
+│   └── .doom.d/         # Doom configuration files
+├── doom-extra-files/     # Extra Doom Emacs resources
+│   └── doom-extra-files/# Templates, snippets, themes, etc.
 ├── nodejs-tools/         # Node.js tools management
 │   ├── nodejs-tools.toml# Configuration for Node.js packages
 │   └── .local/share/bin/# Management script
@@ -21,7 +25,11 @@ stow/
 │   └── .local/share/bin/# Management script
 ├── lazyvim/              # Neovim LazyVim configuration
 │   └── .config/nvim/    # LazyVim configuration files
-└── README.md           # This file
+├── nix-scripts/          # Nix-related utility scripts
+│   └── .local/share/bin/# Nix utilities and helpers
+├── raycast-scripts/      # Raycast automation scripts
+│   └── .local/share/bin/# Raycast-specific utilities
+└── README.md             # This file
 ```
 
 ## Usage
@@ -35,11 +43,15 @@ manage-aux-scripts deploy
 
 Or deploy individual packages:
 ```bash
-stow -t ~ aux-scripts    # Deploy auxiliary scripts
-stow -t ~ cargo-tools    # Deploy cargo tools management
-stow -t ~ nodejs-tools   # Deploy Node.js tools management
-stow -t ~ dotnet-tools   # Deploy .NET tools management
-stow -t ~ lazyvim        # Deploy LazyVim configuration
+stow -t ~ aux-scripts      # Deploy auxiliary scripts
+stow -t ~ cargo-tools      # Deploy cargo tools management
+stow -t ~ doom-emacs       # Deploy Doom Emacs configuration
+stow -t ~ doom-extra-files # Deploy extra Doom Emacs resources
+stow -t ~ nodejs-tools     # Deploy Node.js tools management
+stow -t ~ dotnet-tools     # Deploy .NET tools management
+stow -t ~ lazyvim          # Deploy LazyVim configuration
+stow -t ~ nix-scripts      # Deploy Nix utility scripts
+stow -t ~ raycast-scripts  # Deploy Raycast automation scripts
 ```
 
 This will create symlinks from `~/.local/share/bin/` to the scripts in `stow/aux-scripts/.local/share/bin/`.
@@ -91,6 +103,14 @@ After a system wipe:
 - `manage-dotnet-tools` - Install, update, and manage .NET environment
 - `dotnet-tools.toml` - Declarative configuration for SDK version and tools
 - Integrates with .NET CLI global tool system
+
+### Doom Extra Files (`doom-extra-files`)
+- Additional Doom Emacs resources stored outside `.doom.d`
+- Templates for file creation and project scaffolding
+- Custom YASnippet snippets organized by mode
+- Custom themes and color schemes
+- Symlinked to `~/doom-extra-files/` when deployed
+- Version controlled alongside main Doom configuration
 
 ### LazyVim Configuration (`lazyvim`)
 - Neovim configuration based on LazyVim framework
