@@ -193,6 +193,193 @@ nb && ns  # Build and switch with aliases
 nix run .#build-switch
 ```
 
+### 📦 Updating Software Versions
+
+To get the latest software versions and package updates:
+
+```bash
+# Update flake lock file to latest versions
+nix flake update
+
+# Update specific input (optional)
+nix flake lock --update-input nixpkgs
+nix flake lock --update-input home-manager
+
+# After updating, rebuild and switch
+nb && ns
+```
+
+**What `nix flake update` does:**
+- Updates `flake.lock` with latest versions of nixpkgs, home-manager, and other inputs
+- Gets security updates and new package versions
+- May introduce breaking changes, so test after updating
+- Equivalent to updating your "package manager" in other systems
+
+### 🧹 System Maintenance
+
+For regular system cleanup and maintenance:
+
+```bash
+# Check current disk usage and generation status
+smart-gc status
+
+# Preview what would be cleaned (no changes made)
+smart-gc dry-run
+
+# Smart cleanup (keeps last 3 generations)
+smart-gc clean
+
+# Conservative cleanup (keeps last 7 generations)
+smart-gc conservative
+
+# Aggressive cleanup with store optimization
+smart-gc --force --optimize aggressive
+```
+
+**Smart GC features:**
+- **Preserves recent generations** to avoid breaking your system
+- **Pins essential packages** to prevent removal
+- **Store optimization** to hard-link identical files and save space
+- **Dry-run mode** to preview changes before applying
+- **Multiple cleanup modes** for different maintenance needs
+
+**Recommended maintenance schedule:**
+- **After major changes**: Run `smart-gc dry-run` to check what can be cleaned
+- **Weekly**: `smart-gc clean` to keep 3 recent generations
+- **Monthly**: `smart-gc --optimize conservative` for deeper cleanup with optimization
+- **Before major updates**: `smart-gc status` to check disk usage
+
+### 📌 Package Pinning System
+
+The `smart-gc` utility includes a package pinning system to prevent accidental removal of essential packages during garbage collection. This system creates GC roots that keep specific packages and their dependencies in the Nix store.
+
+#### Understanding Package Pinning
+
+**What pinning does:**
+- Creates GC roots for specified packages, preventing garbage collection
+- Ensures critical system tools remain available after cleanup
+- Protects the current system configuration from removal
+
+**What pinning does NOT do:**
+- ❌ **Does NOT prevent package updates** - pinned packages can still be updated normally
+- ❌ Does not pin to specific versions - only prevents garbage collection
+- ❌ Does not interfere with `nix flake update` or rebuilding the system
+
+#### Using the Pinning System
+
+```bash
+# Pin essential packages to prevent removal
+smart-gc pin
+
+# Check current pinning status
+smart-gc status  # Shows GC roots including pinned packages
+
+# Clean while respecting pinned packages  
+smart-gc clean   # Pinned packages and dependencies are preserved
+```
+
+#### Customizing Essential Packages
+
+The essential packages list is defined in `smart-gc.nu`. Currently, most packages are commented out by default to avoid over-pinning:
+
+```nushell
+# Edit the essential_packages list in smart-gc.nu
+let essential_packages = [
+  # "nixpkgs#git",           # Uncomment to pin git
+  # "nixpkgs#curl",          # Uncomment to pin curl 
+  # "nixpkgs#starship",      # Uncomment to pin starship
+  # "nixpkgs#helix",         # Uncomment to pin helix editor
+  # Add your own essential packages here
+]
+```
+
+**To add your own essential packages:**
+
+1. **Edit the script:**
+   ```bash
+   # Navigate to the script location
+   cd ~/darwin-config/stow/nix-scripts/.local/share/bin/
+   
+   # Edit smart-gc.nu to uncomment or add packages
+   nvim smart-gc.nu
+   ```
+
+2. **Add packages to the list:**
+   ```nushell
+   let essential_packages = [
+     "nixpkgs#git",              # Version control
+     "nixpkgs#curl",             # HTTP client
+     "nixpkgs#your-package",     # Your essential package
+   ]
+   ```
+
+3. **Apply the pinning:**
+   ```bash
+   smart-gc pin
+   ```
+
+#### Pinning vs. Updates - Key Points
+
+**✅ Pinning is update-friendly:**
+- Pinned packages update normally with `nix flake update` and system rebuilds
+- Pinning only prevents garbage collection, not version changes
+- New versions of pinned packages replace old versions in the store
+- Only the cleanup process respects the pinning
+
+**Example workflow:**
+```bash
+# 1. Pin essential packages
+smart-gc pin
+
+# 2. Update your system normally
+nix flake update
+nb && ns  # Build and switch
+
+# 3. Clean up old generations (pinned packages remain)
+smart-gc clean
+
+# Result: You have updated packages + protected against over-aggressive cleanup
+```
+
+#### When to Use Pinning
+
+**✅ Good candidates for pinning:**
+- Core development tools (git, curl, text editors)
+- System utilities you always need
+- Packages that are expensive to rebuild
+- Tools required for system recovery
+
+**❌ Avoid pinning:**
+- Packages that update frequently
+- Large packages you rarely use
+- Packages already managed by your system configuration
+- Development tools for specific projects
+
+#### Managing Pinned Packages
+
+```bash
+# View what's currently pinned
+smart-gc status
+ls -la /nix/var/nix/gcroots/  # Direct inspection of GC roots
+
+# Remove pinning (if needed)
+# Currently requires manual GC root removal:
+sudo rm /nix/var/nix/gcroots/current-system  # Remove system pinning
+# Remove package-specific roots as needed
+
+# Re-pin after changes
+smart-gc pin
+```
+
+#### Technical Details
+
+The pinning system works by:
+1. **System Configuration**: Creates a GC root for the current system derivation
+2. **Essential Packages**: Uses `nix build --no-link --print-out-paths` to realize packages and create implicit GC roots
+3. **GC Root Storage**: Stores roots in `/nix/var/nix/gcroots/` where the garbage collector respects them
+
+This approach ensures that while garbage collection won't remove pinned packages, the normal update and rebuild processes work exactly as expected.
+
 ## 🛠️ Available Nix Apps
 
 ### Core Build Commands
