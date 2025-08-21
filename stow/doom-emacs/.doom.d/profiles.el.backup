@@ -1,0 +1,144 @@
+;;; profiles.el -*- lexical-binding: t; no-byte-compile: t; -*-
+
+;; =============================================================================
+;; DOOM EMACS PROFILE SYSTEM
+;; =============================================================================
+;; 
+;; Usage:
+;; 1. Set DOOM_PROFILE environment variable:
+;;    export DOOM_PROFILE=minimal    # Fast startup, basic features
+;;    export DOOM_PROFILE=dev        # Development-focused
+;;    export DOOM_PROFILE=full       # All features (current setup)
+;;
+;; 2. Or set in your shell config:
+;;    alias emacs-minimal='DOOM_PROFILE=minimal emacs'
+;;    alias emacs-dev='DOOM_PROFILE=dev emacs'
+;;    alias emacs-full='DOOM_PROFILE=full emacs'
+
+(defvar doom-profile (or (getenv "DOOM_PROFILE") "full")
+  "Current Doom Emacs profile: minimal, dev, or full")
+
+;; =============================================================================
+;; PROFILE-SPECIFIC MODULE CONFIGURATIONS
+;; =============================================================================
+
+(defun doom-profile-modules ()
+  "Return modules list based on current profile."
+  (pcase doom-profile
+    ("minimal" 
+     '(:completion (vertico +icons)
+       :ui (doom doom-dashboard modeline)
+       :editor (evil file-templates snippets)
+       :emacs (dired electric undo vc)
+       :tools (magit)
+       :lang (emacs-lisp markdown nix org)
+       :config (default +bindings)))
+    
+    ("dev"
+     '(:completion (corfu +icons +orderless) (vertico +icons)
+       :ui (doom doom-dashboard hl-todo modeline nav-flash 
+            (popup +defaults) (treemacs +lsp) (vc-gutter +pretty) 
+            workspaces)
+       :editor (evil file-templates fold (format +lsp) snippets)
+       :emacs (dired electric ibuffer undo vc)
+       :term (eshell)
+       :tools (debugger direnv editorconfig (eval +overlay) 
+               lookup (lsp +peek) (magit +forge) tree-sitter)
+       :lang (emacs-lisp (java +lsp +tree-sitter) (javascript +lsp +tree-sitter)
+              json markdown (nix +lsp +tree-sitter) (org +pretty)
+              (python +lsp +tree-sitter) (rust +lsp +tree-sitter)
+              (scala +lsp +tree-sitter) (sh +lsp +tree-sitter)
+              (web +lsp +tree-sitter) (yaml +lsp +tree-sitter))
+       :config (default +bindings +smartparens)))
+    
+    ("full"
+     ;; Use full configuration from init.el
+     nil)))
+
+;; =============================================================================
+;; PROFILE-SPECIFIC PACKAGE CONFIGURATIONS
+;; =============================================================================
+
+(defun doom-profile-packages ()
+  "Return additional packages based on current profile."
+  (pcase doom-profile
+    ("minimal" 
+     '()) ; No additional packages
+    
+    ("dev"
+     '(tabnine cider rustic scala-mode))
+    
+    ("full"
+     ;; Use all packages from packages.el
+     nil)))
+
+;; =============================================================================
+;; PROFILE-SPECIFIC CONFIGURATION LOADING
+;; =============================================================================
+
+(defun load-profile-config ()
+  "Load configuration based on current profile."
+  (message "Loading Doom profile: %s" doom-profile)
+  
+  (pcase doom-profile
+    ("minimal"
+     ;; Load only essential configurations
+     (require 'my-defaults-config)
+     (require 'my-gui-appearance-config))
+    
+    ("dev"
+     ;; Load development-focused configurations
+     (require 'my-defaults-config)
+     (require 'my-gui-appearance-config)
+     (my/load-config 'lsp 'lsp)
+     (my/load-config 'treemacs 'ui)
+     (my/load-config 'java 'languages)
+     (my/load-config 'rust 'languages)
+     (my/load-config 'python 'languages))
+    
+    ("full"
+     ;; Load all configurations (current setup)
+     nil))) ; Let config.el handle everything
+
+;; =============================================================================
+;; BENCHMARK UTILITIES
+;; =============================================================================
+
+(defvar doom-startup-benchmark nil
+  "Startup benchmark results.")
+
+(defun doom-benchmark-startup ()
+  "Benchmark startup time and package count."
+  (setq doom-startup-benchmark
+        (list :profile doom-profile
+              :startup-time (float-time (time-subtract after-init-time before-init-time))
+              :packages-loaded (length (doom-packages))
+              :modules-loaded (length (doom-modules))))
+  
+  (message "Doom %s profile: %.3fs, %d packages, %d modules"
+           (plist-get doom-startup-benchmark :profile)
+           (plist-get doom-startup-benchmark :startup-time)
+           (plist-get doom-startup-benchmark :packages-loaded)
+           (plist-get doom-startup-benchmark :modules-loaded)))
+
+(add-hook 'after-init-hook #'doom-benchmark-startup)
+
+;; =============================================================================
+;; SHELL HELPER FUNCTIONS
+;; =============================================================================
+
+;; Add these to your shell config:
+;; 
+;; function emacs-minimal() {
+;;     DOOM_PROFILE=minimal emacs "$@"
+;; }
+;; 
+;; function emacs-dev() {
+;;     DOOM_PROFILE=dev emacs "$@"
+;; }
+;; 
+;; function emacs-full() {
+;;     DOOM_PROFILE=full emacs "$@"
+;; }
+
+(provide 'profiles)
