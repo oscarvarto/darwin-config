@@ -71,6 +71,9 @@
     "/server/"
     ".projectile"
 
+    # Claude Code AI assistant
+    ".claude"
+
     # Programming Languages
     # Java
     "bin/"

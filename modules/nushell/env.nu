@@ -120,3 +120,15 @@ $env.DEVELOPER_DIR = "/Applications/Xcode-beta.app/Contents/Developer"
 
 # Load theme from cache file set by catppuccin theme switcher
 $env.NUSHELL_THEME = (try { open ~/.cache/nushell_theme | str trim } catch { "dark" })
+
+# Load Zellij theme override if available
+if (("~/.cache/zellij_theme_config" | path expand) | path exists) {
+    $env.ZELLIJ_CONFIG_FILE = (try { 
+        open ~/.cache/zellij_theme_config | 
+        lines | 
+        find --regex 'export ZELLIJ_CONFIG_FILE=' | 
+        first | 
+        str replace 'export ZELLIJ_CONFIG_FILE=' '' | 
+        str trim --char '"' 
+    } catch { "" })
+}
