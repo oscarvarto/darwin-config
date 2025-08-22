@@ -27,6 +27,20 @@ with pkgs;
   unrar
   unzip
   fd
+  
+  # Table-like output tools (nushell-like experience)
+  procs        # Modern replacement for ps with table output
+  dust         # Intuitive disk usage with tree view
+  bandwhich    # Network utilization by process, connection, etc.
+  bottom       # System monitor with table views (aliased as btm)
+  gping        # Ping with graph
+  hexyl        # Hex viewer with colored output
+  tokei        # Code statistics in table format
+  hyperfine    # Command-line benchmarking tool with tables
+  sd           # Better sed with intuitive syntax
+  bat          # Better cat with syntax highlighting
+  delta        # Better git diff viewer
+  zoxide       # Smarter cd with frecency tracking
 
   # Encryption and security tools
   age
@@ -84,7 +98,11 @@ with pkgs;
   netcoredbg
 
   # Shell completion tools
-  fish
+  fish  # Required for Nushell's fish completer
   nushell
   carapace
+  
+  # Zsh plugins for enhanced shell experience
+  zsh-autosuggestions
+  zsh-syntax-highlighting
 ]

@@ -190,8 +190,8 @@ echo "🐚 Determining default shell from nix configuration..."
 
 DEFAULT_SHELL=$(grep -A 10 "$TARGET_HOSTNAME = {" flake.nix | grep 'defaultShell = ' | sed 's/.*defaultShell = "\([^"]*\)".*/\1/')
 
-# Default to nushell if not specified (for backward compatibility)
-DEFAULT_SHELL="${DEFAULT_SHELL:-nushell}"
+# Default to zsh if not specified
+DEFAULT_SHELL="${DEFAULT_SHELL:-zsh}"
 
 echo "  Default Shell: $DEFAULT_SHELL"
 
@@ -207,8 +207,8 @@ case "$DEFAULT_SHELL" in
         SHELL_PATH="/Users/$TARGET_USER/.nix-profile/bin/nu"
         ;;
     *)
-        echo -e "${YELLOW}⚠️  Warning: Unknown shell '$DEFAULT_SHELL', defaulting to nushell${NC}"
-        SHELL_PATH="/Users/$TARGET_USER/.nix-profile/bin/nu"
+        echo -e "${YELLOW}⚠️  Warning: Unknown shell '$DEFAULT_SHELL', defaulting to zsh${NC}"
+        SHELL_PATH="/run/current-system/sw/bin/zsh"
         ;;
 esac
 

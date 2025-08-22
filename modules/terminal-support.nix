@@ -36,15 +36,5 @@ in
         export TERM="xterm-256color"
       fi
     '';
-
-    # Fish shell compatibility
-    programs.fish.interactiveShellInit = lib.mkAfter ''
-      # Simple Ghostty terminal compatibility for Fish
-      if test "$TERM" = "xterm-ghostty"
-        if not command -v infocmp >/dev/null 2>&1; or not infocmp xterm-ghostty >/dev/null 2>&1
-          set -gx TERM "xterm-256color"
-        end
-      end
-    '';
   };
 }

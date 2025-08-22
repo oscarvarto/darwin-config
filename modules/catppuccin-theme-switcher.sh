@@ -31,7 +31,6 @@ SUPPORTED APPLICATIONS:
     • Zellij (terminal multiplexer)
     • Ghostty (terminal emulator) - Live config reload without restart
     • Nushell (shell syntax highlighting)
-    • Fish (shell colors)
     • Zsh (shell colors)
     • BAT (syntax highlighter)
 
@@ -59,7 +58,6 @@ INTEGRATION:
 
 FILES:
     ~/.cache/nushell_theme    Theme cache for Nushell
-    ~/.cache/fish_theme       Theme cache for Fish
     ~/.cache/zsh_theme        Theme cache for Zsh
 
 EXIT CODES:
@@ -88,7 +86,7 @@ show_status() {
     
     # Theme cache files
     echo "📁 Theme Cache Files:"
-    for cache_file in ~/.cache/nushell_theme ~/.cache/fish_theme ~/.cache/zsh_theme; do
+    for cache_file in ~/.cache/nushell_theme ~/.cache/zsh_theme; do
         if [[ -f "$cache_file" ]]; then
             theme=$(cat "$cache_file" 2>/dev/null || echo "unknown")
             echo "   $(basename "$cache_file"): $theme"
@@ -448,18 +446,15 @@ export BAT_THEME="$BAT_THEME"
 # Set shell theme environment variables
 if [[ "$APPEARANCE" == "light" ]]; then
     export NUSHELL_THEME="light"
-    export FISH_THEME="light"
     export ZSH_THEME="light"
 else
     export NUSHELL_THEME="dark"
-    export FISH_THEME="dark"
     export ZSH_THEME="dark"
 fi
 
 # Write shell theme to persistent files for new shell sessions
 if [[ "$DRY_RUN" != "true" ]]; then
     echo "$NUSHELL_THEME" > "$HOME/.cache/nushell_theme" 2>/dev/null || true
-    echo "$FISH_THEME" > "$HOME/.cache/fish_theme" 2>/dev/null || true
     echo "$ZSH_THEME" > "$HOME/.cache/zsh_theme" 2>/dev/null || true
 fi
 log "   ✅ Updated shell theme caches ($APPEARANCE mode)"

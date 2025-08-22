@@ -217,7 +217,7 @@
   (my/load-common-appearance-config)
 
   ;; Determine initial theme (default to dark theme)
-  (let ((initial-theme (or (car custom-enabled-themes) my/dark-theme)))
+  (let ((initial-theme (or (car custom-enabled-themes) my/light-theme)))
     (load-theme initial-theme t)
     ;; Load initial font configuration (default to pragmata)
     (my/load-font-config my/current-font-config))

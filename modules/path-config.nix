@@ -73,9 +73,6 @@ let
   # Generate the PATH list with expanded variables
   expandedPaths = map expandPath pathEntries;
   
-  # Generate fish-compatible path list for fish_user_paths
-  fishPaths = lib.concatStringsSep " \\\n        " (map (path: "\"${path}\"") pathEntries);
-  
   # Generate zsh-compatible path array
   zshPaths = lib.concatStringsSep "\n        " (map (path: "\"${path}\"") pathEntries);
   
@@ -88,63 +85,6 @@ in {
     inherit pathEntries expandedPaths;
     
     # Shell-specific configurations with mise override capability
-    fish = {
-      pathSetup = ''
-        # ============================================================================
-        # CENTRALIZED PATH SETUP - CONTROLLED BY modules/path-config.nix
-        # ============================================================================
-        # This overrides mise, homebrew, and any other tool that tries to modify PATH
-        
-        set -l desired_paths \
-            ${fishPaths}
-        
-        # Build authoritative PATH - only include paths that exist
-        set -g fish_user_paths
-        for path in $desired_paths
-            # Expand environment variables for fish
-            set expanded_path (string replace '$HOME' $HOME $path)
-            if test -d $expanded_path
-                set -ga fish_user_paths $expanded_path
-            end
-        end
-        
-        # Override any system or tool-set PATH with our authoritative version
-        set -gx PATH $fish_user_paths
-      '';
-      
-      # This runs AFTER all integrations (mise, etc.) to enforce our PATH
-      pathOverride = ''
-        # ============================================================================
-        # AUTHORITATIVE PATH OVERRIDE - RUNS AFTER ALL INTEGRATIONS
-        # ============================================================================
-        # This ensures our PATH takes precedence over mise, homebrew, etc.
-        
-        # Rebuild our desired PATH
-        set -l desired_paths \
-            ${fishPaths}
-        
-        set -l our_path
-        for path in $desired_paths
-            set expanded_path (string replace '$HOME' $HOME $path)
-            if test -d $expanded_path
-                set -a our_path $expanded_path
-            end
-        end
-        
-        # Force our PATH to take precedence
-        set -gx PATH $our_path
-        
-        # Optional: Add any additional paths that other tools added (but at lower priority)
-        # Uncomment the next few lines if you want to preserve some tool-added paths:
-        # for path in (echo $PATH | tr ':' '\n')
-        #     if not contains $path $our_path
-        #         set -a our_path $path
-        #     end
-        # end
-        # set -gx PATH $our_path
-      '';
-    };
-    
     zsh = {
       pathSetup = ''
         # ============================================================================

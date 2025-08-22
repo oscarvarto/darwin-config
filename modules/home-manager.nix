@@ -46,7 +46,6 @@ in
     users.${user} = { pkgs, config, lib, ... }: {
       imports = [
         ./git-security-scripts.nix
-        ./fish-config.nix
         ./home-activation-scripts.nix
         inputs.catppuccin.homeModules.catppuccin
         inputs.op-shell-plugins.hmModules.default
@@ -133,7 +132,6 @@ in
           daemon.enable = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
-          enableFishIntegration = true;
           settings = {
             # General settings
             auto_sync = true;
@@ -170,7 +168,6 @@ in
           # Disable shell integrations to prevent PATH conflicts - we manage PATH manually
           enableNushellIntegration = false;
           enableZshIntegration = false;
-          enableFishIntegration = false;
           # Use nixpkgs mise package instead of flake to avoid SDK issues
           # package = inputs.mise.packages.${pkgs.stdenv.hostPlatform.system}.default;
         };
@@ -179,7 +176,6 @@ in
           enable = true;
           enableZshIntegration = true;
           enableNushellIntegration = true;
-          enableFishIntegration = true;
           settings = fromTOML(builtins.readFile ./starship.toml);
         };
 
@@ -192,7 +188,6 @@ in
           enable = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
-          enableFishIntegration = true;
           settings = {
             mgr = {
               ratio = [1 3 4];
@@ -204,10 +199,7 @@ in
           enable = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
-          enableFishIntegration = true;
         };
-
-        # Fish configuration is now imported from ./fish-config.nix
 
         # zellij is installed via homebrew and configured manually
         # We use external config file instead of home-manager settings
@@ -251,6 +243,32 @@ in
             identitiesOnly = true;
             identityFile = [ "/Users/${user}/.ssh/id_ed25519" ];
           };
+        };
+        # direnv configuration
+        direnv = {
+          enable = true;
+          nix-direnv.enable = true;
+          enableZshIntegration = true;
+          enableNushellIntegration = true;
+        };
+        
+        # Zsh with enhanced Fish-like features
+        zsh = {
+          enable = true;
+          autosuggestion.enable = true;  # Fish-like autosuggestions
+          syntaxHighlighting.enable = true;  # Fish-like syntax highlighting
+          historySubstringSearch.enable = true;  # Better history search
+          plugins = [
+            {
+              name = "fzf-tab";
+              src = pkgs.fetchFromGitHub {
+                owner = "Aloxaf";
+                repo = "fzf-tab";
+                rev = "v1.1.2";
+                sha256 = "sha256-Qv8zAiMtrr67CbLRrFjGaPzFZcOiMVEFLg1Z+N6VMhg=";
+              };
+            }
+          ];
         };
       } // (import ./shell-config.nix { inherit config pkgs lib; }).programs;
 

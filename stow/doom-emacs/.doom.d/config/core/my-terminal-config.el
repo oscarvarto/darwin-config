@@ -24,14 +24,14 @@
   (setq-default display-color-cells 256))
 
 ;; =============================================================================
-;; NUSHELL INTEGRATION
+;; ZSH INTEGRATION
 ;; =============================================================================
 
-;; Since you use Nushell as your default shell, let's ensure proper integration
-(when (executable-find "nu")
-  ;; Set Nushell as the default shell for terminal operations when available
-  (setq shell-file-name (executable-find "nu"))
-  (setq explicit-shell-file-name (executable-find "nu")))
+;; Use zsh as the default shell for terminal operations
+(when (executable-find "zsh")
+  ;; Set zsh as the default shell for terminal operations when available
+  (setq shell-file-name (executable-find "zsh"))
+  (setq explicit-shell-file-name (executable-find "zsh")))
 
 ;; =============================================================================
 ;; DEBUG HELPERS

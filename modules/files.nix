@@ -28,8 +28,8 @@ in
       theme = dracula
 
       # Default shell (can be overridden)
-      command = /Users/${user}/.nix-profile/bin/nu -i -l
-      initial-command = /Users/${user}/.nix-profile/bin/nu -i -l
+      command = /Users/${user}/.nix-profile/bin/zsh --login --interactive
+      initial-command = /Users/${user}/.nix-profile/bin/zsh --login --interactive
 
       # Window and appearance settings
       split-divider-color = green

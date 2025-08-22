@@ -1061,7 +1061,7 @@ def ns [] {
     dirs drop
 }
 
-alias edd = emacs --daemon=doom
+alias edd = with-env {SHELL: "/bin/zsh"} { emacs --daemon=doom }
 alias pke = pkill -9 Emacs
 
 def doom-socket [] {
@@ -1088,7 +1088,10 @@ def ensure-emacs-daemon [] {
     mut socket_path = (doom-socket)
     if ($socket_path | is-empty) {
         print "Emacs daemon socket not found. Starting Emacs daemon first with: emacs --daemon=doom"
-        emacs --daemon=doom
+        # Start Emacs daemon with zsh as SHELL for POSIX compatibility
+        with-env {SHELL: "/bin/zsh"} {
+            emacs --daemon=doom
+        }
 
         # Wait for daemon to start and create socket
         mut retries = 0
@@ -1108,19 +1111,27 @@ def ensure-emacs-daemon [] {
 # Terminal Emacs function
 def "t" [...args] {
     let socket_path = (ensure-emacs-daemon)
-    ^/opt/homebrew/bin/emacsclient -nw -s $socket_path ...$args
+    # Launch emacsclient with zsh as SHELL for POSIX compatibility
+    with-env {SHELL: "/bin/zsh"} {
+        ^/opt/homebrew/bin/emacsclient -nw -s $socket_path ...$args
+    }
 }
 
 # GUI Emacs client function
 def "e" [...args] {
     let socket_path = (ensure-emacs-daemon)
-    ^/opt/homebrew/bin/emacsclient -nc -s $socket_path ...$args
+    # Launch emacsclient with zsh as SHELL for POSIX compatibility
+    with-env {SHELL: "/bin/zsh"} {
+        ^/opt/homebrew/bin/emacsclient -nc -s $socket_path ...$args
+    }
 }
 
-alias tt = emacs -nw
+alias tt = with-env {SHELL: "/bin/zsh"} { emacs -nw }
 # Start Emacs in background
 def "et" [tag?: string] {
-    job spawn -t ($tag | default 'emacs') {emacs}
+    job spawn -t ($tag | default 'emacs') {
+        with-env {SHELL: "/bin/zsh"} { emacs }
+    }
 }
 
 def "ke" [tag_to_kill?: string] {

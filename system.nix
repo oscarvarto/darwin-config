@@ -8,7 +8,6 @@ let
   # Shell path mapping
   shellPaths = {
     zsh = "/run/current-system/sw/bin/zsh";
-    fish = "/Users/${user}/.nix-profile/bin/fish";
     nushell = "/Users/${user}/.nix-profile/bin/nu";
   };
   
@@ -82,7 +81,6 @@ in
   # Add selected shell and commonly used shells to available shells
   environment.shells = [ selectedShellPath ] ++ 
     (if defaultShell != "zsh" then [ shellPaths.zsh ] else []) ++
-    (if defaultShell != "fish" then [ shellPaths.fish ] else []) ++
     (if defaultShell != "nushell" then [ shellPaths.nushell ] else []);
   
   # Configure the selected user with the chosen shell
@@ -97,7 +95,6 @@ in
 
   programs = {
     zsh.enable = true;
-    fish.enable = (defaultShell == "fish");
   };
 
   # User-level launchd agent to set environment variables for GUI applications

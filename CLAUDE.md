@@ -83,7 +83,7 @@ modules/                      # Modular configuration components
 - Host configurations defined in `flake.nix` `hostConfigs` section
 - Each host specifies: user, system architecture, defaultShell, hostSettings
 - Supports personal/work profiles with conditional configuration
-- Shell choice per host: "nushell", "fish", or "zsh"
+- Shell choice per host: "nushell" or "zsh"
 
 ### Configuration Layer Structure
 1. **System Layer** (`system.nix`) - macOS system settings, services
@@ -103,7 +103,7 @@ modules/                      # Modular configuration components
 ### PATH Management (Centralized)
 - All PATH configuration in `modules/path-config.nix`
 - Overrides mise, homebrew, and other tools
-- Consistent across all shells (zsh, fish, nushell)
+- Consistent across both shells (zsh, nushell)
 - Priority-ordered entries with automatic deduplication
 
 ### Font System (Intelligent Fallback)
@@ -116,10 +116,11 @@ modules/                      # Modular configuration components
 - **Graceful degradation**: Missing commercial fonts don't break applications
 
 ### Shell Configuration (Multi-Shell Support)
-- Supports nushell, fish, and zsh with feature parity
-- Shared aliases, PATH, development tools across shells
-- Shell-specific strengths preserved (nushell data processing, fish UX, zsh compatibility)
+- Supports nushell and zsh with feature parity
+- Shared aliases, PATH, development tools across both shells
+- Shell-specific strengths preserved (nushell data processing, zsh compatibility)
 - Consistent Starship prompts, Zoxide navigation, Atuin history
+- Note: Fish shell binary is installed only as a completion engine for Nushell
 
 ## Development Tools Integration
 

@@ -536,8 +536,8 @@ This approach ensures that while garbage collection won't remove pinned packages
   - **pass**: Backup credential store (offline, GPG-encrypted)
   - **Unified CLI**: Single `secret` command for all credential systems
 - **📦 Package Management**: Nix packages + Homebrew integration
-- **🐚 Advanced Shell Configuration**: Choose between Nushell, Fish, and Zsh with:
-  - **Consistent Experience**: Same aliases, PATH, and tools across all shells
+- **🐚 Advanced Shell Configuration**: Choose between Nushell and Zsh with:
+  - **Consistent Experience**: Same aliases, PATH, and tools across both shells
   - **Smart Switching**: Easy shell changes via simple configuration updates
   - **Modern Features**: Starship prompts, Zoxide navigation, Atuin history
   - **Seamless Integration**: Terminal, editor, and development tool compatibility
@@ -1167,14 +1167,13 @@ This tool is particularly useful in JVM development environments where IntelliJ'
 
 ## 🐚 Choosing Your Default Shell
 
-This configuration supports three fully-configured shells: **Nushell**, **Fish**, and **Zsh**. Each shell is intelligently configured with consistent features, aliases, and PATH management. You can choose your preferred shell and switch between them seamlessly.
+This configuration supports two fully-configured shells: **Nushell** and **Zsh**. Each shell is intelligently configured with consistent features, aliases, and PATH management. You can choose your preferred shell and switch between them seamlessly.
 
 ### 🎯 Available Shells
 
 | Shell       | Description                       | Best For                                             |
 | ----------- | --------------------------------- | ---------------------------------------------------- |
 | **Nushell** | Modern shell with structured data | Data manipulation, pipelines, modern workflows       |
-| **Fish**    | User-friendly with great defaults | Interactive use, beginners, excellent autocompletion |
 | **Zsh**     | Traditional, highly configurable  | Power users, legacy compatibility, extensive plugins |
 
 ### 🔧 Setting Your Default Shell
@@ -1195,7 +1194,7 @@ hostConfigs = {
   your-hostname = {
     user = "youruser";
     system = "aarch64-darwin";
-    defaultShell = "nushell";  # Options: "nushell", "fish", "zsh"
+    defaultShell = "nushell";  # Options: "nushell", "zsh"
     hostSettings = {
       enablePersonalConfig = true;
       workProfile = false;
@@ -1212,7 +1211,7 @@ hostConfigs = {
    predator = {
      user = "oscarvarto";
      system = "aarch64-darwin";
-     defaultShell = "fish";  # Change to your preferred shell
+     defaultShell = "nushell";  # Change to your preferred shell ("nushell" or "zsh")
      hostSettings = {
        # ... existing settings
      };
@@ -1260,18 +1259,6 @@ open package.json | get dependencies
 ps | where cpu > 50 | select name cpu
 ```
 
-**Fish Features:**
-
-```bash
-# Excellent autocompletion
-cd /usr/loc[TAB]  # Completes to /usr/local/
-
-# Visual command history
-# Use up arrow for intelligent history search
-
-# Syntax highlighting in real-time
-```
-
 **Zsh Features:**
 
 ```bash
@@ -1302,7 +1289,6 @@ cd /usr/loc[TAB]  # Completes to /usr/local/
 | ------- | ----- | -------------------------------------- |
 | `nnc`   | All   | Edit Nushell config.nu                 |
 | `nne`   | All   | Edit Nushell env.nu                    |
-| `ffc`   | All   | Edit Fish config (in home-manager.nix) |
 | `tg`    | All   | Edit terminal config                   |
 
 ### 🔄 Switching Between Shells
@@ -1311,7 +1297,6 @@ cd /usr/loc[TAB]  # Completes to /usr/local/
 
 ```bash
 # Try different shells temporarily
-fish    # Start fish session
 nu      # Start nushell session
 zsh     # Start zsh session
 exit    # Return to default shell
@@ -1322,7 +1307,7 @@ exit    # Return to default shell
 1. **Update flake.nix:**
 
    ```nix
-   defaultShell = "fish";  # Change to desired shell
+   defaultShell = "nushell";  # Change to desired shell ("nushell" or "zsh")
    ```
 
 2. **Rebuild system:**
@@ -1345,7 +1330,6 @@ exit    # Return to default shell
 Each shell's configuration can be customized in specific files:
 
 **Nushell**: `modules/nushell/config.nu` and `modules/nushell/env.nu`
-**Fish**: `modules/home-manager.nix` (fish section)
 **Zsh**: `modules/shell-config.nix` and `modules/zsh-darwin.nix`
 
 #### Adding Custom Aliases
@@ -1357,14 +1341,6 @@ Edit the appropriate configuration file for your shell:
 ```nushell
 # Add custom aliases
 alias myalias = "your-command"
-```
-
-**For Fish** (`modules/home-manager.nix`):
-
-```nix
-shellAbbrs = {
-  myalias = "your-command";
-};
 ```
 
 **For Zsh** (`modules/shell-config.nix`):
@@ -1383,13 +1359,6 @@ initContent = lib.mkAfter ''
 - Like modern, consistent command syntax
 - Want powerful data manipulation pipelines
 - Prefer type safety and structured output
-
-**Choose Fish if you:**
-
-- Want excellent out-of-the-box experience
-- Prefer intuitive, user-friendly interfaces
-- Value great autocompletion and history
-- Are new to advanced shell features
 
 **Choose Zsh if you:**
 
@@ -1439,7 +1408,6 @@ manage-stow-packages deploy
 ```bash
 # Check configuration files exist
 ls -la ~/.config/nushell/
-ls -la ~/.config/fish/
 
 # Test configuration syntax
 # For nushell:
@@ -1529,13 +1497,13 @@ your-hostname = {
 };
 ```
 
-### Work Machine with Fish
+### Work Machine with Zsh
 
 ```nix
 work-laptop = {
   user = "alice";
   system = "aarch64-darwin";
-  defaultShell = "fish";     # User-friendly shell for work
+  defaultShell = "zsh";      # Traditional shell for work compatibility
   hostSettings = {
     enablePersonalConfig = false;
     workProfile = true;

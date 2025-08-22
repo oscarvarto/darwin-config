@@ -90,7 +90,7 @@
         predator = {
           user = "oscarvarto";
           system = "aarch64-darwin";
-          defaultShell = "nushell";  # Options: "zsh", "fish", "nushell"
+          defaultShell = "zsh";  # Options: "zsh", "nushell"
           # Add host-specific settings here
           hostSettings = {
             enablePersonalConfig = true;
@@ -111,7 +111,7 @@
         # work-macbook = {
         #   user = "alice";
         #   system = "aarch64-darwin";
-        #   defaultShell = "zsh";  # Options: "zsh", "fish", "nushell"
+        #   defaultShell = "zsh";  # Options: "zsh", "nushell"
         #   hostSettings = {
         #     enablePersonalConfig = false;
         #     workProfile = true;
