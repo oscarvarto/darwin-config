@@ -1,2 +1,3 @@
 #!/usr/bin/env nu
-~/.local/share/bin/ghostty-config.nu theme dracula
+# Switch Ghostty to catppuccin dark theme (integrated with unified theme system)
+~/.local/share/bin/ghostty-config.nu theme catppuccin-mocha

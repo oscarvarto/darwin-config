@@ -4,144 +4,143 @@
 # https://www.nushell.sh/book/coloring_and_theming.html
 # And here is the theme collection
 # https://github.com/nushell/nu_scripts/tree/main/themes
-let dark_theme = {
+# Theme definitions - must be defined before $env.config block
+# Catppuccin Mocha theme (dark)
+let catppuccin_mocha_theme = {
     # color for nushell primitives
-    separator: white
-    leading_trailing_space_bg: { attr: n } # no fg, no bg, attr none effectively turns this off
-    header: green_bold
-    empty: blue
-    # Closures can be used to choose colors for specific values.
-    # The value (in this case, a bool) is piped into the closure.
-    # eg) {|| if $in { 'light_cyan' } else { 'light_gray' } }
-    bool: light_cyan
-    int: white
-    filesize: cyan
-    duration: white
-    date: purple
-    range: white
-    float: white
-    string: white
-    nothing: white
-    binary: white
-    cell-path: white
-    row_index: green_bold
-    record: white
-    list: white
-    block: white
-    hints: dark_gray
-    search_result: { bg: red fg: white }
-    shape_and: purple_bold
-    shape_binary: purple_bold
-    shape_block: blue_bold
-    shape_bool: light_cyan
-    shape_closure: green_bold
-    shape_custom: green
-    shape_datetime: cyan_bold
-    shape_directory: cyan
-    shape_external: cyan
-    shape_externalarg: green_bold
-    shape_external_resolved: light_yellow_bold
-    shape_filepath: cyan
-    shape_flag: blue_bold
-    shape_float: purple_bold
-    # shapes are used to change the cli syntax highlighting
-    shape_garbage: { fg: white bg: red attr: b}
-    shape_globpattern: cyan_bold
-    shape_int: purple_bold
-    shape_internalcall: cyan_bold
-    shape_keyword: cyan_bold
-    shape_list: cyan_bold
-    shape_literal: blue
-    shape_match_pattern: green
-    shape_matching_brackets: { attr: u }
-    shape_nothing: light_cyan
-    shape_operator: yellow
-    shape_or: purple_bold
-    shape_pipe: purple_bold
-    shape_range: yellow_bold
-    shape_record: cyan_bold
-    shape_redirection: purple_bold
-    shape_signature: green_bold
-    shape_string: green
-    shape_string_interpolation: cyan_bold
-    shape_table: blue_bold
-    shape_variable: purple
-    shape_vardecl: purple
-    shape_raw_string: light_purple
+    separator: "#cdd6f4"      # text
+    leading_trailing_space_bg: { attr: n }
+    header: { fg: "#a6e3a1" attr: b }  # green bold
+    empty: "#89b4fa"         # blue
+    bool: { |v| if $v { "#a6e3a1" } else { "#f38ba8" } }  # green/red
+    int: "#fab387"           # peach
+    filesize: "#89b4fa"      # blue
+    duration: "#f9e2af"      # yellow
+    date: "#cba6f7"          # mauve
+    range: "#f9e2af"         # yellow
+    float: "#fab387"         # peach
+    string: "#a6e3a1"        # green
+    nothing: "#6c7086"       # overlay0
+    binary: "#f38ba8"        # red
+    cell-path: "#cdd6f4"     # text
+    row_index: { fg: "#a6e3a1" attr: b }  # green bold
+    record: "#cdd6f4"        # text
+    list: "#cdd6f4"          # text
+    block: "#89b4fa"         # blue
+    hints: "#6c7086"         # overlay0
+    search_result: { fg: "#11111b" bg: "#f38ba8" }  # crust on red
+    shape_and: { fg: "#cba6f7" attr: b }          # mauve bold
+    shape_binary: { fg: "#cba6f7" attr: b }       # mauve bold
+    shape_block: { fg: "#89b4fa" attr: b }        # blue bold
+    shape_bool: "#f5c2e7"                        # pink
+    shape_closure: { fg: "#a6e3a1" attr: b }     # green bold
+    shape_custom: "#89b4fa"                      # blue
+    shape_datetime: { fg: "#cba6f7" attr: b }    # mauve bold
+    shape_directory: "#89b4fa"                   # blue
+    shape_external: "#a6e3a1"                    # green
+    shape_externalarg: { fg: "#a6e3a1" attr: b } # green bold
+    shape_external_resolved: { fg: "#f9e2af" attr: b }  # yellow bold
+    shape_filepath: "#89b4fa"                    # blue
+    shape_flag: { fg: "#89b4fa" attr: b }        # blue bold
+    shape_float: { fg: "#fab387" attr: b }       # peach bold
+    shape_garbage: { fg: "#cdd6f4" bg: "#f38ba8" attr: b }  # text on red bold
+    shape_globpattern: { fg: "#89b4fa" attr: b } # blue bold
+    shape_int: { fg: "#fab387" attr: b }         # peach bold
+    shape_internalcall: { fg: "#89b4fa" attr: b }  # blue bold
+    shape_keyword: { fg: "#cba6f7" attr: b }     # mauve bold
+    shape_list: { fg: "#89b4fa" attr: b }        # blue bold
+    shape_literal: "#89b4fa"                     # blue
+    shape_match_pattern: "#a6e3a1"              # green
+    shape_matching_brackets: { attr: u }         # underline
+    shape_nothing: "#f5c2e7"                     # pink
+    shape_operator: "#f9e2af"                    # yellow
+    shape_or: { fg: "#cba6f7" attr: b }          # mauve bold
+    shape_pipe: { fg: "#cba6f7" attr: b }        # mauve bold
+    shape_range: { fg: "#f9e2af" attr: b }       # yellow bold
+    shape_record: { fg: "#89b4fa" attr: b }      # blue bold
+    shape_redirection: { fg: "#cba6f7" attr: b } # mauve bold
+    shape_signature: { fg: "#a6e3a1" attr: b }  # green bold
+    shape_string: "#a6e3a1"                     # green
+    shape_string_interpolation: { fg: "#89b4fa" attr: b }  # blue bold
+    shape_table: { fg: "#89b4fa" attr: b }       # blue bold
+    shape_variable: "#cba6f7"                    # mauve
+    shape_vardecl: "#cba6f7"                     # mauve
+    shape_raw_string: "#f5c2e7"                  # pink
 }
 
-let light_theme = {
+# Catppuccin Latte theme (light) - high contrast for light backgrounds
+let catppuccin_latte_theme = {
     # color for nushell primitives
-    separator: dark_gray
-    leading_trailing_space_bg: { attr: n } # no fg, no bg, attr none effectively turns this off
-    header: green_bold
-    empty: blue
-    # Closures can be used to choose colors for specific values.
-    # The value (in this case, a bool) is piped into the closure.
-    # eg) {|| if $in { 'dark_cyan' } else { 'dark_gray' } }
-    bool: dark_cyan
-    int: dark_gray
-    filesize: cyan_bold
-    duration: dark_gray
-    date: purple
-    range: dark_gray
-    float: dark_gray
-    string: dark_gray
-    nothing: dark_gray
-    binary: dark_gray
-    cell-path: dark_gray
-    row_index: green_bold
-    record: dark_gray
-    list: dark_gray
-    block: dark_gray
-    hints: dark_gray
-    search_result: { fg: white bg: red }
-    shape_and: purple_bold
-    shape_binary: purple_bold
-    shape_block: blue_bold
-    shape_bool: light_cyan
-    shape_closure: green_bold
-    shape_custom: green
-    shape_datetime: cyan_bold
-    shape_directory: cyan
-    shape_external: cyan
-    shape_externalarg: green_bold
-    shape_external_resolved: light_purple_bold
-    shape_filepath: cyan
-    shape_flag: blue_bold
-    shape_float: purple_bold
-    # shapes are used to change the cli syntax highlighting
-    shape_garbage: { fg: white bg: red attr: b}
-    shape_globpattern: cyan_bold
-    shape_int: purple_bold
-    shape_internalcall: cyan_bold
-    shape_keyword: cyan_bold
-    shape_list: cyan_bold
-    shape_literal: blue
-    shape_match_pattern: green
-    shape_matching_brackets: { attr: u }
-    shape_nothing: light_cyan
-    shape_operator: yellow
-    shape_or: purple_bold
-    shape_pipe: purple_bold
-    shape_range: yellow_bold
-    shape_record: cyan_bold
-    shape_redirection: purple_bold
-    shape_signature: green_bold
-    shape_string: green
-    shape_string_interpolation: cyan_bold
-    shape_table: blue_bold
-    shape_variable: purple
-    shape_vardecl: purple
-    shape_raw_string: light_purple
+    separator: "#4c4f69"      # text (dark)
+    leading_trailing_space_bg: { attr: n }
+    header: { fg: "#40a02b" attr: b }  # green bold
+    empty: "#1e66f5"         # blue
+    bool: { |v| if $v { "#40a02b" } else { "#d20f39" } }  # green/red
+    int: "#fe640b"           # peach
+    filesize: "#1e66f5"      # blue
+    duration: "#df8e1d"      # yellow
+    date: "#8839ef"          # mauve
+    range: "#df8e1d"         # yellow
+    float: "#fe640b"         # peach
+    string: "#40a02b"        # green
+    nothing: "#9ca0b0"       # overlay0
+    binary: "#d20f39"        # red
+    cell-path: "#4c4f69"     # text
+    row_index: { fg: "#40a02b" attr: b }  # green bold
+    record: "#4c4f69"        # text
+    list: "#4c4f69"          # text
+    block: "#1e66f5"         # blue
+    hints: "#9ca0b0"         # overlay0
+    search_result: { fg: "#eff1f5" bg: "#d20f39" }  # base on red
+    shape_and: { fg: "#8839ef" attr: b }          # mauve bold
+    shape_binary: { fg: "#8839ef" attr: b }       # mauve bold
+    shape_block: { fg: "#1e66f5" attr: b }        # blue bold
+    shape_bool: "#ea76cb"                        # pink
+    shape_closure: { fg: "#40a02b" attr: b }     # green bold
+    shape_custom: "#1e66f5"                      # blue
+    shape_datetime: { fg: "#8839ef" attr: b }    # mauve bold
+    shape_directory: "#1e66f5"                   # blue
+    shape_external: "#40a02b"                    # green
+    shape_externalarg: { fg: "#40a02b" attr: b } # green bold
+    shape_external_resolved: { fg: "#df8e1d" attr: b }  # yellow bold
+    shape_filepath: "#1e66f5"                    # blue
+    shape_flag: { fg: "#1e66f5" attr: b }        # blue bold
+    shape_float: { fg: "#fe640b" attr: b }       # peach bold
+    shape_garbage: { fg: "#4c4f69" bg: "#d20f39" attr: b }  # text on red bold
+    shape_globpattern: { fg: "#1e66f5" attr: b } # blue bold
+    shape_int: { fg: "#fe640b" attr: b }         # peach bold
+    shape_internalcall: { fg: "#1e66f5" attr: b }  # blue bold
+    shape_keyword: { fg: "#8839ef" attr: b }     # mauve bold
+    shape_list: { fg: "#1e66f5" attr: b }        # blue bold
+    shape_literal: "#1e66f5"                     # blue
+    shape_match_pattern: "#40a02b"              # green
+    shape_matching_brackets: { attr: u }         # underline
+    shape_nothing: "#ea76cb"                     # pink
+    shape_operator: "#df8e1d"                    # yellow
+    shape_or: { fg: "#8839ef" attr: b }          # mauve bold
+    shape_pipe: { fg: "#8839ef" attr: b }        # mauve bold
+    shape_range: { fg: "#df8e1d" attr: b }       # yellow bold
+    shape_record: { fg: "#1e66f5" attr: b }      # blue bold
+    shape_redirection: { fg: "#8839ef" attr: b } # mauve bold
+    shape_signature: { fg: "#40a02b" attr: b }  # green bold
+    shape_string: "#40a02b"                     # green
+    shape_string_interpolation: { fg: "#1e66f5" attr: b }  # blue bold
+    shape_table: { fg: "#1e66f5" attr: b }       # blue bold
+    shape_variable: "#8839ef"                    # mauve
+    shape_vardecl: "#8839ef"                     # mauve
+    shape_raw_string: "#ea76cb"                  # pink
 }
+
+# Theme aliases - must be defined before $env.config block
+let dark_theme = $catppuccin_mocha_theme
+let light_theme = $catppuccin_latte_theme
 
 # The default config record. This is where much of your global configuration is setup.
 $env.config = {
     show_banner: false # true or false to enable or disable the welcome banner at startup
 
     ls: {
-        use_ls_colors: true # use the LS_COLORS environment variable to colorize output
+        use_ls_colors: false # disable LS_COLORS to prevent theme conflicts
         clickable_links: true # enable or disable clickable links. Your terminal has to support links.
     }
 
@@ -255,7 +254,7 @@ $env.config = {
                 }
             }
         }
-        use_ls_colors: true # set this to true to enable file/path/directory completions using LS_COLORS
+        use_ls_colors: false # disable LS_COLORS to prevent theme conflicts in completions
     }
 
     # filesize options have been moved to other configuration sections in newer nushell versions
@@ -266,7 +265,8 @@ $env.config = {
         vi_normal: underscore # block, underscore, line, blink_block, blink_underscore, blink_line, inherit to skip setting cursor shape (underscore is the default)
     }
 
-    color_config: $dark_theme # if you want a more interesting theme, you can replace the empty record with `$dark_theme`, `$light_theme` or another custom record
+    # Static default theme - will be updated after config load
+    color_config: $dark_theme
     footer_mode: 25 # always, never, number_of_rows, auto
     float_precision: 2 # the precision for displaying floats in tables
     buffer_editor: "nvim" # command that will be used to edit the current line buffer with ctrl+o, if unset fallback to $env.EDITOR and $env.VISUAL
@@ -1131,6 +1131,18 @@ def --env y [...args] {
 }
 
 source ~/.local/share/atuin/init.nu
+
+# Dynamic theme application function
+def --env "apply-theme" [] {
+    if ($env.NUSHELL_THEME? | default "dark") == "light" {
+        $env.config.color_config = $light_theme
+    } else {
+        $env.config.color_config = $dark_theme
+    }
+}
+
+# Apply theme immediately after config is loaded
+apply-theme
 
 # Final PATH cleanup - remove duplicates after all integrations have loaded
 $env.PATH = ($env.PATH | uniq)

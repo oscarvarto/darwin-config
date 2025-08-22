@@ -28,6 +28,8 @@ $cmd_duration\
 $line_break\
 $character"""
 
+# Use system appearance to determine palette
+# This will be automatically switched by a script
 palette = 'catppuccin_mocha'
 
 [os]

@@ -1,2 +1,3 @@
 #!/usr/bin/env nu
-~/.local/share/bin/ghostty-config.nu theme BlulocoLight
+# Switch Ghostty to catppuccin light theme (integrated with unified theme system)
+~/.local/share/bin/ghostty-config.nu theme catppuccin-latte

@@ -5,3 +5,6 @@ example-sensitive-data.txt
 secrets.txt
 
 result
+
+# Zed editor sensitive data
+stow/zed/.config/zed/prompts

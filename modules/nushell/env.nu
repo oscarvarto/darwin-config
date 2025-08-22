@@ -117,3 +117,6 @@ $env.DOOMLOCALDIR = "~/.emacs.d/.local"
 
 # Set Xcode developer directory to beta version
 $env.DEVELOPER_DIR = "/Applications/Xcode-beta.app/Contents/Developer"
+
+# Load theme from cache file set by catppuccin theme switcher
+$env.NUSHELL_THEME = (try { open ~/.cache/nushell_theme | str trim } catch { "dark" })

@@ -100,7 +100,8 @@ ensure_emacs_postinstall_and_alias || true
 echo "${YELLOW}Switching to new generation...${NC}"
 # See https://github.com/nix-darwin/nix-darwin/issues/1457 on why we need sudo
 # Filter out the repetitive toPlist deprecation warnings from darwin-rebuild switch as well
-sudo -u root ./result/sw/bin/darwin-rebuild switch --flake .#${HOSTNAME} $@ 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true
+# Use absolute path to darwin-rebuild to avoid PATH issues in sudo environment
+sudo -u root /run/current-system/sw/bin/darwin-rebuild switch --flake .#${HOSTNAME} $@ 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true
 
 # Ensure alias again (idempotent) in case switch modified contents
 ensure_emacs_postinstall_and_alias || true

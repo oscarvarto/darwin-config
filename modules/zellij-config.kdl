@@ -256,6 +256,9 @@ load_plugins {
 // Choose the theme that is specified in the themes section.
 // Default: default
 // 
+// Theme will be managed by the theme-switcher script
+// Default dark theme is catppuccin-mocha
+// Default light theme is catppuccin-latte
 theme "catppuccin-mocha"
  
 // Choose the base input mode of zellij.

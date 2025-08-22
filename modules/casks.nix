@@ -1,11 +1,10 @@
 _:
 
 [
-  "ghostty@tip"
-  
   # Development Tools
   # "homebrew/cask/docker"
   "chromedriver"
+  "ghostty@tip"
   "claude"
   "claude-code"
   "dotnet-sdk"

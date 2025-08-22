@@ -73,6 +73,13 @@ in
         export EDITOR="nvim"
         export VISUAL="/opt/homebrew/bin/emacsclient -nc -s /var/folders/yh/5_g54kd572gd9vr8tbc4m6gh0000gn/T/emacs501/doom"
 
+        # Load theme from cache file set by catppuccin theme switcher
+        if [[ -f ~/.cache/zsh_theme ]]; then
+            export ZSH_THEME=$(cat ~/.cache/zsh_theme 2>/dev/null | tr -d '\n')
+        else
+            export ZSH_THEME="dark"
+        fi
+
         t() {
            # nvim "$@"
            /opt/homebrew/bin/emacsclient -nw -s /var/folders/yh/5_g54kd572gd9vr8tbc4m6gh0000gn/T/emacs501/doom "$@"
