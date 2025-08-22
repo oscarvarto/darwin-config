@@ -121,55 +121,13 @@ in
             source ~/.cache/zellij_theme_config
         fi
 
-        # Function to dynamically find the Emacs daemon socket
-        get_emacs_socket() {
-            local socket_path=""
-            # First try to find the doom socket in temp directories
-            if command -v fd >/dev/null 2>&1; then
-                socket_path=$(fd -t s "doom" /var/folders 2>/dev/null | head -1)
-            fi
-            # Fallback to standard location using TMPDIR
-            if [[ -z "$socket_path" ]]; then
-                socket_path="''${TMPDIR}emacs$(id -u)/doom"
-            fi
-            echo "$socket_path"
-        }
-
-        # Function to ensure Emacs daemon is running
-        ensure_emacs_daemon() {
-            local socket=$(get_emacs_socket)
-            if [[ ! -S "$socket" ]]; then
-                echo "Emacs daemon not running. Starting..."
-                doom run --daemon=doom >/dev/null 2>&1 || emacs --daemon=doom
-                sleep 1
-                socket=$(get_emacs_socket)
-            fi
-            echo "$socket"
-        }
-
-        t() {
-           local socket=$(ensure_emacs_daemon)
-           if [[ -S "$socket" ]]; then
-               /opt/homebrew/bin/emacsclient -nw -s "$socket" "$@"
-           else
-               echo "Error: Could not connect to Emacs daemon"
-               return 1
-           fi
-        }
-
-        ec() {
-           local socket=$(ensure_emacs_daemon)
-           if [[ -S "$socket" ]]; then
-               /opt/homebrew/bin/emacsclient -nc -s "$socket" "$@"
-           else
-               echo "Error: Could not connect to Emacs daemon"
-               return 1
-           fi
-        }
-
-        e() {
-           emacs & disown
-        }
+        # Use existing helper scripts for Emacs; avoid duplicating logic here
+        alias t="$HOME/.local/share/bin/t"
+        alias e="$HOME/.local/share/bin/e"
+        alias tt="$HOME/.local/share/bin/tt"
+        alias edd="$HOME/.local/share/bin/edd"
+        alias et="$HOME/.local/share/bin/et"
+        alias ke="$HOME/.local/share/bin/ke"
 
         # nix shortcuts
         shell() {
