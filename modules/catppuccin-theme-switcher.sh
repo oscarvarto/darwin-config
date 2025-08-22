@@ -314,9 +314,53 @@ if [[ -f "$ZELLIJ_BASE_CONFIG" ]]; then
         if [[ "$APPEARANCE" == "light" ]]; then
             cat > "$ZELLIJ_THEME_OVERRIDE" << 'ZELLIJ_EOF'
 // Zellij theme override - managed by catppuccin-theme-switcher
-// This file overrides the theme setting from the Nix-managed base configuration
+// This file includes inline high-contrast theme definition for better border visibility
 
-theme "catppuccin-latte"
+// Define high-contrast Catppuccin Latte theme inline
+themes {
+    catppuccin-latte-contrast {
+        // Base terminal colors (RGB values)
+        fg 76 79 105        // #4c4f69 - dark text
+        bg 239 241 245      // #eff1f5 - light background
+        red 210 15 57       // #d20f39
+        green 64 160 43     // #40a02b - matches your prompt!
+        yellow 223 142 29   // #df8e1d
+        blue 30 102 245     // #1e66f5
+        magenta 136 57 239  // #8839ef
+        orange 254 100 11   // #fe640b
+        cyan 23 146 153     // #179299
+        black 76 79 105     // #4c4f69 - dark for contrast
+        white 239 241 245   // #eff1f5 - light
+        
+        // UI component colors - CRITICAL for border visibility!
+        frame_unselected {
+            base 64 160 43       // Green border (matches prompt!)
+            background 239 241 245
+            emphasis_0 76 79 105
+            emphasis_1 108 111 133
+            emphasis_2 156 160 176
+            emphasis_3 172 176 190
+        }
+        frame_selected {
+            base 64 160 43       // Green active border
+            background 239 241 245
+            emphasis_0 76 79 105
+            emphasis_1 108 111 133
+            emphasis_2 156 160 176
+            emphasis_3 172 176 190
+        }
+        frame_highlight {
+            base 64 160 43       // Green highlight border
+            background 239 241 245
+            emphasis_0 76 79 105
+            emphasis_1 108 111 133
+            emphasis_2 156 160 176
+            emphasis_3 172 176 190
+        }
+    }
+}
+
+theme "catppuccin-latte-contrast"
 
 // Include all other settings from base config by copying key sections
 keybinds clear-defaults=true {
@@ -328,7 +372,7 @@ keybinds clear-defaults=true {
 }
 
 default_mode "locked"
-default_shell "nu"
+default_shell "zsh"
 copy_command "pbcopy"
 attach_to_session true
 styled_underlines true
@@ -352,7 +396,7 @@ keybinds clear-defaults=true {
 }
 
 default_mode "locked"
-default_shell "nu"
+default_shell "zsh"
 copy_command "pbcopy"
 attach_to_session true
 styled_underlines true

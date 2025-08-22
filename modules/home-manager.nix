@@ -111,6 +111,8 @@ in
         # Programs will automatically use "latte" in light mode and "mocha" in dark mode
         # Disable starship integration to prevent conflicts with our manual config
         starship.enable = false;
+        # Disable zellij integration to prevent conflicts with our manual high-contrast theme
+        zellij.enable = false;
       };
 
       # Enable the local nushell module

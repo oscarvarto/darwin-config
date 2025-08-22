@@ -116,6 +116,11 @@ in
             export ZSH_THEME="dark"
         fi
 
+        # Load Zellij theme config if available (like in nushell configuration)
+        if [[ -f ~/.cache/zellij_theme_config ]]; then
+            source ~/.cache/zellij_theme_config
+        fi
+
         # Function to dynamically find the Emacs daemon socket
         get_emacs_socket() {
             local socket_path=""
