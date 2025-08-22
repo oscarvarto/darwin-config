@@ -118,6 +118,17 @@ in
         alias diff="difft"
         alias nb="pushd \\$HOME/darwin-config > /dev/null; nix run .#build; popd > /dev/null"
         alias ns="pushd \\$HOME/darwin-config > /dev/null; nix run .#build-switch; popd > /dev/null"
+        
+        # Claude Code integration - Shift+Enter key binding
+        # Function to handle Claude Code prompt submission
+        claude-code-submit() {
+          echo "# Claude Code: Submit prompt"
+        }
+        zle -N claude-code-submit
+        
+        # Bind Shift+Enter to the Claude Code submit function
+        # The escape sequence \\e[13;2u is for Shift+Enter in modern terminals
+        bindkey '^[[13;2u' claude-code-submit
       '';
     };
   };

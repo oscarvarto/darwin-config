@@ -44,6 +44,8 @@ in
 
       # Key bindings
       keybind = global:super+ctrl+grave_accent=toggle_quick_terminal
+      # Claude Code terminal integration - Shift+Enter to submit prompt
+      keybind = shift+enter=text:\x1b[13;2u
 
       # Include user overrides LAST so they take precedence
       config-file = ~/.config/ghostty/overrides.conf

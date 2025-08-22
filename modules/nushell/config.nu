@@ -928,6 +928,13 @@ $env.config = {
             mode: emacs
             event: { edit: selectall }
         }
+        {
+            name: claude_code_submit
+            modifier: shift
+            keycode: enter
+            mode: [emacs, vi_normal, vi_insert]
+            event: { send: executehostcommand cmd: "# Claude Code: Submit prompt" }
+        }
     ]
 }
 

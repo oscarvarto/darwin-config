@@ -117,6 +117,11 @@
       
       # Authoritative PATH override - ensures our configuration takes precedence over all tools
       ${pathConfig.fish.pathOverride or "# PATH override not available"}
+      
+      # Claude Code integration - Shift+Enter key binding
+      # The escape sequence \e[13;2u is for Shift+Enter in modern terminals
+      bind -M insert \e[13;2u 'echo "# Claude Code: Submit prompt"'
+      bind -M default \e[13;2u 'echo "# Claude Code: Submit prompt"'
     '';
 
     # Function definitions (matching some nushell functions)
