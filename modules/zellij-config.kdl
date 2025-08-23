@@ -252,13 +252,98 @@ load_plugins {
 //   - false (Default)
 // 
 // simplified_ui true
+
+// Custom high-contrast themes for accessibility
+themes {
+    catppuccin-latte-contrast {
+        // Base terminal colors (RGB values)
+        fg 76 79 105        // #4c4f69 - dark text
+        bg 239 241 245      // #eff1f5 - light background
+        red 210 15 57       // #d20f39
+        green 64 160 43     // #40a02b - matches your prompt!
+        yellow 223 142 29   // #df8e1d
+        blue 30 102 245     // #1e66f5
+        magenta 136 57 239  // #8839ef
+        orange 254 100 11   // #fe640b
+        cyan 23 146 153     // #179299
+        black 76 79 105     // #4c4f69 - dark for contrast
+        white 239 241 245   // #eff1f5 - light
+        
+        // UI component colors - CRITICAL for border visibility in light mode!
+        frame_unselected {
+            base 64 160 43       // Green border (matches prompt!)
+            background 239 241 245
+            emphasis_0 76 79 105
+            emphasis_1 108 111 133
+            emphasis_2 156 160 176
+            emphasis_3 172 176 190
+        }
+        frame_selected {
+            base 64 160 43       // Green active border
+            background 239 241 245
+            emphasis_0 76 79 105
+            emphasis_1 108 111 133
+            emphasis_2 156 160 176
+            emphasis_3 172 176 190
+        }
+        frame_highlight {
+            base 64 160 43       // Green highlight border
+            background 239 241 245
+            emphasis_0 76 79 105
+            emphasis_1 108 111 133
+            emphasis_2 156 160 176
+            emphasis_3 172 176 190
+        }
+    }
+    
+    catppuccin-mocha-contrast {
+        // Base terminal colors (RGB values) - Catppuccin Mocha palette
+        fg 205 214 244      // #cdd6f4 - light text
+        bg 30 30 46         // #1e1e2e - dark background
+        red 243 139 168     // #f38ba8
+        green 166 227 161   // #a6e3a1
+        yellow 249 226 175  // #f9e2af
+        blue 137 180 250    // #89b4fa
+        magenta 203 166 247 // #cba6f7
+        orange 250 179 135  // #fab387
+        cyan 148 226 213    // #94e2d5
+        black 30 30 46      // #1e1e2e - dark
+        white 205 214 244   // #cdd6f4 - light
+        
+        // UI component colors - Enhanced visibility for dark mode!
+        frame_unselected {
+            base 137 180 250     // Blue border for dark mode
+            background 30 30 46
+            emphasis_0 205 214 244
+            emphasis_1 186 194 222
+            emphasis_2 166 173 200
+            emphasis_3 147 153 178
+        }
+        frame_selected {
+            base 166 227 161     // Green active border for dark mode  
+            background 30 30 46
+            emphasis_0 205 214 244
+            emphasis_1 186 194 222
+            emphasis_2 166 173 200
+            emphasis_3 147 153 178
+        }
+        frame_highlight {
+            base 203 166 247     // Purple highlight border for dark mode
+            background 30 30 46
+            emphasis_0 205 214 244
+            emphasis_1 186 194 222
+            emphasis_2 166 173 200
+            emphasis_3 147 153 178
+        }
+    }
+}
  
 // Choose the theme that is specified in the themes section.
 // Default: default
 // 
 // Theme will be managed by the theme-switcher script
 // Default dark theme is catppuccin-mocha
-// Default light theme is catppuccin-latte
+// Default light theme is catppuccin-latte-contrast (high contrast borders)
 theme "catppuccin-mocha"
  
 // Choose the base input mode of zellij.

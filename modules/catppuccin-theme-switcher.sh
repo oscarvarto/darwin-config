@@ -300,118 +300,50 @@ else
     log "   🔍 Would create Atuin override for $APPEARANCE theme"
 fi
 
-# Update zellij theme via override config (Nix-managed base config)
+# Update zellij theme by modifying the theme line in the main config
 log "🖼️  Updating Zellij multiplexer theme..."
 ZELLIJ_BASE_CONFIG="$HOME/.config/zellij/config.kdl"
-ZELLIJ_OVERRIDE_DIR="$HOME/.config/zellij/overrides"
-ZELLIJ_THEME_OVERRIDE="$ZELLIJ_OVERRIDE_DIR/theme-override.kdl"
+ZELLIJ_TEMP_CONFIG="$HOME/.config/zellij/current-theme.kdl"
 
 if [[ -f "$ZELLIJ_BASE_CONFIG" ]]; then
     if [[ "$DRY_RUN" != "true" ]]; then
-        mkdir -p "$ZELLIJ_OVERRIDE_DIR"
+        # Remove any existing temp config to avoid permission issues
+        rm -f "$ZELLIJ_TEMP_CONFIG"
         
-        # Create theme override config that includes base config
+        # Create a temporary config with the appropriate theme
         if [[ "$APPEARANCE" == "light" ]]; then
-            cat > "$ZELLIJ_THEME_OVERRIDE" << 'ZELLIJ_EOF'
-// Zellij theme override - managed by catppuccin-theme-switcher
-// This file includes inline high-contrast theme definition for better border visibility
-
-// Define high-contrast Catppuccin Latte theme inline
-themes {
-    catppuccin-latte-contrast {
-        // Base terminal colors (RGB values)
-        fg 76 79 105        // #4c4f69 - dark text
-        bg 239 241 245      // #eff1f5 - light background
-        red 210 15 57       // #d20f39
-        green 64 160 43     // #40a02b - matches your prompt!
-        yellow 223 142 29   // #df8e1d
-        blue 30 102 245     // #1e66f5
-        magenta 136 57 239  // #8839ef
-        orange 254 100 11   // #fe640b
-        cyan 23 146 153     // #179299
-        black 76 79 105     // #4c4f69 - dark for contrast
-        white 239 241 245   // #eff1f5 - light
-        
-        // UI component colors - CRITICAL for border visibility!
-        frame_unselected {
-            base 64 160 43       // Green border (matches prompt!)
-            background 239 241 245
-            emphasis_0 76 79 105
-            emphasis_1 108 111 133
-            emphasis_2 156 160 176
-            emphasis_3 172 176 190
-        }
-        frame_selected {
-            base 64 160 43       // Green active border
-            background 239 241 245
-            emphasis_0 76 79 105
-            emphasis_1 108 111 133
-            emphasis_2 156 160 176
-            emphasis_3 172 176 190
-        }
-        frame_highlight {
-            base 64 160 43       // Green highlight border
-            background 239 241 245
-            emphasis_0 76 79 105
-            emphasis_1 108 111 133
-            emphasis_2 156 160 176
-            emphasis_3 172 176 190
-        }
-    }
-}
-
-theme "catppuccin-latte-contrast"
-
-// Include all other settings from base config by copying key sections
-keybinds clear-defaults=true {
-    // Keybinds are inherited from base config - using minimal override
-    shared_except "locked" {
-        bind "Ctrl q" { Quit; }
-        bind "Alt `" { SwitchToMode "locked"; }
-    }
-}
-
-default_mode "locked"
-default_shell "zsh"
-copy_command "pbcopy"
-attach_to_session true
-styled_underlines true
-support_kitty_keyboard_protocol true
-show_startup_tips false
-ZELLIJ_EOF
+            # Copy the config and change to high-contrast light theme
+            cp "$ZELLIJ_BASE_CONFIG" "$ZELLIJ_TEMP_CONFIG"
+            sed -i '' 's/theme ".*"/theme "catppuccin-latte-contrast"/' "$ZELLIJ_TEMP_CONFIG"
+            
+            # Make sure the file is writable and readable
+            chmod 644 "$ZELLIJ_TEMP_CONFIG"
+            
+            # Set environment variable to use temp config with light theme
+            echo "export ZELLIJ_CONFIG_FILE=\"$ZELLIJ_TEMP_CONFIG\"" > "$HOME/.cache/zellij_theme_config"
+            
+            log "   ✅ Switched Zellij to catppuccin-latte-contrast theme (high-contrast borders)"
         else
-            cat > "$ZELLIJ_THEME_OVERRIDE" << 'ZELLIJ_EOF'
-// Zellij theme override - managed by catppuccin-theme-switcher
-// This file overrides the theme setting from the Nix-managed base configuration
-
-theme "catppuccin-mocha"
-
-// Include all other settings from base config by copying key sections
-keybinds clear-defaults=true {
-    // Keybinds are inherited from base config - using minimal override
-    shared_except "locked" {
-        bind "Ctrl q" { Quit; }
-        bind "Alt `" { SwitchToMode "locked"; }
-    }
-}
-
-default_mode "locked"
-default_shell "zsh"
-copy_command "pbcopy"
-attach_to_session true
-styled_underlines true
-support_kitty_keyboard_protocol true
-show_startup_tips false
-ZELLIJ_EOF
+            # Copy the config and change to dark theme
+            cp "$ZELLIJ_BASE_CONFIG" "$ZELLIJ_TEMP_CONFIG"
+            sed -i '' 's/theme ".*"/theme "catppuccin-mocha-contrast"/' "$ZELLIJ_TEMP_CONFIG"
+            
+            # Make sure the file is writable and readable
+            chmod 644 "$ZELLIJ_TEMP_CONFIG"
+            
+            # Set environment variable to use temp config with dark theme
+            echo "export ZELLIJ_CONFIG_FILE=\"$ZELLIJ_TEMP_CONFIG\"" > "$HOME/.cache/zellij_theme_config"
+            
+            log "   ✅ Switched Zellij to catppuccin-mocha-contrast theme (enhanced borders)"
         fi
         
-        # Set environment variable for shell sessions
-        echo "export ZELLIJ_CONFIG_FILE=\"$ZELLIJ_THEME_OVERRIDE\"" > "$HOME/.cache/zellij_theme_config"
-        
-        log "   ✅ Created Zellij theme override for $APPEARANCE mode"
-        log "   💡 Use 'source ~/.cache/zellij_theme_config' or restart shell to apply"
+        log "   💡 Restart zellij sessions to see theme changes"
     else
-        log "   🔍 Would create Zellij theme override for $APPEARANCE mode"
+        if [[ "$APPEARANCE" == "light" ]]; then
+            log "   🔍 Would switch Zellij to catppuccin-latte-contrast theme (high-contrast borders)"
+        else
+            log "   🔍 Would switch Zellij to catppuccin-mocha theme"
+        fi
     fi
 else
     log "   ❌ Zellij base config file not found: $ZELLIJ_BASE_CONFIG"

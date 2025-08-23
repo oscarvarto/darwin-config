@@ -17,6 +17,7 @@ _:
   "powershell"
   "qt-creator"
   "qt-design-studio"
+  "warp@preview"
 
   # Communication Tools
   "anytype"
