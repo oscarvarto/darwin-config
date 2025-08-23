@@ -1,0 +1,155 @@
+#!/bin/bash
+# ns-ghostty-safe - Safe wrapper for nix build-switch that detects ghostty 
+# to prevent the terminal from quitting unexpectedly
+
+set -euo pipefail
+
+# Colors for output
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+NC='\033[0m'
+
+# Simplified ghostty detection - zellij is only used in ghostty
+detect_ghostty() {
+  # Method 1: Force detection for testing
+  if [[ "${FORCE_GHOSTTY_DETECTION:-}" == "1" ]]; then
+    return 0
+  fi
+  
+  # Method 2: Primary detection - if we're in zellij, we're in ghostty
+  # Design decision: zellij is ONLY used in ghostty
+  if [[ -n "${ZELLIJ:-}" ]] || [[ -n "${ZELLIJ_SESSION_NAME:-}" ]]; then
+    return 0
+  fi
+  
+  # Method 3: Check standard ghostty environment variables (fallback)
+  if [[ "$TERM_PROGRAM" == "ghostty" ]] || [[ "$TERM" == *"ghostty"* ]]; then
+    return 0
+  fi
+  
+  # Method 4: Check for ghostty-specific environment variables (fallback)
+  if [[ -n "${GHOSTTY_RESOURCES_DIR:-}" ]] || [[ -n "${GHOSTTY_CONFIG_PATH:-}" ]]; then
+    return 0
+  fi
+  
+  # Method 5: Manual hint file (for testing/troubleshooting)
+  local hint_file="$HOME/.cache/ghostty_hint"
+  if [[ -f "$hint_file" ]]; then
+    local hint_time=$(cat "$hint_file" 2>/dev/null || echo "0")
+    local current_time=$(date +%s)
+    local time_diff=$((current_time - hint_time))
+    
+    # If hint file is less than 30 minutes old, assume ghostty
+    if [[ $time_diff -lt 1800 ]]; then
+      return 0
+    fi
+  fi
+  
+  # Not ghostty
+  return 1
+}
+
+# Determine the system type
+SYSTEM_TYPE="aarch64-darwin"
+if [[ "$(uname -m)" == "x86_64" ]]; then
+    SYSTEM_TYPE="x86_64-darwin"
+fi
+
+# Use the same command structure as nb and ns aliases
+
+export NIXPKGS_ALLOW_UNFREE=1
+
+# Check for zellij session
+in_zellij=0
+if [[ -n "${ZELLIJ:-}" ]] || [[ -n "${ZELLIJ_SESSION_NAME:-}" ]]; then
+  in_zellij=1
+fi
+
+# Check if we're in ghostty
+if detect_ghostty; then
+  echo -e "${BLUE}Detected ghostty terminal - enabling safe mode${NC}"
+  
+  if [[ $in_zellij -eq 1 ]]; then
+    echo -e "${BLUE}Running in zellij session${NC}"
+  fi
+  
+  echo -e "${YELLOW}Using ghostty-safe mode for nix build-switch...${NC}"
+  echo -e "${YELLOW}Current session will be preserved during theme switching...${NC}"
+  
+  # Set environment variables to prevent theme switcher from killing Zellij sessions
+  export GHOSTTY_SAFE_MODE=1
+  export NUSHELL_NIX_BUILD=true
+  
+  # In zellij, use a simpler approach to avoid process conflicts
+  if [[ $in_zellij -eq 1 ]]; then
+    echo -e "${YELLOW}Using zellij-safe direct execution...${NC}"
+    
+    # Change to the correct directory
+    cd ~/darwin-config || exit 1
+    
+    # Run build-switch directly without nohup to avoid zellij conflicts
+    echo -e "${YELLOW}Running nix build-switch directly (zellij-safe mode)...${NC}"
+    if nix run .#build-switch "$@"; then
+      echo -e "${GREEN}Switch to new generation complete!${NC}"
+      echo -e "${GREEN}✅ Nix build-switch completed successfully!${NC}"
+      echo -e "${BLUE}🔍 Press any key to continue...${NC}"
+      read -n 1 -s
+    else
+      echo -e "${RED}Build or switch failed${NC}"
+      exit 1
+    fi
+  else
+    # Not in zellij, use the background process approach
+    echo -e "${YELLOW}Using background process approach...${NC}"
+    
+    # Create a temporary file to store the exit code
+    exit_code_file=$(mktemp)
+    
+    # Using background process with nohup to prevent terminal closing
+    (
+      cd ~/darwin-config || exit 1
+      echo -e "${YELLOW}Building system configuration...${NC}"
+      
+      # Use nohup to prevent ghostty from closing
+      nohup nix run .#build-switch > nohup_build.log 2>&1
+      build_exit=$?
+      
+      if [[ $build_exit -ne 0 ]]; then
+        echo $build_exit > "$exit_code_file"
+        exit $build_exit
+      fi
+      
+      echo 0 > "$exit_code_file"
+    ) &
+    
+    # Wait a bit for the background process to start
+    sleep 1
+    
+    # Show logs while the process is running
+    echo -e "${YELLOW}Showing build logs (press Ctrl+C to stop watching logs, build will continue):${NC}"
+    tail -f ~/darwin-config/nohup_build.log ~/darwin-config/nohup_switch.log 2>/dev/null || true
+    
+    # Wait for the background process to complete
+    wait
+    
+    # Get the exit code
+    exit_code=$(cat "$exit_code_file")
+    rm -f "$exit_code_file"
+    
+    if [[ $exit_code -eq 0 ]]; then
+      echo -e "${GREEN}Switch to new generation complete!${NC}"
+    else
+      echo -e "${RED}Build or switch failed with exit code: $exit_code${NC}"
+      echo -e "${YELLOW}Check logs in ~/darwin-config/nohup_build.log and ~/darwin-config/nohup_switch.log${NC}"
+    fi
+  fi
+else
+  # Not in ghostty, use the normal method (same as original ns alias)
+  cd ~/darwin-config || exit 1
+  
+  echo -e "${YELLOW}Running nix build-switch...${NC}"
+  nix run .#build-switch "$@"
+  
+  echo -e "${GREEN}Switch to new generation complete!${NC}"
+fi

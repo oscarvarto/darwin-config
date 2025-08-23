@@ -205,73 +205,19 @@ $env.config = {
             enable: true # set to false to prevent nushell looking into $env.PATH to find more suggestions, `false` recommended for WSL users as this look up may be very slow
             max_results: 50 # Reduced for better performance
             completer: {|spans|
-                # Enhanced multicompleter with better context awareness and performance
+                # Simple multicompleter - try carapace first, then fish as fallback
                 
-                # Context analysis
-                let is_command_position = ($spans | length) == 1
-                let current_input = ($spans | last | default "")
-                let input_length = ($current_input | str length)
-                
-                # Performance: Skip completion for very short inputs in argument positions
-                # Only require 1 char for commands, 2+ for arguments
-                let min_chars = if $is_command_position { 1 } else { 2 }
-                if $input_length < $min_chars {
-                    return []
-                }
-                
-                # Command-specific completers
-                let git_completer = {|spans|
-                    if ($spans.0 == "git") {
-                        try {
-                            git $"--list-cmds=($spans | skip 1 | str join ",")" |
-                            lines |
-                            each { |cmd| {value: $cmd, description: "git command"} }
-                        } catch { [] }
-                    } else {
-                        []
-                    }
-                }
-                
-                let nix_completer = {|spans|
-                    if ($spans.0 in ["nix", "nix-shell", "nix-build"]) {
-                        try {
-                            # Basic nix completions for common subcommands
-                            let nix_commands = [
-                                {value: "develop", description: "start a development shell"}
-                                {value: "build", description: "build a derivation"}
-                                {value: "run", description: "run a command from a package"}
-                                {value: "shell", description: "run a shell with packages"}
-                                {value: "search", description: "search for packages"}
-                                {value: "flake", description: "work with flakes"}
-                            ]
-                            $nix_commands | where value starts-with $current_input
-                        } catch { [] }
-                    } else {
-                        []
-                    }
-                }
-                
-                # Enhanced carapace completer with error handling
+                # Carapace completer
                 let carapace_completer = {|spans| 
                     try {
-                        let result = carapace $spans.0 nushell ...$spans | from json
-                        # Filter out excessive file completions when we're likely looking for commands
-                        if $is_command_position {
-                            $result | where {|item| 
-                                let val = $item.value
-                                # Prefer executables and built-ins over random files
-                                not ($val | str contains "." and ($val | path exists) and not ($val | str ends-with ".sh"))
-                            }
-                        } else {
-                            $result
-                        }
+                        carapace $spans.0 nushell ...$spans | from json
                     } catch { [] }
                 }
                 
-                # Enhanced fish completer with better file handling
+                # Fish completer with proper quoting
                 let fish_completer = {|spans|
                     try {
-                        let fish_result = fish --command $"complete '--do-complete=($spans | str replace --all "'" "'\''" | str join ' ')'" |
+                        fish --command $"complete '--do-complete=($spans | str replace --all "'" "'\''" | str join ' ')'" |
                         from tsv --flexible --noheaders --no-infer |
                         rename value description |
                         update value {|row|
@@ -288,71 +234,31 @@ $env.config = {
                                 $value
                             }
                         }
-                        
-                        # For command position, prefer commands over files
-                        if $is_command_position {
-                            $fish_result | where {|item| 
-                                let val = $item.value
-                                # Prioritize commands over random files
-                                not ($val | str contains "/" and ($val | path exists) and not ($val | str contains "bin"))
-                            }
-                        } else {
-                            $fish_result
-                        }
                     } catch { [] }
                 }
                 
-                # PATH-based command completer for first position
-                let path_completer = {|spans|
-                    if $is_command_position and $input_length >= 2 {
+                # Git completer for git commands
+                let git_completer = {|spans|
+                    if ($spans.0 == "git") {
                         try {
-                            $env.PATH | split row (char esep) | each {|path|
-                                try {
-                                    ls $path | where type == "file" and name starts-with $current_input
-                                    | get name | each {|cmd| {value: $cmd, description: $"command from ($path)"}}
-                                } catch { [] }
-                            } | flatten | first 20  # Limit to prevent overwhelming
+                            git $"--list-cmds=($spans | skip 1 | str join ",")" |
+                            lines |
+                            each { |cmd| {value: $cmd, description: "git command"} }
                         } catch { [] }
                     } else {
                         []
                     }
                 }
                 
-                # Intelligent completion strategy
-                # Priority: specialized completers > carapace > fish > path completion
-                
-                # Try specialized completers first
-                let specialized_result = [
-                    (do $git_completer $spans),
-                    (do $nix_completer $spans)
-                ] | flatten
-                
-                if ($specialized_result | length) > 0 {
-                    return ($specialized_result | first 25)
-                }
-                
-                # Try carapace (usually the best for most commands)
+                # Simple strategy: try carapace first, if no results try fish, add git completions for git commands
                 let carapace_result = do $carapace_completer $spans
-                if ($carapace_result | length) > 0 {
-                    return ($carapace_result | first 30)
-                }
-                
-                # Try fish completer
                 let fish_result = do $fish_completer $spans
-                if ($fish_result | length) > 0 {
-                    return ($fish_result | first 25)
-                }
+                let git_result = do $git_completer $spans
                 
-                # For command position only, try PATH-based completion as fallback
-                if $is_command_position {
-                    let path_result = do $path_completer $spans
-                    if ($path_result | length) > 0 {
-                        return $path_result
-                    }
-                }
+                # Combine all results, prioritizing carapace but including others
+                let all_results = ($carapace_result + $fish_result + $git_result) | uniq-by value | first 50
                 
-                # No results found
-                return []
+                $all_results
             }
         }
         use_ls_colors: false # disable LS_COLORS to prevent theme conflicts in completions
