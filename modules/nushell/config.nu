@@ -250,13 +250,13 @@ $env.config = {
                     }
                 }
                 
-                # Simple strategy: try carapace first, if no results try fish, add git completions for git commands
-                let carapace_result = do $carapace_completer $spans
+                # Simple strategy: try fish first (more comprehensive), then carapace, add git completions for git commands
                 let fish_result = do $fish_completer $spans
+                let carapace_result = do $carapace_completer $spans
                 let git_result = do $git_completer $spans
                 
-                # Combine all results, prioritizing carapace but including others
-                let all_results = ($carapace_result + $fish_result + $git_result) | uniq-by value | first 50
+                # Combine all results, prioritizing fish for broader coverage
+                let all_results = ($fish_result + $carapace_result + $git_result) | uniq-by value | first 50
                 
                 $all_results
             }
