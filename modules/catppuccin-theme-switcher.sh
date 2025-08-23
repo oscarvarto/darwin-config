@@ -20,7 +20,7 @@ OPTIONS:
     -v, --version       Show version information
     -s, --status        Show current theme status across all applications
     -f, --force-light   Force light theme (Catppuccin Latte) regardless of system setting
-    -d, --force-dark    Force dark theme (Catppuccin Mocha) regardless of system setting
+    -d, --force-dark    Force dark theme (Catppuccin Macchiato) regardless of system setting
     -a, --auto          Use automatic system appearance detection (default)
     -q, --quiet         Run silently without output
     --dry-run          Show what would be changed without making changes
@@ -35,13 +35,13 @@ SUPPORTED APPLICATIONS:
     • BAT (syntax highlighter)
 
 THEME MAPPING:
-    Light Mode:  Catppuccin Latte (with high contrast colors)
-    Dark Mode:   Catppuccin Mocha (with vibrant colors)
+    Light Mode:  Catppuccin Latte (official built-in theme)
+    Dark Mode:   Catppuccin Macchiato (official built-in theme)
 
 AUTOMATIC MODE:
     The script automatically detects macOS system appearance:
     • System Light Mode → Catppuccin Latte
-    • System Dark Mode  → Catppuccin Mocha
+    • System Dark Mode  → Catppuccin Macchiato
 
 EXAMPLES:
     catppuccin-theme-switcher              # Auto-detect and apply theme
@@ -232,8 +232,8 @@ fi
 
 # Set theme variables
 if [[ "$APPEARANCE" == "dark" ]]; then
-    CATPPUCCIN_FLAVOR="mocha"
-    STARSHIP_PALETTE="catppuccin_mocha"
+    CATPPUCCIN_FLAVOR="macchiato"
+    STARSHIP_PALETTE="catppuccin_mocha"  # Starship still uses mocha for dark mode
     BAT_THEME="ansi"
 else
     CATPPUCCIN_FLAVOR="latte"
@@ -300,53 +300,36 @@ else
     log "   🔍 Would create Atuin override for $APPEARANCE theme"
 fi
 
-# Update zellij theme by modifying the theme line in the main config
-log "🖼️  Updating Zellij multiplexer theme..."
-ZELLIJ_BASE_CONFIG="$HOME/.config/zellij/config.kdl"
-ZELLIJ_TEMP_CONFIG="$HOME/.config/zellij/current-theme.kdl"
+# Update zellij theme management - simplified approach for better reliability
+log "🖼️  Updating Zellij multiplexer theme configuration..."
 
-if [[ -f "$ZELLIJ_BASE_CONFIG" ]]; then
-    if [[ "$DRY_RUN" != "true" ]]; then
-        # Remove any existing temp config to avoid permission issues
-        rm -f "$ZELLIJ_TEMP_CONFIG"
-        
-        # Create a temporary config with the appropriate theme
-        if [[ "$APPEARANCE" == "light" ]]; then
-            # Copy the config and change to high-contrast light theme
-            cp "$ZELLIJ_BASE_CONFIG" "$ZELLIJ_TEMP_CONFIG"
-            sed -i '' 's/theme ".*"/theme "catppuccin-latte-contrast"/' "$ZELLIJ_TEMP_CONFIG"
-            
-            # Make sure the file is writable and readable
-            chmod 644 "$ZELLIJ_TEMP_CONFIG"
-            
-            # Set environment variable to use temp config with light theme
-            echo "export ZELLIJ_CONFIG_FILE=\"$ZELLIJ_TEMP_CONFIG\"" > "$HOME/.cache/zellij_theme_config"
-            
-            log "   ✅ Switched Zellij to catppuccin-latte-contrast theme (high-contrast borders)"
-        else
-            # Copy the config and change to dark theme
-            cp "$ZELLIJ_BASE_CONFIG" "$ZELLIJ_TEMP_CONFIG"
-            sed -i '' 's/theme ".*"/theme "catppuccin-mocha-contrast"/' "$ZELLIJ_TEMP_CONFIG"
-            
-            # Make sure the file is writable and readable
-            chmod 644 "$ZELLIJ_TEMP_CONFIG"
-            
-            # Set environment variable to use temp config with dark theme
-            echo "export ZELLIJ_CONFIG_FILE=\"$ZELLIJ_TEMP_CONFIG\"" > "$HOME/.cache/zellij_theme_config"
-            
-            log "   ✅ Switched Zellij to catppuccin-mocha-contrast theme (enhanced borders)"
-        fi
-        
-        log "   💡 Restart zellij sessions to see theme changes"
+# Write theme preference to cache for zt function to read
+ZELLIJ_THEME_CACHE="$HOME/.cache/zellij_preferred_theme"
+if [[ "$DRY_RUN" != "true" ]]; then
+    if [[ "$APPEARANCE" == "light" ]]; then
+        echo "tokyo-night-light" > "$ZELLIJ_THEME_CACHE"
+        log "   ✅ Set preferred Zellij theme: tokyo-night-light (high contrast light)"
     else
-        if [[ "$APPEARANCE" == "light" ]]; then
-            log "   🔍 Would switch Zellij to catppuccin-latte-contrast theme (high-contrast borders)"
+        echo "catppuccin-macchiato" > "$ZELLIJ_THEME_CACHE"
+        log "   ✅ Set preferred Zellij theme: catppuccin-macchiato (high contrast dark)"
+    fi
+    
+    # Kill existing sessions to apply theme immediately
+    if command -v zellij >/dev/null 2>&1; then
+        if zellij list-sessions >/dev/null 2>&1; then
+            log "   🔄 Terminating existing Zellij sessions for immediate theme change..."
+            zellij kill-all-sessions --yes >/dev/null 2>&1 || true
+            log "   ✨ Zellij sessions cleared - new sessions will use updated theme"
         else
-            log "   🔍 Would switch Zellij to catppuccin-mocha theme"
+            log "   💡 No existing Zellij sessions found"
         fi
     fi
 else
-    log "   ❌ Zellij base config file not found: $ZELLIJ_BASE_CONFIG"
+    if [[ "$APPEARANCE" == "light" ]]; then
+        log "   🔍 Would set Zellij theme: tokyo-night-light (high contrast light)"
+    else
+        log "   🔍 Would set Zellij theme: catppuccin-macchiato (high contrast dark)"
+    fi
 fi
 
 # Update Ghostty theme

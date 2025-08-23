@@ -1162,5 +1162,178 @@ def --env "apply-theme" [] {
 # Apply theme immediately after config is loaded
 apply-theme
 
+# Smart Zellij launcher with manual theme switching - handles Ghostty integration
+# Usage: zt [theme_name] [--session session_name]
+def "zt" [
+    theme?: string                    # Explicit theme name (required)
+    --session (-s): string           # Optional session name
+    --quiet (-q)                     # Suppress informational output
+    --force-zsh                      # Force using zsh intermediary (for troubleshooting)
+    --force-restart                  # Force restart even when in Ghostty-managed Zellij
+    ...args                          # Additional zellij arguments
+] {
+    # Helper function for logging
+    let log = {|msg| if not $quiet { print $msg }}
+    
+    # Require explicit theme - no more automatic detection
+    if ($theme == null) {
+        print "❌ Theme name is required. Use 'zt-themes' to see available themes."
+        print "Example: zt catppuccin-macchiato"
+        return 1
+    }
+    
+    do $log $"🎯 Setting theme: ($theme)"
+    
+    # -----------------------------------------------------
+    # 1. Detect if we're inside a Zellij session managed by Ghostty
+    # -----------------------------------------------------
+    let in_zellij = ($env.ZELLIJ? | default "" | str length) > 0
+    let current_session = $env.ZELLIJ_SESSION_NAME? | default ""
+    
+    if $in_zellij and not $force_restart {
+        do $log "🔍 Detected running inside Zellij - using in-place theme change..."
+        
+        # -----------------------------------------------------
+        # 2. Set theme using simplified theme manager (in-place)
+        # -----------------------------------------------------
+        try {
+            let theme_manager_result = (do { zellij-theme-manager set $theme } | complete)
+            if $theme_manager_result.exit_code == 0 {
+                do $log $"🎨 Set zellij theme to: ($theme)"
+                
+                # Reload the current session to apply the theme
+                do $log "🔄 Reloading Zellij configuration..."
+                try {
+                    # Use Zellij's action system to reload config without killing the session
+                    ^zellij action write-chars "clear" | complete | null
+                    ^zellij action write-chars "" | complete | null  # Send enter
+                    do $log "✅ Theme applied! Zellij configuration reloaded."
+                    print $"\n🎆 Theme changed to ($theme)! The new theme should be visible."
+                } catch { |e|
+                    do $log $"\n⚠️  Note: Theme config updated but may require Zellij restart to see changes."
+                    print $"\n📝 You can restart Zellij manually or run 'zt ($theme) --force-restart'"
+                }
+            } else {
+                print $"❌ Theme manager failed: ($theme_manager_result.stderr)"
+                return 1
+            }
+        } catch { |e|
+            print $"❌ Failed to set theme: ($e.msg)"
+            return 1
+        }
+        
+        return 0
+    }
+    
+    # -----------------------------------------------------
+    # 3. Handle external launch or forced restart
+    # -----------------------------------------------------
+    
+    # Get list of existing sessions
+    let existing_sessions = try {
+        (do { zellij list-sessions } | complete | get stdout | lines | where {|line| $line != ""})
+    } catch {
+        []
+    }
+    
+    if ($existing_sessions | length) > 0 {
+        if $in_zellij and $force_restart {
+            do $log "⚠️  Force restart requested - this will terminate the current Zellij session!"
+            print "\n🚨 Warning: This will close Ghostty if it's managing this Zellij session."
+            print "Press Ctrl+C to cancel, or Enter to continue..."
+            input
+        }
+        
+        do $log $"🔄 Found ($existing_sessions | length) existing Zellij sessions"
+        do $log "   Terminating existing sessions for clean theme application..."
+        
+        # Kill all existing sessions to prevent theme conflicts
+        try {
+            do { zellij kill-all-sessions --yes } | complete | null
+            do $log "   ✅ Successfully terminated existing sessions"
+        } catch {
+            do $log "   ⚠️  Could not terminate some sessions (may not exist anymore)"
+        }
+        
+        # Wait a moment for cleanup
+        sleep 500ms
+    }
+    
+    # -----------------------------------------------------
+    # 4. Set theme using simplified theme manager
+    # -----------------------------------------------------
+    try {
+        let theme_manager_result = (do { zellij-theme-manager set $theme } | complete)
+        if $theme_manager_result.exit_code == 0 {
+            do $log $"🎨 Set zellij theme to: ($theme)"
+        } else {
+            print $"❌ Theme manager failed: ($theme_manager_result.stderr)"
+            return 1
+        }
+    } catch { |e|
+        print $"❌ Failed to set theme: ($e.msg)"
+        return 1
+    }
+    
+    # -----------------------------------------------------
+    # 5. Launch Zellij - now using direct nushell execution!
+    # -----------------------------------------------------
+    if ($session != null) {
+        do $log $"📝 Using session name: ($session)"
+        do $log $"🚀 Launching: zellij --session ($session)"
+    } else {
+        do $log $"🚀 Launching: zellij attach --create"
+    }
+    
+    # Direct execution - no more zsh intermediary needed!
+    if $force_zsh {
+        do $log "🔧 Using zsh intermediary as requested via --force-zsh..."
+        let cmd_parts = if ($session != null) {
+            ["zellij" "--session" $session] | append $args
+        } else {
+            ["zellij" "attach" "--create"] | append $args
+        }
+        let full_cmd = ($cmd_parts | str join " ")
+        ^/bin/zsh -l -c $full_cmd
+    } else {
+        # Direct nushell execution - should work fine now!
+        if ($session != null) {
+            if ($args | length) > 0 {
+                ^zellij --session $session ...$args
+            } else {
+                ^zellij --session $session
+            }
+        } else {
+            if ($args | length) > 0 {
+                ^zellij attach --create ...$args
+            } else {
+                ^zellij attach --create
+            }
+        }
+    }
+}
+
+# Aliases and helper functions for zellij theme management
+alias z = zt
+
+# Quick theme switching functions
+def "zt-light" [...args] {
+    zt "tokyo-night-light" ...$args
+}
+
+def "zt-dark" [...args] {
+    zt "catppuccin-macchiato" ...$args  
+}
+
+# List available zellij themes
+def "zt-themes" [] {
+    zellij-theme-manager list
+}
+
+# Show current theme status
+def "zt-status" [] {
+    zellij-theme-manager status
+}
+
 # Final PATH cleanup - remove duplicates after all integrations have loaded
 $env.PATH = ($env.PATH | uniq)

@@ -28,8 +28,8 @@ in
       theme = dracula
 
       # Default shell (can be overridden)
-      command = /Users/${user}/.nix-profile/bin/zsh --login --interactive
-      initial-command = /Users/${user}/.nix-profile/bin/zsh --login --interactive
+      command = /Users/${user}/.nix-profile/bin/nu --login --interactive
+      initial-command = /Users/${user}/.nix-profile/bin/nu --login --interactive
 
       # Window and appearance settings
       split-divider-color = green
@@ -58,10 +58,9 @@ in
   # NOTE: Ghostty configuration scripts are now managed via stow (nix-scripts package)
   # Run: cd ~/darwin-config/stow && stow nix-scripts
 
-  # Zellij configuration
-  ".config/zellij/config.kdl" = {
-    text = builtins.readFile ./zellij-config.kdl;
-  };
+  # NOTE: Zellij configuration is now managed by the theme manager for dynamic theme switching
+  # The base config is created by the zellij-theme-manager and updated dynamically
+  # This allows themes to be changed at runtime without rebuilding Nix configuration
 
 }
 
