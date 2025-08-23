@@ -32,7 +32,6 @@ in
       initial-command = /Users/${user}/.nix-profile/bin/nu --login --interactive
 
       # Window and appearance settings
-      split-divider-color = green
       window-save-state = always
       cursor-style = block
       cursor-color = "#D9905A"
