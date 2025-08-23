@@ -203,55 +203,156 @@ $env.config = {
         algorithm: "fuzzy"    # prefix or fuzzy
         external: {
             enable: true # set to false to prevent nushell looking into $env.PATH to find more suggestions, `false` recommended for WSL users as this look up may be very slow
-            max_results: 100 # setting it lower can improve completion performance at the cost of omitting some options
+            max_results: 50 # Reduced for better performance
             completer: {|spans|
-                # Multiple completer setup with carapace, fish, and git completers
-                let carapace_completer = {|spans| 
-                    carapace $spans.0 nushell ...$spans | from json
+                # Enhanced multicompleter with better context awareness and performance
+                
+                # Context analysis
+                let is_command_position = ($spans | length) == 1
+                let current_input = ($spans | last | default "")
+                let input_length = ($current_input | str length)
+                
+                # Performance: Skip completion for very short inputs in argument positions
+                # Only require 1 char for commands, 2+ for arguments
+                let min_chars = if $is_command_position { 1 } else { 2 }
+                if $input_length < $min_chars {
+                    return []
                 }
                 
-                let fish_completer = {|spans|
-                    fish --command $"complete '--do-complete=($spans | str replace --all "'" "'\''" | str join ' ')'" |
-                    from tsv --flexible --noheaders --no-infer |
-                    rename value description |
-                    update value {|row|
-                        let value = $row.value
-                        let need_quote = [ '\' ',' '[' ']' '(' ')' ' ' '\t' "'" '"' "`" ] | any { $in in $value }
-                        if ($need_quote and ($value | path exists)) {
-                            let expanded_path = if ($value starts-with "~") {
-                                $value | path expand --no-symlink
-                            } else {
-                                $value
-                            }
-                            $'"($expanded_path | str replace --all '"' '\\"')"'
-                        } else {
-                            $value
-                        }
-                    }
-                }
-                
+                # Command-specific completers
                 let git_completer = {|spans|
                     if ($spans.0 == "git") {
-                        git $"--list-cmds=($spans | skip 1 | str join ",")" |
-                        lines |
-                        each { {value: $in} }
+                        try {
+                            git $"--list-cmds=($spans | skip 1 | str join ",")" |
+                            lines |
+                            each { |cmd| {value: $cmd, description: "git command"} }
+                        } catch { [] }
                     } else {
                         []
                     }
                 }
                 
-                # Try completers in order: carapace first, then fish, then git
-                let carapace_result = do $carapace_completer $spans
-                if ($carapace_result | length) > 0 {
-                    $carapace_result
-                } else {
-                    let fish_result = try { do $fish_completer $spans } catch { [] }
-                    if ($fish_result | length) > 0 {
-                        $fish_result
+                let nix_completer = {|spans|
+                    if ($spans.0 in ["nix", "nix-shell", "nix-build"]) {
+                        try {
+                            # Basic nix completions for common subcommands
+                            let nix_commands = [
+                                {value: "develop", description: "start a development shell"}
+                                {value: "build", description: "build a derivation"}
+                                {value: "run", description: "run a command from a package"}
+                                {value: "shell", description: "run a shell with packages"}
+                                {value: "search", description: "search for packages"}
+                                {value: "flake", description: "work with flakes"}
+                            ]
+                            $nix_commands | where value starts-with $current_input
+                        } catch { [] }
                     } else {
-                        try { do $git_completer $spans } catch { [] }
+                        []
                     }
                 }
+                
+                # Enhanced carapace completer with error handling
+                let carapace_completer = {|spans| 
+                    try {
+                        let result = carapace $spans.0 nushell ...$spans | from json
+                        # Filter out excessive file completions when we're likely looking for commands
+                        if $is_command_position {
+                            $result | where {|item| 
+                                let val = $item.value
+                                # Prefer executables and built-ins over random files
+                                not ($val | str contains "." and ($val | path exists) and not ($val | str ends-with ".sh"))
+                            }
+                        } else {
+                            $result
+                        }
+                    } catch { [] }
+                }
+                
+                # Enhanced fish completer with better file handling
+                let fish_completer = {|spans|
+                    try {
+                        let fish_result = fish --command $"complete '--do-complete=($spans | str replace --all "'" "'\''" | str join ' ')'" |
+                        from tsv --flexible --noheaders --no-infer |
+                        rename value description |
+                        update value {|row|
+                            let value = $row.value
+                            let need_quote = [ '\' ',' '[' ']' '(' ')' ' ' '\t' "'" '"' "`" ] | any { $in in $value }
+                            if ($need_quote and ($value | path exists)) {
+                                let expanded_path = if ($value starts-with "~") {
+                                    $value | path expand --no-symlink
+                                } else {
+                                    $value
+                                }
+                                $'"($expanded_path | str replace --all '"' '\\"')"'
+                            } else {
+                                $value
+                            }
+                        }
+                        
+                        # For command position, prefer commands over files
+                        if $is_command_position {
+                            $fish_result | where {|item| 
+                                let val = $item.value
+                                # Prioritize commands over random files
+                                not ($val | str contains "/" and ($val | path exists) and not ($val | str contains "bin"))
+                            }
+                        } else {
+                            $fish_result
+                        }
+                    } catch { [] }
+                }
+                
+                # PATH-based command completer for first position
+                let path_completer = {|spans|
+                    if $is_command_position and $input_length >= 2 {
+                        try {
+                            $env.PATH | split row (char esep) | each {|path|
+                                try {
+                                    ls $path | where type == "file" and name starts-with $current_input
+                                    | get name | each {|cmd| {value: $cmd, description: $"command from ($path)"}}
+                                } catch { [] }
+                            } | flatten | first 20  # Limit to prevent overwhelming
+                        } catch { [] }
+                    } else {
+                        []
+                    }
+                }
+                
+                # Intelligent completion strategy
+                # Priority: specialized completers > carapace > fish > path completion
+                
+                # Try specialized completers first
+                let specialized_result = [
+                    (do $git_completer $spans),
+                    (do $nix_completer $spans)
+                ] | flatten
+                
+                if ($specialized_result | length) > 0 {
+                    return ($specialized_result | first 25)
+                }
+                
+                # Try carapace (usually the best for most commands)
+                let carapace_result = do $carapace_completer $spans
+                if ($carapace_result | length) > 0 {
+                    return ($carapace_result | first 30)
+                }
+                
+                # Try fish completer
+                let fish_result = do $fish_completer $spans
+                if ($fish_result | length) > 0 {
+                    return ($fish_result | first 25)
+                }
+                
+                # For command position only, try PATH-based completion as fallback
+                if $is_command_position {
+                    let path_result = do $path_completer $spans
+                    if ($path_result | length) > 0 {
+                        return $path_result
+                    }
+                }
+                
+                # No results found
+                return []
             }
         }
         use_ls_colors: false # disable LS_COLORS to prevent theme conflicts in completions
@@ -1055,10 +1156,253 @@ def nb [] {
     dirs drop
 }
 
-def ns [] {
+# ns function - nushell-native implementation with ghostty/zellij compatibility
+def "ns" [...args] {
+    # Colors for output
+    let GREEN = (ansi green_bold)
+    let YELLOW = (ansi yellow_bold)
+    let BLUE = (ansi blue_bold)
+    let RED = (ansi red_bold)
+    let NC = (ansi reset)
+    
+    # Helper functions
+    let detect_ghostty = {
+        # Method 1: Force detection for testing
+        if ($env.FORCE_GHOSTTY_DETECTION? | default "0") == "1" {
+            return true
+        }
+        
+        # Method 2: Primary detection - if we're in zellij, we're in ghostty
+        # Design decision: zellij is ONLY used in ghostty
+        if ($env.ZELLIJ? | default "" | str length) > 0 or ($env.ZELLIJ_SESSION_NAME? | default "" | str length) > 0 {
+            return true
+        }
+        
+        # Method 3: Check standard ghostty environment variables (fallback)
+        if ($env.TERM_PROGRAM? | default "") == "ghostty" or ($env.TERM? | default "" | str contains "ghostty") {
+            return true
+        }
+        
+        # Method 4: Check for ghostty-specific environment variables (fallback)
+        if ($env.GHOSTTY_RESOURCES_DIR? | default "" | str length) > 0 or ($env.GHOSTTY_CONFIG_PATH? | default "" | str length) > 0 {
+            return true
+        }
+        
+        # Method 5: Manual hint file (for testing/troubleshooting)
+        let hint_file = ($env.HOME | path join ".cache" "ghostty_hint")
+        if ($hint_file | path exists) {
+            let hint_time = (try { open $hint_file | into int } catch { 0 })
+            let current_time = (date now | format date "%s" | into int)
+            let time_diff = ($current_time - $hint_time)
+            
+            # If hint file is less than 30 minutes old, assume ghostty
+            if $time_diff < 1800 {
+                return true
+            }
+        }
+        
+        # Not ghostty
+        false
+    }
+    
+    # Check for zellij session
+    let in_zellij = ($env.ZELLIJ? | default "" | str length) > 0 or ($env.ZELLIJ_SESSION_NAME? | default "" | str length) > 0
+    
+    # Determine system type  
+    let system_type = if (^uname -m | str trim) == "x86_64" { "x86_64-darwin" } else { "aarch64-darwin" }
+    
+    # Set NIXPKGS_ALLOW_UNFREE
+    $env.NIXPKGS_ALLOW_UNFREE = "1"
+    
+    # Check if we're in ghostty
+    if (do $detect_ghostty) {
+        print $"($BLUE)Detected ghostty terminal - enabling safe mode($NC)"
+        
+        if $in_zellij {
+            print $"($BLUE)Running in zellij session($NC)"
+        }
+        
+        print $"($YELLOW)Using ghostty-safe mode for nix build-switch...($NC)"
+        print $"($YELLOW)Current session will be preserved during theme switching...($NC)"
+        
+        # Set environment variables to prevent theme switcher from killing Zellij sessions
+        $env.GHOSTTY_SAFE_MODE = "1"
+        $env.NUSHELL_NIX_BUILD = "true"
+        
+        # In zellij, use a simpler approach to avoid process conflicts
+        if $in_zellij {
+            print $"($YELLOW)Using zellij-safe direct execution...($NC)"
+            
+            # Change to the correct directory
+            dirs add ~/darwin-config
+            
+            # Run build-switch directly without nohup to avoid zellij conflicts
+            print $"($YELLOW)Running nix build-switch directly \(zellij-safe mode\)...($NC)"
+            try {
+                if ($args | length) > 0 {
+                    nix run .#build-switch ...$args
+                } else {
+                    nix run .#build-switch
+                }
+                print $"($GREEN)Switch to new generation complete!($NC)"
+                print $"($GREEN)✅ Nix build-switch completed successfully!($NC)"
+                print $"($BLUE)🔍 Press any key to continue...($NC)"
+                input
+            } catch { |e|
+                print $"($RED)Build or switch failed: ($e.msg)($NC)"
+                dirs drop
+                return 1
+            }
+            dirs drop
+        } else {
+            # Not in zellij, use the background process approach
+            print $"($YELLOW)Using background process approach...($NC)"
+            print $"($YELLOW)Note: This may cause the terminal to close if ghostty theme changes occur($NC)"
+            
+            # Change to correct directory
+            dirs add ~/darwin-config
+            
+            try {
+                print $"($YELLOW)Building system configuration...($NC)"
+                
+                if ($args | length) > 0 {
+                    nix run .#build-switch ...$args
+                } else {
+                    nix run .#build-switch
+                }
+                
+                print $"($GREEN)Switch to new generation complete!($NC)"
+            } catch { |e|
+                print $"($RED)Build or switch failed: ($e.msg)($NC)"
+                dirs drop
+                return 1
+            }
+            dirs drop
+        }
+    } else {
+        # Not in ghostty, use the normal method (same as original ns alias)
+        dirs add ~/darwin-config
+        
+        print $"($YELLOW)Running nix build-switch...($NC)"
+        try {
+            if ($args | length) > 0 {
+                nix run .#build-switch ...$args
+            } else {
+                nix run .#build-switch
+            }
+            
+            print $"($GREEN)Switch to new generation complete!($NC)"
+        } catch { |e|
+            print $"($RED)Build or switch failed: ($e.msg)($NC)"
+            dirs drop
+            return 1
+        }
+        dirs drop
+    }
+}
+
+# Original complex nushell ns function, kept for reference/fallback
+# Use 'ns-nushell' if you specifically want the old nushell behavior
+def "ns-nushell" [] {
     dirs add ~/darwin-config
-    nix run .#build-switch
+    
+    # Check if we're in a Zellij session and handle it gracefully
+    let in_zellij = ($env.ZELLIJ? | default "" | str length) > 0
+    let saved_session_name = $env.ZELLIJ_SESSION_NAME? | default ""
+    
+    # Get list of ALL current sessions to protect them during build
+    let pre_build_sessions = if $in_zellij {
+        try {
+            (do { zellij list-sessions } | complete | get stdout | lines | where {|line| $line != "" and not ($line | str contains "No active sessions")})
+        } catch {
+            []
+        }
+    } else {
+        []
+    }
+    
+    if $in_zellij {
+        print $"🔄 Detected running inside Zellij session: ($saved_session_name)"
+        print "   Pre-build sessions detected:"
+        for session_line in $pre_build_sessions {
+            let session_name = ($session_line | split row " " | first)
+            print $"     - ($session_name)"
+        }
+        print "   Exiting Zellij gracefully before Nix rebuild to prevent interruption..."
+        
+        # Exit Zellij cleanly - this will return us to the parent shell (nushell in Ghostty)
+        try {
+            # Use the correct zellij command to close the current session
+            ^zellij action close-session
+        } catch {
+            print "⚠️  Could not exit Zellij gracefully, continuing anyway..."
+        }
+        
+        # Wait a moment for the exit to complete
+        sleep 1sec
+    }
+    
+    # Now run the build process outside of Zellij
+    print "🚀 Running Nix build-switch outside of Zellij..."
+    print "   ⚠️  Note: Build process may kill Zellij sessions as part of system updates."
+    print "   This is expected and why we exited gracefully first."
+    
+    # Set environment variable to signal this is a controlled build
+    with-env {NUSHELL_NIX_BUILD: "true"} {
+        nix run .#build-switch
+    }
     dirs drop
+    
+    # Temporary debugging: pause to confirm completion
+    print "\n✅ Nix build-switch completed successfully!"
+    print "🔍 Press any key to continue..."
+    input
+    
+    # Check what sessions survived the build
+    let post_build_sessions = try {
+        (do { zellij list-sessions } | complete | get stdout | lines | where {|line| $line != "" and not ($line | str contains "No active sessions")})
+    } catch {
+        []
+    }
+    
+    if ($post_build_sessions | length) > 0 {
+        print "\n🔍 Sessions that survived the build:"
+        for session_line in $post_build_sessions {
+            let session_name = ($session_line | split row " " | first)
+            print $"   - ($session_name)"
+        }
+    } else {
+        print "\n📋 No Zellij sessions survived the build (this is expected)."
+    }
+    
+    # If we were originally in Zellij, offer to restart it
+    if $in_zellij {
+        print "\n🔄 Build complete! Would you like to restart Zellij?"
+        let restart_choice = (input "Type 'y' to restart Zellij, or any other key to stay in nushell: ")
+        
+        if ($restart_choice | str downcase) == "y" {
+            # Check if the original session still exists
+            let session_exists = ($post_build_sessions | any {|line| ($line | str contains $saved_session_name)})
+            
+            if $session_exists and ($saved_session_name | str length) > 0 {
+                print $"🚀 Original session '($saved_session_name)' survived! Reattaching..."
+                try {
+                    zellij attach $saved_session_name
+                } catch {
+                    print $"⚠️  Could not reattach to '($saved_session_name)', creating new session..."
+                    zellij attach --create
+                }
+            } else {
+                if ($saved_session_name | str length) > 0 {
+                    print $"🔄 Original session '($saved_session_name)' was cleaned up during build."
+                }
+                print "🚀 Starting fresh Zellij session..."
+                zellij attach --create
+            }
+        } else {
+            print "👍 Staying in nushell. Run 'zt <theme>' when ready to launch Zellij."
+        }
+    }
 }
 
 alias edd = with-env {SHELL: "/bin/zsh"} { emacs --daemon=doom }
@@ -1162,6 +1506,24 @@ def --env "apply-theme" [] {
 # Apply theme immediately after config is loaded
 apply-theme
 
+# Auto-launch Zellij when starting nushell in Ghostty
+# This provides the automatic Zellij launch while keeping nushell as the main process
+if ($env.TERM_PROGRAM? | default "" | str contains "ghostty") and ($env.ZELLIJ? | default "" | is-empty) {
+    # We're in Ghostty and not already in Zellij - auto-launch Zellij
+    print "🚀 Auto-launching Zellij in Ghostty..."
+    
+    # Launch Zellij with current theme, but don't exit nushell when Zellij exits
+    try {
+        zellij attach --create
+    } catch {
+        print "⚠️  Could not auto-launch Zellij, continuing with nushell..."
+    }
+    
+    # When Zellij exits, we return here to nushell (Ghostty stays alive)
+    print "\n👋 Zellij session ended. You're back in nushell."
+    print "💡 Run 'zt <theme>' to launch Zellij again with a specific theme."
+}
+
 # Smart Zellij launcher with manual theme switching - handles Ghostty integration
 # Usage: zt [theme_name] [--session session_name]
 def "zt" [
@@ -1185,33 +1547,41 @@ def "zt" [
     do $log $"🎯 Setting theme: ($theme)"
     
     # -----------------------------------------------------
-    # 1. Detect if we're inside a Zellij session managed by Ghostty
+    # 1. Detect if we're inside a Zellij session
     # -----------------------------------------------------
     let in_zellij = ($env.ZELLIJ? | default "" | str length) > 0
     let current_session = $env.ZELLIJ_SESSION_NAME? | default ""
     
     if $in_zellij and not $force_restart {
-        do $log "🔍 Detected running inside Zellij - using in-place theme change..."
+        do $log "🔍 Detected running inside Zellij session: ($current_session)"
+        do $log "   Using in-place theme change to avoid killing Ghostty..."
         
         # -----------------------------------------------------
-        # 2. Set theme using simplified theme manager (in-place)
+        # 2. Set theme using theme manager (in-place)
         # -----------------------------------------------------
         try {
             let theme_manager_result = (do { zellij-theme-manager set $theme } | complete)
             if $theme_manager_result.exit_code == 0 {
                 do $log $"🎨 Set zellij theme to: ($theme)"
                 
-                # Reload the current session to apply the theme
-                do $log "🔄 Reloading Zellij configuration..."
+                # Try to reload config without killing the session
+                do $log "🔄 Attempting to reload Zellij configuration..."
                 try {
-                    # Use Zellij's action system to reload config without killing the session
-                    ^zellij action write-chars "clear" | complete | null
-                    ^zellij action write-chars "" | complete | null  # Send enter
-                    do $log "✅ Theme applied! Zellij configuration reloaded."
-                    print $"\n🎆 Theme changed to ($theme)! The new theme should be visible."
+                    # Try using Zellij's reload-config action if available
+                    let reload_result = (do { ^zellij action reload-config } | complete)
+                    if $reload_result.exit_code == 0 {
+                        do $log "✅ Successfully reloaded Zellij configuration!"
+                        print $"\n🎆 Theme changed to ($theme)! New theme should be visible."
+                    } else {
+                        # Fallback: just clear screen to help show theme change
+                        ^zellij action write-chars "clear" | complete | null
+                        ^zellij action write-chars "" | complete | null  # Send enter
+                        do $log "✅ Theme applied! You may need to open a new pane to see full changes."
+                        print $"\n🎆 Theme changed to ($theme)! Try opening a new pane (Ctrl+p + n) to see the new theme."
+                    }
                 } catch { |e|
-                    do $log $"\n⚠️  Note: Theme config updated but may require Zellij restart to see changes."
-                    print $"\n📝 You can restart Zellij manually or run 'zt ($theme) --force-restart'"
+                    do $log $"⚠️  Could not reload config automatically: ($e.msg)"
+                    print $"\n📝 Theme updated! Restart Zellij manually or run 'zt ($theme) --force-restart' to see changes."
                 }
             } else {
                 print $"❌ Theme manager failed: ($theme_manager_result.stderr)"
@@ -1229,12 +1599,18 @@ def "zt" [
     # 3. Handle external launch or forced restart
     # -----------------------------------------------------
     
-    # Get list of existing sessions
-    let existing_sessions = try {
-        (do { zellij list-sessions } | complete | get stdout | lines | where {|line| $line != ""})
+    # Get list of existing sessions with more detailed info
+    let existing_sessions_raw = try {
+        (do { zellij list-sessions } | complete | get stdout | lines | where {|line| $line != "" and not ($line | str contains "No active sessions")})
     } catch {
         []
     }
+    
+    # Parse session names from the list (extract names before the bracket)
+    let existing_sessions = ($existing_sessions_raw | each {|line| 
+        let parts = ($line | split row " " | first)
+        $parts
+    })
     
     if ($existing_sessions | length) > 0 {
         if $in_zellij and $force_restart {
@@ -1242,17 +1618,39 @@ def "zt" [
             print "\n🚨 Warning: This will close Ghostty if it's managing this Zellij session."
             print "Press Ctrl+C to cancel, or Enter to continue..."
             input
-        }
-        
-        do $log $"🔄 Found ($existing_sessions | length) existing Zellij sessions"
-        do $log "   Terminating existing sessions for clean theme application..."
-        
-        # Kill all existing sessions to prevent theme conflicts
-        try {
-            do { zellij kill-all-sessions --yes } | complete | null
-            do $log "   ✅ Successfully terminated existing sessions"
-        } catch {
-            do $log "   ⚠️  Could not terminate some sessions (may not exist anymore)"
+            
+            # When force-restarting from within a session, kill everything
+            try {
+                do { zellij kill-all-sessions --yes } | complete | null
+                do $log "   ✅ Force-killed all sessions including current one"
+            } catch {
+                do $log "   ⚠️  Some sessions may not have been killed"
+            }
+        } else {
+            # When NOT inside Zellij, be more careful about session management
+            do $log $"🔄 Found ($existing_sessions | length) existing Zellij sessions:"
+            for session in $existing_sessions {
+                do $log $"   - ($session)"
+            }
+            
+            # Only kill sessions if we're launching a new one
+            if ($session == null) {
+                do $log "   Cleaning up existing sessions for fresh start..."
+                try {
+                    for session_name in $existing_sessions {
+                        try {
+                            do { zellij kill-session $session_name } | complete | null
+                            do $log $"   ✅ Killed session: ($session_name)"
+                        } catch {
+                            do $log $"   ⚠️  Could not kill session: ($session_name) (may be attached elsewhere)"
+                        }
+                    }
+                } catch {
+                    do $log "   ⚠️  Some sessions could not be terminated"
+                }
+            } else {
+                do $log $"   Keeping existing sessions, will use/create session: ($session)"
+            }
         }
         
         # Wait a moment for cleanup
@@ -1260,7 +1658,7 @@ def "zt" [
     }
     
     # -----------------------------------------------------
-    # 4. Set theme using simplified theme manager
+    # 4. Set theme using theme manager
     # -----------------------------------------------------
     try {
         let theme_manager_result = (do { zellij-theme-manager set $theme } | complete)
@@ -1276,7 +1674,7 @@ def "zt" [
     }
     
     # -----------------------------------------------------
-    # 5. Launch Zellij - now using direct nushell execution!
+    # 5. Launch Zellij with direct nushell execution
     # -----------------------------------------------------
     if ($session != null) {
         do $log $"📝 Using session name: ($session)"
@@ -1285,7 +1683,7 @@ def "zt" [
         do $log $"🚀 Launching: zellij attach --create"
     }
     
-    # Direct execution - no more zsh intermediary needed!
+    # Choose execution method
     if $force_zsh {
         do $log "🔧 Using zsh intermediary as requested via --force-zsh..."
         let cmd_parts = if ($session != null) {
@@ -1296,7 +1694,7 @@ def "zt" [
         let full_cmd = ($cmd_parts | str join " ")
         ^/bin/zsh -l -c $full_cmd
     } else {
-        # Direct nushell execution - should work fine now!
+        # Direct nushell execution
         if ($session != null) {
             if ($args | length) > 0 {
                 ^zellij --session $session ...$args

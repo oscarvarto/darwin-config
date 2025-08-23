@@ -238,7 +238,7 @@ in
         alias dup="doom sync -u --aot --gc -j \\$(nproc)"
         alias diff="difft"
         alias nb="pushd \\$HOME/darwin-config > /dev/null; nix run .#build; popd > /dev/null"
-        alias ns="pushd \\$HOME/darwin-config > /dev/null; nix run .#build-switch; popd > /dev/null"
+        alias ns="ns-ghostty-safe"
         
         # Claude Code integration - Shift+Enter key binding
         # Function to handle Claude Code prompt submission
