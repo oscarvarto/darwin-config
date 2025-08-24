@@ -3,6 +3,7 @@ _:
 [
   # Development Tools
   # "homebrew/cask/docker"
+  "chatgpt"
   "chromedriver"
   "ghostty@tip"
   "claude"
