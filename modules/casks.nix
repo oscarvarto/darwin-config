@@ -9,7 +9,6 @@ _:
   "claude"
   "claude-code"
   "dotnet-sdk"
-  "gg"
   "jetbrains-toolbox"
   "mactex"
   "miniforge"

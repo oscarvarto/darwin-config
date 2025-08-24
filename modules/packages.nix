@@ -14,6 +14,8 @@ with pkgs;
   zip
   btop
   jujutsu
+  lazyjj
+  gg-jj
   neofetch
   pixi
 
