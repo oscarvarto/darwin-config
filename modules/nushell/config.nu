@@ -203,60 +203,105 @@ $env.config = {
         algorithm: "fuzzy"    # prefix or fuzzy
         external: {
             enable: true # set to false to prevent nushell looking into $env.PATH to find more suggestions, `false` recommended for WSL users as this look up may be very slow
-            max_results: 50 # Reduced for better performance
+            max_results: 100 # Increased for better coverage with improved carapace
             completer: {|spans|
-                # Simple multicompleter - try carapace first, then fish as fallback
+                # Enhanced carapace-first completer with smart fallbacks
+                # Carapace is faster and more accurate than fish completions
                 
-                # Carapace completer
-                let carapace_completer = {|spans| 
-                    try {
-                        carapace $spans.0 nushell ...$spans | from json
-                    } catch { [] }
-                }
+                # Primary carapace completer with better error handling
+                let carapace_result = try {
+                    carapace $spans.0 nushell ...$spans 
+                    | from json 
+                    | default []
+                    | where value != null 
+                    | where value != ""
+                    | each {|item| 
+                        {
+                            value: $item.value
+                            description: ($item.description? | default "")
+                        }
+                    }
+                } catch { [] }
                 
-                # Fish completer with proper quoting
-                let fish_completer = {|spans|
+                # Enhanced file/directory completion for commands that need it
+                let file_completion = if (
+                    $spans.0 in ["cat", "ls", "cd", "cp", "mv", "rm", "code", "nvim", "vim", "emacs"]
+                    or ($spans | length) > 1 and ($spans | last | str starts-with "./")
+                    or ($spans | length) > 1 and ($spans | last | str starts-with "/")
+                    or ($spans | length) > 1 and ($spans | last | str starts-with "~")
+                ) {
+                    let current_input = if ($spans | length) > 1 { $spans | last } else { "" }
+                    let dir_path = if ($current_input | str contains "/") {
+                        $current_input | path dirname
+                    } else {
+                        "."
+                    }
+                    
                     try {
-                        fish --command $"complete '--do-complete=($spans | str replace --all "'" "'\''" | str join ' ')'" |
-                        from tsv --flexible --noheaders --no-infer |
-                        rename value description |
-                        update value {|row|
-                            let value = $row.value
-                            let need_quote = [ '\' ',' '[' ']' '(' ')' ' ' '\t' "'" '"' "`" ] | any { $in in $value }
-                            if ($need_quote and ($value | path exists)) {
-                                let expanded_path = if ($value starts-with "~") {
-                                    $value | path expand --no-symlink
-                                } else {
-                                    $value
-                                }
-                                $'"($expanded_path | str replace --all '"' '\\"')"'
-                            } else {
-                                $value
+                        ls $dir_path 
+                        | where name != null
+                        | each {|item| 
+                            let base_name = $item.name | path basename
+                            let full_path = if ($dir_path == ".") { 
+                                $base_name 
+                            } else { 
+                                $dir_path | path join $base_name 
+                            }
+                            {
+                                value: $full_path
+                                description: (if $item.type == "dir" { "directory" } else { "file" })
                             }
                         }
+                        | where value =~ $current_input
+                        | first 30
                     } catch { [] }
-                }
+                } else { [] }
                 
-                # Git completer for git commands
-                let git_completer = {|spans|
-                    if ($spans.0 == "git") {
-                        try {
-                            git $"--list-cmds=($spans | skip 1 | str join ",")" |
-                            lines |
-                            each { |cmd| {value: $cmd, description: "git command"} }
-                        } catch { [] }
-                    } else {
-                        []
+                # Simple git subcommand completion for better git experience
+                let git_completion = if ($spans.0 == "git" and ($spans | length) == 2) {
+                    [
+                        {value: "add", description: "Add files to staging area"}
+                        {value: "commit", description: "Record changes to repository"}
+                        {value: "push", description: "Push changes to remote"}
+                        {value: "pull", description: "Pull changes from remote"}
+                        {value: "status", description: "Show working tree status"}
+                        {value: "log", description: "Show commit logs"}
+                        {value: "diff", description: "Show changes between commits"}
+                        {value: "branch", description: "List, create, or delete branches"}
+                        {value: "checkout", description: "Switch branches or restore files"}
+                        {value: "merge", description: "Join development histories"}
+                        {value: "clone", description: "Clone a repository"}
+                        {value: "fetch", description: "Download objects from remote"}
+                        {value: "rebase", description: "Reapply commits on top of another base"}
+                        {value: "reset", description: "Reset current HEAD to specified state"}
+                        {value: "stash", description: "Stash changes in working directory"}
+                    ]
+                } else { [] }
+                
+                # Nushell built-in command completion
+                let nu_builtin_completion = if (($spans | length) == 1) {
+                    help commands 
+                    | where name =~ $spans.0
+                    | each {|cmd| 
+                        {
+                            value: $cmd.name
+                            description: ($cmd.description? | default "nushell builtin")
+                        }
                     }
-                }
+                    | first 20
+                } else { [] }
                 
-                # Simple strategy: try fish first (more comprehensive), then carapace, add git completions for git commands
-                let fish_result = do $fish_completer $spans
-                let carapace_result = do $carapace_completer $spans
-                let git_result = do $git_completer $spans
-                
-                # Combine all results, prioritizing fish for broader coverage
-                let all_results = ($fish_result + $carapace_result + $git_result) | uniq-by value | first 50
+                # Combine results with smart prioritization:
+                # 1. Carapace results (most accurate and comprehensive)
+                # 2. Git completions (for git commands)
+                # 3. File completions (for file-based commands)
+                # 4. Nushell builtins (for nushell commands)
+                let all_results = (
+                    $carapace_result + $git_completion + $file_completion + $nu_builtin_completion
+                    | uniq-by value
+                    | sort-by description value
+                    | first 100
+                )
                 
                 $all_results
             }
