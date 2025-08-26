@@ -90,7 +90,7 @@
         predator = {
           user = "oscarvarto";
           system = "aarch64-darwin";
-          defaultShell = "zsh";  # Options: "zsh", "nushell"
+          defaultShell = "zsh";  # Options: "zsh", "nushell", "fish"
           # Add host-specific settings here
           hostSettings = {
             enablePersonalConfig = true;

@@ -536,7 +536,7 @@ This approach ensures that while garbage collection won't remove pinned packages
   - **pass**: Backup credential store (offline, GPG-encrypted)
   - **Unified CLI**: Single `secret` command for all credential systems
 - **📦 Package Management**: Nix packages + Homebrew integration
-- **🐚 Advanced Shell Configuration**: Choose between Nushell and Zsh with:
+- **🐚 Advanced Shell Configuration**: Choose between Nushell, Zsh, and Fish with:
   - **Consistent Experience**: Same aliases, PATH, and tools across both shells
   - **Smart Switching**: Easy shell changes via simple configuration updates
   - **Modern Features**: Starship prompts, Zoxide navigation, Atuin history
@@ -1167,7 +1167,7 @@ This tool is particularly useful in JVM development environments where IntelliJ'
 
 ## 🐚 Choosing Your Default Shell
 
-This configuration supports two fully-configured shells: **Nushell** and **Zsh**. Each shell is intelligently configured with consistent features, aliases, and PATH management. You can choose your preferred shell and switch between them seamlessly.
+This configuration supports three fully-configured shells: **Nushell**, **Zsh**, and **Fish**. Each shell is intelligently configured with consistent features, aliases, and PATH management. You can choose your preferred shell and switch between them seamlessly.
 
 ### 🎯 Available Shells
 
@@ -1175,6 +1175,7 @@ This configuration supports two fully-configured shells: **Nushell** and **Zsh**
 | ----------- | --------------------------------- | ---------------------------------------------------- |
 | **Nushell** | Modern shell with structured data | Data manipulation, pipelines, modern workflows       |
 | **Zsh**     | Traditional, highly configurable  | Power users, legacy compatibility, extensive plugins |
+| **Fish**    | User-friendly with smart defaults| Beginners, interactive use, auto-suggestions        |
 
 ### 🔧 Setting Your Default Shell
 
@@ -1194,7 +1195,7 @@ hostConfigs = {
   your-hostname = {
     user = "youruser";
     system = "aarch64-darwin";
-    defaultShell = "nushell";  # Options: "nushell", "zsh"
+    defaultShell = "nushell";  # Options: "nushell", "zsh", "fish"
     hostSettings = {
       enablePersonalConfig = true;
       workProfile = false;
@@ -1435,7 +1436,7 @@ nu --config modules/nushell/config.nu --commands "exit"
 - **Languages**: Rust, Go, Node.js, Python, Java, C++
 - **Editors**: Neovim, Helix, Emacs, VS Code
 - **Version Control**: Git with smart conditional configs
-- **Terminals**: Nushell, Zsh with beautiful prompts
+- **Terminals**: Nushell, Zsh, Fish with beautiful prompts
 
 ### macOS Integration
 

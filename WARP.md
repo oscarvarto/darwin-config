@@ -75,7 +75,7 @@ High-level architecture
   - darwinConfigurations: Built via mkDarwinConfig for each hostname in hostConfigs
     - Modules include: home-manager.darwinModules.home-manager, agenix.darwinModules.default, and local modules from ./modules/
     - Host named predator is explicitly defined for aarch64-darwin with user "oscarvarto"
-    - Each host configuration supports custom user, system, defaultShell, and hostSettings
+    - Each host configuration supports custom user, system, defaultShell (zsh/nushell/fish), and hostSettings
 
 - Modules layout (actual structure)
   - modules/ (macOS-focused configuration modules)
@@ -90,6 +90,7 @@ High-level architecture
     - overlays.nix: Nix package overlays
     - shell-config.nix: shell configuration and aliases
     - zsh-darwin.nix: Zsh shell configuration
+    - fish-config.nix: Fish shell configuration
     - dock/: macOS Dock configuration
     - nushell/: Nushell shell configuration
     - scripts/nu/: Nushell utility scripts
