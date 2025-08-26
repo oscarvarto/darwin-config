@@ -11,6 +11,7 @@
 (package! 1passel
   :recipe (:host github
            :repo "vinid/1passel"))
+(package! catppuccin-theme)
 (package! cider
   :recipe (:host github
            :repo "clojure-emacs/cider"

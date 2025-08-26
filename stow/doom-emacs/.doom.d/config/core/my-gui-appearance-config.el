@@ -4,17 +4,6 @@
 (defvar my/current-font-config 'monolisa
   "Stores the currently loaded font configuration ('pragmatapro, 'monolisa, or 'jetbrains).")
 
-(defvar my/light-theme 'modus-operandi-deuteranopia
-  "The light theme to use.")
-
-(defvar my/dark-theme 'modus-vivendi-deuteranopia
-  "The dark theme to use.")
-
-;; Function to determine if a theme is light or dark
-(defun my/theme-is-light-p (theme)
-  "Return t if THEME is a light theme."
-  (eq theme my/light-theme))
-
 (load! "pragmatapro-lig")
 
 (defun turn-on-pragmatapro-lig-mode ()
@@ -135,17 +124,69 @@
     "::" ":::" "::=" ":=" ":.>" ":>" ".="
     ".." "..." "?:" "??" ".?" "?."))
 
+;; Initialize catppuccin flavor support
+;; SINGLE SOURCE OF TRUTH: Default catppuccin flavor configuration
+(defconst my/default-catppuccin-flavor 'latte
+  "The default catppuccin flavor to use on startup and as fallback.")
+
+(defvar my/catppuccin-current-flavor my/default-catppuccin-flavor
+  "Current catppuccin flavor (fallback if catppuccin-flavor is not available).")
+
+(defun my/ensure-catppuccin-loaded ()
+  "Ensure catppuccin theme package is loaded and initialized."
+  (condition-case nil
+      (progn
+        (require 'catppuccin-theme)
+        ;; Check if catppuccin-flavor variable exists
+        (unless (boundp 'catppuccin-flavor)
+          (defvar catppuccin-flavor my/default-catppuccin-flavor))
+        ;; Set our fallback to match the actual variable if it exists
+        (when (boundp 'catppuccin-flavor)
+          (setq my/catppuccin-current-flavor catppuccin-flavor))
+        t)
+    (error
+     (message "Warning: catppuccin-theme package not available, using fallback")
+     nil)))
+
+(defun my/get-current-catppuccin-flavor ()
+  "Get the current catppuccin flavor, with fallback support."
+  (if (boundp 'catppuccin-flavor)
+      catppuccin-flavor
+    my/catppuccin-current-flavor))
+
+(defun my/set-catppuccin-flavor (flavor)
+  "Set catppuccin flavor with fallback support."
+  (if (boundp 'catppuccin-flavor)
+      (setq catppuccin-flavor flavor)
+    (setq my/catppuccin-current-flavor flavor)))
+
 ;; Custom theme toggle function
 (defun my/toggle-theme ()
-  "Toggle between light and dark themes without changing font."
+  "Toggle between light and dark Catppuccin flavors without changing font."
   (interactive)
-  (let ((current-theme (car custom-enabled-themes))
-        (new-theme (if (eq (car custom-enabled-themes) my/light-theme)
-                       my/dark-theme
-                     my/light-theme)))
-    (load-theme new-theme t)
-    (doom/reload-theme)
-    (message "Switched to %s theme" new-theme)))
+  (my/ensure-catppuccin-loaded)
+  
+  (let* ((current-flavor (my/get-current-catppuccin-flavor))
+         (new-flavor (if (eq current-flavor 'latte)
+                         'mocha
+                       'latte)))
+    (my/set-catppuccin-flavor new-flavor)
+    
+    ;; Try different methods to reload the theme
+    (cond
+     ;; Method 1: Use catppuccin-reload if available
+     ((fboundp 'catppuccin-reload)
+      (catppuccin-reload)
+      (message "Switched to Catppuccin %s flavor (via catppuccin-reload)" new-flavor))
+     ;; Method 2: Try loading catppuccin theme directly
+     ((featurep 'catppuccin-theme)
+      (load-theme 'catppuccin :no-confirm)
+      (doom/reload-theme)
+      (message "Switched to Catppuccin %s flavor (via load-theme)" new-flavor))
+     ;; Method 3: Fallback - just reload doom theme
+     (t
+      (doom/reload-theme)
+      (message "Theme toggled to %s mode (fallback method)" new-flavor)))))
 
 ;; Custom font toggle function
 (defun my/toggle-font ()
@@ -173,15 +214,6 @@
   ;; Rainbow delimiters
   (use-package rainbow-delimiters
     :hook (prog-mode . rainbow-delimiters-mode))
-
-  ;; Modus themes configuration
-  (use-package! emacs
-    :config
-    (require-theme 'modus-themes)
-    (setq modus-themes-italic-constructs t
-          modus-themes-bold-constructs t
-          modus-themes-common-palette-overrides
-          '((cursor "#FEB000"))))
 
   ;; Cursor configuration
   (blink-cursor-mode 1)
@@ -216,11 +248,19 @@
   ;; Load common configuration first
   (my/load-common-appearance-config)
 
-  ;; Determine initial theme (default to dark theme)
-  (let ((initial-theme (or (car custom-enabled-themes) my/light-theme)))
-    (load-theme initial-theme t)
-    ;; Load initial font configuration (default to pragmata)
-    (my/load-font-config my/current-font-config))
+  ;; Initialize catppuccin following official documentation pattern
+  (condition-case nil
+      (progn
+        ;; Set the flavor BEFORE loading the theme (per documentation)
+        (setq catppuccin-flavor my/default-catppuccin-flavor)
+        ;; Load the theme with the pre-set flavor (no need to call catppuccin-reload)
+        (load-theme 'catppuccin :no-confirm)
+        (message "Loaded Catppuccin theme with %s flavor" my/default-catppuccin-flavor))
+    (error 
+     (message "Warning: catppuccin theme not available, using default theme")))
+
+  ;; Load initial font configuration (default to monolisa)
+  (my/load-font-config my/current-font-config)
 
   (after! (solaire-mode demap)
     (setq demap-minimap-window-width 15)

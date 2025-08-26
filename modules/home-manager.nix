@@ -164,9 +164,9 @@ in
 
         mise = {
           enable = true;
-          # Disable shell integrations to prevent PATH conflicts - we manage PATH manually
-          enableNushellIntegration = false;
-          enableZshIntegration = false;
+          enableZshIntegration = true;
+          enableFishIntegration = true;
+          enableNushellIntegration = true;
         };
 
         starship = {
