@@ -75,38 +75,8 @@ $env.AWS_DEFAULT_REGION = "us-east-1"
 # Starship configuration path
 $env.STARSHIP_CONFIG = ($env.HOME | path join ".config" "starship.toml")
 
-# Set up clean PATH with deduplication - define our desired order
-# This ensures consistent PATH across shells and removes duplicates
-let desired_paths = [
-    ($env.HOME | path join ".volta" "bin")
-    ($env.HOME | path join "Library" "Application Support" "Coursier" "bin") 
-    ($env.HOME | path join "bin")
-    ($env.HOME | path join ".emacs.d" "bin")
-    ($env.HOME | path join ".cargo" "bin")
-    ($env.HOME | path join ".local" "bin")
-    ($env.HOME | path join ".local" "share" "bin")
-    ($env.HOME | path join ".npm-packages" "bin")
-    ($env.HOME | path join "darwin-config" "modules" "elisp-formatter")
-    ($env.HOME | path join ".nix-profile" "bin")
-    "/nix/var/nix/profiles/default/bin"
-    "/opt/homebrew/bin"
-    "/opt/homebrew/sbin"
-    "/Library/TeX/texbin"
-    "/run/current-system/sw/bin"
-    "/opt/homebrew/opt/gnu-tar/libexec/gnubin"
-    "/opt/homebrew/opt/mysql@8.4/bin"
-    "/usr/local/share/dotnet"
-    ($env.HOME | path join ".dotnet" "tools")
-    "/opt/homebrew/opt/llvm/bin"
-    "/usr/local/bin"
-    "/usr/bin"
-    "/bin"
-    "/usr/sbin"
-    "/sbin"
-]
-
-# Build clean PATH by filtering for existing directories and removing duplicates
-$env.PATH = ($desired_paths | where {|p| $p | path exists} | uniq)
+# Note: PATH is now managed by centralized path configuration in modules/path-config.nix
+# The PATH will be set by the pathConfig.nushell.pathSetup configuration
 
 # Set environment variables that apps might need
 $env.DOTNET_ROOT = "/usr/local/share/dotnet"

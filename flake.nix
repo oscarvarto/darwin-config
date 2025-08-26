@@ -48,19 +48,15 @@
       url = "github:nix-community/nixd";
       flake = true;
     };
-    op-shell-plugins = {
-      url = "github:1Password/shell-plugins";
-      flake = true;
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # op-shell-plugins = {
+    #   url = "github:1Password/shell-plugins";
+    #   flake = true;
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
     secrets = {
       url = "git+ssh://git@github.com/oscarvarto/nix-secrets.git";
       flake = false;
     };
-    # mise = {  # Not needed - using nixpkgs version to avoid SDK issues
-    #   url = "github:jdx/mise";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
   };
   outputs = { self,
               nixpkgs,
@@ -77,11 +73,15 @@
               neovim-nightly-overlay,
               nix-homebrew,
               nixd-ls,
-              op-shell-plugins,
+              # op-shell-plugins,
               secrets,
               # mise  # not needed - using nixpkgs version
               } @inputs:
     let
+      # Supported systems (macOS only)
+      darwinSystems = [ "x86_64-darwin" "aarch64-darwin" ];
+      forAllSystems = nixpkgs.lib.genAttrs darwinSystems;
+      
       # Default user configuration - can be overridden per hostname
       defaultUser = "oscarvarto";
       
@@ -107,31 +107,9 @@
             };
           };
         };
-        # Example of work host configuration:
-        # work-macbook = {
-        #   user = "alice";
-        #   system = "aarch64-darwin";
-        #   defaultShell = "zsh";  # Options: "zsh", "nushell"
-        #   hostSettings = {
-        #     enablePersonalConfig = false;
-        #     workProfile = true;
-        #     # Work-specific configuration
-        #     workConfig = {
-        #       companyName = "ACME Corp";  # Your actual company name
-        #       gitWorkDirPattern = "~/acme/**";  # Pattern for work git directories
-        #       databaseName = "acme_db";  # Work database name
-        #       databaseHost = "db.internal.acme.com";
-        #       databasePort = "5432";
-        #       opVaultName = "Work";  # 1Password vault for work credentials
-        #       opItemName = "ACME Corp";  # 1Password item name for work credentials
-        #     };
-        #   };
-        # };
       };
       
-      darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
-      forAllSystems = f: nixpkgs.lib.genAttrs darwinSystems f;
-      
+
       devShell = system: let pkgs = nixpkgs.legacyPackages.${system}; in {
         default = with pkgs; mkShell {
           nativeBuildInputs = with pkgs; [ bashInteractive git ];
@@ -238,11 +216,11 @@
           ./system.nix
         ];
       };
-    in
-    {
-      devShells = forAllSystems devShell;
-      apps = nixpkgs.lib.genAttrs darwinSystems mkDarwinApps;
+  in
+  {
+    devShells = forAllSystems devShell;
+    apps = nixpkgs.lib.genAttrs darwinSystems mkDarwinApps;
 
-      darwinConfigurations = nixpkgs.lib.mapAttrs mkDarwinConfig hostConfigs;
+    darwinConfigurations = nixpkgs.lib.mapAttrs mkDarwinConfig hostConfigs;
   };
 }

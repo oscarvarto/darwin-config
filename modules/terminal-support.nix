@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, config, user, ... }:
 
 let
   # Create the xterm-ghostty terminfo entry
@@ -23,7 +23,7 @@ in
 {
   # Simple approach: just add the terminfo package to user environment
   # Darwin will handle the rest through its existing terminfo infrastructure
-  home-manager.users.oscarvarto = {
+  home-manager.users.${user} = {
     # Add terminfo to user packages - this makes it available without conflicts
     home.packages = [ ghosttyTerminfo ];
     

@@ -10,6 +10,7 @@ in
       enable = true;
       enableNushellIntegration = true;
       enableZshIntegration = true;
+      enableFishIntegration = true;
     };
 
     # direnv is now managed directly in home-manager.nix to avoid conflicts
@@ -17,6 +18,7 @@ in
     fzf = {
       enable = true;
       enableZshIntegration = true;
+      enableFishIntegration = true;
     };
 
     # Consolidated zsh configuration for macOS
@@ -212,20 +214,7 @@ in
         jqc() {
             jq -C "$@" | bat --style=plain --language=json
         }
-        
-        # Function to show system info in a nice format
-        info() {
-            echo "\n📊 System Information:"
-            echo "========================"
-            neofetch --off --color_blocks off | tail -n +2
-            echo "\n💾 Disk Usage:"
-            echo "========================"
-            dust -d 1
-            echo "\n🔄 Top Processes:"
-            echo "========================"
-            procs --top 10 --sortd cpu
-        }
- 
+         
         alias tg="$EDITOR $HOME/.config/ghostty/config"
         alias edd="emacs --daemon=doom"
         alias eddr="doom run --daemon=doom"  # Alternative daemon start method

@@ -47,12 +47,10 @@ in
       imports = [
         ./git-security-scripts.nix
         ./home-activation-scripts.nix
+        ./fish-config.nix
         inputs.catppuccin.homeModules.catppuccin
-        inputs.op-shell-plugins.hmModules.default
-      ] ++ [ ./nushell ]; # Always include nushell module for starship integration
-
-      # Test: re-enable font management now that mise SDK issues are fixed
-      # disabledModules = [ "targets/darwin/fonts.nix" ];
+        # inputs.op-shell-plugins.hmModules.default
+      ] ++ [ ./nushell ];
 
       home = {
         enableNixpkgsReleaseCheck = false;
@@ -61,9 +59,6 @@ in
           inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.neovim
           # Add nixd nightly from flake input
           inputs.nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
-          # Note: Ghostty from official flake currently fails to build on macOS ARM due to Darwin SDK issues
-          # Using homebrew cask version instead until build issues are resolved
-          # inputs.ghostty.packages.${pkgs.stdenv.hostPlatform.system}.default
         ];
         file = sharedFiles // {
           
@@ -116,24 +111,25 @@ in
       };
 
       # Enable the local nushell module
-      local.nushell.enable = true;
-      
-      # Home activation scripts are now imported from ./home-activation-scripts.nix
+      local.nushell.enable = true;  # Re-enabled to test if it causes fish config issue
 
       programs = {
-        _1password-shell-plugins = {
-          # enable 1Password shell plugins for bash, zsh
-          enable = true;
-          # the specified packages as well as 1Password CLI will be
-          # automatically installed and configured to use shell plugins
-          plugins = with pkgs; [ cachix gh glab ];
-        };
+        # Issue: https://github.com/1Password/shell-plugins/issues/544
+        # Fix pending for approval: https://github.com/1Password/shell-plugins/pull/545
+        # _1password-shell-plugins = {
+        #   # enable 1Password shell plugins for bash, zsh, fish
+        #   enable = true;
+        #   # the specified packages as well as 1Password CLI will be
+        #   # automatically installed and configured to use shell plugins
+        #   plugins = with pkgs; [ cachix gh glab ];
+        # };
 
         atuin = {
           enable = true;
           daemon.enable = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
+          enableFishIntegration = true;
           settings = {
             # General settings
             auto_sync = true;
@@ -151,6 +147,7 @@ in
             max_preview_height = 4;
           };
         };
+
 
         helix.enable = true;
 
@@ -170,14 +167,13 @@ in
           # Disable shell integrations to prevent PATH conflicts - we manage PATH manually
           enableNushellIntegration = false;
           enableZshIntegration = false;
-          # Use nixpkgs mise package instead of flake to avoid SDK issues
-          # package = inputs.mise.packages.${pkgs.stdenv.hostPlatform.system}.default;
         };
 
         starship = {
           enable = true;
           enableZshIntegration = true;
           enableNushellIntegration = true;
+          enableFishIntegration = true;
           settings = fromTOML(builtins.readFile ./starship.toml);
         };
 
@@ -190,6 +186,7 @@ in
           enable = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
+          enableFishIntegration = true;
           settings = {
             mgr = {
               ratio = [1 3 4];
@@ -201,11 +198,9 @@ in
           enable = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
+          enableFishIntegration = true;
         };
 
-        # zellij is installed via homebrew and configured manually
-        # We use external config file instead of home-manager settings
-        
         # Git configuration
         git = {
           enable = true;
@@ -254,6 +249,8 @@ in
           enableNushellIntegration = true;
         };
         
+        # Fish shell configuration is now imported from fish-config.nix module
+
         # Zsh with enhanced Fish-like features
         zsh = {
           enable = true;
@@ -274,13 +271,9 @@ in
         };
       } // (import ./shell-config.nix { inherit config pkgs lib; }).programs;
 
-      # Shell modules are now conditionally imported based on defaultShell
-
       # Marked broken Oct 20, 2022 check later to remove this
       # https://github.com/nix-community/home-manager/issues/3344
       manual.manpages.enable = false;
     };
   };
-
-  # Dock configuration is now imported from ./dock-config.nix
 }

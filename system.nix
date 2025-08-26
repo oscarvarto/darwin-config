@@ -8,6 +8,7 @@ let
   # Shell path mapping
   shellPaths = {
     zsh = "/run/current-system/sw/bin/zsh";
+    fish = "/run/current-system/sw/bin/fish";
     nushell = "/Users/${user}/.nix-profile/bin/nu";
   };
   

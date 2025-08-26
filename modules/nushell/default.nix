@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, lib, inputs, pathConfig ? null, ... }:
 
 let
   cfg = config.local.nushell;
@@ -37,8 +37,10 @@ in
               $env.NIX_SSL_CERT_FILE = '/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt'
               $env.NIX_PROFILES = '/nix/var/nix/profiles/default ~/.nix-profile'
               $env.NIX_PATH = 'nixpkgs=flake:nixpkgs'
-              $env.PATH = ($env.PATH | split row (char esep) | prepend '/nix/var/nix/profiles/default/bin' | uniq | str join (char esep))
           }
+
+          # Apply centralized PATH configuration from modules/path-config.nix
+          ${if pathConfig != null then pathConfig.nushell.pathSetup else "# Centralized PATH config not available"}
 
           # Ensure Enchant uses aspell and aspell finds Nix-installed dictionaries
           $env.ENCHANT_ORDERING = 'en:aspell,es:aspell,*:aspell'

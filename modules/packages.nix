@@ -16,7 +16,6 @@ with pkgs;
   jujutsu
   lazyjj
   gg-jj
-  neofetch
   pixi
 
   # Text and terminal utilities
