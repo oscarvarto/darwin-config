@@ -48,11 +48,11 @@
       url = "github:nix-community/nixd";
       flake = true;
     };
-    # op-shell-plugins = {
-    #   url = "github:1Password/shell-plugins";
-    #   flake = true;
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    op-shell-plugins = {
+      url = "github:1Password/shell-plugins";
+      flake = true;
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     secrets = {
       url = "git+ssh://git@github.com/oscarvarto/nix-secrets.git";
       flake = false;
@@ -73,9 +73,8 @@
               neovim-nightly-overlay,
               nix-homebrew,
               nixd-ls,
-              # op-shell-plugins,
+              op-shell-plugins,
               secrets,
-              # mise  # not needed - using nixpkgs version
               } @inputs:
     let
       # Supported systems (macOS only)

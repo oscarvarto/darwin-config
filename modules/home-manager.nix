@@ -49,7 +49,7 @@ in
         ./home-activation-scripts.nix
         ./fish-config.nix
         inputs.catppuccin.homeModules.catppuccin
-        # inputs.op-shell-plugins.hmModules.default
+        inputs.op-shell-plugins.hmModules.default
       ] ++ [ ./nushell ];
 
       home = {
@@ -104,6 +104,7 @@ in
         accent = "mauve"; # Accent color
         # Enable automatic theme switching for supported programs
         # Programs will automatically use "latte" in light mode and "mocha" in dark mode
+
         # Disable starship integration to prevent conflicts with our manual config
         starship.enable = false;
         # Disable zellij integration to prevent conflicts with our manual high-contrast theme
@@ -116,13 +117,13 @@ in
       programs = {
         # Issue: https://github.com/1Password/shell-plugins/issues/544
         # Fix pending for approval: https://github.com/1Password/shell-plugins/pull/545
-        # _1password-shell-plugins = {
-        #   # enable 1Password shell plugins for bash, zsh, fish
-        #   enable = true;
-        #   # the specified packages as well as 1Password CLI will be
-        #   # automatically installed and configured to use shell plugins
-        #   plugins = with pkgs; [ cachix gh glab ];
-        # };
+        _1password-shell-plugins = {
+          # enable 1Password shell plugins for bash, zsh, fish
+          enable = true;
+          # the specified packages as well as 1Password CLI will be
+          # automatically installed and configured to use shell plugins
+          plugins = with pkgs; [ cachix gh glab ];
+        };
 
         atuin = {
           enable = true;
@@ -155,6 +156,7 @@ in
           enable = true;
           settings = {
             ui.editor = "nvim";
+            lazyjj.highlight-color = "#8839ef";
             user = {
               email = userConfig.email;
               name = userConfig.name;

@@ -43,7 +43,7 @@
   "ui_font_family": "PragmataPro Liga",
   "ui_font_size": 16,
   "buffer_font_family": "MonoLisaVariable Nerd Font",
-  "buffer_font_size": 16,
+  "buffer_font_size": 14,
   "buffer_line_height": "standard",
   "terminal": {
     "font_family": "PragmataPro Liga",

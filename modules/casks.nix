@@ -37,6 +37,7 @@ _:
   "dropbox"
   "figma"
   "obsidian"
+  "only-switch"
   "nordvpn"
   "snagit"
   "unnaturalscrollwheels"
@@ -48,7 +49,7 @@ _:
   "raycast"
 
   # Browsers
+  "firefox"
   "google-chrome"
   "microsoft-edge"
-  "zen"
 ]

@@ -86,7 +86,9 @@ with pkgs;
     sympy
     uv
     # GUI-related packages
+    grip
     pyqt6
+    pyqt6-webengine
     matplotlib
     scipy
     numpy

@@ -63,6 +63,7 @@
 (package! impostman
   :recipe (:host github
            :repo "flashcode/impostman"))
+(package! indent-bars)
 (package! inheritenv)
 (package! ligature
   :recipe (:host github

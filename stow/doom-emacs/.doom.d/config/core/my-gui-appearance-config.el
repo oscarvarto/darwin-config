@@ -165,13 +165,13 @@
   "Toggle between light and dark Catppuccin flavors without changing font."
   (interactive)
   (my/ensure-catppuccin-loaded)
-  
+
   (let* ((current-flavor (my/get-current-catppuccin-flavor))
          (new-flavor (if (eq current-flavor 'latte)
                          'mocha
                        'latte)))
     (my/set-catppuccin-flavor new-flavor)
-    
+
     ;; Try different methods to reload the theme
     (cond
      ;; Method 1: Use catppuccin-reload if available
@@ -232,6 +232,19 @@
   ;; Treemacs
   (load (expand-file-name "config/ui/my-treemacs-config" doom-user-dir))
 
+  (use-package indent-bars
+    :custom
+    (indent-bars-no-descend-lists t) ; no extra bars in continued func arg lists
+    (indent-bars-treesit-support t)
+    (indent-bars-treesit-ignore-blank-lines-types '("module"))
+    (setq
+     indent-bars-pattern "."
+     indent-bars-width-frac 0.5
+     indent-bars-pad-frac 0.25
+     indent-bars-color-by-depth nil
+     indent-bars-highlight-current-depth '(:face default :blend 0.4))
+    :hook (prog-mode . indent-bars-mode))
+
   ;; Ultra scroll
   (use-package ultra-scroll
     :init
@@ -256,7 +269,7 @@
         ;; Load the theme with the pre-set flavor (no need to call catppuccin-reload)
         (load-theme 'catppuccin :no-confirm)
         (message "Loaded Catppuccin theme with %s flavor" my/default-catppuccin-flavor))
-    (error 
+    (error
      (message "Warning: catppuccin theme not available, using default theme")))
 
   ;; Load initial font configuration (default to monolisa)
@@ -296,6 +309,9 @@
 
 
   ;; Add keybindings [INFO]
+  (define-key global-map (kbd "<f6>") (lambda ()
+                                         (interactive)
+                                         (indent-bars-reset)))
   (define-key global-map (kbd "<f7>")  #'my/toggle-theme)
   (define-key global-map (kbd "<f8>")  #'my/toggle-font)
   (define-key global-map (kbd "<f9>")  (lambda ()
@@ -304,7 +320,6 @@
   (define-key global-map (kbd "<f10>")  (lambda ()
                                           (interactive)
                                           (pragmatapro-lig-mode 'toggle)))
-  ;; F11 available for future use
   (define-key global-map (kbd "<f12>") (lambda ()
                                          (interactive)
                                          (global-centered-cursor-mode 'toggle))))
