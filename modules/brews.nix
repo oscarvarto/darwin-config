@@ -37,6 +37,7 @@
       }
       "eza"
       "ffmpeg"
+      "gemini-cli"
       "gradle"
       "git-filter-repo"
       "go"
@@ -59,6 +60,7 @@
       "multimarkdown"
       "nasm"
       "ncurses"
+      "neo4j"
       "ninja"
       "pandoc"
       "pueue"

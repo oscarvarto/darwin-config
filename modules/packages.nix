@@ -15,7 +15,6 @@ with pkgs;
   btop
   jujutsu
   lazyjj
-  gg-jj
   pixi
 
   # Text and terminal utilities

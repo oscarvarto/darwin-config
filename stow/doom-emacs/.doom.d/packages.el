@@ -117,6 +117,10 @@
 (package! shackle)
 (package! tabnine)
 (package! track-changes :built-in t)
+(package! treesit-fold
+  :recipe (:host github
+           :repo "emacs-tree-sitter/treesit-fold"
+           :depth 1))
 (package! verb
   :recipe (:host github
            :repo "federicotdn/verb"))

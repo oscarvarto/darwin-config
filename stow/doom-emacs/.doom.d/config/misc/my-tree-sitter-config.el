@@ -11,29 +11,23 @@
     text-mode) ;; Add more modes as needed
   "List of major modes where tree-sitter should never be enabled.")
 
-;; Function to check if tree-sitter grammar is available for a mode
-(defun my/tree-sitter-language-available-p (mode)
-  "Check if tree-sitter grammar is available for MODE."
-  (when-let ((language (alist-get mode tree-sitter-major-mode-language-alist)))
-    (condition-case nil
-        (tree-sitter-require language)
-      (error nil))))
+;; Function to determine if treesit should be enabled
+(defun my/should-enable-treesit-p ()
+  "Check if treesit should be enabled for current major mode."
+  (and (treesit-available-p)
+       (not (memq major-mode my/tree-sitter-disabled-modes))
+       (treesit-language-at (point))))
 
-;; Function to determine if tree-sitter should be enabled
-(defun my/should-enable-tree-sitter-p ()
-  "Check if tree-sitter should be enabled for current major mode."
-  (and (not (memq major-mode my/tree-sitter-disabled-modes))
-       (my/tree-sitter-language-available-p major-mode)))
-
-;; Safe tree-sitter mode activation
-(defun my/safe-tree-sitter-mode ()
-  "Enable tree-sitter mode only if grammar is available for current major mode."
-  (when (and (fboundp 'tree-sitter-mode)
-             (my/should-enable-tree-sitter-p))
+;; Safe treesit mode activation (mainly for compatibility with hooks)
+(defun my/safe-treesit-mode ()
+  "Ensure treesit is available for current major mode."
+  (when (and (treesit-available-p)
+             (not (memq major-mode my/tree-sitter-disabled-modes)))
     (condition-case err
-        (tree-sitter-mode +1)
+        (when (treesit-language-at (point))
+          (message "Treesit available for %s" major-mode))
       (error
-       (message "Tree-sitter failed for %s: %s" major-mode (error-message-string err))))))
+       (message "Treesit failed for %s: %s" major-mode (error-message-string err))))))
 
 ;; Use Doom variables for paths if available, otherwise keep original logic
 ;; (add-to-list 'tree-sitter-load-path (expand-file-name "tree-sitter" doom-cache-dir))
@@ -42,45 +36,45 @@
 ;; (add-to-list 'tree-sitter-load-path "/Users/oscarvarto/.emacs.d/.local/cache/tree-sitter/")
 ;; (add-to-list 'tree-sitter-load-path "/Users/oscarvarto/.emacs.d/.local/straight/build-30.1/tree-sitter-langs/bin/")
 
-(use-package tree-sitter
+(use-package treesit
   :config
-  ;; Configure Doom's tree-sitter settings more carefully
-  (setq +tree-sitter-hl-enabled-modes
-        `(not ,@my/tree-sitter-disabled-modes))
+  ;; Enable treesit modes where appropriate
+  (setq treesit-font-lock-level 4)
+  
+  ;; Auto-enable treesit modes for supported languages
+  (setq major-mode-remap-alist
+        (append '((c-mode . c-ts-mode)
+                  (c++-mode . c++-ts-mode)
+                  (cmake-mode . cmake-ts-mode)
+                  (conf-toml-mode . toml-ts-mode)
+                  (css-mode . css-ts-mode)
+                  (js-mode . js-ts-mode)
+                  (javascript-mode . js-ts-mode)
+                  (json-mode . json-ts-mode)
+                  (python-mode . python-ts-mode)
+                  (sh-mode . bash-ts-mode)
+                  (typescript-mode . typescript-ts-mode)
+                  (rust-mode . rust-ts-mode)
+                  (yaml-mode . yaml-ts-mode))
+                major-mode-remap-alist))
 
-  ;; Conditional tree-sitter highlighting
-  (defun my/conditional-tree-sitter-hl-mode ()
-    "Enable tree-sitter highlighting only if appropriate."
-    (when (my/should-enable-tree-sitter-p)
-      (condition-case err
-          (tree-sitter-hl-mode +1)
-        (error
-         (message "Tree-sitter highlighting failed for %s: %s" major-mode (error-message-string err))))))
-
-  ;; Replace the direct hook with conditional version
-  (add-hook 'tree-sitter-after-on-hook #'my/conditional-tree-sitter-hl-mode)
-
-  ;; Enable tree-sitter mode conditionally via hook instead of globally
-  (add-hook 'prog-mode-hook #'my/safe-tree-sitter-mode)
-
-  ;; Disable tree-sitter for specific modes that cause issues
-  (dolist (mode my/tree-sitter-disabled-modes)
-    (let ((hook-name (intern (concat (symbol-name mode) "-hook"))))
-      (when (boundp hook-name)
-        (add-hook hook-name
-                  (lambda ()
-                    (when (bound-and-true-p tree-sitter-mode)
-                      (tree-sitter-mode -1))))))))
-
-(setq major-mode-remap-alist
-      (append '((css-mode  . css-ts-mode)
-                (scss-mode . css-ts-mode))
-              major-mode-remap-alist))
-
-(setq tree-sitter-major-mode-language-alist
-      (append
-       tree-sitter-major-mode-language-alist
-       '((css-ts-mode . css))))
+  ;; Install language grammars automatically
+  (when (treesit-available-p)
+    ;; Define language sources for automatic installation
+    (dolist (lang-source '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+                          (c "https://github.com/tree-sitter/tree-sitter-c")
+                          (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+                          (cmake "https://github.com/uyha/tree-sitter-cmake")
+                          (css "https://github.com/tree-sitter/tree-sitter-css")
+                          (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
+                          (json "https://github.com/tree-sitter/tree-sitter-json")
+                          (python "https://github.com/tree-sitter/tree-sitter-python")
+                          (rust "https://github.com/tree-sitter/tree-sitter-rust")
+                          (toml "https://github.com/tree-sitter/tree-sitter-toml")
+                          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+                          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+                          (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+      (add-to-list 'treesit-language-source-alist lang-source))))
 
 (use-package! line-reminder
   :config
@@ -108,7 +102,7 @@
   (defun my/safe-line-reminder-mode ()
     "Enable line-reminder mode only for safe conditions with error handling."
     (when (and (my/line-reminder-safe-p)
-               (my/should-enable-tree-sitter-p))
+               (not (memq major-mode my/tree-sitter-disabled-modes)))
       (condition-case err
           (line-reminder-mode +1)
         (args-out-of-range
@@ -124,37 +118,40 @@
 
   :hook (prog-mode . my/delayed-line-reminder-setup))
 
-(use-package! ts-fold
+(use-package! treesit-fold
   :config
-  ;; Safe ts-fold mode activation
-  (defun my/safe-ts-fold-mode ()
-    "Enable ts-fold mode only for safe tree-sitter modes."
-    (when (my/should-enable-tree-sitter-p)
-      (ts-fold-mode +1)))
+  (defun my/safe-treesit-fold-mode ()
+    "Enable treesit-fold mode only for safe tree-sitter modes."
+    (when (and (treesit-available-p)
+               (not (memq major-mode my/tree-sitter-disabled-modes))
+               (treesit-language-at (point)))
+      (treesit-fold-mode +1)))
 
-  (defun my/safe-ts-fold-indicators-mode ()
-    "Enable ts-fold-indicators mode only for safe tree-sitter modes."
-    (when (my/should-enable-tree-sitter-p)
-      (ts-fold-indicators-mode +1)))
+  (defun my/safe-treesit-fold-indicators-mode ()
+    "Enable treesit-fold-indicators mode only for safe tree-sitter modes."
+    (when (and (treesit-available-p)
+               (not (memq major-mode my/tree-sitter-disabled-modes))
+               (treesit-language-at (point)))
+      (treesit-fold-indicators-mode +1)))
 
-  (add-hook! 'prog-mode-hook #'my/safe-ts-fold-mode)
-  (add-hook! 'prog-mode-hook #'my/safe-ts-fold-indicators-mode)
+  (add-hook! 'prog-mode-hook #'my/safe-treesit-fold-mode)
+  (add-hook! 'prog-mode-hook #'my/safe-treesit-fold-indicators-mode)
   (map! :after ts-fold
         :leader
         (:prefix ("t" . "toggle")
                  (:prefix ("z" . "fold")
-                  :desc "Toggle fold at point" "t" #'ts-fold-toggle
-                  :desc "Close fold at point" "c" #'ts-fold-close
-                  :desc "Open fold at point" "o" #'ts-fold-open
-                  :desc "Open fold recursively" "O" #'ts-fold-open-recursively
-                  :desc "Close all folds" "C" #'ts-fold-close-all
-                  :desc "Open all folds" "a" #'ts-fold-open-all))))
+                  :desc "Toggle fold at point" "t" #'treesit-fold-toggle
+                  :desc "Close fold at point" "c" #'treesit-fold-close
+                  :desc "Open fold at point" "o" #'treesit-fold-open
+                  :desc "Open fold recursively" "O" #'treesit-fold-open-recursively
+                  :desc "Close all folds" "C" #'treesit-fold-close-all
+                  :desc "Open all folds" "a" #'treesit-fold-open-all))))
 
 ;; Configure ts-fold integration with line-reminder safely
 (with-eval-after-load 'line-reminder
   ;; Safe integration functions
   (when (fboundp 'line-reminder--get-face)
-    (setq ts-fold-indicators-face-function
+    (setq treesit-fold-indicators-face-function
           (lambda (pos &rest _)
             ;; Return the face of it's function.
             (condition-case nil
@@ -164,12 +161,12 @@
                   (line-reminder--get-face (line-number-at-pos pos t)))
               (error 'default)))))
 
-  (when (fboundp 'ts-fold--overlays-in)
+  (when (fboundp 'treesit-fold--overlays-in)
     (setq line-reminder-add-line-function
           (lambda (&rest _)
             (condition-case nil
                 (and (not (buffer-narrowed-p))
-                     (null (ts-fold--overlays-in 'ts-fold-indicators-window (selected-window)
+                     (null (treesit-fold--overlays-in 'treesit-fold-indicators-window (selected-window)
                                                  (line-beginning-position) (line-end-position))))
               (error t))))))
 
@@ -177,7 +174,9 @@
   :config
   (defun my/safe-combobulate-mode ()
     "Enable combobulate-mode only for safe tree-sitter modes."
-    (when (my/should-enable-tree-sitter-p)
+    (when (and (treesit-available-p)
+               (not (memq major-mode my/tree-sitter-disabled-modes))
+               (treesit-language-at (point)))
       (combobulate-mode +1)))
   :custom
   ;; You can customize Combobulate's key prefix here.
