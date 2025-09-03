@@ -302,18 +302,38 @@ else
     log "   🔍 Would create Atuin override for $APPEARANCE theme"
 fi
 
-# Update zellij theme management - simplified approach for better reliability
+# Update zellij theme management - use zellij-theme-manager for proper integration
 log "🖼️  Updating Zellij multiplexer theme configuration..."
 
 # Write theme preference to cache for zt function to read
 ZELLIJ_THEME_CACHE="$HOME/.cache/zellij_preferred_theme"
 if [[ "$DRY_RUN" != "true" ]]; then
     if [[ "$APPEARANCE" == "light" ]]; then
-        echo "tokyo-night-light" > "$ZELLIJ_THEME_CACHE"
-        log "   ✅ Set preferred Zellij theme: tokyo-night-light (high contrast light)"
+        echo "catppuccin-latte" > "$ZELLIJ_THEME_CACHE"
+        # Actually set the theme using the theme manager (use full path for reliability)
+        ZELLIJ_THEME_MANAGER="$HOME/.local/bin/zellij-theme-manager"
+        if [[ -x "$ZELLIJ_THEME_MANAGER" ]]; then
+            if "$ZELLIJ_THEME_MANAGER" set catppuccin-latte >/dev/null 2>&1; then
+                log "   ✅ Set Zellij theme: catppuccin-latte (catppuccin light)"
+            else
+                log "   ⚠️  Failed to set Zellij theme via theme manager, cached preference only"
+            fi
+        else
+            log "   ⚠️  zellij-theme-manager not found at $ZELLIJ_THEME_MANAGER, cached preference only"
+        fi
     else
         echo "catppuccin-macchiato" > "$ZELLIJ_THEME_CACHE"
-        log "   ✅ Set preferred Zellij theme: catppuccin-macchiato (high contrast dark)"
+        # Actually set the theme using the theme manager (use full path for reliability)
+        ZELLIJ_THEME_MANAGER="$HOME/.local/bin/zellij-theme-manager"
+        if [[ -x "$ZELLIJ_THEME_MANAGER" ]]; then
+            if "$ZELLIJ_THEME_MANAGER" set catppuccin-macchiato >/dev/null 2>&1; then
+                log "   ✅ Set Zellij theme: catppuccin-macchiato (high contrast dark)"
+            else
+                log "   ⚠️  Failed to set Zellij theme via theme manager, cached preference only"
+            fi
+        else
+            log "   ⚠️  zellij-theme-manager not found at $ZELLIJ_THEME_MANAGER, cached preference only"
+        fi
     fi
     
     # Kill existing sessions to apply theme immediately (but preserve current session)
@@ -369,9 +389,9 @@ if [[ "$DRY_RUN" != "true" ]]; then
     fi
 else
     if [[ "$APPEARANCE" == "light" ]]; then
-        log "   🔍 Would set Zellij theme: tokyo-night-light (high contrast light)"
+        log "   🔍 Would set Zellij theme: catppuccin-latte (catppuccin light)"
     else
-        log "   🔍 Would set Zellij theme: catppuccin-macchiato (high contrast dark)"
+        log "   🔍 Would set Zellij theme: catppuccin-macchiato (catppuccin dark)"
     fi
 fi
 

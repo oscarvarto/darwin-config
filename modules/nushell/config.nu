@@ -135,6 +135,52 @@ let catppuccin_latte_theme = {
 let dark_theme = $catppuccin_mocha_theme
 let light_theme = $catppuccin_latte_theme
 
+# Completers
+let fish_completer = {|spans|
+    fish --command $"complete '--do-complete=($spans | str replace --all "'" "\\'" | str join ' ')'"
+    | from tsv --flexible --noheaders --no-infer
+    | rename value description
+    | update value {|row|
+      let value = $row.value
+      let need_quote = ['\' ',' '[' ']' '(' ')' ' ' '\t' "'" '"' "`"] | any {$in in $value}
+      if ($need_quote and ($value | path exists)) {
+        let expanded_path = if ($value starts-with ~) {$value | path expand --no-symlink} else {$value}
+        $'"($expanded_path | str replace --all "\"" "\\\"")"'
+      } else {$value}
+    }
+}
+
+let carapace_completer = {|spans: list<string>|
+    carapace $spans.0 nushell ...$spans
+    | from json
+    | if ($in | default [] | where value =~ '^-.*ERR$' | is-empty) { $in } else { null }
+}
+
+# This completer will use carapace by default
+let external_completer = {|spans|
+    let expanded_alias = scope aliases
+    | where name == $spans.0
+    | get -o 0.expansion
+
+    let spans = if $expanded_alias != null {
+        $spans
+        | skip 1
+        | prepend ($expanded_alias | split row ' ' | take 1)
+    } else {
+        $spans
+    }
+
+    match $spans.0 {
+        # carapace completions are incorrect for nu
+        nu => $fish_completer
+        # fish completes commits and branch names in a nicer way
+        git => $fish_completer
+        # carapace doesn't have completions for asdf
+        asdf => $fish_completer
+        _ => $carapace_completer
+    } | do $in $spans
+}
+
 # The default config record. This is where much of your global configuration is setup.
 $env.config = {
     show_banner: false # true or false to enable or disable the welcome banner at startup
@@ -204,107 +250,7 @@ $env.config = {
         external: {
             enable: true # set to false to prevent nushell looking into $env.PATH to find more suggestions, `false` recommended for WSL users as this look up may be very slow
             max_results: 100 # Increased for better coverage with improved carapace
-            completer: {|spans|
-                # Enhanced carapace-first completer with smart fallbacks
-                # Carapace is faster and more accurate than fish completions
-                
-                # Primary carapace completer with better error handling
-                let carapace_result = try {
-                    carapace $spans.0 nushell ...$spans 
-                    | from json 
-                    | default []
-                    | where value != null 
-                    | where value != ""
-                    | each {|item| 
-                        {
-                            value: $item.value
-                            description: ($item.description? | default "")
-                        }
-                    }
-                } catch { [] }
-                
-                # Enhanced file/directory completion for commands that need it
-                let file_completion = if (
-                    $spans.0 in ["cat", "ls", "cd", "cp", "mv", "rm", "code", "nvim", "vim", "emacs"]
-                    or ($spans | length) > 1 and ($spans | last | str starts-with "./")
-                    or ($spans | length) > 1 and ($spans | last | str starts-with "/")
-                    or ($spans | length) > 1 and ($spans | last | str starts-with "~")
-                ) {
-                    let current_input = if ($spans | length) > 1 { $spans | last } else { "" }
-                    let dir_path = if ($current_input | str contains "/") {
-                        $current_input | path dirname
-                    } else {
-                        "."
-                    }
-                    
-                    try {
-                        ls $dir_path 
-                        | where name != null
-                        | each {|item| 
-                            let base_name = $item.name | path basename
-                            let full_path = if ($dir_path == ".") { 
-                                $base_name 
-                            } else { 
-                                $dir_path | path join $base_name 
-                            }
-                            {
-                                value: $full_path
-                                description: (if $item.type == "dir" { "directory" } else { "file" })
-                            }
-                        }
-                        | where value =~ $current_input
-                        | first 30
-                    } catch { [] }
-                } else { [] }
-                
-                # Simple git subcommand completion for better git experience
-                let git_completion = if ($spans.0 == "git" and ($spans | length) == 2) {
-                    [
-                        {value: "add", description: "Add files to staging area"}
-                        {value: "commit", description: "Record changes to repository"}
-                        {value: "push", description: "Push changes to remote"}
-                        {value: "pull", description: "Pull changes from remote"}
-                        {value: "status", description: "Show working tree status"}
-                        {value: "log", description: "Show commit logs"}
-                        {value: "diff", description: "Show changes between commits"}
-                        {value: "branch", description: "List, create, or delete branches"}
-                        {value: "checkout", description: "Switch branches or restore files"}
-                        {value: "merge", description: "Join development histories"}
-                        {value: "clone", description: "Clone a repository"}
-                        {value: "fetch", description: "Download objects from remote"}
-                        {value: "rebase", description: "Reapply commits on top of another base"}
-                        {value: "reset", description: "Reset current HEAD to specified state"}
-                        {value: "stash", description: "Stash changes in working directory"}
-                    ]
-                } else { [] }
-                
-                # Nushell built-in command completion
-                let nu_builtin_completion = if (($spans | length) == 1) {
-                    help commands 
-                    | where name =~ $spans.0
-                    | each {|cmd| 
-                        {
-                            value: $cmd.name
-                            description: ($cmd.description? | default "nushell builtin")
-                        }
-                    }
-                    | first 20
-                } else { [] }
-                
-                # Combine results with smart prioritization:
-                # 1. Carapace results (most accurate and comprehensive)
-                # 2. Git completions (for git commands)
-                # 3. File completions (for file-based commands)
-                # 4. Nushell builtins (for nushell commands)
-                let all_results = (
-                    $carapace_result + $git_completion + $file_completion + $nu_builtin_completion
-                    | uniq-by value
-                    | sort-by description value
-                    | first 100
-                )
-                
-                $all_results
-            }
+            completer: $external_completer
         }
         use_ls_colors: false # disable LS_COLORS to prevent theme conflicts in completions
     }
@@ -1663,11 +1609,9 @@ def "zt" [
 }
 
 # Aliases and helper functions for zellij theme management
-alias z = zt
-
 # Quick theme switching functions
 def "zt-light" [...args] {
-    zt "tokyo-night-light" ...$args
+    zt "catppuccin_latte" ...$args
 }
 
 def "zt-dark" [...args] {
