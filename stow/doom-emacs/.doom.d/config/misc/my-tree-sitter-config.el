@@ -38,9 +38,9 @@
 
 (use-package treesit
   :config
-  ;; Enable treesit modes where appropriate
-  (setq treesit-font-lock-level 4)
-  
+  ;; Set a safer default font-lock level
+  (setq treesit-font-lock-level 3)
+
   ;; Auto-enable treesit modes for supported languages
   (setq major-mode-remap-alist
         (append '((c-mode . c-ts-mode)
@@ -53,6 +53,7 @@
                   (json-mode . json-ts-mode)
                   (python-mode . python-ts-mode)
                   (sh-mode . bash-ts-mode)
+                  ;; (swift-mode . swift-ts-mode)
                   (typescript-mode . typescript-ts-mode)
                   (rust-mode . rust-ts-mode)
                   (yaml-mode . yaml-ts-mode))
@@ -62,18 +63,18 @@
   (when (treesit-available-p)
     ;; Define language sources for automatic installation
     (dolist (lang-source '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-                          (c "https://github.com/tree-sitter/tree-sitter-c")
-                          (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
-                          (cmake "https://github.com/uyha/tree-sitter-cmake")
-                          (css "https://github.com/tree-sitter/tree-sitter-css")
-                          (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
-                          (json "https://github.com/tree-sitter/tree-sitter-json")
-                          (python "https://github.com/tree-sitter/tree-sitter-python")
-                          (rust "https://github.com/tree-sitter/tree-sitter-rust")
-                          (toml "https://github.com/tree-sitter/tree-sitter-toml")
-                          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-                          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-                          (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+                           (c "https://github.com/tree-sitter/tree-sitter-c")
+                           (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+                           (cmake "https://github.com/uyha/tree-sitter-cmake")
+                           (css "https://github.com/tree-sitter/tree-sitter-css")
+                           (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
+                           (json "https://github.com/tree-sitter/tree-sitter-json")
+                           (python "https://github.com/tree-sitter/tree-sitter-python")
+                           (rust "https://github.com/tree-sitter/tree-sitter-rust")
+                           (toml "https://github.com/tree-sitter/tree-sitter-toml")
+                           (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+                           (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+                           (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
       (add-to-list 'treesit-language-source-alist lang-source))))
 
 (use-package! line-reminder
