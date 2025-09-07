@@ -53,6 +53,7 @@ let
     "/run/current-system/sw/bin"                         # NixOS system tools
     "/usr/local/share/dotnet"                            # .NET Core
     "$HOME/.dotnet/tools"                                # .NET user tools
+    "$HOME/.swiftpm/bin"
     
     # -------------------------------------------------------------------------
     # STANDARD SYSTEM PATHS (lowest priority)

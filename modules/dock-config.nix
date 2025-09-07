@@ -20,6 +20,7 @@
         { path = "/Applications/Microsoft Outlook.app/"; }
         { path = "/Applications/FaceTime.app/"; }
         { path = "/Applications/Discord.app/"; }
+        { path = "/Applications/Preview.app/"; }
         { path = "/System/Applications/Music.app/"; }
         { path = "/System/Applications/Calendar.app/"; }
         { path = "/System/Applications/System Settings.app/"; }

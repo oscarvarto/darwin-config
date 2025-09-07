@@ -23,8 +23,8 @@
   },
   "agent": {
     "default_model": {
-      "provider": "copilot_chat",
-      "model": "gpt-4.1"
+      "provider": "openai",
+      "model": "gpt-4o"
     }
   },
   "features": {
@@ -60,7 +60,7 @@
   "theme": {
     "mode": "system",
     "light": "Catppuccin Latte",
-    "dark": "Catppuccin Mocha"
+    "dark": "Catppuccin Latte"
   },
   "indent_guides": {
     "enabled": true,

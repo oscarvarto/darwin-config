@@ -154,7 +154,7 @@ def perform_cleanup [keep_generations: int, force: bool, verbose: bool, optimize
     }
   }
   
-  let before_size = (do { ^du -sb /nix/store } | complete | get stdout | str trim | split row "\t" | get 0? | into int | default 0)
+  let before_size = (do { ^du -sb /nix/store } | complete | get stdout | str trim | split row "\t" | get 0? | default "0" | into int)
   
   # Remove old generations
   print $"($YELLOW)🗑️ Removing old generations \(older than ($keep_generations) days\)($NC)"
@@ -205,7 +205,7 @@ def perform_cleanup [keep_generations: int, force: bool, verbose: bool, optimize
   }
   
   # Calculate space freed
-  let after_size = (do { ^du -sb /nix/store } | complete | get stdout | str trim | split row "\t" | get 0? | into int | default 0)
+  let after_size = (do { ^du -sb /nix/store } | complete | get stdout | str trim | split row "\t" | get 0? | default "0" | into int)
   let freed = ($before_size - $after_size)
   let freed_mb = ($freed / 1024 / 1024)
   
