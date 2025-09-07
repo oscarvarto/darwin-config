@@ -177,6 +177,8 @@ let external_completer = {|spans|
         git => $fish_completer
         # carapace doesn't have completions for asdf
         asdf => $fish_completer
+        # carapace brew completer has a panic bug, use fish instead
+        brew => $fish_completer
         _ => $carapace_completer
     } | do $in $spans
 }

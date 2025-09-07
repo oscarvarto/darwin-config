@@ -38,8 +38,10 @@ def main [command: string = "help", --force (-f)] {
                 "nodejs-tools",
                 "dotnet-tools",
                 "doom-emacs",
+                "doom-extra-files",
                 "lazyvim",
-                "zed"
+                "zed",
+                "zellij-theme-management"
             ]
             
             # Deploy each package and collect results
@@ -71,6 +73,7 @@ def main [command: string = "help", --force (-f)] {
                 print "\n✅ All stow packages deployed successfully!"
                 print $"📂 Scripts are now available in ($env.HOME)/.local/share/bin/"
                 print $"🎨 Editor configs deployed to ~/.doom.d/, ~/.config/nvim/, and ~/.config/zed/"
+                print $"🖼️  Theme management tools deployed to ~/.local/bin/"
             } else {
                 print $"\n⚠️  Deployment completed with ($failed_packages | length) failures:"
                 for failed in $failed_packages {
@@ -101,8 +104,12 @@ def main [command: string = "help", --force (-f)] {
             
             # Editor configurations
             stow -D -t ~ doom-emacs
+            stow -D -t ~ doom-extra-files
             stow -D -t ~ lazyvim
             stow -D -t ~ zed
+            
+            # Theme management
+            stow -D -t ~ zellij-theme-management
             
             if $env.LAST_EXIT_CODE == 0 {
                 print "✅ Stow packages removed successfully!"
@@ -175,14 +182,17 @@ def main [command: string = "help", --force (-f)] {
             print "  • nodejs-tools     - Node.js tools and toolchain"
             print "  • dotnet-tools     - .NET SDK and global tools"
             print "  • doom-emacs       - Complete Doom Emacs configuration"
+            print "  • doom-extra-files - Additional Doom Emacs configuration files"
             print "  • lazyvim          - Neovim LazyVim configuration"
             print "  • zed              - Zed editor configuration"
+            print "  • zellij-theme-management - Zellij theme switching tools"
             print ""
             print "📂 Deployment Targets:"
             print "  • Scripts → ~/.local/share/bin/ (as symlinks)"
             print "  • Doom Emacs → ~/.doom.d/ (as symlinks)"
             print "  • LazyVim → ~/.config/nvim/ (as symlinks)"
             print "  • Zed → ~/.config/zed/ (as symlinks)"
+            print "  • Theme Tools → ~/.local/bin/ (as symlinks)"
         }
     }
 }
