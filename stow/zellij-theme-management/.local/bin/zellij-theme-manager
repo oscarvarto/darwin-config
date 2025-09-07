@@ -9,7 +9,7 @@ VERSION="2.0.0"
 SCRIPT_NAME="zellij-theme-manager"
 
 # Configuration paths
-ZELLIJ_CONFIG_FILE="${HOME}/.config/zellij/current-theme.kdl"
+ZELLIJ_CONFIG_FILE="${HOME}/.config/zellij/config.kdl"
 CURRENT_THEME_FILE="${HOME}/.cache/zellij_current_theme"
 
 # Log function

@@ -14,7 +14,6 @@ with pkgs;
   zip
   btop
   jujutsu
-  lazyjj
   pixi
 
   # Text and terminal utilities
@@ -27,7 +26,7 @@ with pkgs;
   unrar
   unzip
   fd
-  
+
   # Table-like output tools (nushell-like experience)
   procs        # Modern replacement for ps with table output
   dust         # Intuitive disk usage with tree view
@@ -67,11 +66,10 @@ with pkgs;
 
   # Qt6 packages
   qt6.full
-  
+
   # Font packages
-  jetbrains-mono
   font-awesome
-  
+
   # Python packages with GUI dependencies
   (python3.withPackages (python-pkgs: with python-pkgs; [
     debugpy
@@ -92,7 +90,7 @@ with pkgs;
     scipy
     numpy
   ]))
-  
+
   # Darwin-specific packages
   awscli2  # AWS CLI v2 with SSO support
   dockutil
@@ -103,7 +101,7 @@ with pkgs;
   fish  # Required for Nushell's fish completer
   nushell
   carapace
-  
+
   # Zsh plugins for enhanced shell experience
   zsh-autosuggestions
   zsh-syntax-highlighting

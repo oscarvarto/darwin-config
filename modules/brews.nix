@@ -45,6 +45,7 @@
       "hugo"
       "imagemagick"
       "jq"
+      "lazyjj"
       "libedit"
       "libvterm"
       "libsql"

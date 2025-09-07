@@ -17,12 +17,12 @@ ensure_emacs_postinstall_and_alias() {
     # Check if the formula is known/installed in any form
     if brew ls --versions d12frosted/emacs-plus/emacs-plus@31 > /dev/null 2>&1 \
        || brew ls --versions emacs-plus@31 > /dev/null 2>&1; then
-      
+
       desired_app="/opt/homebrew/opt/emacs-plus@31/Emacs.app"
-      
+
       # Smart detection: check if everything is already properly configured
       emacs_needs_work=false
-      
+
       # Check if the desired app exists and /Applications alias is correct
       if [ -e "${desired_app}" ]; then
         if [ -e "/Applications/Emacs.app" ]; then
@@ -38,10 +38,10 @@ ensure_emacs_postinstall_and_alias() {
       else
         emacs_needs_work=true
       fi
-      
+
       if [ "$emacs_needs_work" = "true" ]; then
         echo "${YELLOW}Emacs.app configuration needs updates - applying fixes...${NC}"
-        
+
         # First, ensure install-info directory exists and is writable
         emacs_cellar="$(brew --cellar emacs-plus@31 2>/dev/null || brew --cellar d12frosted/emacs-plus/emacs-plus@31 2>/dev/null)"
         if [ -n "$emacs_cellar" ] && [ -d "$emacs_cellar" ]; then
@@ -56,13 +56,13 @@ ensure_emacs_postinstall_and_alias() {
             fi
           fi
         fi
-        
+
         # Run postinstall to complete the installation and create Emacs.app
         echo "${YELLOW}  → Running brew postinstall to complete emacs-plus@31 setup...${NC}"
         if ! brew postinstall d12frosted/emacs-plus/emacs-plus@31 2>/dev/null; then
           brew postinstall emacs-plus@31 2>/dev/null || true
         fi
-        
+
         # Remove stale symlink only (do not remove a real app bundle)
         if [ -L "/Applications/Emacs.app" ]; then
           target="$(readlink "/Applications/Emacs.app" 2>/dev/null || true)"
@@ -71,7 +71,7 @@ ensure_emacs_postinstall_and_alias() {
             rm -f "/Applications/Emacs.app" || true
           fi
         fi
-        
+
         # Create Finder alias if it doesn't exist
         if [ -e "${desired_app}" ] && [ ! -e "/Applications/Emacs.app" ]; then
           echo "${YELLOW}  → Creating Emacs.app alias in /Applications...${NC}"

@@ -1,6 +1,6 @@
 keybinds clear-defaults=true {
     locked {
-        bind "Alt `" { SwitchToMode "normal"; }
+        bind "Ctrl `" { SwitchToMode "normal"; }
     }
     pane {
         bind "left" { MoveFocus "left"; }
@@ -162,7 +162,7 @@ keybinds clear-defaults=true {
         bind "enter" { SwitchToMode "locked"; }
     }
     shared_except "locked" "entersearch" "renametab" "renamepane" "prompt" "tmux" {
-        bind "Alt `" { SwitchToMode "locked"; }
+        bind "Ctrl `" { SwitchToMode "locked"; }
     }
     shared_except "locked" "entersearch" "renametab" "renamepane" {
         bind "esc" { SwitchToMode "locked"; }
@@ -272,7 +272,7 @@ default_mode "locked"
 // Choose the path to the default shell that zellij will use for opening new panes
 // Default: $SHELL
 // Using shell wrapper to detect current shell and use nix-profile versions
-default_shell "zsh"
+default_shell "nu"
  
 // Choose the path to override cwd that zellij will use for opening new panes
 // 

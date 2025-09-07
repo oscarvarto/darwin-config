@@ -3,7 +3,7 @@
 # Script to manage stow packages using GNU Stow
 # Usage: manage-stow-packages <command>
 
-def main [command: string = "help"] {
+def main [command: string = "help", --force (-f)] {
     let stow_dir = $"($env.HOME)/darwin-config/stow"
     
     if not ($stow_dir | path exists) {
@@ -11,34 +11,76 @@ def main [command: string = "help"] {
         exit 1
     }
     
+    # Determine stow options based on force flag
+    let stow_options = if $force {
+        ["--restow", "--adopt"]
+    } else {
+        []
+    }
+    
     match $command {
         "deploy" | "install" => {
-            print "🚀 Deploying stow packages..."
+            if $force {
+                print "🚀 Force deploying stow packages (will overwrite existing files)..."
+                print "⚠️  Warning: Using --adopt mode - existing files will be imported into stow packages"
+            } else {
+                print "🚀 Deploying stow packages..."
+            }
             
             cd $stow_dir
             
-            # Core script packages
-            stow -t ~ aux-scripts
-            stow -t ~ nix-scripts  
-            stow -t ~ raycast-scripts
+            # Define all packages to deploy
+            let packages = [
+                "aux-scripts",
+                "nix-scripts", 
+                "raycast-scripts",
+                "cargo-tools",
+                "nodejs-tools",
+                "dotnet-tools",
+                "doom-emacs",
+                "lazyvim",
+                "zed"
+            ]
             
-            # Development tool managers
-            stow -t ~ cargo-tools
-            stow -t ~ nodejs-tools
-            stow -t ~ dotnet-tools
+            # Deploy each package and collect results
+            let results = $packages | each { |package|
+                print $"📦 Processing ($package)..."
+                
+                let result = try {
+                    if ($stow_options | length) > 0 {
+                        # With force options
+                        run-external "stow" "-t" $env.HOME "--restow" "--adopt" $package
+                    } else {
+                        # Normal deployment
+                        run-external "stow" "-t" $env.HOME $package
+                    }
+                    print $"  ✅ ($package) deployed successfully"
+                    {package: $package, success: true, error: null}
+                } catch { |e|
+                    print $"  ❌ Failed to deploy ($package): ($e.msg)"
+                    {package: $package, success: false, error: $e.msg}
+                }
+                $result
+            }
             
-            # Editor configurations
-            stow -t ~ doom-emacs
-            stow -t ~ lazyvim
-            stow -t ~ zed
+            let failed_packages = $results | where success == false | get package
+            let success_count = $results | where success == true | length
             
-            if $env.LAST_EXIT_CODE == 0 {
-                print "✅ Stow packages deployed successfully!"
+            # Report results
+            if ($failed_packages | length) == 0 {
+                print "\n✅ All stow packages deployed successfully!"
                 print $"📂 Scripts are now available in ($env.HOME)/.local/share/bin/"
                 print $"🎨 Editor configs deployed to ~/.doom.d/, ~/.config/nvim/, and ~/.config/zed/"
             } else {
-                print "❌ Failed to deploy stow packages"
-                exit 1
+                print $"\n⚠️  Deployment completed with ($failed_packages | length) failures:"
+                for failed in $failed_packages {
+                    print $"  • ($failed)"
+                }
+                print "\n💡 Try running with --force flag to overwrite existing files:"
+                print $"   manage-stow-packages deploy --force"
+                if not $force {
+                    exit 1
+                }
             }
         }
         
@@ -107,7 +149,7 @@ def main [command: string = "help"] {
         "help" | _ => {
             print "🛠️  Stow Package Manager"
             print ""
-            print "Usage: manage-stow-packages <command>"
+            print "Usage: manage-stow-packages <command> [--force]"
             print ""
             print "Commands:"
             print "  deploy, install    Deploy all stow packages using stow"
@@ -115,6 +157,15 @@ def main [command: string = "help"] {
             print "  status             Check deployment status of scripts"
             print "  list               List available scripts in aux-scripts"
             print "  help               Show this help message"
+            print ""
+            print "Options:"
+            print "  --force, -f        Force deployment, overwriting existing files"
+            print "                     Uses --restow and --adopt stow options"
+            print "                     WARNING: --adopt imports existing files into stow packages"
+            print ""
+            print "Examples:"
+            print "  manage-stow-packages deploy          # Safe deployment (fails on conflicts)"
+            print "  manage-stow-packages deploy --force  # Force deployment (imports conflicting files)"
             print ""
             print "📁 Available Stow Packages:"
             print "  • aux-scripts      - Core utility scripts"

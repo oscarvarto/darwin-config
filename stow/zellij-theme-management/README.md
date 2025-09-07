@@ -68,7 +68,7 @@ zellij-theme-manager status                     # Show current status
 ## File locations
 
 - Current theme cache: `~/.cache/zellij_current_theme`
-- Zellij config: `~/.config/zellij/current-theme.kdl`
+- Zellij config: `~/.config/zellij/config.kdl`
 
 ## Troubleshooting
 
