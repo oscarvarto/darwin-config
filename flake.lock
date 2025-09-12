@@ -414,11 +414,11 @@
     "homebrew-cask": {
       "flake": false,
       "locked": {
-        "lastModified": 1757702747,
-        "narHash": "sha256-PaaC/3EMNl1QDx5y8gfe7LNAQSP+a80c4ne3r/Fqd04=",
+        "lastModified": 1757707077,
+        "narHash": "sha256-R3Mt2ofMzc3Qt5NC/c3j8f3Rqb0a7FOAT4duKcul+1I=",
         "owner": "homebrew",
         "repo": "homebrew-cask",
-        "rev": "d653ebf7ba43b701c2b61e5cd7431e05070b32b0",
+        "rev": "b804675c8a9975cdcdf3996ca3e2d25c5b03e1d2",
         "type": "github"
       },
       "original": {
@@ -430,11 +430,11 @@
     "homebrew-core": {
       "flake": false,
       "locked": {
-        "lastModified": 1757702758,
-        "narHash": "sha256-7OsnBq8LYs1aWAC5N8Ubq1vY5wP+bznWrhf/X+06h/A=",
+        "lastModified": 1757710620,
+        "narHash": "sha256-ZeEcO3tqLrp4YgD68mY7UrCiA3UakEbNm4iFRSmHrGw=",
         "owner": "homebrew",
         "repo": "homebrew-core",
-        "rev": "a68855eea865793cb2b14fac63e0ca4a13c12422",
+        "rev": "b29bada521aeb0518a884a9c580910c5404cfd2b",
         "type": "github"
       },
       "original": {
@@ -443,19 +443,19 @@
         "type": "github"
       }
     },
-    "homebrew-emacs-plus": {
+    "homebrew-emacs-builds": {
       "flake": false,
       "locked": {
-        "lastModified": 1756021711,
-        "narHash": "sha256-Ew69BHwupkdHyECC7EHyG0YKzBhBEyZbmoD84leUhfw=",
-        "owner": "d12frosted",
-        "repo": "homebrew-emacs-plus",
-        "rev": "15a9e55c28347ace5bc4d1cbd954e8594bc67dd9",
+        "lastModified": 1757634462,
+        "narHash": "sha256-8Tz6Od2xr3OSN3cQaTG4XlYSYuuMwcHxZXGKxkkzpSk=",
+        "owner": "jimeh",
+        "repo": "homebrew-emacs-builds",
+        "rev": "a59ae3d68f0e02ec97c8a3f41b9bbfadf5c7dcd6",
         "type": "github"
       },
       "original": {
-        "owner": "d12frosted",
-        "repo": "homebrew-emacs-plus",
+        "owner": "jimeh",
+        "repo": "homebrew-emacs-builds",
         "type": "github"
       }
     },
@@ -648,7 +648,7 @@
         "homebrew-bundle": "homebrew-bundle",
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
-        "homebrew-emacs-plus": "homebrew-emacs-plus",
+        "homebrew-emacs-builds": "homebrew-emacs-builds",
         "neovim-nightly-overlay": "neovim-nightly-overlay",
         "nix-homebrew": "nix-homebrew",
         "nixd-ls": "nixd-ls",

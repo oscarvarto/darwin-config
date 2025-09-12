@@ -71,14 +71,20 @@ in
   # Biometric authentication configuration (main setting is below in security.pam.services)
   
   # Environment variables for 1Password integration with multiple vaults
-  # and homebrew compiler configuration for emacs-plus@31 compatibility
+  # and homebrew compiler configuration for emacs-plus@31 compatibility (temporarily commented out)
   environment.variables = {
     OP_BIOMETRIC_UNLOCK_ENABLED = "true";
     OP_VAULT_PERSONAL = "Personal";
     OP_VAULT_WORK = "Work";
+    # Temporarily commented out - emacs-plus@31 specific variables
     # Force homebrew to use gcc-15 for emacs-plus@31 build to fix libgccjit issues on macOS 26
-    HOMEBREW_CC = "gcc-15";
-    HOMEBREW_CXX = "g++-15";
+    # HOMEBREW_CC = "gcc-15";
+    # HOMEBREW_CXX = "g++-15";
+    # SDK configuration for gcc-15 to find macOS frameworks and headers
+    # SDKROOT = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk";
+    # MACOSX_DEPLOYMENT_TARGET = "26.0";
+    # LIBRARY_PATH for gcc-15 libgccjit compatibility
+    # LIBRARY_PATH = "/opt/homebrew/opt/gcc/lib/gcc/15:/opt/homebrew/opt/libgccjit/lib/gcc/15:/opt/homebrew/opt/gcc/lib/gcc/15/gcc/aarch64-apple-darwin25/15";
   };
   
 
@@ -202,29 +208,60 @@ in
     };
   };
 
+  # Temporarily commented out - emacs-plus@31 specific configuration
   # Set HOMEBREW_CC to use gcc-15 for emacs-plus@31 compatibility
-  launchd.user.agents.setHomebrewCCVar = {
-    serviceConfig = {
-      Label = "org.nixos.setHomebrewCCVar";
-      ProgramArguments = [
-        "/bin/launchctl"
-        "setenv"
-        "HOMEBREW_CC"
-        "gcc-15"
-      ];
-      RunAtLoad = true;
-    };
-  };
+  # launchd.user.agents.setHomebrewCCVar = {
+  #   serviceConfig = {
+  #     Label = "org.nixos.setHomebrewCCVar";
+  #     ProgramArguments = [
+  #       "/bin/launchctl"
+  #       "setenv"
+  #       "HOMEBREW_CC"
+  #       "gcc-15"
+  #     ];
+  #     RunAtLoad = true;
+  #   };
+  # };
 
+  # Temporarily commented out - emacs-plus@31 specific configuration
   # Set HOMEBREW_CXX to use g++-15 for emacs-plus@31 compatibility
-  launchd.user.agents.setHomebrewCXXVar = {
+  # launchd.user.agents.setHomebrewCXXVar = {
+  #   serviceConfig = {
+  #     Label = "org.nixos.setHomebrewCXXVar";
+  #     ProgramArguments = [
+  #       "/bin/launchctl"
+  #       "setenv"
+  #       "HOMEBREW_CXX"
+  #       "g++-15"
+  #     ];
+  #     RunAtLoad = true;
+  #   };
+  # };
+
+  # Temporarily commented out - emacs-plus@31 specific configuration
+  # Set SDKROOT for gcc-15 to find macOS SDK
+  # launchd.user.agents.setSDKRootVar = {
+  #   serviceConfig = {
+  #     Label = "org.nixos.setSDKRootVar";
+  #     ProgramArguments = [
+  #       "/bin/launchctl"
+  #       "setenv"
+  #       "SDKROOT"
+  #       "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+  #     ];
+  #     RunAtLoad = true;
+  #   };
+  # };
+
+  # Set MACOSX_DEPLOYMENT_TARGET for gcc-15
+  launchd.user.agents.setMacOSXDeploymentTargetVar = {
     serviceConfig = {
-      Label = "org.nixos.setHomebrewCXXVar";
+      Label = "org.nixos.setMacOSXDeploymentTargetVar";
       ProgramArguments = [
         "/bin/launchctl"
         "setenv"
-        "HOMEBREW_CXX"
-        "g++-15"
+        "MACOSX_DEPLOYMENT_TARGET"
+        "26.0"
       ];
       RunAtLoad = true;
     };

@@ -252,11 +252,39 @@ in
               identityFile = [ "/Users/${user}/.ssh/id_ed25519" ];
             };
             
+            # Personal GitLab (use specific host alias to avoid conflicts)
+            "gitlab.com-personal" = {
+              hostname = "gitlab.com";
+              user = "git";
+              identitiesOnly = true;
+              identityFile = [ "/Users/${user}/.ssh/id_ed25519" ];
+            };
+            
+            # Work GitLab (default gitlab.com - uses work key)
+            "gitlab.com" = {
+              hostname = "gitlab.com";
+              user = "git";
+              identitiesOnly = true;
+              identityFile = [ "/Users/${user}/.ssh/id_ed25519_gitlab_work" ];
+            };
+            
+            # Alternative work GitLab host (explicit work context)
+            "gitlab-work" = {
+              hostname = "gitlab.com";
+              user = "git";
+              identitiesOnly = true;
+              identityFile = [ "/Users/${user}/.ssh/id_ed25519_gitlab_work" ];
+            };
+            
             # Global settings for all hosts
             "*" = {
               # These settings optimize 1Password SSH agent usage
               serverAliveInterval = 60;
               serverAliveCountMax = 3;
+              # Keep connection alive and prevent hanging
+              compression = false;
+              hashKnownHosts = false;
+              userKnownHostsFile = "/Users/${user}/.ssh/known_hosts";
             };
           };
         };

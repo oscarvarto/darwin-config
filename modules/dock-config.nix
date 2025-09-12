@@ -7,7 +7,8 @@
       enable = true;
       username = user;
       entries = [
-        { path = "/opt/homebrew/Cellar/emacs-plus@31/31.0.50/Emacs.app/"; }
+        # { path = "/opt/homebrew/Cellar/emacs-plus@31/31.0.50/Emacs.app/"; }
+        { path = "/Applications/Emacs.app/"; }
         { path = "/Applications/Obsidian.app/"; }
         { path = "/Applications/Zed Preview.app/"; }
         { path = "/Applications/Ghostty.app/"; }

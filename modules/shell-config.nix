@@ -81,6 +81,21 @@ in
 
         # Set Xcode developer directory to release version
         export DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
+        
+        # Force homebrew to use gcc-15 for emacs-plus@31 compatibility on macOS 26
+        export HOMEBREW_CC="gcc-15"
+        export HOMEBREW_CXX="g++-15"
+        
+        # SDK path configuration for gcc-15 to find macOS frameworks and headers
+        export SDKROOT="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+        export MACOSX_DEPLOYMENT_TARGET="26.0"
+        # Add framework search paths for gcc-15
+        export CPPFLAGS="-isysroot $SDKROOT -I$SDKROOT/usr/include -F$SDKROOT/System/Library/Frameworks"
+        export LDFLAGS="-isysroot $SDKROOT -L$SDKROOT/usr/lib -F$SDKROOT/System/Library/Frameworks"
+        
+        # LIBRARY_PATH for gcc-15 libgccjit compatibility (fixes "ld: library not found" errors)
+        # Based on https://github.com/d12frosted/homebrew-emacs-plus/issues/554#issuecomment-1564287827
+        export LIBRARY_PATH="/opt/homebrew/opt/gcc/lib/gcc/15:/opt/homebrew/opt/libgccjit/lib/gcc/15:/opt/homebrew/opt/gcc/lib/gcc/15/gcc/aarch64-apple-darwin25/15"
 
         # Define variables for directories
         export EMACSDIR=$HOME/.emacs.d

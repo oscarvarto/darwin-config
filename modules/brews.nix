@@ -11,7 +11,8 @@
     };
 
     taps = [
-      "d12frosted/homebrew-emacs-plus"
+      # "d12frosted/homebrew-emacs-plus"  # Temporarily commented out
+      "jimeh/homebrew-emacs-builds"
     ];
 
     brews = [
@@ -31,11 +32,12 @@
       "cmake-language-server"
       "coursier"
       "difftastic"
-      {
-        name = "emacs-plus@31";
-        args = [ "with-xwidgets" "with-imagemagick" "with-savchenkovaleriy-big-sur-curvy-3d-icon" "with-mailutils" ];
-        link = true;
-      }
+      # Temporarily commented out - switch back when upstream issues are resolved
+      # {
+      #   name = "emacs-plus@31";
+      #   args = [ "with-xwidgets" "with-imagemagick" "with-savchenkovaleriy-big-sur-curvy-3d-icon" "with-mailutils" ];
+      #   link = true;
+      # }
       "eza"
       "ffmpeg"
       "fontforge"
