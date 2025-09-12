@@ -19,8 +19,8 @@ Large files will have TreeSitter and other heavy features disabled.")
   '(tree-sitter-mode
     tree-sitter-hl-mode
     line-reminder-mode
-    ts-fold-mode
-    ts-fold-indicators-mode
+    treesit-fold-mode
+    treesit-fold-indicators-mode
     combobulate-mode
     lsp-mode
     company-mode

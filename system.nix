@@ -68,6 +68,19 @@ in
     })
   ];
   
+  # Biometric authentication configuration (main setting is below in security.pam.services)
+  
+  # Environment variables for 1Password integration with multiple vaults
+  # and homebrew compiler configuration for emacs-plus@31 compatibility
+  environment.variables = {
+    OP_BIOMETRIC_UNLOCK_ENABLED = "true";
+    OP_VAULT_PERSONAL = "Personal";
+    OP_VAULT_WORK = "Work";
+    # Force homebrew to use gcc-15 for emacs-plus@31 build to fix libgccjit issues on macOS 26
+    HOMEBREW_CC = "gcc-15";
+    HOMEBREW_CXX = "g++-15";
+  };
+  
 
   ids.gids.nixbld = 350;
 
@@ -93,7 +106,13 @@ in
     shell = selectedShellPath;
   };
 
-  security.pam.services.sudo_local.touchIdAuth = true;
+  # Touch ID configuration for macOS 26 (uses pam_tid.so.2)
+  security.pam.services.sudo_local = {
+    touchIdAuth = true;
+    text = ''
+      auth       sufficient     pam_tid.so.2
+    '';
+  };
 
   programs = {
     zsh.enable = true;
@@ -169,7 +188,7 @@ in
     };
   };
 
-  # Set DEVELOPER_DIR to point to Xcode beta for GUI applications
+  # Set DEVELOPER_DIR to point to Xcode for GUI applications
   launchd.user.agents.setDeveloperDirVar = {
     serviceConfig = {
       Label = "org.nixos.setDeveloperDirVar";
@@ -177,7 +196,62 @@ in
         "/bin/launchctl"
         "setenv"
         "DEVELOPER_DIR"
-        "/Applications/Xcode-beta.app/Contents/Developer"
+        "/Applications/Xcode.app/Contents/Developer"
+      ];
+      RunAtLoad = true;
+    };
+  };
+
+  # Set HOMEBREW_CC to use gcc-15 for emacs-plus@31 compatibility
+  launchd.user.agents.setHomebrewCCVar = {
+    serviceConfig = {
+      Label = "org.nixos.setHomebrewCCVar";
+      ProgramArguments = [
+        "/bin/launchctl"
+        "setenv"
+        "HOMEBREW_CC"
+        "gcc-15"
+      ];
+      RunAtLoad = true;
+    };
+  };
+
+  # Set HOMEBREW_CXX to use g++-15 for emacs-plus@31 compatibility
+  launchd.user.agents.setHomebrewCXXVar = {
+    serviceConfig = {
+      Label = "org.nixos.setHomebrewCXXVar";
+      ProgramArguments = [
+        "/bin/launchctl"
+        "setenv"
+        "HOMEBREW_CXX"
+        "g++-15"
+      ];
+      RunAtLoad = true;
+    };
+  };
+
+  # Touch ID authorization settings for screen sharing compatibility
+  # This allows Touch ID to work with Duet Display and similar screen sharing apps
+  # IMPORTANT: This setting affects system authorization (sudo, etc.) only
+  # Apple Pay uses a separate security framework and should NOT be affected
+  # 
+  # TO REVERT IF NEEDED:
+  # 1. Comment out or remove the "setTouchIdIgnoreArd" launchd agent below
+  # 2. Run: nb && ns  
+  # 3. Manually run: defaults delete ~/Library/Preferences/com.apple.security.authorization.plist ignoreArd
+  # 
+  # If you experience ANY issues with Apple Pay or other Touch ID features,
+  # immediately revert this setting using the steps above.
+  launchd.user.agents.setTouchIdIgnoreArd = {
+    serviceConfig = {
+      Label = "org.nixos.setTouchIdIgnoreArd";
+      ProgramArguments = [
+        "/usr/bin/defaults"
+        "write"
+        "/Users/${user}/Library/Preferences/com.apple.security.authorization.plist"
+        "ignoreArd"
+        "-bool"
+        "true"
       ];
       RunAtLoad = true;
     };

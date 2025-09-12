@@ -85,7 +85,7 @@ $env.EMACSDIR = "~/.emacs.d"
 $env.DOOMDIR  = "~/.doom.d"
 $env.DOOMLOCALDIR = "~/.emacs.d/.local"
 
-# Set Xcode developer directory to release version
+# Set Xcode developer directory to release version (forced rebuild)
 $env.DEVELOPER_DIR = "/Applications/Xcode.app/Contents/Developer"
 
 # Load theme from cache file set by catppuccin theme switcher

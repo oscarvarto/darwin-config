@@ -29,6 +29,7 @@
       "ccache"
       "cmake"
       "cmake-language-server"
+      "coursier"
       "difftastic"
       {
         name = "emacs-plus@31";
@@ -37,6 +38,7 @@
       }
       "eza"
       "ffmpeg"
+      "fontforge"
       "gemini-cli"
       "gradle"
       "git-filter-repo"
@@ -106,7 +108,7 @@
       "Okta Verify" = 490179405;
       "Okta Extension App" = 1439967473;
       "rcmd" = 1596283165;
-      # "XCode" = 497799835; # Commented out - using Xcode beta instead
+      # "XCode" = 497799835;
     };
   };
 }

@@ -35,5 +35,5 @@ else
 fi
 
 echo ""
-echo "⚠️  Note: Your shell config still sets DEVELOPER_DIR to Xcode beta"
-echo "   You may want to update modules/shell-config.nix if switching permanently."
+echo "✅ Note: Your shell config now correctly sets DEVELOPER_DIR to Xcode release"
+echo "   Configuration has been updated to use /Applications/Xcode.app as default."

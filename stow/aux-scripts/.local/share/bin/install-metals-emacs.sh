@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cs bootstrap \
+coursier bootstrap \
 	--java-opt -XX:+UseG1GC \
 	--java-opt -XX:+UseStringDeduplication \
 	--java-opt -Xss4m \

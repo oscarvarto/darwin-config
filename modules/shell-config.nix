@@ -79,8 +79,8 @@ in
         export LC_ALL="en_US.UTF-8"
         bindkey "^[[3~" delete-char
 
-        # Set Xcode developer directory to beta version
-        export DEVELOPER_DIR="/Applications/Xcode-beta.app/Contents/Developer"
+        # Set Xcode developer directory to release version
+        export DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
 
         # Define variables for directories
         export EMACSDIR=$HOME/.emacs.d

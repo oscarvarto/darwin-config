@@ -16,8 +16,8 @@ set -gx DOOMDIR "~/.doom.d"
 set -gx DOOMLOCALDIR "~/.emacs.d/.local"
 set -gx CARGO_HOME "$HOME/.cargo"
 
-# Set Xcode developer directory to beta version (matching other shells)
-set -gx DEVELOPER_DIR "/Applications/Xcode-beta.app/Contents/Developer"
+# Set Xcode developer directory to release version (matching other shells)
+set -gx DEVELOPER_DIR "/Applications/Xcode.app/Contents/Developer"
 
 # Enchant/Aspell configuration (matching current setup)
 set -gx ENCHANT_ORDERING 'en:aspell,es:aspell,*:aspell'

@@ -1391,8 +1391,6 @@ def --env y [...args] {
 	rm -fp $tmp
 }
 
-# source ~/.local/share/atuin/init.nu
-
 # Dynamic theme application function
 def --env "apply-theme" [] {
     if ($env.NUSHELL_THEME? | default "dark") == "light" {

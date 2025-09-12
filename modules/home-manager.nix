@@ -79,8 +79,8 @@ in
           ENCHANT_ORDERING = "en:aspell,es:aspell,*:aspell";
           ASPELL_CONF = "dict-dir ${pkgs.aspellWithDicts (dicts: with dicts; [ en en-computers en-science es ])}/lib/aspell; data-dir ${pkgs.aspell}/share/aspell";
           STARSHIP_CONFIG = "${config.home.homeDirectory}/.config/starship.toml";
-          # Set Xcode developer directory to beta version for GUI applications
-          DEVELOPER_DIR = "/Applications/Xcode-beta.app/Contents/Developer";
+          # Set Xcode developer directory to release version for GUI applications
+          DEVELOPER_DIR = "/Applications/Xcode.app/Contents/Developer";
           # Work configuration environment variables
           WORK_COMPANY_NAME = workConfig.companyName or "CompanyName";
           WORK_GIT_DIR_PATTERN = workConfig.gitWorkDirPattern or "~/work/**";
@@ -234,13 +234,30 @@ in
           };
         };
 
-        # SSH configuration
+        # SSH configuration with 1Password SSH agent integration
         ssh = {
           enable = true;
           includes = [ "/Users/${user}/.ssh/config_external" ];
-          matchBlocks."github.com" = {
-            identitiesOnly = true;
-            identityFile = [ "/Users/${user}/.ssh/id_ed25519" ];
+          
+          # Configure 1Password SSH agent for biometric authentication
+          extraConfig = ''
+            # 1Password SSH Agent Configuration
+            Host *
+                IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+          '';
+          
+          matchBlocks = {
+            "github.com" = {
+              identitiesOnly = true;
+              identityFile = [ "/Users/${user}/.ssh/id_ed25519" ];
+            };
+            
+            # Global settings for all hosts
+            "*" = {
+              # These settings optimize 1Password SSH agent usage
+              serverAliveInterval = 60;
+              serverAliveCountMax = 3;
+            };
           };
         };
         # direnv configuration

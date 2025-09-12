@@ -18,11 +18,13 @@
         { path = "/Applications/Microsoft Edge.app/"; }
         { path = "/Applications/Microsoft Teams.app/"; }
         { path = "/Applications/Microsoft Outlook.app/"; }
+        { path = "/Applications/Mail.app/"; }
         { path = "/Applications/FaceTime.app/"; }
         { path = "/Applications/Discord.app/"; }
         { path = "/Applications/Preview.app/"; }
         { path = "/System/Applications/Music.app/"; }
         { path = "/System/Applications/Calendar.app/"; }
+        { path = "/Applications/Xcode.app/"; }
         { path = "/System/Applications/System Settings.app/"; }
       ];
     };
