@@ -51,7 +51,7 @@ in
       imports = [
         ./git-security-scripts.nix
         ./home-activation-scripts.nix
-        # ./fish-config.nix  # Commented out to reduce build overhead - using nushell/zsh
+        ./fish-config.nix  # Re-enabled for basic fish functionality (integrations disabled)
         inputs.catppuccin.homeModules.catppuccin
         # inputs.op-shell-plugins.hmModules.default  # Removed - SSH agent integration sufficient
       ] ++ [ ./nushell ];
