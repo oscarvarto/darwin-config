@@ -18,16 +18,15 @@
   (defvar my-jdk-paths
     (let ((jdk-base (my/get-path :jdks)))
       `((:name "JavaSE-17"
-         :path "/Library/Java/JavaVirtualMachines/corretto-17.0.15.6.1.jdk/Contents/Home"
+         :path (shell-command "mise where java@corretto-17")
          :version "17"
          :default nil)  ;; Default for LSP servers and most builds
         (:name "JavaSE-21"
-         :path "/Library/Java/JavaVirtualMachines/corretto-21.0.1.7.1.jdk/Contents/Home"
+         :path (shell-command "mise where java@corretto-21")
          :version "21"
          :default nil)  ;; Default for LSP servers and most builds
         (:name "JavaSE-24"
-         ;; :path ,(expand-file-name "https/github.com/adoptium/temurin24-binaries/releases/download/jdk-24%252B36/OpenJDK24U-jdk_aarch64_mac_hotspot_24_36.tar.gz/jdk-24+36/Contents/Home/" jdk-base)
-         :path "/Library/Java/JavaVirtualMachines/oracle-graalvm-24.0.2.jdk/Contents/Home"
+         :path (shell-command "mise where java@25")
          :version "24"
          :default t)))
     "List of JDK installations available for use by LSP servers and build tools.")

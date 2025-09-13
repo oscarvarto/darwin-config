@@ -85,6 +85,9 @@ $env.EMACSDIR = "~/.emacs.d"
 $env.DOOMDIR  = "~/.doom.d"
 $env.DOOMLOCALDIR = "~/.emacs.d/.local"
 
+# Ghostty terminfo location for proper terminal support in Emacs
+$env.TERMINFO_DIRS = $"($env.HOME)/.terminfo:/usr/share/terminfo"
+
 # Set Xcode developer directory to release version (forced rebuild)
 $env.DEVELOPER_DIR = "/Applications/Xcode.app/Contents/Developer"
 

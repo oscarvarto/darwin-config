@@ -11,26 +11,26 @@
 # Function to start Emacs with minimal configuration (fastest startup)
 emacs-minimal() {
     echo "🚀 Starting Emacs with minimal profile..."
-    DOOM_PROFILE=minimal emacs "$@"
+    DOOM_PROFILE=minimal "$HOME/.nix-profile/bin/emacs" "$@"
 }
 
 # Function to start Emacs with development profile (balanced)
 emacs-dev() {
     echo "⚡ Starting Emacs with development profile..."
-    DOOM_PROFILE=dev emacs "$@"
+    DOOM_PROFILE=dev "$HOME/.nix-profile/bin/emacs" "$@"
 }
 
 # Function to start Emacs with full profile (current setup)
 emacs-full() {
     echo "🔥 Starting Emacs with full profile..."
-    DOOM_PROFILE=full emacs "$@"
+    DOOM_PROFILE=full "$HOME/.nix-profile/bin/emacs" "$@"
 }
 
 # Function to start Emacs daemon with specific profile
 emacs-daemon() {
     local profile=${1:-full}
     echo "🌟 Starting Emacs daemon with $profile profile..."
-    DOOM_PROFILE=$profile emacs --daemon=doom-$profile
+    DOOM_PROFILE=$profile "$HOME/.nix-profile/bin/emacs" --daemon=doom-$profile
 }
 
 # Function to connect to specific daemon profile
@@ -38,7 +38,7 @@ emacs-client() {
     local profile=${1:-full}
     local socket_name="doom-$profile"
     echo "📡 Connecting to daemon: $socket_name"
-    emacsclient -s $socket_name -c "$@"
+    "$HOME/.nix-profile/bin/emacsclient" -s $socket_name -c "$@"
 }
 
 # =============================================================================
@@ -69,13 +69,13 @@ benchmark-emacs() {
     echo "🧪 Benchmarking all Emacs profiles..."
     
     echo "Testing minimal profile..."
-    time DOOM_PROFILE=minimal emacs --batch --eval "(message \"Minimal profile loaded\")"
+    time DOOM_PROFILE=minimal "$HOME/.nix-profile/bin/emacs" --batch --eval "(message \"Minimal profile loaded\")"
     
     echo "Testing dev profile..."
-    time DOOM_PROFILE=dev emacs --batch --eval "(message \"Dev profile loaded\")"
+    time DOOM_PROFILE=dev "$HOME/.nix-profile/bin/emacs" --batch --eval "(message \"Dev profile loaded\")"
     
     echo "Testing full profile..."
-    time DOOM_PROFILE=full emacs --batch --eval "(message \"Full profile loaded\")"
+    time DOOM_PROFILE=full "$HOME/.nix-profile/bin/emacs" --batch --eval "(message \"Full profile loaded\")"
 }
 
 # Function to show current profile

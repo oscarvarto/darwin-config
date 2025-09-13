@@ -1,4 +1,4 @@
 #!/usr/bin/env zsh
 
 # Start Emacs in terminal mode without daemon (equivalent to alias tt = emacs -nw)
-exec emacs -nw "$@"
+exec "$HOME/.nix-profile/bin/emacs" -nw "$@"

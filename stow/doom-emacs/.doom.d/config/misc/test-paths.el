@@ -38,7 +38,6 @@
 (test-path "JDKs base path" (my/get-path :jdks))
 (test-path "mmdc executable" (my/get-path :mmdc))
 (test-path "Org directory" (my/get-path :org))
-(test-path "MobileOrg directory" (my/get-path :mobileorg))
 
 ;; Test normalize path function
 (print-section-header "Path Normalization")

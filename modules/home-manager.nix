@@ -16,48 +16,9 @@ let
   workConfig = hostSettings.workConfig or {};
   workDirName = builtins.replaceStrings ["~/" "/**"] ["" ""] (workConfig.gitWorkDirPattern or "~/work/**");
   
-  # Emacs pinning system with hash management
-  pinFile = "/Users/${user}/.cache/emacs-git-pin";
-  hashFile = "/Users/${user}/.cache/emacs-git-pin-hash";
-  
-  isPinned = builtins.pathExists pinFile;
-  
-  pinnedCommit = if isPinned 
-    then builtins.replaceStrings ["\n"] [""] (builtins.readFile pinFile)
-    else null;
-    
-  pinnedHash = if isPinned && builtins.pathExists hashFile
-    then builtins.replaceStrings ["\n"] [""] (builtins.readFile hashFile)
-    else null;
-    
-  # Create emacs package - pinned or latest
-  emacsPackage = if isPinned && pinnedCommit != null && pinnedHash != null
-    then 
-      # Use pinned version with stored hash
-      (inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git.overrideAttrs (oldAttrs: {
-        version = "31.0.50-${builtins.substring 0 7 pinnedCommit}";
-        src = pkgs.fetchFromGitHub {
-          owner = "emacs-mirror";
-          repo = "emacs";
-          rev = pinnedCommit;
-          sha256 = pinnedHash;
-        };
-      }))
-    else 
-      # Use latest version from overlay (when not pinned or hash missing)
-      inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git;
-      
-  # Apply emacs configuration overrides
-  configuredEmacs = emacsPackage.override {
-    withNativeCompilation = true;
-    withImageMagick = true;
-    withWebP = true;
-    withTreeSitter = true;
-    withSQLite3 = true;
-    withMailutils = true;
-    # gnutls, librsvg, libxml2, little-cms2, and dynamic modules
-    # are enabled by default in recent builds
-  };
+  # Emacs pinning logic moved to separate module for modularity
+  emacsPinModule = import ./emacs-pinning.nix { inherit pkgs user inputs; };
+  configuredEmacs = emacsPinModule.configuredEmacs;
 in
 {
 
@@ -101,111 +62,7 @@ in
           inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default
           inputs.nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
           configuredEmacs
-          # Emacs pinning CLI tools
-          (pkgs.writeScriptBin "emacs-pin" ''
-            #!/usr/bin/env bash
-            # Pin emacs-git to current or specified commit
-            
-            set -euo pipefail
-            
-            COMMIT="''${1:-}"
-            CACHE_DIR="''${HOME}/.cache"
-            PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
-            HASH_FILE="''${CACHE_DIR}/emacs-git-pin-hash"
-            
-            # Create cache directory if it doesn't exist
-            mkdir -p "''${CACHE_DIR}"
-            
-            if [[ -z "''${COMMIT}" ]]; then
-              echo $'\U274C Please specify a commit hash: emacs-pin <commit-hash>'
-              echo "   You can find commits at: https://github.com/emacs-mirror/emacs/commits/master"
-              echo "   Example: emacs-pin abc123def456"
-              exit 1
-            fi
-            
-            # Validate commit hash format (basic check)
-            if [[ ! "''${COMMIT}" =~ ^[a-f0-9]{7,40}$ ]]; then
-              echo $'\U274C Invalid commit hash format: '"''${COMMIT}"
-              exit 1
-            fi
-            
-            echo $'\U1F50D Fetching hash for commit '"''${COMMIT}"$'...'
-            
-            # Use system-installed nix-prefetch-github
-            HASH_RESULT=$(nix-prefetch-github emacs-mirror emacs --rev "''${COMMIT}" 2>/dev/null)
-            HASH=$(echo "''${HASH_RESULT}" | grep '"hash"' | sed 's/.*"hash": "\([^"]*\)".*/\1/')
-            
-            if [[ -z "''${HASH}" || "''${HASH}" == "null" ]]; then
-              echo $'\U274C Failed to fetch hash for commit '"''${COMMIT}"
-              echo "   Please check that the commit exists in the emacs-mirror/emacs repository."
-              exit 1
-            fi
-            
-            # Save the commit hash and its corresponding SHA256
-            echo "''${COMMIT}" > "''${PIN_FILE}"
-            echo "''${HASH}" > "''${HASH_FILE}"
-            
-            echo $'\U1F4CC Pinned emacs-git to commit: '"''${COMMIT}"
-            echo $'\U1F511 Stored hash: '"''${HASH}"
-            echo $'\U1F4A1 Rebuild your configuration: nb && ns'
-          '')
-          
-          (pkgs.writeScriptBin "emacs-unpin" ''
-            #!/usr/bin/env bash
-            # Unpin emacs-git to use latest commit
-            
-            set -euo pipefail
-            
-            CACHE_DIR="''${HOME}/.cache"
-            PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
-            HASH_FILE="''${CACHE_DIR}/emacs-git-pin-hash"
-            
-            if [[ -f "''${PIN_FILE}" ]]; then
-              PINNED_COMMIT=$(cat "''${PIN_FILE}")
-              rm "''${PIN_FILE}"
-              [[ -f "''${HASH_FILE}" ]] && rm "''${HASH_FILE}"
-              echo $'\U1F513 Unpinned emacs-git from commit: '"''${PINNED_COMMIT}"
-              echo $'\U1F4A1 Rebuild your configuration: nb && ns'
-              echo "   This will use the latest emacs-git commit from the overlay."
-            else
-              echo $'\U2139\UFE0F emacs-git is not currently pinned'
-            fi
-          '')
-          
-          (pkgs.writeScriptBin "emacs-pin-status" ''
-            #!/usr/bin/env bash
-            # Show current emacs-git pinning status
-            
-            set -euo pipefail
-            
-            CACHE_DIR="''${HOME}/.cache"
-            PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
-            HASH_FILE="''${CACHE_DIR}/emacs-git-pin-hash"
-            
-            if [[ -f "''${PIN_FILE}" ]]; then
-              PINNED_COMMIT=$(cat "''${PIN_FILE}")
-              echo $'\U1F4CC emacs-git is pinned to commit: '"''${PINNED_COMMIT}"
-              echo $'\U1F517 View commit: https://github.com/emacs-mirror/emacs/commit/'"''${PINNED_COMMIT}"
-              
-              if [[ -f "''${HASH_FILE}" ]]; then
-                STORED_HASH=$(cat "''${HASH_FILE}")
-                echo $'\U1F511 Stored hash: '"''${STORED_HASH}"
-              else
-                echo $'\U26A0\UFE0F Warning: No hash file found - pinning may not work correctly'
-                echo "   Run: emacs-pin ''${PINNED_COMMIT} to fix"
-              fi
-            else
-              echo $'\U1F513 emacs-git is not pinned (using latest from overlay)'
-            fi
-            
-            # Show current emacs version if available
-            if command -v emacs >/dev/null 2>&1; then
-              echo ""
-              echo "Current emacs version:"
-              emacs --version | head -1
-            fi
-          '')
-        ];
+        ] ++ emacsPinModule.pinTools;
         file = sharedFiles // {
           
           # Automatic theme switcher script
@@ -227,6 +84,8 @@ in
           STARSHIP_CONFIG = "${config.home.homeDirectory}/.config/starship.toml";
           # Set Xcode developer directory to release version for GUI applications
           DEVELOPER_DIR = "/Applications/Xcode.app/Contents/Developer";
+          # Ghostty terminfo location for proper terminal support
+          TERMINFO_DIRS = "${config.home.homeDirectory}/.terminfo:/usr/share/terminfo";
           # Work configuration environment variables
           WORK_COMPANY_NAME = workConfig.companyName or "CompanyName";
           WORK_GIT_DIR_PATTERN = workConfig.gitWorkDirPattern or "~/work/**";
@@ -444,6 +303,7 @@ in
             };
           };
         };
+
         # direnv configuration
         direnv = {
           enable = true;
@@ -451,8 +311,6 @@ in
           enableZshIntegration = true;
           enableNushellIntegration = true;
         };
-        
-        # Fish shell configuration is now imported from fish-config.nix module
 
         # Zsh with enhanced Fish-like features
         zsh = {
@@ -473,6 +331,18 @@ in
           ];
         };
       } // (import ./shell-config.nix { inherit config pkgs lib; }).programs;
+
+      # Enable Emacs service with our configured package
+      services.emacs = {
+        enable = true;
+        package = configuredEmacs;
+        client = {
+          enable = true;
+          arguments = [ "-c" ];
+        };
+        defaultEditor = false;  # Don't set as EDITOR, we use nvim
+        startWithUserSession = true;
+      };
 
       # Marked broken Oct 20, 2022 check later to remove this
       # https://github.com/nix-community/home-manager/issues/3344

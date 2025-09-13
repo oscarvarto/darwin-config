@@ -1,4 +1,4 @@
 #!/usr/bin/env zsh
 
 # Start Emacs daemon with doom tag (equivalent to alias edd = emacs --daemon=doom)
-exec emacs --daemon=doom
+exec "$HOME/.nix-profile/bin/emacs" --daemon=doom

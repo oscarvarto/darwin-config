@@ -10,4 +10,5 @@
 # @raycast.icon ~/.local/share/img/icons/Emacs.icns
 # @raycast.iconDark ~/.local/share/img/icons/Emacs.icns
 
-~/.local/share/bin/emacsclient -nc -s /var/folders/f4/08zm_5ks36vc7tw43765qk580000gn/T/emacs501/doom "$@"
+# Use the default socket managed by home-manager service
+"$HOME/.nix-profile/bin/emacsclient" -nc "$@"

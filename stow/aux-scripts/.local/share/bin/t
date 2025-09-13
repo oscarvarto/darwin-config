@@ -1,9 +1,11 @@
 #!/usr/bin/env zsh
 
 # Terminal Emacs function
-socket_path=$(ensure-emacs-daemon)
-if [[ $? -ne 0 ]]; then
-    exit 1
+# Now using home-manager managed Emacs service with default socket
+
+# Ensure Emacs can find ghostty terminfo
+if [[ "$TERM" == "xterm-ghostty" ]]; then
+    export TERMINFO="$HOME/.terminfo"
 fi
 
-exec /opt/homebrew/bin/emacsclient -nw -s "$socket_path" "$@"
+exec "$HOME/.nix-profile/bin/emacsclient" -nw "$@"

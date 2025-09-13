@@ -8,10 +8,6 @@
 
 ;; Set to the location of your Org files on your local system
 (setq org-directory (my/get-path :org))
-;; Set to the name of the file where new notes will be stored
-(setq org-mobile-inbox-for-pull (expand-file-name "flagged.org" (my/get-path :org)))
-;; Set to <your Dropbox root directory>/MobileOrg.
-(setq org-mobile-directory (my/get-path :mobileorg))
 
 (require 'org)
 

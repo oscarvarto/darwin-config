@@ -112,7 +112,7 @@
         if test $status -ne 0
             return 1
         end
-        env SHELL=/bin/zsh /opt/homebrew/bin/emacsclient -nw -s "$socket_path" $argv
+        env SHELL=/bin/zsh ~/.nix-profile/bin/emacsclient -nw -s "$socket_path" $argv
       '';
       
       # GUI Emacs client function
@@ -121,7 +121,7 @@
         if test $status -ne 0
             return 1
         end
-        env SHELL=/bin/zsh /opt/homebrew/bin/emacsclient -nc -s "$socket_path" $argv
+        env SHELL=/bin/zsh ~/.nix-profile/bin/emacsclient -nc -s "$socket_path" $argv
       '';
       
       # Direct terminal Emacs (no daemon)

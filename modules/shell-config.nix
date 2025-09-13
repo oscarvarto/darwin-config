@@ -124,7 +124,7 @@ in
         export ALTERNATE_EDITOR=""
         export EDITOR="nvim"
         # VISUAL will use dynamic socket finding via ec function
-        export VISUAL="/opt/homebrew/bin/emacsclient -nc"
+        export VISUAL="$HOME/.nix-profile/bin/emacsclient -nc"
 
         # Load theme from cache file set by catppuccin theme switcher
         if [[ -f ~/.cache/zsh_theme ]]; then
@@ -238,13 +238,13 @@ in
         }
          
         alias tg="$EDITOR $HOME/.config/ghostty/config"
-        alias edd="emacs --daemon=doom"
-        alias eddr="doom run --daemon=doom"  # Alternative daemon start method
- 
+        # Emacs daemon is now managed by home-manager service
+        # No need for manual daemon management
         alias pke="pkill -9 Emacs"
         alias nz="nvim ~/.zshrc"
         alias gd="ghostty +show-config --default --docs"
         alias gp="git fetch --all -p; git pull; git submodule update --recursive"
+        # Doom sync commands (if still using Doom configuration)
         alias ds="doom sync --aot --gc -j \\$(nproc)"
         alias dup="doom sync -u --aot --gc -j \\$(nproc)"
         alias diff="difft"

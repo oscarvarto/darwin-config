@@ -31,43 +31,35 @@
 (defvar my/default-paths
   (let ((home (getenv "HOME")))
     `((:env . ,(expand-file-name ".emacs.d/.local/env" home))
-      (:dropbox . ,(expand-file-name 
-                    (cond 
+      (:dropbox . ,(expand-file-name
+                    (cond
                      ((eq my/platform 'macos) "Library/CloudStorage/Dropbox")
                      ((eq my/platform 'windows) "Dropbox")
                      (t "Dropbox"))
                     home))
-      (:onedrive . ,(expand-file-name 
-                     (cond 
-                      ((eq my/platform 'macos) "Library/CloudStorage/OneDrive-Personal")
+      (:onedrive . ,(expand-file-name
+                     (cond
                       ((eq my/platform 'windows) "OneDrive")
                       (t "OneDrive"))
                      home))
-      (:mmdc . ,(cond 
-                 ((eq my/platform 'macos) 
-                  (or (executable-find "mmdc") 
+      (:mmdc . ,(cond
+                 ((eq my/platform 'macos)
+                  (or (executable-find "mmdc")
                       (expand-file-name ".volta/bin/mmdc" home)))
                  ((eq my/platform 'windows)
-                  (or (executable-find "mmdc.cmd") 
+                  (or (executable-find "mmdc.cmd")
                       (executable-find "mmdc")))
                  (t (executable-find "mmdc"))))
-      (:jdks . 
-             ,(cond 
-               ((eq my/platform 'macos) 
-                 "/Library/Java/JavaVirtualMachines")
-               ((eq my/platform 'windows) 
-                (expand-file-name "AppData/Local/Coursier/Cache/arc" home))
+      (:jdks .
+             ,(cond
+               ((eq my/platform 'macos)
+                "/Library/Java/JavaVirtualMachines")
+               ((eq my/platform 'windows)
+                (expand-file-name "FIXME" home))
                ((eq my/platform 'linux)
-                (expand-file-name ".cache/coursier/arc" home))
-               (t (expand-file-name ".cache/coursier/arc" home))))
-      (:org . ,(expand-file-name "org" home))
-      (:mobileorg . ,(cond 
-                      ((eq my/platform 'macos)
-                       (expand-file-name "Library/CloudStorage/Dropbox/Apps/MobileOrg" home))
-                      (t
-                       (expand-file-name "Dropbox/Apps/MobileOrg" home))))
-      ;; Path for manually cloned EAF repo
-      (:eaf . ,(expand-file-name "git-repos/site-lisp/emacs-application-framework" home))))
+                (expand-file-name ".local/share/mise/installs/java" home))
+               (t (expand-file-name ".local/share/mise/installs/java" home))))
+      (:org . ,(expand-file-name "org" home))))
   "Association list of default paths used in configuration.")
 
 ;; Get the Doom private directory if available, otherwise use a fallback
@@ -143,4 +135,3 @@ NAMES can be a string or a list of strings."
 (provide 'my-paths)
 
 ;;; my-paths.el ends here
-

@@ -1340,68 +1340,34 @@ def "ns-nushell" [] {
     }
 }
 
-alias edd = with-env {SHELL: "/bin/zsh"} { emacs --daemon=doom }
+# Emacs daemon is now managed by home-manager service
+# No need for manual daemon management
 alias pke = pkill -9 Emacs
 
-def doom-socket [] {
-    let socket_file = (fd -ts doom $env.TMPDIR err> (std null-device) | default "")
-    
-    if ($socket_file | is-empty) {
-        return ""
-    }
-    
-    # Test if the socket is actually active by trying to connect
-    let test_result = (do { ^/opt/homebrew/bin/emacsclient -s $socket_file --eval "t" } | complete)
-    
-    if $test_result.exit_code == 0 {
-        $socket_file
-    } else {
-        # Socket file exists but is stale, remove it
-        rm -f $socket_file
-        ""
-    }
-}
-
-# Helper function to ensure daemon is running and return socket path
-def ensure-emacs-daemon [] {
-    mut socket_path = (doom-socket)
-    if ($socket_path | is-empty) {
-        print "Emacs daemon socket not found. Starting Emacs daemon first with: emacs --daemon=doom"
-        # Start Emacs daemon with zsh as SHELL for POSIX compatibility
-        with-env {SHELL: "/bin/zsh"} {
-            emacs --daemon=doom
-        }
-
-        # Wait for daemon to start and create socket
-        mut retries = 0
-        while ($socket_path | is-empty) and ($retries < 18) {
-            sleep 500ms
-            $socket_path = (doom-socket)
-            $retries = ($retries + 1)
-        }
-
-        if ($socket_path | is-empty) {
-            error make {msg: "Failed to start Emacs daemon or find socket after 9 seconds"}
-        }
-    }
-    $socket_path
-}
-
-# Terminal Emacs function
+# Terminal Emacs function - uses default socket from managed service
 def "t" [...args] {
-    let socket_path = (ensure-emacs-daemon)
     # Launch emacsclient with zsh as SHELL for POSIX compatibility
-    with-env {SHELL: "/bin/zsh"} {
-        ^/opt/homebrew/bin/emacsclient -nw -s $socket_path ...$args
+    # Ensure Emacs can find ghostty terminfo
+    let term_env = if ($env.TERM? | default "") == "xterm-ghostty" {
+        {
+            SHELL: "/bin/zsh",
+            TERMINFO: $"($env.HOME)/.terminfo",
+            TERMINFO_DIRS: $"($env.HOME)/.terminfo:/usr/share/terminfo"
+        }
+    } else {
+        {SHELL: "/bin/zsh"}
+    }
+    
+    with-env $term_env {
+        ^/Users/oscarvarto/.nix-profile/bin/emacsclient -nw ...$args
     }
 }
 
-# GUI Emacs client function
+# GUI Emacs client function - uses default socket from managed service
 def "e" [...args] {
-    let socket_path = (ensure-emacs-daemon)
     # Launch emacsclient with zsh as SHELL for POSIX compatibility
     with-env {SHELL: "/bin/zsh"} {
-        ^/opt/homebrew/bin/emacsclient -nc -s $socket_path ...$args
+        ^/Users/oscarvarto/.nix-profile/bin/emacsclient -nc ...$args
     }
 }
 

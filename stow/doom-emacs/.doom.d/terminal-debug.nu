@@ -14,7 +14,7 @@ def terminal-debug [] {
     # Test if we can connect to the Emacs daemon
     let socket_path = (doom-socket)
     if not ($socket_path | is-empty) {
-        let daemon_test = (do { ^/opt/homebrew/bin/emacsclient -s $socket_path --eval "t" } | complete)
+let daemon_test = (do { ^/Users/oscarvarto/.nix-profile/bin/emacsclient -s $socket_path --eval "t" } | complete)
         print $"   Emacs daemon: {if ($daemon_test.exit_code == 0) { '✅ Connected' } else { '❌ Connection failed' }}"
     } else {
         print $"   Emacs daemon: ❌ Not running"
@@ -23,7 +23,7 @@ def terminal-debug [] {
     # Test current terminal Emacs connectivity
     print ""
     print "🧪 Testing terminal Emacs connection..."
-    let test_result = (do { ^/opt/homebrew/bin/emacsclient -nw --eval "(message \"Terminal test successful\")" } | complete)
+let test_result = (do { ^/Users/oscarvarto/.nix-profile/bin/emacsclient -nw --eval "(message \"Terminal test successful\")" } | complete)
     if ($test_result.exit_code == 0) {
         print "✅ Terminal Emacs connection working!"
     } else {
