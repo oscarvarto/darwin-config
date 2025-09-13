@@ -27,14 +27,7 @@ in
     # Add terminfo to user packages - this makes it available without conflicts
     home.packages = [ ghosttyTerminfo ];
     
-    # Simple shell fallback - only if terminfo fails
-    programs.zsh.initContent = lib.mkAfter ''
-      # Simple Ghostty terminal compatibility fallback
-      if [[ "$TERM" == "xterm-ghostty" ]] && ! command -v infocmp >/dev/null 2>&1; then
-        export TERM="xterm-256color"
-      elif [[ "$TERM" == "xterm-ghostty" ]] && ! infocmp xterm-ghostty >/dev/null 2>&1; then
-        export TERM="xterm-256color"
-      fi
-    '';
+    # Note: Terminal compatibility fallback has been moved to shell-config.nix
+    # to avoid conflicts with multiple initContent definitions
   };
 }

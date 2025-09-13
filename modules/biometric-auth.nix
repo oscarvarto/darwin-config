@@ -15,6 +15,8 @@
 
   # Configure SSH to work with 1Password SSH agent
   programs.ssh = {
+    # Disable default config to avoid deprecation warning
+    enableDefaultConfig = false;
     # These settings help with 1Password SSH agent integration
     extraConfig = ''
       # 1Password SSH Agent Configuration

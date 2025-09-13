@@ -92,7 +92,7 @@ in
         ./home-activation-scripts.nix
         # ./fish-config.nix  # Commented out to reduce build overhead - using nushell/zsh
         inputs.catppuccin.homeModules.catppuccin
-        inputs.op-shell-plugins.hmModules.default
+        # inputs.op-shell-plugins.hmModules.default  # Removed - SSH agent integration sufficient
       ] ++ [ ./nushell ];
 
       home = {
@@ -261,15 +261,10 @@ in
       local.nushell.enable = true;  # Re-enabled to test if it causes fish config issue
 
       programs = {
-        # Issue: https://github.com/1Password/shell-plugins/issues/544
-        # Fix pending for approval: https://github.com/1Password/shell-plugins/pull/545
-        _1password-shell-plugins = {
-          # enable 1Password shell plugins for bash, zsh, fish
-          enable = true;
-          # the specified packages as well as 1Password CLI will be
-          # automatically installed and configured to use shell plugins
-          plugins = with pkgs; [ cachix gh glab ];
-        };
+        # 1Password shell plugins removed - SSH agent integration is sufficient
+        # SSH-based authentication works for GitHub/GitLab via 1Password SSH agent
+        # Manual `op` CLI commands available when direct credential access needed
+        # This eliminates the deprecated initExtra warning from upstream shell plugins
 
         atuin = {
           enable = true;
@@ -383,6 +378,8 @@ in
         # SSH configuration with 1Password SSH agent integration
         ssh = {
           enable = true;
+          # Disable default config to avoid deprecation warning
+          enableDefaultConfig = false;
           includes = [ "/Users/${user}/.ssh/config_external" ];
           
           # Configure 1Password SSH agent for biometric authentication
@@ -390,6 +387,12 @@ in
             # 1Password SSH Agent Configuration
             Host *
                 IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+                StrictHostKeyChecking ask
+                IdentitiesOnly no
+                ServerAliveInterval 60
+                ServerAliveCountMax 3
+                Compression no
+                UserKnownHostsFile ~/.ssh/known_hosts
           '';
           
           matchBlocks = {
@@ -422,15 +425,9 @@ in
               identityFile = [ "/Users/${user}/.ssh/id_ed25519_gitlab_work" ];
             };
             
-            # Global settings for all hosts
+            # Minimal global matchBlock required by home-manager when using extraConfig
             "*" = {
-              # These settings optimize 1Password SSH agent usage
-              serverAliveInterval = 60;
-              serverAliveCountMax = 3;
-              # Keep connection alive and prevent hanging
-              compression = false;
-              hashKnownHosts = false;
-              userKnownHostsFile = "/Users/${user}/.ssh/known_hosts";
+              # Keep this minimal to avoid API issues
             };
           };
         };

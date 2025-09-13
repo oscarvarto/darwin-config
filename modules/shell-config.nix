@@ -137,6 +137,13 @@ in
         if [[ -f ~/.cache/zellij_theme_config ]]; then
             source ~/.cache/zellij_theme_config
         fi
+        
+        # Ghostty terminal compatibility fallback (merged from terminal-support.nix)
+        if [[ "$TERM" == "xterm-ghostty" ]] && ! command -v infocmp >/dev/null 2>&1; then
+          export TERM="xterm-256color"
+        elif [[ "$TERM" == "xterm-ghostty" ]] && ! infocmp xterm-ghostty >/dev/null 2>&1; then
+          export TERM="xterm-256color"
+        fi
 
         # Use existing helper scripts for Emacs; avoid duplicating logic here
         alias t="$HOME/.local/share/bin/t"
