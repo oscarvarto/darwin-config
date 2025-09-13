@@ -758,15 +758,15 @@ A complete, modular Doom Emacs configuration with advanced features, language su
 # 1. Emacs is now managed via Nix packages and home-manager service
 # No need to manually install Emacs - it's included in the system configuration
 
-# 2. Deploy Doom configuration via stow
+# 2. Install Doom Emacs if not already installed
+if [[ ! -d ~/.emacs.d ]]; then
+  git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.emacs.d
+  ~/.emacs.d/bin/doom install
+fi
+
+# 3. Deploy Doom configuration via stow
 manage-stow-packages deploy doom-emacs
 # OR deploy all packages: manage-stow-packages deploy
-
-# 3. Install Doom if not already installed
-if [[ ! -d ~/.config/emacs ]]; then
-  git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs
-  ~/.config/emacs/bin/doom install
-fi
 
 # 4. Sync Doom with new configuration
 doom sync
@@ -787,7 +787,7 @@ emacs-service-toggle status
 ├── config/          # Modular configuration files
 │   ├── ai/          # AI tools (Tabnine, Copilot, etc.)
 │   ├── core/        # Core Emacs functionality
-│   ├── jvm/         # JVM languages (Java, Scala)
+│   ├── jvm/         # JVM languages (Java, Clojure, Kotlin)
 │   ├── languages/   # Programming language configurations
 │   ├── lsp/         # Language Server Protocol setup
 │   ├── misc/        # Miscellaneous configurations
@@ -795,6 +795,8 @@ emacs-service-toggle status
 │   └── writing/     # Writing and documentation tools
 ├── snippets/        # YASnippet templates
 └── docs/           # Configuration documentation
+
+Doom Emacs itself is installed at ~/.emacs.d/
 ```
 
 #### Key Features
@@ -813,8 +815,9 @@ emacs-service-toggle status
 | Command                       | Description                           |
 | ----------------------------- | ------------------------------------- |
 | `e [files...]`                | Open files in GUI Emacs (with daemon) |
-| `et`                          | Start Emacs in terminal                |
-| `edd`                         | Open current directory in Emacs       |
+| `t [files...]`                | Open files in terminal Emacs          |
+| `et`                          | Start Emacs in background             |
+| `edd`                         | Start Emacs daemon                    |
 | `emacsclient-gui`             | Launch Emacs GUI with macOS integration |
 | `emacs-service-toggle`        | Manage Emacs home-manager service     |
 | `emacs-pin [commit]`          | Pin Emacs to specific/current version |
@@ -855,15 +858,17 @@ git add . && git commit -m "Update Doom config"
 
 #### Language Support
 
-**Supported Languages:**
+**Actively Configured Languages:**
 
-- **Systems**: Rust, Go, C/C++, Zig
-- **JVM**: Java, Scala, Clojure, Kotlin
+- **Systems**: Rust, Go, C/C++
+- **JVM**: Java, Clojure, Kotlin (Scala support removed)
 - **Web**: TypeScript, JavaScript, HTML, CSS
-- **Data**: Python, R, SQL, JSON, YAML
-- **Markup**: Markdown, LaTeX, Org-mode
-- **Config**: Nix, TOML, INI, Dockerfile
-- **And many more...**
+- **Data**: Python, SQL, JSON, YAML
+- **Shell**: Bash, Fish, Nushell
+- **Markup**: Markdown, Org-mode
+- **Config**: Nix, TOML, YAML
+- **Mobile**: Swift
+- **Functional**: Emacs Lisp, Clojure
 
 #### Troubleshooting
 
@@ -871,7 +876,7 @@ git add . && git commit -m "Update Doom config"
 # Check configuration status
 manage-doom-config status
 
-# Validate elisp syntax
+# Validate elisp syntax (uses elisp-formatter.js)
 manage-doom-config validate
 
 # Diagnose issues
@@ -881,6 +886,9 @@ doom doctor
 manage-stow-packages remove doom-emacs
 manage-stow-packages deploy doom-emacs
 doom sync
+
+# If Doom commands are not found, add to PATH:
+export PATH="$HOME/.emacs.d/bin:$PATH"
 ```
 
 ### 🌟 Neovim (LazyVim) Configuration
