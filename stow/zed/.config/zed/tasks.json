@@ -60,15 +60,5 @@
     "label": "mvn test method",
     "command": "mvn -f pom.xml -Dtest=${ZED_STEM}#${ZED_SYMBOL} test",
     "working_directory": "${workspace_root}"
-  },
-  {
-    "label": "run main with bloop",
-    "name": "run-main",
-    "command": "./run-bloop-main.sh ${ZED_WORKTREE_ROOT} ${ZED_FILE} ${ZED_SYMBOL}",
-    "working_directory": "${workspace_root}",
-    "environment": {
-      "PATH": "${env.PATH}"
-    },
-    "tags": ["java-main"]
   }
 ]
