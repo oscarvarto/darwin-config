@@ -20,6 +20,7 @@ with pkgs;
   htop
   iftop
   jq
+  lazyjj
   (ripgrep.override {withPCRE2 = true;})
   nurl
   tree
