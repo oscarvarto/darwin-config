@@ -511,8 +511,8 @@ This approach ensures that while garbage collection won't remove pinned packages
 
 | Command                       | Description                                                      |
 | ----------------------------- | ---------------------------------------------------------------- |
-| `manage-aux-scripts deploy`   | Deploy all stow-managed scripts and configurations               |
-| `manage-aux-scripts remove`   | Remove all stow-managed symlinks                                 |
+| `manage-stow-packages deploy` | Deploy all stow-managed scripts and configurations               |
+| `manage-stow-packages remove` | Remove all stow-managed symlinks                                 |
 | `stow -t ~ PACKAGE`           | Deploy specific stow package (e.g., doom-emacs, raycast-scripts) |
 | `stow -D -t ~ PACKAGE`        | Remove specific stow package                                     |
 | `manage-cargo-tools install`  | Install/update Rust/Cargo tools from configuration               |
@@ -524,6 +524,12 @@ This approach ensures that while garbage collection won't remove pinned packages
 | Command                      | Description                                     |
 | ---------------------------- | ----------------------------------------------- |
 | `cleanup-intellij [project]` | Clean IntelliJ IDEA caches and fix broken state |
+| `emacs-pin [commit]`         | Pin Emacs to specific commit or current version |
+| `emacs-unpin`                | Unpin Emacs to use latest from overlay         |
+| `emacs-pin-diff`             | Show differences between pinned and latest Emacs |
+| `emacs-pin-status`           | Show current Emacs pinning status              |
+| `emacs-service-toggle`       | Toggle Emacs home-manager service              |
+| `emacsclient-gui`            | Launch Emacs GUI client with proper macOS integration |
 
 ## ✨ Key Features
 
@@ -536,6 +542,12 @@ This approach ensures that while garbage collection won't remove pinned packages
   - **pass**: Backup credential store (offline, GPG-encrypted)
   - **Unified CLI**: Single `secret` command for all credential systems
 - **📦 Package Management**: Nix packages + Homebrew integration
+- **✨ Emacs Integration**: Advanced Emacs configuration with:
+  - **Home-Manager Service**: Managed daemon with automatic startup
+  - **Version Pinning**: Pin Emacs to specific commits for stability
+  - **macOS Integration**: Proper window management and GUI support
+  - **Ghostty Terminal Support**: Full xterm-ghostty terminfo integration
+  - **Catppuccin Theming**: Unified theme management across applications
 - **🐚 Advanced Shell Configuration**: Choose between Nushell, Zsh, and Fish with:
   - **Consistent Experience**: Same aliases, PATH, and tools across both shells
   - **Smart Switching**: Easy shell changes via simple configuration updates
@@ -568,7 +580,7 @@ This repository uses **GNU Stow** to manage auxiliary scripts, dotfiles, and too
 cd ~/darwin-config/stow
 
 # Deploy all packages at once
-manage-aux-scripts deploy
+manage-stow-packages deploy
 
 # Deploy specific packages
 stow -t ~ doom-emacs      # Deploy Doom Emacs config
@@ -577,7 +589,7 @@ stow -t ~ aux-scripts     # Deploy utility scripts
 
 # Remove packages
 stow -D -t ~ doom-emacs   # Remove Doom Emacs config
-manage-aux-scripts remove # Remove all packages
+manage-stow-packages remove # Remove all packages
 ```
 
 ### Tool Management Scripts
@@ -739,16 +751,25 @@ A complete, modular Doom Emacs configuration with advanced features, language su
 #### Quick Setup
 
 ```bash
-# 1. Install Doom Emacs (if not already installed)
-git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.emacs.d/bin
-~/.emacs.d/bin/doom install
+# 1. Emacs is now managed via Nix packages and home-manager service
+# No need to manually install Emacs - it's included in the system configuration
 
-# 2. Deploy configuration via stow
-manage-aux-scripts deploy doom-emacs
-# OR deploy all packages: manage-aux-scripts deploy
+# 2. Deploy Doom configuration via stow
+manage-stow-packages deploy doom-emacs
+# OR deploy all packages: manage-stow-packages deploy
 
-# 3. Sync Doom with new configuration
+# 3. Install Doom if not already installed
+if [[ ! -d ~/.config/emacs ]]; then
+  git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs
+  ~/.config/emacs/bin/doom install
+fi
+
+# 4. Sync Doom with new configuration
 doom sync
+
+# 5. The Emacs daemon starts automatically via home-manager service
+# Check service status:
+emacs-service-toggle status
 ```
 
 #### Configuration Structure
@@ -788,8 +809,13 @@ doom sync
 | Command                       | Description                           |
 | ----------------------------- | ------------------------------------- |
 | `e [files...]`                | Open files in GUI Emacs (with daemon) |
-| `et`                          | Start Emacs in background             |
+| `et`                          | Start Emacs in terminal                |
 | `edd`                         | Open current directory in Emacs       |
+| `emacsclient-gui`             | Launch Emacs GUI with macOS integration |
+| `emacs-service-toggle`        | Manage Emacs home-manager service     |
+| `emacs-pin [commit]`          | Pin Emacs to specific/current version |
+| `emacs-unpin`                 | Use latest Emacs from overlay         |
+| `emacs-pin-status`            | Show current Emacs pinning status     |
 | `manage-doom-config status`   | Check configuration deployment status |
 | `manage-doom-config validate` | Validate all elisp files for syntax   |
 | `manage-doom-config sync`     | Validate config and run `doom sync`   |
@@ -848,14 +874,14 @@ manage-doom-config validate
 doom doctor
 
 # Re-deploy configuration
-manage-aux-scripts remove doom-emacs
-manage-aux-scripts deploy doom-emacs
+manage-stow-packages remove doom-emacs
+manage-stow-packages deploy doom-emacs
 doom sync
 ```
 
 ### 🌟 Neovim (LazyVim) Configuration
 
-A modern Neovim configuration based on LazyVim with sensible defaults and extensive plugin ecosystem.
+A modern Neovim configuration based on LazyVim with sensible defaults, extensive plugin ecosystem, and enhanced Lisp/Elisp support.
 
 #### Quick Setup
 
@@ -864,8 +890,8 @@ A modern Neovim configuration based on LazyVim with sensible defaults and extens
 
 # 2. Deploy LazyVim configuration
 cd ~/darwin-config/stow
-stow lazyvim
-# OR: manage-aux-scripts deploy lazyvim
+stow -t ~ lazyvim
+# OR: manage-stow-packages deploy lazyvim
 
 # 3. Start Neovim (plugins auto-install on first run)
 nvim
@@ -887,6 +913,8 @@ nvim
     └── plugins/     # Plugin configurations
         ├── nixd.lua        # Nix language support
         ├── python.lua      # Python development
+        ├── lisp.lua        # Lisp languages support
+        ├── elisp.lua       # Emacs Lisp specific support
         └── example.lua     # Plugin examples
 ```
 
@@ -899,6 +927,8 @@ nvim
 - **🎨 Modern UI**: Beautiful statusline, bufferline, themes
 - **⚡ Performance**: Lazy loading, fast startup
 - **🔧 Extensible**: Easy to add custom plugins and configurations
+- **👾 Lisp Support**: Enhanced support for Lisp dialects including Emacs Lisp
+- **🎯 Structural Editing**: Parinfer for automatic parenthesis management
 
 #### Available Commands
 
@@ -942,14 +972,14 @@ Both editor configurations use the stow system for deployment and management.
 
 ```bash
 # Deploy both editors
-manage-aux-scripts deploy
+manage-stow-packages deploy
 
 # Deploy specific editor
 stow -t ~ doom-emacs    # Deploy Doom Emacs config
 stow -t ~ lazyvim       # Deploy LazyVim config
 
 # Check deployment status
-manage-aux-scripts status
+manage-stow-packages status
 ```
 
 #### Removing Editor Configurations
@@ -960,7 +990,7 @@ stow -D -t ~ doom-emacs
 stow -D -t ~ lazyvim
 
 # Remove all stow packages
-manage-aux-scripts remove
+manage-stow-packages remove
 ```
 
 #### Benefits of Stow Management
@@ -988,7 +1018,7 @@ manage-aux-scripts remove
    ```
 
 3. **Add to management system:**
-   - Update `manage-aux-scripts` to include new package
+   - Update `manage-stow-packages` to include new package
    - Add documentation to package README.md
 
 ### 🎯 Editor Recommendations

@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a comprehensive macOS system configuration using Nix-Darwin and Home Manager with flakes. The repository configures an entire macOS development environment including packages, applications, shell configurations, editors, and secrets management.
 
+**Current Branch**: feature/emacs - Enhanced Emacs integration with home-manager service, version pinning, and improved macOS support.
+
 ## Essential Build Commands
 
 ### Core Development Workflow
@@ -15,6 +17,14 @@ This is a comprehensive macOS system configuration using Nix-Darwin and Home Man
 - `./apps/aarch64-darwin/build-switch` - Direct build and switch script
 - `./apps/aarch64-darwin/rollback` - Rollback to previous generation
 - `nix run .#apply` - Apply user/secrets repo placeholders into files
+
+### Emacs Management (NEW in feature/emacs)
+- `emacs-pin [commit]` - Pin Emacs to specific commit or current version
+- `emacs-unpin` - Unpin Emacs to use latest from overlay
+- `emacs-pin-diff` - Show differences between pinned and latest Emacs
+- `emacs-pin-status` - Show current Emacs pinning status
+- `emacs-service-toggle` - Toggle Emacs home-manager service on/off
+- `emacsclient-gui` - Launch Emacs GUI with proper macOS integration
 
 ### Validation & Development
 - `nix flake check` - Validate flake configuration and evaluate checks
@@ -53,7 +63,7 @@ This is a comprehensive macOS system configuration using Nix-Darwin and Home Man
 - `ghostty-config font "Font Name"` - Switch terminal font
 
 ### GNU Stow Package Management
-- `manage-stow-packages deploy` - Deploy all stow packages (**CRITICAL**: renamed from manage-aux-scripts)
+- `manage-stow-packages deploy` - Deploy all stow packages
 - `manage-stow-packages remove` - Remove all stow packages
 - `stow -t ~ PACKAGE` - Deploy specific package (**CRITICAL**: -t ~ target flag is REQUIRED)
 - `stow -D -t ~ PACKAGE` - Remove specific package (**CRITICAL**: always include -t ~ flag)
@@ -76,6 +86,10 @@ modules/                      # Modular configuration components
 ├── secrets.nix               # Age-encrypted secrets with agenix
 ├── enhanced-secrets.nix      # Unified secret management CLI
 ├── secure-credentials.nix    # 1Password/pass integration
+├── emacs-pinning.nix         # Emacs version pinning system (NEW)
+├── terminal-support.nix      # Ghostty terminfo support (NEW)
+├── biometric-auth.nix        # macOS biometric authentication (NEW)
+├── starship.toml             # Starship prompt with Catppuccin theme
 └── [various other modules]
 ```
 
@@ -126,8 +140,14 @@ modules/                      # Modular configuration components
 
 ### Editor Configurations (via Stow)
 - **Doom Emacs**: `stow/doom-emacs/` - Complete modular configuration
-- **LazyVim**: `stow/lazyvim/` - Modern Neovim setup
+  - Now uses Emacs from Nix packages with home-manager service
+  - Removed Scala support, focused on core languages
+  - Enhanced terminal compatibility (Ghostty support)
+- **LazyVim**: `stow/lazyvim/` - Modern Neovim setup with Lisp/Elisp support
+  - Added `lisp.lua` and `elisp.lua` plugins for Lisp editing
+  - Parinfer support for structural editing
 - Font cycling with F8, LSP support, AI integration
+- Emacs service managed by home-manager with proper daemon support
 
 ### Tool Management Scripts (via Stow)
 - `manage-cargo-tools install` - Rust tools from cargo-tools.toml
@@ -171,10 +191,11 @@ modules/                      # Modular configuration components
 - Complex configurations managed via GNU Stow
 - Symlinks from `stow/package-name/` to home directory
 - **CRITICAL**: Always use `stow -t ~` syntax - the target directory flag is REQUIRED
-- **CRITICAL**: `manage-stow-packages` (renamed from `manage-aux-scripts`)
+- **CRITICAL**: Use `manage-stow-packages` command (not manage-aux-scripts)
 - Use for editors, scripts, tool configurations that are difficult to embed in Nix
 - Package structure mirrors home directory layout for automatic placement
 - Most scripts symlinked to `~/.local/share/bin`
+- **NEW**: Enhanced Emacs service scripts in `stow/nix-scripts/`
 
 ### PATH Override Strategy
 - `modules/path-config.nix` takes absolute precedence
@@ -189,6 +210,13 @@ modules/                      # Modular configuration components
 2. If GUI app, add to Homebrew casks (`modules/casks.nix`)
 3. If CLI tool, add to Homebrew brews (`modules/brews.nix`)
 4. Rebuild with `nb && ns`
+
+### Managing Emacs Versions
+1. Pin to current: `emacs-pin` (no args)
+2. Pin to specific: `emacs-pin abc123def`
+3. Check status: `emacs-pin-status`
+4. Unpin for latest: `emacs-unpin`
+5. Rebuild: `nb && ns`
 
 ### Adding New Host/User
 1. `nix run .#add-host -- --hostname HOST --user USER`

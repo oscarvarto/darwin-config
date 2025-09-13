@@ -49,12 +49,20 @@ Common commands (macOS aarch64-darwin)
   - detect-fonts ghostty-font # Get recommended font name for terminals
   - ghostty-config font "Font Name" # Switch terminal font
 
+- Emacs management (feature/emacs branch enhancements)
+  - emacs-pin [commit]      # Pin Emacs to specific commit or current version
+  - emacs-unpin            # Unpin Emacs to use latest from overlay
+  - emacs-pin-diff         # Show differences between pinned and latest
+  - emacs-pin-status       # Show current Emacs pinning status
+  - emacs-service-toggle   # Toggle Emacs home-manager service on/off
+  - emacsclient-gui        # Launch Emacs GUI with proper macOS integration
+
 - GNU Stow package management
   - cd ~/darwin-config/stow                 # Navigate to stow directory
-  - manage-stow-packages deploy             # Deploy all stow packages (renamed from manage-aux-scripts)
+  - manage-stow-packages deploy             # Deploy all stow packages
   - manage-stow-packages remove             # Remove all stow packages  
-  - stow -t ~ PACKAGE                       # Deploy specific package
-  - stow -D -t ~ PACKAGE                    # Remove specific package
+  - stow -t ~ PACKAGE                       # Deploy specific package (CRITICAL: -t ~ is required)
+  - stow -D -t ~ PACKAGE                    # Remove specific package (CRITICAL: -t ~ is required)
   - manage-cargo-tools install              # Install Rust/Cargo tools
   - manage-nodejs-tools install             # Install Node.js toolchain
   - manage-dotnet-tools install             # Install .NET SDK and tools
@@ -86,11 +94,15 @@ High-level architecture
     - secrets.nix: agenix-encrypted secrets configuration
     - secure-credentials.nix: 1Password/pass integration for git credentials
     - enhanced-secrets.nix: unified secret management CLI tools
+    - emacs-pinning.nix: Emacs version pinning system (NEW)
+    - terminal-support.nix: Ghostty terminfo support (NEW)
+    - biometric-auth.nix: macOS biometric authentication (NEW)
     - files.nix: immutable non-Nix files
     - overlays.nix: Nix package overlays
     - shell-config.nix: shell configuration and aliases
     - zsh-darwin.nix: Zsh shell configuration
     - fish-config.nix: Fish shell configuration
+    - starship.toml: Starship prompt with Catppuccin theme
     - dock/: macOS Dock configuration
     - nushell/: Nushell shell configuration
     - scripts/nu/: Nushell utility scripts
@@ -104,11 +116,19 @@ High-level architecture
   - Creates symlinks from home directory to repository files
   - Main packages: aux-scripts, doom-emacs, lazyvim, raycast-scripts, nix-scripts
   - Tool management: cargo-tools, nodejs-tools, dotnet-tools
+  - Enhanced LazyVim: Added Lisp/Elisp support via lisp.lua and elisp.lua plugins
+  - Emacs service scripts: emacs-service-toggle, emacsclient-gui in nix-scripts
   - Most scripts symlinked to ~/.local/share/bin (see stow/README.md for details)
   - Package structure mirrors home directory layout for automatic placement
 
 Repo-specific practices and conventions
 - Use the nb and ns aliases to build and switch the macOS configuration when available.
+- Emacs management (feature/emacs branch):
+  - Emacs is now provided via Nix packages with home-manager service management
+  - Version pinning system allows locking to specific commits for stability
+  - Home-manager service ensures daemon is always running with proper environment
+  - macOS integration via emacsclient-gui for proper window management
+  - Ghostty terminal support with xterm-ghostty terminfo
 - GNU Stow package deployment approach:
   - Scripts intended for Raycast should live in ~/.local/share/bin; this repo achieves that with stow packages
   - Use 'manage-stow-packages deploy' for initial setup or 'stow -t ~ PACKAGE' for individual packages
