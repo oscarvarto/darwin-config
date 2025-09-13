@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+#
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Launch Emacs GUI
+# @raycast.mode silent
+#
+# Optional parameters:
+# @raycast.packageName Emacs
+# @raycast.icon ~/.local/share/img/icons/Emacs.icns
+# @raycast.iconDark ~/.local/share/img/icons/Emacs.icns
+
+# Enhanced emacsclient wrapper for proper macOS window recognition
+# This ensures the Emacs window is properly recognized by macOS window management
+# while maintaining connection to the home-manager daemon
+
+EMACSCLIENT="$HOME/.nix-profile/bin/emacsclient"
+
+# Check if server is running
+if ! "$EMACSCLIENT" -e "(emacs-version)" >/dev/null 2>&1; then
+    echo "Emacs daemon not running. Waiting for home-manager service..." >&2
+    # Give the home-manager service a moment to start
+    sleep 2
+    
+    # Check again
+    if ! "$EMACSCLIENT" -e "(emacs-version)" >/dev/null 2>&1; then
+        echo "Error: Emacs daemon still not available" >&2
+        exit 1
+    fi
+fi
+
+# Create a new frame with proper focus and raise it
+# The -c flag creates a new frame (window)
+# The -n flag means don't wait for the server to return
+"$EMACSCLIENT" \
+    --create-frame \
+    --no-wait \
+    "$@"
+
+# Immediately raise and focus the frame using emacsclient itself
+# This avoids launching a new Emacs instance
+"$EMACSCLIENT" --eval '(progn
+  (select-frame-set-input-focus (selected-frame))
+  (raise-frame)
+  (when (fboundp (quote ns-do-applescript))
+    (ns-do-applescript "tell application \"System Events\" to set frontmost of process \"Emacs\" to true"))
+  t)' >/dev/null 2>&1 || true
+
+# Alternative focus method using System Events directly
+# This avoids the "tell application Emacs" which might launch a new instance
+osascript <<EOF 2>/dev/null || true
+tell application "System Events"
+    set emacsProcList to every process whose name contains "Emacs"
+    if length of emacsProcList > 0 then
+        set frontmost of item 1 of emacsProcList to true
+    end if
+end tell
+EOF
