@@ -1,8 +1,20 @@
 #!/bin/bash
 # ns-ghostty-safe - Safe wrapper for nix build-switch that detects ghostty 
 # to prevent the terminal from quitting unexpectedly
+# Supports -v flag for verbose output
 
 set -euo pipefail
+
+# Parse arguments for verbose flag
+VERBOSE=false
+ARGS=()
+for arg in "$@"; do
+    if [[ "$arg" == "-v" ]]; then
+        VERBOSE=true
+    else
+        ARGS+=("$arg")
+    fi
+done
 
 # Colors for output
 GREEN='\033[1;32m'
@@ -90,7 +102,23 @@ if detect_ghostty; then
     
     # Run build-switch directly without nohup to avoid zellij conflicts
     echo -e "${YELLOW}Running nix build-switch directly (zellij-safe mode)...${NC}"
-    if nix run .#build-switch "$@"; then
+    if $VERBOSE; then
+        if [[ ${#ARGS[@]} -gt 0 ]]; then
+            build_result=$(nix run .#build-switch -- --verbose "${ARGS[@]}")
+        else
+            build_result=$(nix run .#build-switch -- --verbose)
+        fi
+        build_exit=$?
+    else
+        if [[ ${#ARGS[@]} -gt 0 ]]; then
+            build_result=$(nix run .#build-switch -- "${ARGS[@]}")
+        else
+            build_result=$(nix run .#build-switch)
+        fi
+        build_exit=$?
+    fi
+    
+    if [[ $build_exit -eq 0 ]]; then
       echo -e "${GREEN}Switch to new generation complete!${NC}"
       echo -e "${GREEN}✅ Nix build-switch completed successfully!${NC}"
       echo -e "${BLUE}🔍 Press any key to continue...${NC}"
@@ -112,7 +140,19 @@ if detect_ghostty; then
       echo -e "${YELLOW}Building system configuration...${NC}"
       
       # Use nohup to prevent ghostty from closing
-      nohup nix run .#build-switch > nohup_build.log 2>&1
+      if [[ "$VERBOSE" == "true" ]]; then
+        if [[ ${#ARGS[@]} -gt 0 ]]; then
+          nohup nix run .#build-switch -- --verbose "${ARGS[@]}" > nohup_build.log 2>&1
+        else
+          nohup nix run .#build-switch -- --verbose > nohup_build.log 2>&1
+        fi
+      else
+        if [[ ${#ARGS[@]} -gt 0 ]]; then
+          nohup nix run .#build-switch -- "${ARGS[@]}" > nohup_build.log 2>&1
+        else
+          nohup nix run .#build-switch > nohup_build.log 2>&1
+        fi
+      fi
       build_exit=$?
       
       if [[ $build_exit -ne 0 ]]; then
@@ -149,7 +189,19 @@ else
   cd ~/darwin-config || exit 1
   
   echo -e "${YELLOW}Running nix build-switch...${NC}"
-  nix run .#build-switch "$@"
+  if $VERBOSE; then
+    if [[ ${#ARGS[@]} -gt 0 ]]; then
+      nix run .#build-switch -- --verbose "${ARGS[@]}"
+    else
+      nix run .#build-switch -- --verbose
+    fi
+  else
+    if [[ ${#ARGS[@]} -gt 0 ]]; then
+      nix run .#build-switch -- "${ARGS[@]}"
+    else
+      nix run .#build-switch
+    fi
+  fi
   
   echo -e "${GREEN}Switch to new generation complete!${NC}"
 fi

@@ -3,7 +3,6 @@ _:
 [
   # Development Tools
   # "homebrew/cask/docker"
-  "jimeh/emacs-builds/emacs-app-nightly"
   "chatgpt"
   "chromedriver"
   "claude"

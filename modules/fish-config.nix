@@ -39,15 +39,47 @@
         rg -p --glob '!node_modules/*' $argv
       '';
 
-      # Nix shortcuts (matching current setup)
+      # Nix shortcuts (matching current setup) - enhanced with -v flag support
       nb = ''
+        set -l verbose false
+        set -l args
+        
+        for arg in $argv
+            if test "$arg" = "-v"
+                set verbose true
+            else
+                set args $args $arg
+            end
+        end
+        
         pushd ~/darwin-config > /dev/null
-        nix run .#build
+        
+        if test $verbose = true
+            nix run .#build --verbose $args
+        else
+            nix run .#build $args
+        end
+        
         popd > /dev/null
       '';
       
       ns = ''
-        ns-ghostty-safe
+        set -l verbose false
+        set -l args
+        
+        for arg in $argv
+            if test "$arg" = "-v"
+                set verbose true
+            else
+                set args $args $arg
+            end
+        end
+        
+        if test $verbose = true
+            ns-ghostty-safe -v $args
+        else
+            ns-ghostty-safe $args
+        end
       '';
 
       # Terminal and editor shortcuts (matching current zsh aliases)

@@ -103,9 +103,6 @@
 (my/load-config 'obsidian 'writing)
 (my/load-config 'org 'writing)
 
-;;; External application interfaces
-(my/load-config 'eaf 'misc)
-
 ;;; Load project cleanup configuration after all other modules
 ;; This ensures that projectile, treemacs, and other modules are fully loaded
 ;; before we set up cleanup hooks and timers

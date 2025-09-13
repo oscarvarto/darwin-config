@@ -32,17 +32,44 @@ in
   nix = {
     settings = {
       trusted-users = [ "@admin" "${user}" ];
-      substituters = [ "https://nix-community.cachix.org" "https://cache.nixos.org"];
+      substituters = [ 
+        "https://nix-community.cachix.org" 
+        "https://cache.nixos.org"
+        # Add emacs-overlay cache for pre-built Emacs binaries
+        "https://emacs-ci.cachix.org"
+      ];
       trusted-public-keys = [
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "emacs-ci.cachix.org-1:B5FVOrxhXXrOL0S+tQ7USrThNT2ag4G+BWZZbaaDtwM="
       ];
 
+      # Maximize build performance 
+      max-jobs = "auto";        # Use all available CPU cores
+      cores = 0;                # Use all available logical cores for each job
+      max-substitution-jobs = 16;  # Increase parallel downloads
+      
+      # Memory optimization - allow large builds with plenty of RAM
+      max-silent-time = 3600;   # 1 hour timeout for silent builds (Emacs compilation)
+      timeout = 7200;           # 2 hour total timeout for long builds
+      
+      # Sandbox and build optimizations
+      sandbox = true;
+      build-cores = 0;          # Use all cores for building (same as cores but explicit)
+      
       warn-dirty = true;
       # produces linking issues when updating on macOS
       # https://github.com/NixOS/nix/issues/7273
       auto-optimise-store = false;
+      
+      # Fix locale issues in nix builds - ensure consistent locale environment
+      extra-sandbox-paths = [];
     };
+    
+    # Set locale variables for nix daemon and builds
+    daemonIOLowPriority = true;
+    # daemonCPUSchedPolicy is deprecated, using daemonProcessType instead
+    # daemonProcessType = "background"; # Alternative option if needed
 
     gc = {
       automatic = true;
@@ -71,20 +98,20 @@ in
   # Biometric authentication configuration (main setting is below in security.pam.services)
   
   # Environment variables for 1Password integration with multiple vaults
-  # and homebrew compiler configuration for emacs-plus@31 compatibility (temporarily commented out)
   environment.variables = {
     OP_BIOMETRIC_UNLOCK_ENABLED = "true";
     OP_VAULT_PERSONAL = "Personal";
     OP_VAULT_WORK = "Work";
-    # Temporarily commented out - emacs-plus@31 specific variables
-    # Force homebrew to use gcc-15 for emacs-plus@31 build to fix libgccjit issues on macOS 26
-    # HOMEBREW_CC = "gcc-15";
-    # HOMEBREW_CXX = "g++-15";
-    # SDK configuration for gcc-15 to find macOS frameworks and headers
-    # SDKROOT = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk";
-    # MACOSX_DEPLOYMENT_TARGET = "26.0";
-    # LIBRARY_PATH for gcc-15 libgccjit compatibility
-    # LIBRARY_PATH = "/opt/homebrew/opt/gcc/lib/gcc/15:/opt/homebrew/opt/libgccjit/lib/gcc/15:/opt/homebrew/opt/gcc/lib/gcc/15/gcc/aarch64-apple-darwin25/15";
+    # Fix locale issues in nix builds by setting locale environment variables
+    # These variables ensure that all Nix builds use consistent locale settings
+    LANG = "en_US.UTF-8";
+    LC_ALL = "en_US.UTF-8";
+    LC_COLLATE = "en_US.UTF-8";
+    LC_CTYPE = "en_US.UTF-8";
+    LC_MESSAGES = "en_US.UTF-8";
+    LC_MONETARY = "en_US.UTF-8";
+    LC_NUMERIC = "en_US.UTF-8";
+    LC_TIME = "en_US.UTF-8";
   };
   
 
@@ -208,50 +235,6 @@ in
     };
   };
 
-  # Temporarily commented out - emacs-plus@31 specific configuration
-  # Set HOMEBREW_CC to use gcc-15 for emacs-plus@31 compatibility
-  # launchd.user.agents.setHomebrewCCVar = {
-  #   serviceConfig = {
-  #     Label = "org.nixos.setHomebrewCCVar";
-  #     ProgramArguments = [
-  #       "/bin/launchctl"
-  #       "setenv"
-  #       "HOMEBREW_CC"
-  #       "gcc-15"
-  #     ];
-  #     RunAtLoad = true;
-  #   };
-  # };
-
-  # Temporarily commented out - emacs-plus@31 specific configuration
-  # Set HOMEBREW_CXX to use g++-15 for emacs-plus@31 compatibility
-  # launchd.user.agents.setHomebrewCXXVar = {
-  #   serviceConfig = {
-  #     Label = "org.nixos.setHomebrewCXXVar";
-  #     ProgramArguments = [
-  #       "/bin/launchctl"
-  #       "setenv"
-  #       "HOMEBREW_CXX"
-  #       "g++-15"
-  #     ];
-  #     RunAtLoad = true;
-  #   };
-  # };
-
-  # Temporarily commented out - emacs-plus@31 specific configuration
-  # Set SDKROOT for gcc-15 to find macOS SDK
-  # launchd.user.agents.setSDKRootVar = {
-  #   serviceConfig = {
-  #     Label = "org.nixos.setSDKRootVar";
-  #     ProgramArguments = [
-  #       "/bin/launchctl"
-  #       "setenv"
-  #       "SDKROOT"
-  #       "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
-  #     ];
-  #     RunAtLoad = true;
-  #   };
-  # };
 
   # Set MACOSX_DEPLOYMENT_TARGET for gcc-15
   launchd.user.agents.setMacOSXDeploymentTargetVar = {

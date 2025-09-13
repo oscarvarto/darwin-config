@@ -29,13 +29,6 @@
       (error
        (message "Treesit failed for %s: %s" major-mode (error-message-string err))))))
 
-;; Use Doom variables for paths if available, otherwise keep original logic
-;; (add-to-list 'tree-sitter-load-path (expand-file-name "tree-sitter" doom-cache-dir))
-;; (add-to-list 'tree-sitter-load-path (expand-file-name "straight/build-30.1/tree-sitter-langs/bin/" doom-local-dir))
-;; Original paths:
-;; (add-to-list 'tree-sitter-load-path "/Users/oscarvarto/.emacs.d/.local/cache/tree-sitter/")
-;; (add-to-list 'tree-sitter-load-path "/Users/oscarvarto/.emacs.d/.local/straight/build-30.1/tree-sitter-langs/bin/")
-
 (use-package treesit
   :config
   ;; Set a safer default font-lock level

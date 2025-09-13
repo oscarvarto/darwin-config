@@ -10,7 +10,7 @@ in
       enable = true;
       enableNushellIntegration = true;
       enableZshIntegration = true;
-      enableFishIntegration = true;
+      enableFishIntegration = false;  # Disabled for faster builds - using nushell/zsh
     };
 
     # direnv is now managed directly in home-manager.nix to avoid conflicts
@@ -18,7 +18,7 @@ in
     fzf = {
       enable = true;
       enableZshIntegration = true;
-      enableFishIntegration = true;
+      enableFishIntegration = false;  # Disabled for faster builds - using nushell/zsh
     };
 
     # Consolidated zsh configuration for macOS
@@ -241,8 +241,37 @@ in
         alias ds="doom sync --aot --gc -j \\$(nproc)"
         alias dup="doom sync -u --aot --gc -j \\$(nproc)"
         alias diff="difft"
-        alias nb="pushd \\$HOME/darwin-config > /dev/null; nix run .#build; popd > /dev/null"
-        alias ns="ns-ghostty-safe"
+        nb() {
+            local verbose=false
+            if [[ "$1" == "-v" ]]; then
+                verbose=true
+                shift
+            fi
+            
+            pushd "$HOME/darwin-config" > /dev/null
+            
+            if $verbose; then
+                nix run .#build -- --verbose "$@"
+            else
+                nix run .#build -- "$@"
+            fi
+            
+            popd > /dev/null
+        }
+        
+        ns() {
+            local verbose=false
+            if [[ "$1" == "-v" ]]; then
+                verbose=true
+                shift
+            fi
+            
+            if $verbose; then
+                ns-ghostty-safe -v "$@"
+            else
+                ns-ghostty-safe "$@"
+            fi
+        }
         
         # Claude Code integration - Shift+Enter key binding
         # Function to handle Claude Code prompt submission

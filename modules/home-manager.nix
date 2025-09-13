@@ -15,6 +15,43 @@ let
   # Work configuration - extract pattern without '/**' suffix for directory name
   workConfig = hostSettings.workConfig or {};
   workDirName = builtins.replaceStrings ["~/" "/**"] ["" ""] (workConfig.gitWorkDirPattern or "~/work/**");
+  
+  # Emacs pinning system
+  pinFile = "/Users/oscarvarto/.cache/emacs-git-pin";
+  isPinned = builtins.pathExists pinFile;
+  pinnedCommit = if isPinned 
+    then builtins.readFile pinFile
+    else null;
+    
+  # Create emacs package - pinned or latest
+  emacsPackage = if isPinned && pinnedCommit != null
+    then 
+      # Use pinned version
+      (inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git.overrideAttrs (oldAttrs: {
+        version = "31.0.50-${builtins.substring 0 7 pinnedCommit}";
+        src = pkgs.fetchFromGitHub {
+          owner = "emacs-mirror";
+          repo = "emacs";
+          rev = pinnedCommit;
+          # This will need to be updated when first pinning - the build will fail with the correct hash
+          sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; 
+        };
+      }))
+    else 
+      # Use latest version from overlay
+      inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git;
+      
+  # Apply emacs configuration overrides
+  configuredEmacs = emacsPackage.override {
+    withNativeCompilation = true;
+    withImageMagick = true;
+    withWebP = true;
+    withTreeSitter = true;
+    withSQLite3 = true;
+    withMailutils = true;
+    # gnutls, librsvg, libxml2, little-cms2, and dynamic modules
+    # are enabled by default in recent builds
+  };
 in
 {
 
@@ -47,7 +84,7 @@ in
       imports = [
         ./git-security-scripts.nix
         ./home-activation-scripts.nix
-        ./fish-config.nix
+        # ./fish-config.nix  # Commented out to reduce build overhead - using nushell/zsh
         inputs.catppuccin.homeModules.catppuccin
         inputs.op-shell-plugins.hmModules.default
       ] ++ [ ./nushell ];
@@ -55,10 +92,90 @@ in
       home = {
         enableNixpkgsReleaseCheck = false;
         packages = (pkgs.callPackage ./packages.nix {}) ++ [
-          # Add neovim-nightly from overlay
-          inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.neovim
-          # Add nixd nightly from flake input
+          inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default
           inputs.nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
+          configuredEmacs
+          # Emacs pinning CLI tools
+          (pkgs.writeScriptBin "emacs-pin" ''
+            #!/usr/bin/env bash
+            # Pin emacs-git to current or specified commit
+            
+            set -euo pipefail
+            
+            COMMIT="''${1:-}"
+            CACHE_DIR="''${HOME}/.cache"
+            PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
+            
+            # Create cache directory if it doesn't exist
+            mkdir -p "''${CACHE_DIR}"
+            
+            if [[ -z "''${COMMIT}" ]]; then
+              # Get the current commit from emacs-overlay
+              echo $'\U1F50D Fetching current emacs-git commit...'
+              # This is a simplified version - in practice you might want to query the overlay
+              echo $'\U274C Please specify a commit hash: emacs-pin <commit-hash>'
+              echo "   You can find commits at: https://github.com/emacs-mirror/emacs/commits/master"
+              exit 1
+            fi
+            
+            # Validate commit hash format (basic check)
+            if [[ ! "''${COMMIT}" =~ ^[a-f0-9]{7,40}$ ]]; then
+              echo $'\U274C Invalid commit hash format: '"''${COMMIT}"
+              exit 1
+            fi
+            
+            # Save the commit hash
+            echo "''${COMMIT}" > "''${PIN_FILE}"
+            echo $'\U1F4CC Pinned emacs-git to commit: '"''${COMMIT}"
+            echo $'\U1F4A1 You need to rebuild your configuration: nb && ns'
+            echo "   Note: The first build might fail with a hash mismatch."
+            echo "   If it does, copy the correct hash from the error and update the configuration."
+          '')
+          
+          (pkgs.writeScriptBin "emacs-unpin" ''
+            #!/usr/bin/env bash
+            # Unpin emacs-git to use latest commit
+            
+            set -euo pipefail
+            
+            CACHE_DIR="''${HOME}/.cache"
+            PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
+            
+            if [[ -f "''${PIN_FILE}" ]]; then
+              PINNED_COMMIT=$(cat "''${PIN_FILE}")
+              rm "''${PIN_FILE}"
+              echo $'\U1F513 Unpinned emacs-git from commit: '"''${PINNED_COMMIT}"
+              echo $'\U1F4A1 You need to rebuild your configuration: nb && ns'
+              echo "   This will use the latest emacs-git commit from the overlay."
+            else
+              echo $'\U2139\UFE0F emacs-git is not currently pinned'
+            fi
+          '')
+          
+          (pkgs.writeScriptBin "emacs-pin-status" ''
+            #!/usr/bin/env bash
+            # Show current emacs-git pinning status
+            
+            set -euo pipefail
+            
+            CACHE_DIR="''${HOME}/.cache"
+            PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
+            
+            if [[ -f "''${PIN_FILE}" ]]; then
+              PINNED_COMMIT=$(cat "''${PIN_FILE}")
+              echo $'\U1F4CC emacs-git is pinned to commit: '"''${PINNED_COMMIT}"
+              echo $'\U1F517 View commit: https://github.com/emacs-mirror/emacs/commit/'"''${PINNED_COMMIT}"
+            else
+              echo $'\U1F513 emacs-git is not pinned (using latest from overlay)'
+            fi
+            
+            # Show current emacs version if available
+            if command -v emacs >/dev/null 2>&1; then
+              echo ""
+              echo "Current emacs version:"
+              emacs --version | head -1
+            fi
+          '')
         ];
         file = sharedFiles // {
           
@@ -130,7 +247,7 @@ in
           daemon.enable = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
-          enableFishIntegration = true;
+          enableFishIntegration = false;  # Disabled for faster builds - using nushell/zsh
           settings = {
             # General settings
             auto_sync = true;
@@ -167,7 +284,7 @@ in
         mise = {
           enable = true;
           enableZshIntegration = true;
-          enableFishIntegration = true;
+          enableFishIntegration = false;  # Disabled for faster builds - using nushell/zsh
           enableNushellIntegration = true;
         };
 
@@ -175,7 +292,7 @@ in
           enable = true;
           enableZshIntegration = true;
           enableNushellIntegration = true;
-          enableFishIntegration = true;
+          enableFishIntegration = false;  # Disabled for faster builds - using nushell/zsh
           settings = fromTOML(builtins.readFile ./starship.toml);
         };
 
@@ -188,7 +305,7 @@ in
           enable = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
-          enableFishIntegration = true;
+          enableFishIntegration = false;  # Disabled for faster builds - using nushell/zsh
           settings = {
             mgr = {
               ratio = [1 3 4];
@@ -200,7 +317,7 @@ in
           enable = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
-          enableFishIntegration = true;
+          enableFishIntegration = false;  # Disabled for faster builds - using nushell/zsh
         };
 
         # Git configuration

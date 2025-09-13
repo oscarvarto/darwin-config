@@ -1048,15 +1048,27 @@ alias ds = doom sync --aot --gc -j (nproc)
 alias dup = doom sync -u --aot --gc -j (nproc)
 alias sdup = doom sync -u --aot --gc -j (nproc) --rebuild
 
-# Nix shortcuts
-def nb [] {
+# Nix shortcuts - enhanced with -v flag support
+def nb [...args] {
+    let verbose = ($args | any {|arg| $arg == "-v"})
+    let filtered_args = ($args | where {|arg| $arg != "-v"})
+    
     dirs add ~/darwin-config
-    nix run .#build
+    
+    if $verbose {
+        nix run .#build --verbose ...$filtered_args
+    } else {
+        nix run .#build ...$filtered_args
+    }
+    
     dirs drop
 }
 
 # ns function - nushell-native implementation with ghostty/zellij compatibility
+# Enhanced with -v flag support for verbose output
 def "ns" [...args] {
+    let verbose = ($args | any {|arg| $arg == "-v"})
+    let filtered_args = ($args | where {|arg| $arg != "-v"})
     # Colors for output
     let GREEN = (ansi green_bold)
     let YELLOW = (ansi yellow_bold)
@@ -1138,10 +1150,18 @@ def "ns" [...args] {
             # Run build-switch directly without nohup to avoid zellij conflicts
             print $"($YELLOW)Running nix build-switch directly \(zellij-safe mode\)...($NC)"
             try {
-                if ($args | length) > 0 {
-                    nix run .#build-switch ...$args
+                if $verbose {
+                    if ($filtered_args | length) > 0 {
+                        nix run .#build-switch --verbose ...$filtered_args
+                    } else {
+                        nix run .#build-switch --verbose
+                    }
                 } else {
-                    nix run .#build-switch
+                    if ($filtered_args | length) > 0 {
+                        nix run .#build-switch ...$filtered_args
+                    } else {
+                        nix run .#build-switch
+                    }
                 }
                 print $"($GREEN)Switch to new generation complete!($NC)"
                 print $"($GREEN)✅ Nix build-switch completed successfully!($NC)"
@@ -1164,10 +1184,18 @@ def "ns" [...args] {
             try {
                 print $"($YELLOW)Building system configuration...($NC)"
                 
-                if ($args | length) > 0 {
-                    nix run .#build-switch ...$args
+                if $verbose {
+                    if ($filtered_args | length) > 0 {
+                        nix run .#build-switch --verbose ...$filtered_args
+                    } else {
+                        nix run .#build-switch --verbose
+                    }
                 } else {
-                    nix run .#build-switch
+                    if ($filtered_args | length) > 0 {
+                        nix run .#build-switch ...$filtered_args
+                    } else {
+                        nix run .#build-switch
+                    }
                 }
                 
                 print $"($GREEN)Switch to new generation complete!($NC)"
@@ -1184,10 +1212,18 @@ def "ns" [...args] {
         
         print $"($YELLOW)Running nix build-switch...($NC)"
         try {
-            if ($args | length) > 0 {
-                nix run .#build-switch ...$args
+            if $verbose {
+                if ($filtered_args | length) > 0 {
+                    nix run .#build-switch --verbose ...$filtered_args
+                } else {
+                    nix run .#build-switch --verbose
+                }
             } else {
-                nix run .#build-switch
+                if ($filtered_args | length) > 0 {
+                    nix run .#build-switch ...$filtered_args
+                } else {
+                    nix run .#build-switch
+                }
             }
             
             print $"($GREEN)Switch to new generation complete!($NC)"

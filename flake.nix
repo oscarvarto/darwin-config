@@ -33,15 +33,6 @@
       url = "github:homebrew/homebrew-core";
       flake = false;
     };
-    # Temporarily commented out - switch back when upstream issues are resolved
-    # homebrew-emacs-plus = {
-    #   url = "github:d12frosted/homebrew-emacs-plus";
-    #   flake = false;
-    # };
-    homebrew-emacs-builds = {
-      url = "github:jimeh/homebrew-emacs-builds";
-      flake = false;
-    };
     neovim-nightly-overlay = {
       url = "github:nix-community/neovim-nightly-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -62,6 +53,10 @@
       url = "git+ssh://git@github.com/oscarvarto/nix-secrets.git";
       flake = false;
     };
+    emacs-overlay = {
+      url = "github:nix-community/emacs-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs = { self,
               nixpkgs,
@@ -74,13 +69,12 @@
               homebrew-bundle,
               homebrew-cask,
               homebrew-core,
-              # homebrew-emacs-plus,  # Temporarily commented out
-              homebrew-emacs-builds,
               neovim-nightly-overlay,
               nix-homebrew,
               nixd-ls,
               op-shell-plugins,
               secrets,
+              emacs-overlay,
               } @inputs:
     let
       # Supported systems (macOS only)
@@ -130,7 +124,7 @@
           #!/usr/bin/env bash
           PATH=${nixpkgs.legacyPackages.${system}.git}/bin:$PATH
           echo "Running ${scriptName} for ${system}"
-          exec ${self}/apps/${system}/${scriptName}
+          exec ${self}/apps/${system}/${scriptName} "$@"
         '')}/bin/${scriptName}";
       };
       
@@ -212,8 +206,6 @@
                 "homebrew/homebrew-core" = homebrew-core;
                 "homebrew/homebrew-cask" = homebrew-cask;
                 "homebrew/homebrew-bundle" = homebrew-bundle;
-                # "d12frosted/homebrew-emacs-plus" = homebrew-emacs-plus;  # Temporarily commented out
-                "jimeh/homebrew-emacs-builds" = homebrew-emacs-builds;
               };
               mutableTaps = true;
               autoMigrate = true;
