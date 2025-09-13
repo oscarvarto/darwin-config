@@ -1,19 +1,23 @@
 return {
-  -- Simple Emacs Lisp support without server integration
+  -- Simple Emacs Lisp support - formatting and syntax checking only
   {
-    "nvim-lua/plenary.nvim",
-    config = function()
-      -- Helper function to format Elisp using your elisp-formatter
+    "LazyVim/LazyVim",
+    opts = function(_, opts)
+      -- Helper function to format Elisp using elisp-formatter
       local function format_elisp_buffer()
         local file = vim.fn.expand("%:p")
         if file and file ~= "" then
-          local cmd = string.format("elisp-formatter.js elisp '%s'", file)
-          local result = vim.fn.system(cmd)
-          if vim.v.shell_error == 0 then
-            vim.cmd("edit!") -- Reload the file
-            vim.notify("Elisp buffer formatted successfully", vim.log.levels.INFO)
+          if vim.fn.executable("elisp-formatter.js") == 1 then
+            local cmd = string.format("elisp-formatter.js elisp '%s'", file)
+            local result = vim.fn.system(cmd)
+            if vim.v.shell_error == 0 then
+              vim.cmd("edit!") -- Reload the file
+              vim.notify("Elisp buffer formatted successfully", vim.log.levels.INFO)
+            else
+              vim.notify("Elisp formatting failed: " .. result, vim.log.levels.ERROR)
+            end
           else
-            vim.notify("Elisp formatting failed: " .. result, vim.log.levels.ERROR)
+            vim.notify("elisp-formatter.js not found in PATH", vim.log.levels.WARN)
           end
         end
       end
@@ -22,12 +26,16 @@ return {
       local function check_elisp_syntax()
         local file = vim.fn.expand("%:p")
         if file and file ~= "" then
-          local cmd = string.format("elisp-formatter.js check '%s'", file)
-          local result = vim.fn.system(cmd)
-          if vim.v.shell_error == 0 then
-            vim.notify("Elisp syntax is valid", vim.log.levels.INFO)
+          if vim.fn.executable("elisp-formatter.js") == 1 then
+            local cmd = string.format("elisp-formatter.js check '%s'", file)
+            local result = vim.fn.system(cmd)
+            if vim.v.shell_error == 0 then
+              vim.notify("Elisp syntax is valid", vim.log.levels.INFO)
+            else
+              vim.notify("Elisp syntax errors: " .. result, vim.log.levels.WARN)
+            end
           else
-            vim.notify("Elisp syntax errors: " .. result, vim.log.levels.WARN)
+            vim.notify("elisp-formatter.js not found in PATH", vim.log.levels.WARN)
           end
         end
       end
@@ -39,11 +47,11 @@ return {
       -- Create user commands
       vim.api.nvim_create_user_command("ElispFormat", function()
         format_elisp_buffer()
-      end, {})
+      end, { desc = "Format Elisp buffer using elisp-formatter" })
 
       vim.api.nvim_create_user_command("ElispCheck", function()
         check_elisp_syntax()
-      end, {})
+      end, { desc = "Check Elisp syntax using elisp-formatter" })
     end,
   },
 

@@ -1,6 +1,6 @@
 # Lisp Language Support for LazyVim
 
-This configuration adds comprehensive support for Lisp family languages in Neovim using LazyVim, with special emphasis on Emacs Lisp integration with your Doom Emacs setup.
+This configuration adds comprehensive support for Lisp family languages in Neovim using LazyVim, with simple and dependency-free Emacs Lisp support.
 
 ## Supported Languages
 
@@ -20,11 +20,12 @@ This configuration adds comprehensive support for Lisp family languages in Neovi
 - **Conjure** - Interactive REPL evaluation for multiple Lisp dialects
 
 ### Emacs Lisp Specific Features
-- **Doom Emacs integration** - Direct interaction with running Emacs instance
-- **elisp-formatter integration** - Uses your custom elisp-formatter.js tool
-- **Auto-formatting on save** - Keeps your Elisp code properly formatted
-- **Syntax validation** - Real-time checking of Elisp code structure
-- **Documentation lookup** - Access Emacs help system from within Neovim
+- **Dependency-Free** - No external dependencies required (no Emacs, emacsclient, or nelisp)
+- **Code Formatting** - Uses your custom elisp-formatter.js tool for consistent formatting
+- **Syntax Validation** - Real-time syntax checking with elisp-formatter
+- **Auto-formatting on Save** - Automatic code formatting when you save files (optional)
+- **Vim Syntax Highlighting** - Clean syntax highlighting using Vim's built-in elisp support
+- **Tree-sitter Free** - Avoids tree-sitter conflicts by using traditional syntax highlighting
 
 ## Key Bindings
 
@@ -49,13 +50,10 @@ This configuration adds comprehensive support for Lisp family languages in Neovi
 ### Emacs Lisp Specific Bindings
 - `<localleader>cf` - Format buffer with elisp-formatter
 - `<localleader>cc` - Check syntax with elisp-formatter
-- `<localleader>dr` - Reload Doom Emacs configuration
-- `<localleader>ds` - Sync Doom Emacs configuration
 
 ## User Commands
 
 ### Emacs Lisp Commands
-- `:ElispEval [code]` - Evaluate Elisp code in running Emacs
 - `:ElispFormat` - Format current buffer using elisp-formatter
 - `:ElispCheck` - Check syntax of current buffer
 
@@ -68,7 +66,7 @@ vim.g.elisp_auto_format = false
 ```
 
 ### Parinfer Mode
-Parinfer is set to "smart" mode by default. You can change this in the configuration:
+Parinfer is set to "smart" mode by default for other Lisp dialects. You can change this in the configuration:
 - `"indent"` - Indentation drives structure
 - `"paren"` - Parentheses drive structure  
 - `"smart"` - Intelligent hybrid mode (recommended)
@@ -76,8 +74,6 @@ Parinfer is set to "smart" mode by default. You can change this in the configura
 ## Requirements
 
 ### System Dependencies
-- **Emacs** - Required for Emacs Lisp evaluation and documentation
-- **emacsclient** - For communicating with running Emacs instance
 - **elisp-formatter.js** - Your custom Elisp formatter (already installed)
 - **clojure-lsp** - LSP server for Clojure (installed via Mason)
 - **clj-kondo** - Clojure linter (installed via Mason)
