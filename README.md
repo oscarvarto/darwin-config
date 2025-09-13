@@ -1534,6 +1534,7 @@ flake.nix              # Main flake with inputs, hostConfigs, and apps
 │   ├── secrets.nix        # Age-encrypted secrets configuration
 │   ├── secure-credentials.nix # 1Password/pass integration
 │   ├── enhanced-secrets.nix   # Unified secret management CLI
+│   ├── overlays.nix       # Nixpkgs configuration (no custom overlays)
 │   ├── dock/              # macOS Dock configuration
 │   ├── nushell/           # Nushell shell configuration
 │   ├── elisp-formatter/   # Emacs Lisp formatting tool
@@ -1542,12 +1543,11 @@ flake.nix              # Main flake with inputs, hostConfigs, and apps
 │   ├── configure-user.sh  # User/hostname configuration
 │   ├── add-host.sh        # Add new host to flake
 │   └── setup-*-secrets.sh # Secrets management scripts
-├── stow/              # GNU Stow packages for dotfiles
-│   ├── raycast-scripts/   # Raycast automation scripts
-│   ├── nix-scripts/       # Nix-related utilities
-│   ├── doom-emacs/        # Doom Emacs configuration
-│   └── .../               # Various tool configurations
-└── overlays/          # Nix package overlays
+└── stow/              # GNU Stow packages for dotfiles
+    ├── raycast-scripts/   # Raycast automation scripts
+    ├── nix-scripts/       # Nix-related utilities
+    ├── doom-emacs/        # Doom Emacs configuration
+    └── .../               # Various tool configurations
 ```
 
 ## 📖 Documentation
