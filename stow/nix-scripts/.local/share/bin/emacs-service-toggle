@@ -1,0 +1,205 @@
+#!/usr/bin/env bash
+
+# Script to toggle home-manager Emacs service on macOS
+# Useful for troubleshooting Emacs configuration issues
+
+set -euo pipefail
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Get the launchd service name
+SERVICE_NAME="org.nix-community.home.emacs"
+PLIST_PATH="$HOME/Library/LaunchAgents/${SERVICE_NAME}.plist"
+
+# Function to print colored messages
+print_msg() {
+    local color=$1
+    local msg=$2
+    echo -e "${color}${msg}${NC}"
+}
+
+# Function to check service status
+check_status() {
+    if launchctl list | grep -q "$SERVICE_NAME"; then
+        local status=$(launchctl list | grep "$SERVICE_NAME" | awk '{print $1}')
+        if [[ "$status" == "-" ]]; then
+            echo "stopped"
+        else
+            echo "running"
+        fi
+    else
+        echo "not-loaded"
+    fi
+}
+
+# Function to stop the service
+stop_service() {
+    print_msg "$YELLOW" "🛑 Stopping Emacs service..."
+    
+    # First, try to unload the service
+    if [[ -f "$PLIST_PATH" ]]; then
+        launchctl unload "$PLIST_PATH" 2>/dev/null || true
+    fi
+    
+    # Kill any running Emacs daemon processes
+    pkill -f "emacs.*--daemon" 2>/dev/null || true
+    pkill -f "Emacs.app" 2>/dev/null || true
+    
+    # Wait a moment for processes to terminate
+    sleep 2
+    
+    # Force kill if still running
+    pkill -9 -f "emacs.*--daemon" 2>/dev/null || true
+    pkill -9 -f "Emacs.app" 2>/dev/null || true
+    
+    print_msg "$GREEN" "✅ Emacs service stopped"
+}
+
+# Function to start the service
+start_service() {
+    print_msg "$YELLOW" "🚀 Starting Emacs service..."
+    
+    if [[ ! -f "$PLIST_PATH" ]]; then
+        print_msg "$RED" "❌ Service plist not found at $PLIST_PATH"
+        print_msg "$YELLOW" "💡 Try rebuilding your Darwin configuration with: ns"
+        return 1
+    fi
+    
+    launchctl load "$PLIST_PATH"
+    
+    # Wait for the service to start
+    sleep 2
+    
+    if [[ "$(check_status)" == "running" ]]; then
+        print_msg "$GREEN" "✅ Emacs service started successfully"
+    else
+        print_msg "$RED" "⚠️  Service may not have started properly. Check logs with:"
+        print_msg "$BLUE" "   log show --predicate 'process == \"emacs\"' --last 5m"
+    fi
+}
+
+# Function to restart the service
+restart_service() {
+    stop_service
+    sleep 1
+    start_service
+}
+
+# Function to show service info
+show_info() {
+    local status=$(check_status)
+    
+    print_msg "$BLUE" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    print_msg "$BLUE" "  Emacs Service Information"
+    print_msg "$BLUE" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    case "$status" in
+        "running")
+            print_msg "$GREEN" "📍 Status: Running"
+            ;;
+        "stopped")
+            print_msg "$YELLOW" "📍 Status: Stopped (loaded but not running)"
+            ;;
+        "not-loaded")
+            print_msg "$RED" "📍 Status: Not loaded"
+            ;;
+    esac
+    
+    if [[ -f "$PLIST_PATH" ]]; then
+        print_msg "$GREEN" "📄 Plist: Found at $PLIST_PATH"
+    else
+        print_msg "$RED" "📄 Plist: Not found"
+    fi
+    
+    # Check for running Emacs processes
+    local emacs_procs=$(pgrep -f "emacs" 2>/dev/null | wc -l | tr -d ' ')
+    if [[ "$emacs_procs" -gt 0 ]]; then
+        print_msg "$BLUE" "🔧 Running Emacs processes: $emacs_procs"
+        echo ""
+        ps aux | grep -E "[e]macs" | head -5
+    else
+        print_msg "$BLUE" "🔧 No Emacs processes running"
+    fi
+    
+    print_msg "$BLUE" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+}
+
+# Function to show usage
+show_usage() {
+    cat << EOF
+Usage: $(basename "$0") [COMMAND]
+
+Manage the home-manager Emacs service on macOS.
+
+Commands:
+  status    Show current service status
+  start     Start the Emacs service
+  stop      Stop the Emacs service
+  restart   Restart the Emacs service
+  info      Show detailed service information
+  help      Show this help message
+
+Examples:
+  $(basename "$0") status    # Check if service is running
+  $(basename "$0") stop      # Stop service for troubleshooting
+  $(basename "$0") start     # Start service after fixing config
+  $(basename "$0") restart   # Quick restart
+
+Note: After making changes to Emacs configuration, you may need to:
+  1. Stop the service: $(basename "$0") stop
+  2. Rebuild Darwin config: ns
+  3. Start the service: $(basename "$0") start
+
+EOF
+}
+
+# Main script logic
+main() {
+    local cmd="${1:-help}"
+    
+    case "$cmd" in
+        status)
+            local status=$(check_status)
+            case "$status" in
+                "running")
+                    print_msg "$GREEN" "✅ Emacs service is running"
+                    ;;
+                "stopped")
+                    print_msg "$YELLOW" "⏸️  Emacs service is stopped"
+                    ;;
+                "not-loaded")
+                    print_msg "$RED" "❌ Emacs service is not loaded"
+                    ;;
+            esac
+            ;;
+        start)
+            start_service
+            ;;
+        stop)
+            stop_service
+            ;;
+        restart)
+            restart_service
+            ;;
+        info)
+            show_info
+            ;;
+        help|--help|-h)
+            show_usage
+            ;;
+        *)
+            print_msg "$RED" "❌ Unknown command: $cmd"
+            echo ""
+            show_usage
+            exit 1
+            ;;
+    esac
+}
+
+# Run the main function
+main "$@"
