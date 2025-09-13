@@ -16,29 +16,35 @@ let
   workConfig = hostSettings.workConfig or {};
   workDirName = builtins.replaceStrings ["~/" "/**"] ["" ""] (workConfig.gitWorkDirPattern or "~/work/**");
   
-  # Emacs pinning system
-  pinFile = "/Users/oscarvarto/.cache/emacs-git-pin";
+  # Emacs pinning system with hash management
+  pinFile = "/Users/${user}/.cache/emacs-git-pin";
+  hashFile = "/Users/${user}/.cache/emacs-git-pin-hash";
+  
   isPinned = builtins.pathExists pinFile;
+  
   pinnedCommit = if isPinned 
-    then builtins.readFile pinFile
+    then builtins.replaceStrings ["\n"] [""] (builtins.readFile pinFile)
+    else null;
+    
+  pinnedHash = if isPinned && builtins.pathExists hashFile
+    then builtins.replaceStrings ["\n"] [""] (builtins.readFile hashFile)
     else null;
     
   # Create emacs package - pinned or latest
-  emacsPackage = if isPinned && pinnedCommit != null
+  emacsPackage = if isPinned && pinnedCommit != null && pinnedHash != null
     then 
-      # Use pinned version
+      # Use pinned version with stored hash
       (inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git.overrideAttrs (oldAttrs: {
         version = "31.0.50-${builtins.substring 0 7 pinnedCommit}";
         src = pkgs.fetchFromGitHub {
           owner = "emacs-mirror";
           repo = "emacs";
           rev = pinnedCommit;
-          # This will need to be updated when first pinning - the build will fail with the correct hash
-          sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; 
+          sha256 = pinnedHash;
         };
       }))
     else 
-      # Use latest version from overlay
+      # Use latest version from overlay (when not pinned or hash missing)
       inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git;
       
   # Apply emacs configuration overrides
@@ -105,16 +111,15 @@ in
             COMMIT="''${1:-}"
             CACHE_DIR="''${HOME}/.cache"
             PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
+            HASH_FILE="''${CACHE_DIR}/emacs-git-pin-hash"
             
             # Create cache directory if it doesn't exist
             mkdir -p "''${CACHE_DIR}"
             
             if [[ -z "''${COMMIT}" ]]; then
-              # Get the current commit from emacs-overlay
-              echo $'\U1F50D Fetching current emacs-git commit...'
-              # This is a simplified version - in practice you might want to query the overlay
               echo $'\U274C Please specify a commit hash: emacs-pin <commit-hash>'
               echo "   You can find commits at: https://github.com/emacs-mirror/emacs/commits/master"
+              echo "   Example: emacs-pin abc123def456"
               exit 1
             fi
             
@@ -124,12 +129,25 @@ in
               exit 1
             fi
             
-            # Save the commit hash
+            echo $'\U1F50D Fetching hash for commit '"''${COMMIT}"$'...'
+            
+            # Use system-installed nix-prefetch-github
+            HASH_RESULT=$(nix-prefetch-github emacs-mirror emacs --rev "''${COMMIT}" 2>/dev/null)
+            HASH=$(echo "''${HASH_RESULT}" | grep '"hash"' | sed 's/.*"hash": "\([^"]*\)".*/\1/')
+            
+            if [[ -z "''${HASH}" || "''${HASH}" == "null" ]]; then
+              echo $'\U274C Failed to fetch hash for commit '"''${COMMIT}"
+              echo "   Please check that the commit exists in the emacs-mirror/emacs repository."
+              exit 1
+            fi
+            
+            # Save the commit hash and its corresponding SHA256
             echo "''${COMMIT}" > "''${PIN_FILE}"
+            echo "''${HASH}" > "''${HASH_FILE}"
+            
             echo $'\U1F4CC Pinned emacs-git to commit: '"''${COMMIT}"
-            echo $'\U1F4A1 You need to rebuild your configuration: nb && ns'
-            echo "   Note: The first build might fail with a hash mismatch."
-            echo "   If it does, copy the correct hash from the error and update the configuration."
+            echo $'\U1F511 Stored hash: '"''${HASH}"
+            echo $'\U1F4A1 Rebuild your configuration: nb && ns'
           '')
           
           (pkgs.writeScriptBin "emacs-unpin" ''
@@ -140,12 +158,14 @@ in
             
             CACHE_DIR="''${HOME}/.cache"
             PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
+            HASH_FILE="''${CACHE_DIR}/emacs-git-pin-hash"
             
             if [[ -f "''${PIN_FILE}" ]]; then
               PINNED_COMMIT=$(cat "''${PIN_FILE}")
               rm "''${PIN_FILE}"
+              [[ -f "''${HASH_FILE}" ]] && rm "''${HASH_FILE}"
               echo $'\U1F513 Unpinned emacs-git from commit: '"''${PINNED_COMMIT}"
-              echo $'\U1F4A1 You need to rebuild your configuration: nb && ns'
+              echo $'\U1F4A1 Rebuild your configuration: nb && ns'
               echo "   This will use the latest emacs-git commit from the overlay."
             else
               echo $'\U2139\UFE0F emacs-git is not currently pinned'
@@ -160,11 +180,20 @@ in
             
             CACHE_DIR="''${HOME}/.cache"
             PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
+            HASH_FILE="''${CACHE_DIR}/emacs-git-pin-hash"
             
             if [[ -f "''${PIN_FILE}" ]]; then
               PINNED_COMMIT=$(cat "''${PIN_FILE}")
               echo $'\U1F4CC emacs-git is pinned to commit: '"''${PINNED_COMMIT}"
               echo $'\U1F517 View commit: https://github.com/emacs-mirror/emacs/commit/'"''${PINNED_COMMIT}"
+              
+              if [[ -f "''${HASH_FILE}" ]]; then
+                STORED_HASH=$(cat "''${HASH_FILE}")
+                echo $'\U1F511 Stored hash: '"''${STORED_HASH}"
+              else
+                echo $'\U26A0\UFE0F Warning: No hash file found - pinning may not work correctly'
+                echo "   Run: emacs-pin ''${PINNED_COMMIT} to fix"
+              fi
             else
               echo $'\U1F513 emacs-git is not pinned (using latest from overlay)'
             fi

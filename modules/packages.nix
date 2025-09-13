@@ -26,6 +26,9 @@ with pkgs;
   unrar
   unzip
   fd
+  
+  # Nix development tools
+  nix-prefetch-github  # For emacs pinning system
 
   # Table-like output tools (nushell-like experience)
   procs        # Modern replacement for ps with table output
