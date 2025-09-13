@@ -26,7 +26,7 @@ OPTIONS:
     --dry-run          Show what would be changed without making changes
 
 SUPPORTED APPLICATIONS:
-    • Starship (shell prompt)
+    • Starship (shell prompt) - Automatically managed by Nix Catppuccin module
     • Atuin (shell history)
     • Zellij (terminal multiplexer)
     • Ghostty (terminal emulator) - Live config reload without restart
@@ -103,8 +103,7 @@ show_status() {
     
     # Starship
     if [[ -f "$HOME/.config/starship.toml" ]]; then
-        starship_theme=$(grep "^palette = " "$HOME/.config/starship.toml" | sed "s/palette = '\(.*\)'/\1/" || echo "unknown")
-        echo "   Starship: $starship_theme"
+        echo "   Starship: Managed by Nix Catppuccin (automatic theme switching)"
     else
         echo "   Starship: not configured"
     fi
@@ -235,11 +234,9 @@ fi
 # Set theme variables
 if [[ "$APPEARANCE" == "dark" ]]; then
     CATPPUCCIN_FLAVOR="macchiato"
-    STARSHIP_PALETTE="catppuccin_mocha"  # Starship still uses mocha for dark mode
     BAT_THEME="ansi"
 else
     CATPPUCCIN_FLAVOR="latte"
-    STARSHIP_PALETTE="catppuccin_latte"
     BAT_THEME="GitHub"
 fi
 
@@ -258,21 +255,8 @@ fi
 log "🎨 Catppuccin flavor: $CATPPUCCIN_FLAVOR"
 log ""
 
-# Update starship configuration
-log "⭐ Updating Starship prompt theme..."
-STARSHIP_CONFIG="$HOME/.config/starship.toml"
-if [[ -f "$STARSHIP_CONFIG" ]]; then
-    if grep -q "^palette = " "$STARSHIP_CONFIG"; then
-        if [[ "$DRY_RUN" != "true" ]]; then
-            sed -i "" "s/^palette = .*/palette = '$STARSHIP_PALETTE'/" "$STARSHIP_CONFIG"
-        fi
-        log "   ✅ Updated Starship to use $STARSHIP_PALETTE"
-    else
-        log "   ⚠️  Starship palette setting not found in $STARSHIP_CONFIG"
-    fi
-else
-    log "   ❌ Starship config file not found: $STARSHIP_CONFIG"
-fi
+# Starship theme is now automatically managed by Nix Catppuccin module
+log "⭐ Starship prompt theme: Managed by Nix Catppuccin (automatic)"
 
 # Update atuin theme via environment variables (Nix-managed configs are read-only)
 log "📖 Updating Atuin history theme..."

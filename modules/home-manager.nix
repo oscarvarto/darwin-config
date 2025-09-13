@@ -251,8 +251,8 @@ in
         # Enable automatic theme switching for supported programs
         # Programs will automatically use "latte" in light mode and "mocha" in dark mode
 
-        # Disable starship integration to prevent conflicts with our manual config
-        starship.enable = false;
+        # Enable starship integration for automatic color palette management
+        starship.enable = true;
         # Disable zellij integration to prevent conflicts with our manual high-contrast theme
         zellij.enable = false;
       };
