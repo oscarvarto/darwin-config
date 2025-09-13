@@ -336,53 +336,46 @@ if [[ "$DRY_RUN" != "true" ]]; then
         fi
     fi
     
-    # Kill existing sessions to apply theme immediately (but preserve current session)
-    # Enhanced build detection - check multiple indicators of build in progress
+    # Smart session management - avoid disrupting active sessions during builds or interactivity
+    # Enhanced build detection with comprehensive checks
     build_in_progress=false
     
+    # Primary build detection - environment variables
     if [[ "${GHOSTTY_SAFE_MODE:-}" == "1" ]] || [[ "${NUSHELL_NIX_BUILD:-}" == "true" ]] || [[ -n "${NIX_BUILD_TOP:-}" ]]; then
         build_in_progress=true
     fi
     
-    # Additional checks for Nix build processes
+    # Secondary build detection - active processes
     if pgrep -f "nix.*build" >/dev/null 2>&1 || pgrep -f "darwin-rebuild" >/dev/null 2>&1 || pgrep -f "home-manager" >/dev/null 2>&1; then
         build_in_progress=true
     fi
     
-    # Check if we're being called from a build script
+    # Tertiary build detection - execution context
     if [[ "$0" == *"home-manager-generation"* ]] || [[ "$0" == *"darwin-system"* ]] || [[ -n "${IN_NIX_SHELL:-}" ]]; then
         build_in_progress=true
     fi
     
-    if [[ "$build_in_progress" == "true" ]]; then
-        log "   ⚠️  Skipping Zellij session termination (build in progress detected)"
-        log "   💡 Zellij theme change will apply to new sessions"
-    elif command -v zellij >/dev/null 2>&1; then
-        if zellij list-sessions >/dev/null 2>&1; then
-            # Get current session name to preserve it
-            current_session="${ZELLIJ_SESSION_NAME:-}"
-            
-            if [[ -n "$current_session" ]]; then
-                log "   🔄 Terminating other Zellij sessions (preserving current session: $current_session)..."
-                # Kill all sessions except the current one
-                sessions_to_kill=$(zellij list-sessions 2>/dev/null | grep -v "$current_session" | awk '{print $1}' || true)
-                
-                if [[ -n "$sessions_to_kill" ]]; then
-                    echo "$sessions_to_kill" | while read -r session_name; do
-                        if [[ -n "$session_name" ]]; then
-                            zellij kill-session "$session_name" >/dev/null 2>&1 || true
-                        fi
-                    done
-                    log "   ✨ Other Zellij sessions cleared - current session preserved"
-                else
-                    log "   💡 No other Zellij sessions to terminate"
-                fi
-            else
-                # Not in a zellij session, safe to kill all
-                log "   🔄 Terminating existing Zellij sessions for immediate theme change..."
-                zellij kill-all-sessions --yes >/dev/null 2>&1 || true
-                log "   ✨ Zellij sessions cleared - new sessions will use updated theme"
-            fi
+    # Interactive session detection - if we're inside Zellij or multiplexers, be extra careful
+    interactive_session=false
+    if [[ -n "${ZELLIJ_SESSION_NAME:-}" ]] || [[ -n "${TMUX:-}" ]] || [[ "${TERM_PROGRAM:-}" == "Ghostty" ]] || [[ "${TERM_PROGRAM:-}" == "WarpTerminal" ]]; then
+        interactive_session=true
+    fi
+    
+    # Conservative approach: Don't kill sessions during builds OR interactive use
+    if [[ "$build_in_progress" == "true" ]] || [[ "$interactive_session" == "true" ]]; then
+        if [[ "$build_in_progress" == "true" ]]; then
+            log "   ⚠️  Skipping Zellij session termination (build in progress detected)"
+        else
+            log "   ⚠️  Skipping Zellij session termination (interactive session detected)"
+        fi
+        log "   💡 Zellij theme change will apply to new sessions or after manual restart"
+        log "   ℹ️  To apply theme to current session: exit and restart Zellij"
+    elif command -v zellij >/dev/null 2>&1 && zellij list-sessions >/dev/null 2>&1; then
+        # Only perform minimal session management when safe
+        session_count=$(zellij list-sessions 2>/dev/null | wc -l || echo "0")
+        if [[ "$session_count" -gt 0 ]]; then
+            log "   💡 Found $session_count Zellij session(s) - theme will apply to new sessions"
+            log "   ℹ️  For immediate effect: manually restart active sessions when convenient"
         else
             log "   💡 No existing Zellij sessions found"
         fi
@@ -435,31 +428,52 @@ if [[ -f "$GHOSTTY_OVERRIDES" ]]; then
         fi
     fi
     
-    # Smart Ghostty reload logic - use config reload instead of restart (but not in safe mode)
+    # Smart Ghostty reload logic - conservative approach during builds and interactive sessions
     if [[ "$DRY_RUN" != "true" ]]; then
-        if [[ "${GHOSTTY_SAFE_MODE:-}" == "1" ]]; then
-            log "   ⚠️  Skipping Ghostty AppleScript reload (ghostty safe mode active)"
-            log "   💡 Ghostty theme changes will apply to new windows automatically"
-            log "   ℹ️  Use Cmd+, and reload config manually if needed"
-        else
-            # Try to reload Ghostty configuration using AppleScript
-            if osascript -e 'tell application "System Events" to tell process "Ghostty" to perform action "AXPress" of (first button whose description is "reload")' 2>/dev/null; then
-                log "   🔄 Reloaded Ghostty configuration via AppleScript"
-            elif osascript -e 'tell application "System Events" to tell process "Ghostty" to click menu item "Reload Configuration" of menu "Ghostty" of menu bar 1' 2>/dev/null; then
-                log "   🔄 Reloaded Ghostty configuration via menu action"
+        # Check if we should avoid interfering with the current session
+        if [[ "${GHOSTTY_SAFE_MODE:-}" == "1" ]] || [[ "$build_in_progress" == "true" ]] || [[ "$interactive_session" == "true" ]]; then
+            if [[ "${GHOSTTY_SAFE_MODE:-}" == "1" ]]; then
+                log "   ⚠️  Skipping Ghostty reload (ghostty safe mode active)"
+            elif [[ "$build_in_progress" == "true" ]]; then
+                log "   ⚠️  Skipping Ghostty reload (build in progress detected)"
             else
-                # Fallback: Check if Ghostty is running and try alternative methods
-                if pgrep -f Ghostty >/dev/null 2>&1; then
-                    # Alternative: Try to send a signal or use other IPC if available
-                    log "   💡 Ghostty is running - theme changes will apply to new windows automatically"
-                    log "   ℹ️  For immediate effect in existing windows, use the reload_config keybind or menu"
-                else
-                    log "   ℹ️  Ghostty not currently running - theme will apply when launched"
+                log "   ⚠️  Skipping Ghostty reload (interactive session detected)"
+            fi
+            log "   💡 Ghostty theme changes will apply to new windows automatically"
+            log "   ℹ️  For immediate effect: manually reload config (Cmd+, or keybind) when convenient"
+        else
+            # Only attempt reload when safe and not disruptive
+            ghostty_running=$(pgrep -f Ghostty >/dev/null 2>&1 && echo "true" || echo "false")
+            
+            if [[ "$ghostty_running" == "true" ]]; then
+                # Attempt gentle reload methods
+                reload_success=false
+                
+                # Method 1: Try accessibility API (least disruptive)
+                if osascript -e 'tell application "System Events" to tell process "Ghostty" to perform action "AXPress" of (first button whose description is "reload")' >/dev/null 2>&1; then
+                    log "   🔄 Gently reloaded Ghostty configuration"
+                    reload_success=true
                 fi
+                
+                # If that failed and we're not in an interactive context, try menu method
+                if [[ "$reload_success" == "false" ]] && [[ "$TERM_PROGRAM" != "Ghostty" ]]; then
+                    if osascript -e 'tell application "System Events" to tell process "Ghostty" to click menu item "Reload Configuration" of menu "Ghostty" of menu bar 1' >/dev/null 2>&1; then
+                        log "   🔄 Reloaded Ghostty configuration via menu"
+                        reload_success=true
+                    fi
+                fi
+                
+                # Fallback: Just notify user
+                if [[ "$reload_success" == "false" ]]; then
+                    log "   💡 Ghostty is running - theme changes will apply to new windows automatically"
+                    log "   ℹ️  For immediate effect: use reload_config keybind or Cmd+, when convenient"
+                fi
+            else
+                log "   ℹ️  Ghostty not currently running - theme will apply when launched"
             fi
         fi
     else
-        log "   🔄 Would reload Ghostty configuration (no restart needed)"
+        log "   🔄 Would attempt gentle Ghostty configuration reload"
     fi
 else
     log "   ❌ Ghostty overrides file not found: $GHOSTTY_OVERRIDES"
@@ -497,5 +511,10 @@ if [[ "$DRY_RUN" == "true" ]]; then
     log "Run without --dry-run to apply these changes"
 else
     log "🎉 Theme switching complete! ($CATPPUCCIN_FLAVOR mode active)"
-    log "💡 Restart terminal applications to see all changes"
+    if [[ "$build_in_progress" == "true" ]] || [[ "$interactive_session" == "true" ]]; then
+        log "💡 Current sessions preserved - new themes active for new applications"
+        log "ℹ️  For immediate effect in active sessions: manually restart when convenient"
+    else
+        log "💡 Theme applied to all applications - restart if needed for full effect"
+    fi
 fi
