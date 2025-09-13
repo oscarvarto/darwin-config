@@ -69,6 +69,6 @@
     "environment": {
       "PATH": "${env.PATH}"
     },
-    "tags": ["scala-main"]
+    "tags": ["java-main"]
   }
 ]

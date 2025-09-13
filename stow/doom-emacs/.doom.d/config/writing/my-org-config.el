@@ -68,7 +68,7 @@
       ;; (python . t)       ;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html
       (rust . t)         ;; https://github.com/emacs-rustic/rustic?tab=readme-ov-file#org-babel
       (shell . t)        ;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-shell.html
-      ;; (scala-cli . t) ;; https://github.com/ag91/scala-cli-repl
+      ;; Scala support removed
       (sql . t)          ;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-sql.html
       (sqlite . t)       ;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-sqlite.html
       (verb . t)))

@@ -1,6 +1,6 @@
 # Centralized JDK Configuration System for Doom Emacs
 
-This document explains how to use the centralized JDK configuration system for managing Java Development Kit (JDK) versions across multiple language servers (Java, Scala, Clojure) and build systems (Maven, Gradle, Mill) in your Doom Emacs setup.
+This document explains how to use the centralized JDK configuration system for managing Java Development Kit (JDK) versions across multiple language servers (Java, Clojure) and build systems (Maven, Gradle) in your Doom Emacs setup.
 
 ## Overview
 
@@ -8,14 +8,14 @@ The centralized JDK configuration system allows you to:
 
 - Define and manage multiple JDK installations in one place
 - Automatically select the appropriate JDK for different projects and build systems
-- Configure LSP servers for Java, Scala, and Clojure to use consistent JDK versions
+- Configure LSP servers for Java and Clojure to use consistent JDK versions
 - Specify project-specific JDK requirements using `.java-version` files
 - Handle build systems that may have specific JDK version requirements
 
 ## Table of Contents
 
 1. [Loading the Configuration](#loading-the-configuration)
-2. [Configuring Metals (Scala LSP)](#configuring-metals-scala-lsp)
+;; Scala LSP configuration removed
 3. [Configuring CIDER (Clojure)](#configuring-cider-clojure)
 4. [Project-Specific JDK Configuration](#project-specific-jdk-configuration)
 5. [Managing JDK Installations](#managing-jdk-installations)
@@ -32,48 +32,7 @@ To load the centralized JDK configuration, add the following to your `config.el`
 
 Note: If you don't have the `my-jdk-config.el` file in your `.doom.d` directory yet, make sure to create it first.
 
-## Configuring Metals (Scala LSP)
-
-To configure Metals (the Scala LSP server) to use the centralized JDK configuration:
-
-1. Add the following to your `config.el` or create a new `my-scala-config.el` file:
-
-```elisp
-(after! lsp-metals
-  (require 'my-jdk-config)
-  
-  ;; Set Metals Java Home to the default JDK from our configuration
-  (setq lsp-metals-java-home (my-jdk-get-default-path))
-  
-  ;; Hook to update Metals' Java Home when switching projects
-  (defun my-update-metals-java-home ()
-    "Update Metals' Java Home based on project requirements."
-    (when (and (derived-mode-p 'scala-mode 'scala-ts-mode)
-               (boundp 'lsp-metals-java-home))
-      (let* ((project-dir (projectile-project-root))
-             (env-file (when project-dir (expand-file-name ".java-version" project-dir)))
-             (java-version (when (and env-file (file-exists-p env-file))
-                             (with-temp-buffer
-                               (insert-file-contents env-file)
-                               (string-trim (buffer-string))))))
-        (if java-version
-            (let ((java-path (my-jdk-get-path-by-version java-version)))
-              (when java-path
-                (setq-local lsp-metals-java-home java-path)
-                (message "Set Metals Java Home to JDK %s for project %s" java-version project-dir)))
-          ;; No .java-version file, set to default
-          (setq-local lsp-metals-java-home (my-jdk-get-default-path))))))
-  
-  ;; Add hook to update Metals' Java Home when opening Scala files
-  (add-hook 'scala-mode-hook #'my-update-metals-java-home)
-  (add-hook 'scala-ts-mode-hook #'my-update-metals-java-home))
-```
-
-2. If you created a new file, make sure to load it in your `config.el`:
-
-```elisp
-(load! "my-scala-config")
-```
+;; Scala LSP (Metals) configuration removed
 
 ## Configuring CIDER (Clojure)
 

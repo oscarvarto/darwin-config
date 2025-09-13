@@ -78,7 +78,7 @@ After a system wipe:
 
 ### Auxiliary Scripts (`aux-scripts`)
 - `cleanup-intellij` - Comprehensive IntelliJ IDEA cache and project cleanup utility
-- `install-metals-emacs.sh` - Installs Metals language server for Scala development in Emacs
+;; Metals installer removed - Scala support discontinued
 - `lunar` - CLI wrapper for Lunar display control app
 - `manage-aux-scripts` - Management utility for this stow-based script system
 - `restore-jj-repo` - Restores a Jujutsu colocated repository after .jj directory deletion

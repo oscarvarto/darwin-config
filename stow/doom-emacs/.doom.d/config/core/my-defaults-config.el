@@ -188,7 +188,7 @@
 ;;                                 (my/setup-java-debug-env)))))  ;; Close with-eval-after-load block
 
 (add-to-list 'auto-mode-alist '("\.json$" . json-mode)) ; Use json-mode for .json files
-(add-to-list 'auto-mode-alist '("\.mill$" . scala-mode)) ; Use scala-mode for Mill build files
+;; Mill build file association removed - Scala support disabled
 
 ;; which-key
 (after! which-key

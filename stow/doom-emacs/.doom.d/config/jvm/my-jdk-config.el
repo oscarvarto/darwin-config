@@ -7,7 +7,7 @@
 
 ;;; Code:
 
-(after! (:any java-mode scala-mode groovy-mode clojure-mode)
+(after! (:any java-mode groovy-mode clojure-mode)
   ;; Load path utilities
   (require 'my-paths)
 
@@ -127,7 +127,7 @@
     (let* ((has-pom (file-exists-p (expand-file-name "pom.xml" project-dir)))
            (has-gradle (or (file-exists-p (expand-file-name "build.gradle" project-dir)) ; Use project-dir
                            (file-exists-p (expand-file-name "build.gradle.kts" project-dir)))) ; Use project-dir
-           (has-mill (file-exists-p (expand-file-name "build.mill" project-dir)))
+           ;; Mill detection removed
            (gradle-properties (expand-file-name "gradle.properties" project-dir))
            (gradle-wrapper-properties (expand-file-name "gradle/wrapper/gradle-wrapper.properties" project-dir)))
 
@@ -152,7 +152,7 @@
         nil))) ; Close if (re-search...)
            ; Close with-temp-buffer
           ; Close cond clause body
-       ;; No specific requirement detected for Maven, Mill, or other cases
+       ;; No specific requirement detected for Maven or other cases
     (t nil)) ; Close cond and outer let*
   ;; Add hook for project switching to update JAVA_HOME
   (add-hook 'projectile-after-switch-project-hook #'my-jdk-set-project-java-home))

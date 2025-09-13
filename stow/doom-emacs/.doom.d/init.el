@@ -181,7 +181,7 @@
        ;;rst               ; ReST in peace
        ;;(ruby +rails)     ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
        (rust +lsp +tree-sitter)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
-       (scala +lsp +tree-sitter)        ; java, but good
+       ;; (scala +lsp +tree-sitter)        ; java, but good (DISABLED)
        ;;(scheme +guile)   ; a fully conniving family of lisps
        (sh +lsp +fish +tree-sitter)    ; she sells {ba,z,fi}sh shells on the C xor
        ;;sml

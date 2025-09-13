@@ -94,7 +94,7 @@
   "Show packages that might be contributing to slow startup."
   (interactive)
   (let ((slow-packages '(treemacs lsp-mode dap-mode magit org pdf-tools
-                         rustic scala-mode clojure-mode vterm eat
+                         rustic clojure-mode vterm eat
                          tabnine obsidian gptel)))
     (message "Potentially slow packages in your config:")
     (dolist (pkg slow-packages)

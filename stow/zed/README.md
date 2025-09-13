@@ -30,7 +30,7 @@ stow -D -t ~ zed
 
 ### Development Environment
 - **Xcode Beta Integration**: Configured to use Xcode 26.0 beta toolchain
-- **Multiple Language Support**: Swift, C/C++, Rust, Python, Java, Scala with LSP
+- **Multiple Language Support**: Swift, C/C++, Rust, Python, Java with LSP
 - **Vi Mode**: Enabled for efficient text editing
 - **Intelligent Completion**: Copilot and Zed AI integration
 
@@ -44,7 +44,7 @@ stow -D -t ~ zed
 - **clangd**: Configured for C/C++ development using Xcode beta
 - **SourceKit LSP**: Swift development with latest toolchain
 - **jdtls**: Java development with Lombok support
-- **metals**: Scala development with inlay hints
+;; Scala LSP support removed
 - **pyrefly**: Python development with custom configuration
 
 ## Notes

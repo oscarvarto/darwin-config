@@ -41,8 +41,7 @@
   (lsp-inlay-hint-enable t)
   :hook ((java-ts-mode java-mode) . lsp)
   :hook ((java-ts-mode java-mode) . treesit-fold-indicators-mode)
-  :hook ((scala-ts-mode scala-mode) . lsp)
-  :hook ((scala-ts-mode scala-mode) . treesit-fold-indicators-mode)
+  ;; Scala hooks removed - Scala support disabled
   :hook ((typescript-ts-mode typescript-mode) . lsp)
   :hook ((typescript-ts-mode typescript-mode) . treesit-fold-indicators-mode)
   ;; if you want which-key integration

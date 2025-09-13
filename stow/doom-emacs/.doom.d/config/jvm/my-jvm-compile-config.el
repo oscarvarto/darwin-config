@@ -9,8 +9,8 @@
 ;;;###autoload
 
 (defun jvm-compile ()
-  "Apply Spotless formatter and compile the current JVM project (Maven, Gradle, or Mill).
-Enhanced to detect and handle Clojure projects using Mill.
+  "Apply Spotless formatter and compile the current JVM project (Maven or Gradle).
+Enhanced to handle various JVM build systems.
 Automatically configures the appropriate JDK for the project's build system.
 Prioritizes JDK selection using:
 1. direnv-set JAVA_HOME via .envrc (if present)
@@ -55,10 +55,7 @@ Prioritizes JDK selection using:
                         (progn
                           (message "Gradle project detected, running Gradle build...")
                           "./gradlew spotlessApply build"))
-                       ((eq build-tool 'mill)
-                        (progn
-                          (message "Mill project detected, running Mill build...")
-                          "mill __.compile")) ; Generic compile command for Mill
+                       ;; Mill support removed
                        ;; Add other build tools here if needed (sbt, lein, etc.)
                        ;; ((eq build-tool 'sbt) "sbt compile")
                        (t

@@ -58,7 +58,7 @@
 (require 'my-banner-config)
 (require 'my-gui-appearance-config)
 (require 'my-terminal-config)
-(require 'my-startup-benchmark)
+;; (require 'my-startup-benchmark)
 
 ;; Helper function for loading
 (defun my/load-config (feature group) ; Group is mandatory
@@ -81,7 +81,6 @@
 (my/load-config 'jvm-navigation 'jvm)
 (my/load-config 'lsp-java 'jvm)
 (my/load-config 'clojure 'jvm)
-(my/load-config 'scala 'jvm)
 
 (my/load-config 'nix 'languages)
 (my/load-config 'rust 'languages)
