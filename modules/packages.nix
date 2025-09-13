@@ -104,6 +104,7 @@ with pkgs;
   fish  # Required for Nushell's fish completer
   nushell
   carapace
+  zellij
 
   # Zsh plugins for enhanced shell experience
   zsh-autosuggestions

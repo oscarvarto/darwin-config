@@ -147,9 +147,10 @@ in
   # NOTE: Ghostty configuration scripts are now managed via stow (nix-scripts package)
   # Run: cd ~/darwin-config/stow && stow nix-scripts
 
-  # NOTE: Zellij configuration is now managed by the theme manager for dynamic theme switching
-  # The base config is created by the zellij-theme-manager and updated dynamically
-  # This allows themes to be changed at runtime without rebuilding Nix configuration
+  # Zellij configuration with custom keybindings - theme managed by Nix Catppuccin
+  ".config/zellij/config.kdl" = {
+    source = ./zellij-config.kdl;
+  };
 
 }
 

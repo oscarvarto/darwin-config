@@ -253,8 +253,10 @@ in
 
         # Enable starship integration for automatic color palette management
         starship.enable = true;
-        # Disable zellij integration to prevent conflicts with our manual high-contrast theme
-        zellij.enable = false;
+        # Enable bat integration for automatic syntax highlighting themes
+        bat.enable = true;
+        # Enable zellij integration for automatic theming
+        zellij.enable = true;
       };
 
       # Enable the local nushell module
@@ -290,6 +292,14 @@ in
           };
         };
 
+        bat = {
+          enable = true;
+          config = {
+            # Theme will be automatically managed by Catppuccin
+            # pager = "less -FR";
+            # style = "numbers,changes,header";
+          };
+        };
 
         helix.enable = true;
 
@@ -337,6 +347,9 @@ in
           };
         };
 
+        # Zellij is configured via files.nix to avoid conflicts with custom KDL config
+        # programs.zellij.enable = true; (disabled - using manual config file)
+        
         zoxide = {
           enable = true;
           enableNushellIntegration = true;

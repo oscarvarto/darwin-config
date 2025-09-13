@@ -253,16 +253,10 @@ load_plugins {
 // 
 // simplified_ui true
 
-// Using built-in accessibility-focused themes
-// Theme will be dynamically set by the zt function based on system appearance
-// 
-// Available high-contrast themes:
-// - tokyo-night-light: High contrast light theme with excellent border visibility
-// - catppuccin-macchiato: High contrast dark theme with good accessibility
-// - catppuccin-mocha: Alternative dark theme
-// 
-// Default theme - will be overridden by zt function
-theme "catppuccin-macchiato"
+// Theme is now automatically managed by Nix Catppuccin module
+// This provides automatic theme switching based on system appearance
+// Available themes: catppuccin-latte (light) and catppuccin-mocha (dark)
+theme "catppuccin-latte"
  
 // Choose the base input mode of zellij.
 // Default: normal

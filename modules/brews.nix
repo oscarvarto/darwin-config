@@ -76,7 +76,6 @@
       "wmctrl"
       "xz" # lzma is part of xz
       "yq"
-      "zellij"
       "zig"
     ];
 

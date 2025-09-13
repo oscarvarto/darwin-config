@@ -27,13 +27,13 @@ OPTIONS:
 
 SUPPORTED APPLICATIONS:
     • Starship (shell prompt) - Automatically managed by Nix Catppuccin module
+    • BAT (syntax highlighter) - Automatically managed by Nix Catppuccin module
+    • Zellij (terminal multiplexer) - Automatically managed by Nix Catppuccin module
     • Atuin (shell history)
-    • Zellij (terminal multiplexer)
     • Ghostty (terminal emulator) - Live config reload without restart
     • Nushell (shell syntax highlighting)
     • Fish (shell colors)
     • Zsh (shell colors)
-    • BAT (syntax highlighter)
 
 THEME MAPPING:
     Light Mode:  Catppuccin Latte (official built-in theme)
@@ -108,6 +108,14 @@ show_status() {
         echo "   Starship: not configured"
     fi
     
+    # BAT
+    if [[ -f "$HOME/.config/bat/config" ]]; then
+        bat_theme=$(grep '^--theme=' "$HOME/.config/bat/config" | sed "s/--theme='\(.*\)'/\1/" || echo "unknown")
+        echo "   BAT: $bat_theme (Nix Catppuccin managed)"
+    else
+        echo "   BAT: not configured"
+    fi
+    
     # Atuin
     if [[ -f "$HOME/.config/atuin/config.toml" ]]; then
         atuin_theme=$(grep 'name = ' "$HOME/.config/atuin/config.toml" | sed 's/name = "\(.*\)"/\1/' || echo "unknown")
@@ -118,8 +126,7 @@ show_status() {
     
     # Zellij
     if [[ -f "$HOME/.config/zellij/config.kdl" ]]; then
-        zellij_theme=$(grep 'theme "' "$HOME/.config/zellij/config.kdl" | sed 's/theme "\(.*\)"/\1/' || echo "unknown")
-        echo "   Zellij: $zellij_theme"
+        echo "   Zellij: Managed by Nix Catppuccin (automatic theme switching)"
     else
         echo "   Zellij: not configured"
     fi
@@ -234,10 +241,8 @@ fi
 # Set theme variables
 if [[ "$APPEARANCE" == "dark" ]]; then
     CATPPUCCIN_FLAVOR="macchiato"
-    BAT_THEME="ansi"
 else
     CATPPUCCIN_FLAVOR="latte"
-    BAT_THEME="GitHub"
 fi
 
 # Dry run prefix
@@ -286,90 +291,31 @@ else
     log "   🔍 Would create Atuin override for $APPEARANCE theme"
 fi
 
-# Update zellij theme management - use zellij-theme-manager for proper integration
-log "🖼️  Updating Zellij multiplexer theme configuration..."
+# Zellij theme is now automatically managed by Nix Catppuccin module
+log "🖼️  Zellij multiplexer theme: Managed by Nix Catppuccin (automatic)"
 
-# Write theme preference to cache for zt function to read
-ZELLIJ_THEME_CACHE="$HOME/.cache/zellij_preferred_theme"
-if [[ "$DRY_RUN" != "true" ]]; then
-    if [[ "$APPEARANCE" == "light" ]]; then
-        echo "catppuccin-latte" > "$ZELLIJ_THEME_CACHE"
-        # Actually set the theme using the theme manager (use full path for reliability)
-        ZELLIJ_THEME_MANAGER="$HOME/.local/bin/zellij-theme-manager"
-        if [[ -x "$ZELLIJ_THEME_MANAGER" ]]; then
-            if "$ZELLIJ_THEME_MANAGER" set catppuccin-latte >/dev/null 2>&1; then
-                log "   ✅ Set Zellij theme: catppuccin-latte (catppuccin light)"
-            else
-                log "   ⚠️  Failed to set Zellij theme via theme manager, cached preference only"
-            fi
-        else
-            log "   ⚠️  zellij-theme-manager not found at $ZELLIJ_THEME_MANAGER, cached preference only"
-        fi
-    else
-        echo "catppuccin-macchiato" > "$ZELLIJ_THEME_CACHE"
-        # Actually set the theme using the theme manager (use full path for reliability)
-        ZELLIJ_THEME_MANAGER="$HOME/.local/bin/zellij-theme-manager"
-        if [[ -x "$ZELLIJ_THEME_MANAGER" ]]; then
-            if "$ZELLIJ_THEME_MANAGER" set catppuccin-macchiato >/dev/null 2>&1; then
-                log "   ✅ Set Zellij theme: catppuccin-macchiato (high contrast dark)"
-            else
-                log "   ⚠️  Failed to set Zellij theme via theme manager, cached preference only"
-            fi
-        else
-            log "   ⚠️  zellij-theme-manager not found at $ZELLIJ_THEME_MANAGER, cached preference only"
-        fi
-    fi
-    
-    # Smart session management - avoid disrupting active sessions during builds or interactivity
-    # Enhanced build detection with comprehensive checks
-    build_in_progress=false
-    
-    # Primary build detection - environment variables
-    if [[ "${GHOSTTY_SAFE_MODE:-}" == "1" ]] || [[ "${NUSHELL_NIX_BUILD:-}" == "true" ]] || [[ -n "${NIX_BUILD_TOP:-}" ]]; then
-        build_in_progress=true
-    fi
-    
-    # Secondary build detection - active processes
-    if pgrep -f "nix.*build" >/dev/null 2>&1 || pgrep -f "darwin-rebuild" >/dev/null 2>&1 || pgrep -f "home-manager" >/dev/null 2>&1; then
-        build_in_progress=true
-    fi
-    
-    # Tertiary build detection - execution context
-    if [[ "$0" == *"home-manager-generation"* ]] || [[ "$0" == *"darwin-system"* ]] || [[ -n "${IN_NIX_SHELL:-}" ]]; then
-        build_in_progress=true
-    fi
-    
-    # Interactive session detection - if we're inside Zellij or multiplexers, be extra careful
-    interactive_session=false
-    if [[ -n "${ZELLIJ_SESSION_NAME:-}" ]] || [[ -n "${TMUX:-}" ]] || [[ "${TERM_PROGRAM:-}" == "Ghostty" ]] || [[ "${TERM_PROGRAM:-}" == "WarpTerminal" ]]; then
-        interactive_session=true
-    fi
-    
-    # Conservative approach: Don't kill sessions during builds OR interactive use
-    if [[ "$build_in_progress" == "true" ]] || [[ "$interactive_session" == "true" ]]; then
-        if [[ "$build_in_progress" == "true" ]]; then
-            log "   ⚠️  Skipping Zellij session termination (build in progress detected)"
-        else
-            log "   ⚠️  Skipping Zellij session termination (interactive session detected)"
-        fi
-        log "   💡 Zellij theme change will apply to new sessions or after manual restart"
-        log "   ℹ️  To apply theme to current session: exit and restart Zellij"
-    elif command -v zellij >/dev/null 2>&1 && zellij list-sessions >/dev/null 2>&1; then
-        # Only perform minimal session management when safe
-        session_count=$(zellij list-sessions 2>/dev/null | wc -l || echo "0")
-        if [[ "$session_count" -gt 0 ]]; then
-            log "   💡 Found $session_count Zellij session(s) - theme will apply to new sessions"
-            log "   ℹ️  For immediate effect: manually restart active sessions when convenient"
-        else
-            log "   💡 No existing Zellij sessions found"
-        fi
-    fi
-else
-    if [[ "$APPEARANCE" == "light" ]]; then
-        log "   🔍 Would set Zellij theme: catppuccin-latte (catppuccin light)"
-    else
-        log "   🔍 Would set Zellij theme: catppuccin-macchiato (catppuccin dark)"
-    fi
+# Build detection for safe theme switching (used by Ghostty logic)
+build_in_progress=false
+
+# Primary build detection - environment variables
+if [[ "${GHOSTTY_SAFE_MODE:-}" == "1" ]] || [[ "${NUSHELL_NIX_BUILD:-}" == "true" ]] || [[ -n "${NIX_BUILD_TOP:-}" ]]; then
+    build_in_progress=true
+fi
+
+# Secondary build detection - active processes
+if pgrep -f "nix.*build" >/dev/null 2>&1 || pgrep -f "darwin-rebuild" >/dev/null 2>&1 || pgrep -f "home-manager" >/dev/null 2>&1; then
+    build_in_progress=true
+fi
+
+# Tertiary build detection - execution context
+if [[ "$0" == *"home-manager-generation"* ]] || [[ "$0" == *"darwin-system"* ]] || [[ -n "${IN_NIX_SHELL:-}" ]]; then
+    build_in_progress=true
+fi
+
+# Interactive session detection - if we're inside Zellij or multiplexers, be extra careful
+interactive_session=false
+if [[ -n "${ZELLIJ_SESSION_NAME:-}" ]] || [[ -n "${TMUX:-}" ]] || [[ "${TERM_PROGRAM:-}" == "Ghostty" ]] || [[ "${TERM_PROGRAM:-}" == "WarpTerminal" ]]; then
+    interactive_session=true
 fi
 
 # Update Ghostty theme
@@ -466,8 +412,7 @@ fi
 # Update shell themes
 log "🐚 Updating shell theme configurations..."
 
-# Set environment variables for current session
-export BAT_THEME="$BAT_THEME"
+# BAT theme is now automatically managed by Nix Catppuccin module
 
 # Set shell theme environment variables
 if [[ "$APPEARANCE" == "light" ]]; then
@@ -487,7 +432,6 @@ if [[ "$DRY_RUN" != "true" ]]; then
     echo "$ZSH_THEME" > "$HOME/.cache/zsh_theme" 2>/dev/null || true
 fi
 log "   ✅ Updated shell theme caches ($APPEARANCE mode)"
-log "   ✅ Set BAT_THEME to $BAT_THEME"
 
 log ""
 if [[ "$DRY_RUN" == "true" ]]; then
