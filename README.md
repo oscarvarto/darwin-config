@@ -110,14 +110,18 @@ find apps/$(uname -m | sed 's/arm64/aarch64/')-darwin -type f -exec chmod +x {} 
 ### 4. Configure for Your Environment
 
 ```bash
-# Configure for your user and hostname
-nix run .#configure-user -- --user $USER --hostname $(hostname -s)
-
-# OR add your hostname if it doesn't exist in flake.nix
+# Option 1: Add your hostname if it doesn't exist in flake.nix
 nix run .#add-host -- --hostname $(hostname -s) --user $USER
 
-# Apply user information to configuration files
+# Option 2: Use existing configuration (if your hostname is already in flake.nix)
+nix run .#configure-user -- --user $USER --hostname $(hostname -s)
+
+# Apply user information and secrets repository to configuration files
 nix run .#apply
+# This will prompt for:
+# - Your git email and name (if not already configured)
+# - Your GitHub username
+# - Your GitHub secrets repository name
 ```
 
 > **📝 Note**: If you're using a git repository, run `git add .` before building to ensure all files are included in the Nix store.

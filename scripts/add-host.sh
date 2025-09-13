@@ -16,6 +16,7 @@ NC='\033[0m' # No Color
 HOSTNAME_ARG=""
 USER_ARG=""
 SYSTEM_ARG="aarch64-darwin"
+DEFAULT_SHELL="zsh"  # Default shell: zsh, nushell, or fish
 WORK_PROFILE=false
 PERSONAL_CONFIG=false
 DRY_RUN=false
@@ -33,6 +34,7 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  -s, --system ARCH      System architecture (default: aarch64-darwin)"
+    echo "  --shell SHELL          Default shell: zsh, nushell, or fish (default: zsh)"
     echo "  -w, --work-profile     Enable work profile configuration"
     echo "  -p, --personal-config  Enable personal configuration"
     echo "  -d, --dry-run          Show what would be changed without making changes"
@@ -41,6 +43,7 @@ show_help() {
     echo "Examples:"
     echo "  add-host.sh --hostname alice-macbook --user alice --personal-config"
     echo "  add-host.sh --hostname work-laptop --user bob --work-profile --system x86_64-darwin"
+    echo "  add-host.sh --hostname dev-machine --user dev --shell nushell"
 }
 
 # Parse arguments
@@ -56,6 +59,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -s|--system)
             SYSTEM_ARG="$2"
+            shift 2
+            ;;
+        --shell)
+            DEFAULT_SHELL="$2"
             shift 2
             ;;
         -w|--work-profile)
@@ -106,10 +113,17 @@ if [[ "$SYSTEM_ARG" != "aarch64-darwin" && "$SYSTEM_ARG" != "x86_64-darwin" ]]; 
     exit 1
 fi
 
+# Validate shell choice
+if [[ "$DEFAULT_SHELL" != "zsh" && "$DEFAULT_SHELL" != "nushell" && "$DEFAULT_SHELL" != "fish" ]]; then
+    echo -e "${RED}❌ Error: Invalid shell '$DEFAULT_SHELL'. Must be 'zsh', 'nushell', or 'fish'${NC}"
+    exit 1
+fi
+
 echo "Adding host configuration:"
 echo "  Hostname: $HOSTNAME_ARG"
 echo "  User: $USER_ARG"
 echo "  System: $SYSTEM_ARG"
+echo "  Default Shell: $DEFAULT_SHELL"
 echo "  Work Profile: $WORK_PROFILE"
 echo "  Personal Config: $PERSONAL_CONFIG"
 echo ""
@@ -140,6 +154,7 @@ fi
 NEW_HOST_CONFIG="        $HOSTNAME_ARG = {
           user = \"$USER_ARG\";
           system = \"$SYSTEM_ARG\";
+          defaultShell = \"$DEFAULT_SHELL\";
           hostSettings = {
             enablePersonalConfig = $PERSONAL_CONFIG;
             workProfile = $WORK_PROFILE;
