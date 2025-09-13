@@ -17,7 +17,7 @@ let
   workDirName = builtins.replaceStrings ["~/" "/**"] ["" ""] (workConfig.gitWorkDirPattern or "~/work/**");
   
   # Emacs pinning logic moved to separate module for modularity
-  emacsPinModule = import ./emacs-pinning.nix { inherit pkgs user inputs; };
+  emacsPinModule = import ./emacs-pinning.nix { inherit pkgs user inputs hostname; };
   configuredEmacs = emacsPinModule.configuredEmacs;
 in
 {

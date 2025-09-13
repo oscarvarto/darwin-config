@@ -1,4 +1,4 @@
-{ pkgs, user, inputs, ... }:
+{ pkgs, user, inputs, hostname, ... }:
 let
   # Emacs pinning system with hash management
   pinFile = "/Users/${user}/.cache/emacs-git-pin";
@@ -52,26 +52,41 @@ let
     CACHE_DIR="''${HOME}/.cache"
     PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
     HASH_FILE="''${CACHE_DIR}/emacs-git-pin-hash"
+    
+    # Get hostname from system or use current
+    HOSTNAME="${hostname}"
 
     # Create cache directory if it doesn't exist
     mkdir -p "''${CACHE_DIR}"
 
     # Function to extract current emacs-git commit from nix configuration
     extract_current_emacs_commit() {
-      local CONFIG_PATH="$(dirname "$(readlink -f "''${BASH_SOURCE[0]}")")"
-
-      # Try to find the darwin-config directory
-      if [[ -d "''${HOME}/darwin-config" ]]; then
-        CONFIG_PATH="''${HOME}/darwin-config"
-      elif [[ -d "/Users/''${USER}/darwin-config" ]]; then
-        CONFIG_PATH="/Users/''${USER}/darwin-config"
+      # Try to find the darwin-config directory in common locations
+      local CONFIG_PATH=""
+      local POSSIBLE_PATHS=(
+        "''${HOME}/darwin-config"
+        "/Users/''${USER}/darwin-config"
+        "$(pwd)"
+        "$(dirname "$(readlink -f "''${BASH_SOURCE[0]}")")/../../../.."
+      )
+      
+      for path in "''${POSSIBLE_PATHS[@]}"; do
+        if [[ -f "''${path}/flake.nix" ]]; then
+          CONFIG_PATH="''${path}"
+          break
+        fi
+      done
+      
+      if [[ -z "''${CONFIG_PATH}" ]]; then
+        echo "Could not find darwin-config directory" >&2
+        return 1
       fi
 
       echo $'\U1F50D Extracting commit hash from current nix-provided emacs-git...' >&2
 
       # Extract commit hash from the current configuration
       local CURRENT_COMMIT
-      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval ".#darwinConfigurations.predator.config.home-manager.users.''${USER}.home.packages" \
+      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval ".#darwinConfigurations.''${HOSTNAME}.config.home-manager.users.''${USER}.home.packages" \
         --apply 'pkgs: let emacsPackage = builtins.filter (p: builtins.match ".*emacs-git.*" p.name != null) pkgs; in if builtins.length emacsPackage > 0 then (builtins.head emacsPackage).src.rev or null else null' \
         --raw)
 
@@ -84,20 +99,32 @@ let
 
     # Function to extract current emacs-git hash from nix configuration
     extract_current_emacs_hash() {
-      local CONFIG_PATH="$(dirname "$(readlink -f "''${BASH_SOURCE[0]}")")"
-
-      # Try to find the darwin-config directory
-      if [[ -d "''${HOME}/darwin-config" ]]; then
-        CONFIG_PATH="''${HOME}/darwin-config"
-      elif [[ -d "/Users/''${USER}/darwin-config" ]]; then
-        CONFIG_PATH="/Users/''${USER}/darwin-config"
+      # Try to find the darwin-config directory in common locations
+      local CONFIG_PATH=""
+      local POSSIBLE_PATHS=(
+        "''${HOME}/darwin-config"
+        "/Users/''${USER}/darwin-config"
+        "$(pwd)"
+        "$(dirname "$(readlink -f "''${BASH_SOURCE[0]}")")/../../../.."
+      )
+      
+      for path in "''${POSSIBLE_PATHS[@]}"; do
+        if [[ -f "''${path}/flake.nix" ]]; then
+          CONFIG_PATH="''${path}"
+          break
+        fi
+      done
+      
+      if [[ -z "''${CONFIG_PATH}" ]]; then
+        echo "Could not find darwin-config directory" >&2
+        return 1
       fi
 
       echo $'\U1F511 Extracting hash from current nix-provided emacs-git...' >&2
 
       # Extract hash from the current configuration
       local CURRENT_HASH
-      CURRENT_HASH=$(cd "''${CONFIG_PATH}" && nix eval ".#darwinConfigurations.predator.config.home-manager.users.''${USER}.home.packages" \
+      CURRENT_HASH=$(cd "''${CONFIG_PATH}" && nix eval ".#darwinConfigurations.''${HOSTNAME}.config.home-manager.users.''${USER}.home.packages" \
         --apply 'pkgs: let emacsPackage = builtins.filter (p: builtins.match ".*emacs-git.*" p.name != null) pkgs; in if builtins.length emacsPackage > 0 then (builtins.head emacsPackage).src.outputHash or null else null' \
         --raw)
 
@@ -196,21 +223,36 @@ let
 
     CACHE_DIR="''${HOME}/.cache"
     PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
+    
+    # Get hostname from system or use current
+    HOSTNAME="${hostname}"
 
     # Function to extract current emacs-git commit from nix configuration
     extract_current_emacs_commit() {
-      local CONFIG_PATH="$(dirname "$(readlink -f "''${BASH_SOURCE[0]}")")"
-
-      # Try to find the darwin-config directory
-      if [[ -d "''${HOME}/darwin-config" ]]; then
-        CONFIG_PATH="''${HOME}/darwin-config"
-      elif [[ -d "/Users/''${USER}/darwin-config" ]]; then
-        CONFIG_PATH="/Users/''${USER}/darwin-config"
+      # Try to find the darwin-config directory in common locations
+      local CONFIG_PATH=""
+      local POSSIBLE_PATHS=(
+        "''${HOME}/darwin-config"
+        "/Users/''${USER}/darwin-config"
+        "$(pwd)"
+        "$(dirname "$(readlink -f "''${BASH_SOURCE[0]}")")/../../../.."
+      )
+      
+      for path in "''${POSSIBLE_PATHS[@]}"; do
+        if [[ -f "''${path}/flake.nix" ]]; then
+          CONFIG_PATH="''${path}"
+          break
+        fi
+      done
+      
+      if [[ -z "''${CONFIG_PATH}" ]]; then
+        echo "Could not find darwin-config directory" >&2
+        return 1
       fi
 
       # Extract commit hash from the current configuration
       local CURRENT_COMMIT
-      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval ".#darwinConfigurations.predator.config.home-manager.users.''${USER}.home.packages" \
+      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval ".#darwinConfigurations.''${HOSTNAME}.config.home-manager.users.''${USER}.home.packages" \
         --apply 'pkgs: let emacsPackage = builtins.filter (p: builtins.match ".*emacs-git.*" p.name != null) pkgs; in if builtins.length emacsPackage > 0 then (builtins.head emacsPackage).src.rev or null else null' \
         --raw)
 
@@ -261,21 +303,36 @@ let
     CACHE_DIR="''${HOME}/.cache"
     PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
     HASH_FILE="''${CACHE_DIR}/emacs-git-pin-hash"
+    
+    # Get hostname from system or use current
+    HOSTNAME="${hostname}"
 
     # Function to extract current emacs-git commit from nix configuration
     extract_current_emacs_commit() {
-      local CONFIG_PATH="$(dirname "$(readlink -f "''${BASH_SOURCE[0]}")")"
-
-      # Try to find the darwin-config directory
-      if [[ -d "''${HOME}/darwin-config" ]]; then
-        CONFIG_PATH="''${HOME}/darwin-config"
-      elif [[ -d "/Users/''${USER}/darwin-config" ]]; then
-        CONFIG_PATH="/Users/''${USER}/darwin-config"
+      # Try to find the darwin-config directory in common locations
+      local CONFIG_PATH=""
+      local POSSIBLE_PATHS=(
+        "''${HOME}/darwin-config"
+        "/Users/''${USER}/darwin-config"
+        "$(pwd)"
+        "$(dirname "$(readlink -f "''${BASH_SOURCE[0]}")")/../../../.."
+      )
+      
+      for path in "''${POSSIBLE_PATHS[@]}"; do
+        if [[ -f "''${path}/flake.nix" ]]; then
+          CONFIG_PATH="''${path}"
+          break
+        fi
+      done
+      
+      if [[ -z "''${CONFIG_PATH}" ]]; then
+        echo "Could not find darwin-config directory" >&2
+        return 1
       fi
 
       # Extract commit hash from the current configuration
       local CURRENT_COMMIT
-      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval ".#darwinConfigurations.predator.config.home-manager.users.''${USER}.home.packages" \
+      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval ".#darwinConfigurations.''${HOSTNAME}.config.home-manager.users.''${USER}.home.packages" \
         --apply 'pkgs: let emacsPackage = builtins.filter (p: builtins.match ".*emacs-git.*" p.name != null) pkgs; in if builtins.length emacsPackage > 0 then (builtins.head emacsPackage).src.rev or null else null' \
         --raw)
 
