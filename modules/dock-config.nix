@@ -7,7 +7,6 @@
       enable = true;
       username = user;
       entries = [
-        { path = "/Users/oscarvarto/.nix-profile/Applications/Emacs.app/"; }
         { path = "/Applications/Obsidian.app/"; }
         { path = "/Applications/Zed Preview.app/"; }
         { path = "/Applications/Ghostty.app/"; }
