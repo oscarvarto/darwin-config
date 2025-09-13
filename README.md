@@ -552,11 +552,11 @@ This approach ensures that while garbage collection won't remove pinned packages
   - **macOS Integration**: Proper window management and GUI support
   - **Ghostty Terminal Support**: Full xterm-ghostty terminfo integration
   - **Catppuccin Theming**: Unified theme management across applications
-- **🐚 Advanced Shell Configuration**: Choose between Nushell, Zsh, and Fish with:
-  - **Consistent Experience**: Same aliases, PATH, and tools across both shells
+- **🐚 Advanced Shell Configuration**: Primary support for Nushell and Zsh:
+  - **Consistent Experience**: Same aliases, PATH, and tools across primary shells
   - **Smart Switching**: Easy shell changes via simple configuration updates
-  - **Modern Features**: Starship prompts, Zoxide navigation, Atuin history
-  - **Seamless Integration**: Terminal, editor, and development tool compatibility
+  - **Modern Features**: Starship prompts, Zoxide navigation, Atuin history (Nushell/Zsh only)
+  - **Limited Fish Support**: Basic functionality only, no integrations to optimize build times
 - **🔧 Development Tools**: Complete development environment with LSPs, formatters, etc.
 - **🔒 Security First**: Automated backups, key rotation, and credential synchronization
 
@@ -1201,15 +1201,25 @@ This tool is particularly useful in JVM development environments where IntelliJ'
 
 ## 🐚 Choosing Your Default Shell
 
-This configuration supports three fully-configured shells: **Nushell**, **Zsh**, and **Fish**. Each shell is intelligently configured with consistent features, aliases, and PATH management. You can choose your preferred shell and switch between them seamlessly.
+This configuration provides primary support for **Nushell** and **Zsh**, with limited support for **Fish**. The focus is on optimizing build times for Emacs development, so Fish shell support is minimal.
 
-### 🎯 Available Shells
+### 🎯 Shell Support Levels
 
-| Shell       | Description                       | Best For                                             |
-| ----------- | --------------------------------- | ---------------------------------------------------- |
-| **Nushell** | Modern shell with structured data | Data manipulation, pipelines, modern workflows       |
-| **Zsh**     | Traditional, highly configurable  | Power users, legacy compatibility, extensive plugins |
-| **Fish**    | User-friendly with smart defaults| Beginners, interactive use, auto-suggestions        |
+| Shell       | Support Level | Description                                         | Best For                                             |
+| ----------- | ------------- | --------------------------------------------------- | ---------------------------------------------------- |
+| **Nushell** | ⭐ Primary    | Full integration with all features                  | Data manipulation, pipelines, modern workflows       |
+| **Zsh**     | ⭐ Primary    | Full integration, extensive plugin support          | Power users, legacy compatibility, extensive plugins |
+| **Fish**    | ⚠️ Limited    | Basic functionality only, no tool integrations      | Users who need Fish but accept minimal features      |
+
+### ⚠️ Important: Fish Shell Limitations
+
+**Fish shell is a second-class citizen in this configuration:**
+- ❌ **No integrations**: Atuin, Starship, Mise, Yazi, and Zoxide integrations are disabled
+- ❌ **Minimal functions**: Most shell functions removed to reduce build overhead
+- ✅ **Basic functionality**: Shell works but with limited features
+- ✅ **Essential aliases**: Only the most basic aliases are configured
+
+**If you need a fully-featured shell, use Nushell or Zsh.**
 
 ### 🔧 Setting Your Default Shell
 
@@ -1229,7 +1239,7 @@ hostConfigs = {
   your-hostname = {
     user = "youruser";
     system = "aarch64-darwin";
-    defaultShell = "nushell";  # Options: "nushell", "zsh", "fish"
+    defaultShell = "nushell";  # Options: "nushell" (recommended), "zsh" (full support), "fish" (limited)
     hostSettings = {
       enablePersonalConfig = true;
       workProfile = false;
@@ -1246,7 +1256,7 @@ hostConfigs = {
    predator = {
      user = "oscarvarto";
      system = "aarch64-darwin";
-     defaultShell = "nushell";  # Change to your preferred shell ("nushell" or "zsh")
+     defaultShell = "nushell";  # Change to your preferred shell ("nushell" or "zsh" recommended)
      hostSettings = {
        # ... existing settings
      };
@@ -1267,17 +1277,23 @@ hostConfigs = {
 
 ### 🌟 Shell Features
 
-All shells include consistent features configured automatically:
-
-#### Shared Features
+#### Primary Shells (Nushell & Zsh) - Full Features
 
 - **Starship Prompt**: Modern, fast prompt with git integration
 - **Zoxide**: Smart directory jumping with `z` command
 - **Atuin**: Improved history with search and sync
 - **Yazi**: File manager integration
-- **Consistent Aliases**: Same shortcuts across all shells
-- **PATH Management**: Unified PATH configuration
-- **Development Tools**: Same tools available in all shells
+- **Consistent Aliases**: Complete set of shortcuts
+- **PATH Management**: Full PATH configuration with all integrations
+- **Development Tools**: All tools with shell integrations
+
+#### Fish Shell - Limited Features
+
+- **Basic Prompt**: Default Fish prompt (no Starship)
+- **Minimal Aliases**: Only essential aliases (ls, ll, cat, grep)
+- **Basic Functions**: Only nb, ns, and yazi wrapper
+- **No Integrations**: No Atuin, Zoxide, Mise, or other tool integrations
+- **PATH Management**: Basic PATH setup without tool integrations
 
 #### Shell-Specific Strengths
 
@@ -1299,9 +1315,16 @@ ps | where cpu > 50 | select name cpu
 ```bash
 # Advanced completion system
 # Glob patterns and extended matching
-
 # Plugin ecosystem compatibility
 # Customizable prompt systems
+```
+
+**Fish Features (Limited):**
+
+```bash
+# Basic shell functionality
+# Minimal configuration for fast builds
+# Use Nushell or Zsh for full features
 ```
 
 ### 📋 Available Shell Commands
@@ -1394,6 +1417,7 @@ initContent = lib.mkAfter ''
 - Like modern, consistent command syntax
 - Want powerful data manipulation pipelines
 - Prefer type safety and structured output
+- Want full integration with all development tools
 
 **Choose Zsh if you:**
 
@@ -1401,6 +1425,14 @@ initContent = lib.mkAfter ''
 - Want extensive plugin ecosystem (oh-my-zsh, etc.)
 - Prefer traditional Unix shell behavior
 - Have existing zsh configurations to port
+- Want full integration with all development tools
+
+**Only choose Fish if you:**
+
+- Absolutely require Fish shell for specific workflows
+- Accept minimal features and no tool integrations
+- Prioritize Emacs build speed over shell features
+- Are willing to use scripts in ~/.local/share/bin/ instead of shell functions
 
 ### ⚡ PATH and Environment Management
 
@@ -1518,13 +1550,13 @@ flake.nix              # Main flake with inputs, hostConfigs, and apps
 
 ## 🔧 Configuration Examples
 
-### Personal Machine with Nushell
+### Personal Machine with Nushell (Recommended)
 
 ```nix
 your-hostname = {
   user = "alice";
   system = "aarch64-darwin";
-  defaultShell = "nushell";  # Modern shell for data processing
+  defaultShell = "nushell";  # Modern shell with full features
   hostSettings = {
     enablePersonalConfig = true;
     workProfile = false;
@@ -1532,13 +1564,13 @@ your-hostname = {
 };
 ```
 
-### Work Machine with Zsh
+### Work Machine with Zsh (Full Support)
 
 ```nix
 work-laptop = {
   user = "alice";
   system = "aarch64-darwin";
-  defaultShell = "zsh";      # Traditional shell for work compatibility
+  defaultShell = "zsh";      # Traditional shell with full integrations
   hostSettings = {
     enablePersonalConfig = false;
     workProfile = true;
@@ -1546,18 +1578,19 @@ work-laptop = {
 };
 ```
 
-### Traditional Setup with Zsh
+### Minimal Setup with Fish (Not Recommended)
 
 ```nix
-legacy-system = {
+minimal-system = {
   user = "bob";
   system = "x86_64-darwin";
-  defaultShell = "zsh";      # Traditional shell with extensive plugins
+  defaultShell = "fish";     # Limited support, no integrations
   hostSettings = {
     enablePersonalConfig = true;
     workProfile = false;
   };
 };
+# NOTE: Fish has minimal support - use Nushell or Zsh for full features
 ```
 
 ## 🤝 Contributing
