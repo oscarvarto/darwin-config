@@ -10,7 +10,6 @@
         { path = "/Applications/Obsidian.app/"; }
         { path = "/Applications/Zed Preview.app/"; }
         { path = "/Applications/Ghostty.app/"; }
-        { path = "/Applications/WarpPreview.app/"; }
         { path = "/Applications/Safari.app/"; }
         { path = "/Applications/Firefox.app/"; }
         { path = "/Applications/Google Chrome.app/"; }

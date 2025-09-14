@@ -10,7 +10,6 @@ in
       enable = true;
       enableNushellIntegration = true;
       enableZshIntegration = true;
-      enableFishIntegration = false;  # Disabled for faster builds - using nushell/zsh
     };
 
     # direnv is now managed directly in home-manager.nix to avoid conflicts
@@ -18,7 +17,6 @@ in
     fzf = {
       enable = true;
       enableZshIntegration = true;
-      enableFishIntegration = false;  # Disabled for faster builds - using nushell/zsh
     };
 
     # Consolidated zsh configuration for macOS
@@ -180,7 +178,6 @@ in
         alias psg='procs | rg'
         
         # Disk usage with better formatting
-        alias du='dust'
         alias dua='dust -r'
         
         # System information in table format

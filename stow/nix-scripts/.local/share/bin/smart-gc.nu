@@ -16,7 +16,7 @@ def show_help [] {
   print ""
   print "Commands:"
   print "  status           Show current disk usage and generations"
-  print "  dry-run          Show what would be deleted (keeping last 3 generations)"
+  print "  dry-run          Show what would be cleaned (keeping last 3 generations)"
   print "  pin              Pin essential derivations to prevent removal"
   print "  clean [N]        Clean keeping last N generations (default: 3)"
   print "  aggressive       Aggressive cleanup (keep last 2 generations)"
@@ -26,7 +26,7 @@ def show_help [] {
   print "  -h, --help       Show this help message"
   print "  -f, --force      Skip confirmation prompts"
   print "  -v, --verbose    Show detailed output"
-  print "  --optimize       Run store optimization after cleanup"
+  print "  --optimize       Run store optimization after cleanup (hard-link duplicate files, 25-35% savings)"
   print ""
   print "Examples:"
   print "  smart-gc status"
@@ -76,32 +76,49 @@ def show_status [] {
 
 def perform_dry_run [keep_generations: int] {
   print $"($BLUE)💭 Smart GC Dry Run \(keeping last ($keep_generations) generations\)($NC)"
-  
+
   print $"($YELLOW)📋 What would be cleaned:($NC)"
-  print $"($YELLOW)├─ Removing old home-manager generations \(older than ($keep_generations) days\)($NC)"
-  
-  let dry_run_cmd = $"nix-collect-garbage --delete-older-than ($keep_generations)d --dry-run"
-  let result = (do { ^nix-collect-garbage --delete-older-than $"($keep_generations)d" --dry-run } | complete)
-  
-  if $result.exit_code == 0 {
-    let output_lines = ($result.stdout | lines)
-    let removing_lines = ($output_lines | where {|line| $line | str contains "removing"})
-    let deleting_lines = ($output_lines | where {|line| $line | str contains "deleting"})
-    
-    if ($removing_lines | length) > 0 {
-      print $"($YELLOW)├─ Profile cleanup:($NC)"
-      for line in $removing_lines {
-        print $"($YELLOW)│  ($line)($NC)"
-      }
+
+  # Check home-manager profile generations
+  let hm_profile = "~/.local/state/nix/profiles/home-manager"
+  let hm_result = (^nix profile history --profile $hm_profile 2>/dev/null | complete)
+  if $hm_result.exit_code == 0 {
+    let hm_generations = ($hm_result.stdout | lines | where {|line| $line | str contains "Version"} | length)
+    if $hm_generations > $keep_generations {
+      let to_remove = ($hm_generations - $keep_generations)
+      print $"($YELLOW)├─ Home-manager: would remove ($to_remove) old generations \(keeping last ($keep_generations)\)($NC)"
+    } else {
+      print $"($YELLOW)├─ Home-manager: ($hm_generations) generations found, all within keep limit($NC)"
     }
-    
-    if ($deleting_lines | length) > 0 {
-      print $"($YELLOW)├─ Store cleanup:($NC)"
-      let delete_count = ($deleting_lines | length)
-      print $"($YELLOW)│  ($delete_count) store paths would be deleted($NC)"
-    }
+  } else {
+    print $"($YELLOW)├─ Home-manager: no profile found($NC)"
   }
-  
+
+  # Check system profile generations
+  let sys_profile = "~/.local/state/nix/profiles/profile"
+  let sys_result = (^nix profile history --profile $sys_profile 2>/dev/null | complete)
+  if $sys_result.exit_code == 0 {
+    let sys_generations = ($sys_result.stdout | lines | where {|line| $line | str contains "Version"} | length)
+    if $sys_generations > $keep_generations {
+      let to_remove = ($sys_generations - $keep_generations)
+      print $"($YELLOW)├─ System profile: would remove ($to_remove) old generations \(keeping last ($keep_generations)\)($NC)"
+    } else {
+      print $"($YELLOW)├─ System profile: ($sys_generations) generations found, all within keep limit($NC)"
+    }
+  } else {
+    print $"($YELLOW)├─ System profile: no profile found($NC)"
+  }
+
+  # Preview store garbage collection
+  print $"($YELLOW)├─ Store cleanup preview:($NC)"
+  let gc_result = (do { ^nix store gc --dry-run } | complete)
+  if $gc_result.exit_code == 0 {
+    let gc_lines = ($gc_result.stdout | lines | length)
+    print $"($YELLOW)│  ($gc_lines) store paths would be deleted($NC)"
+  } else {
+    print $"($YELLOW)│  Could not preview store cleanup($NC)"
+  }
+
   print $"($YELLOW)└─ No actual changes made - this was a dry run($NC)"
 }
 
@@ -144,76 +161,120 @@ def pin_essentials [] {
 
 def perform_cleanup [keep_generations: int, force: bool, verbose: bool, optimize: bool] {
   print $"($BLUE)🧹 Starting smart garbage collection \(keeping last ($keep_generations) generations\)($NC)"
-  
+
   if not $force {
-    print $"($YELLOW)⚠️ This will remove generations older than ($keep_generations) days($NC)"
+    print $"($YELLOW)⚠️ This will remove old generations, keeping only the last ($keep_generations) generations($NC)"
     let response = (input "Continue? (y/N): ")
     if not ($response | str downcase | str starts-with "y") {
       print $"($YELLOW)🚫 Operation cancelled($NC)"
       return
     }
   }
-  
+
   let before_size = (do { ^du -sb /nix/store } | complete | get stdout | str trim | split row "\t" | get 0? | default "0" | into int)
-  
-  # Remove old generations
-  print $"($YELLOW)🗑️ Removing old generations \(older than ($keep_generations) days\)($NC)"
-  let cleanup_result = if $verbose {
-    (do { ^nix-collect-garbage --delete-older-than $"($keep_generations)d" } | complete)
-  } else {
-    (do { ^nix-collect-garbage --delete-older-than $"($keep_generations)d" } | complete)
+
+  # Remove old profile generations
+  print $"($YELLOW)🗑️ Cleaning profile generations \(keeping last ($keep_generations)\)($NC)"
+
+  # Clean home-manager profile generations
+  let hm_profile = "~/.local/state/nix/profiles/home-manager"
+  let hm_result = (^nix profile history --profile $hm_profile 2>/dev/null | complete)
+  if $hm_result.exit_code == 0 {
+    let hm_versions = ($hm_result.stdout | lines | where {|line| $line | str contains "Version"} | each {|line| $line | parse "Version {version}" | get version.0} | sort -r)
+    let hm_to_remove = ($hm_versions | skip $keep_generations)
+
+    for version in $hm_to_remove {
+      if $verbose { print $"($YELLOW)│ Removing home-manager generation ($version)($NC)" }
+      let remove_result = (^nix profile remove --profile $hm_profile $version 2>/dev/null | complete)
+      if $remove_result.exit_code != 0 and $verbose {
+        print $"($RED)│ Failed to remove home-manager generation ($version)($NC)"
+      }
+    }
   }
-  
-  if $cleanup_result.exit_code == 0 {
-    print $"($GREEN)✅ Generation cleanup complete($NC)"
-  } else {
-    print $"($RED)❌ Generation cleanup failed($NC)"
-    print $cleanup_result.stderr
-    return
+
+  # Clean system profile generations
+  let sys_profile = "~/.local/state/nix/profiles/profile"
+  let sys_result = (^nix profile history --profile $sys_profile 2>/dev/null | complete)
+  if $sys_result.exit_code == 0 {
+    let sys_versions = ($sys_result.stdout | lines | where {|line| $line | str contains "Version"} | each {|line| $line | parse "Version {version}" | get version.0} | sort -r)
+    let sys_to_remove = ($sys_versions | skip $keep_generations)
+
+    for version in $sys_to_remove {
+      if $verbose { print $"($YELLOW)│ Removing system profile generation ($version)($NC)" }
+      let remove_result = (^nix profile remove --profile $sys_profile $version 2>/dev/null | complete)
+      if $remove_result.exit_code != 0 and $verbose {
+        print $"($RED)│ Failed to remove system profile generation ($version)($NC)"
+      }
+    }
   }
-  
+
+  print $"($GREEN)✅ Profile generation cleanup complete($NC)"
+
   # Run garbage collection
-  print $"($YELLOW)🗑️ Running garbage collection($NC)"
+  print $"($YELLOW)🗑️ Running store garbage collection($NC)"
   let gc_result = if $verbose {
-    (do { ^nix-store --gc } | complete)
+    let result = (do { ^nix-store --gc } | complete)
+    if ($result.stdout | str length) > 0 { print $result.stdout }
+    $result
   } else {
     (do { ^nix-store --gc } | complete)
   }
-  
+
   if $gc_result.exit_code == 0 {
-    print $"($GREEN)✅ Garbage collection complete($NC)"
+    print $"($GREEN)✅ Store garbage collection complete($NC)"
   } else {
-    print $"($RED)❌ Garbage collection failed($NC)"
-    print $gc_result.stderr
+    print $"($RED)❌ Store garbage collection failed($NC)"
+    if ($gc_result.stderr | str length) > 0 { print $gc_result.stderr }
   }
-  
+
   # Optimize store if requested
   if $optimize {
     print $"($YELLOW)⚡ Optimizing store \(hard-linking identical files\)($NC)"
+    print $"($YELLOW)├─ ⏱️  This operation may take several minutes for large stores...($NC)"
+    let current_store_size = (do { ^du -sh /nix/store } | complete | get stdout | str trim | split row "\t" | get 0? | default "Unknown")
+    print $"($YELLOW)├─ 📊 Current store size: ($current_store_size)($NC)"
+    print $"($YELLOW)└─ 🔄 Running optimization with progress indicators...($NC)"
+
     let optimize_result = if $verbose {
-      (do { ^nix-store --optimise } | complete)
+      let result = (do { ^nix-store --optimise -vv } | complete)
+      # Show the progress output
+      if ($result.stdout | str length) > 0 { print $result.stdout }
+      if ($result.stderr | str length) > 0 { print $result.stderr }
+      $result
     } else {
-      (do { ^nix-store --optimise } | complete)
+      let result = (do { ^nix-store --optimise -v } | complete)
+      # Show summary info even in non-verbose mode
+      if ($result.stderr | str length) > 0 {
+        # Extract the final savings summary from stderr
+        let summary_lines = ($result.stderr | lines | where {|line| $line | str contains "freed by hard-linking"})
+        for line in $summary_lines {
+          print $"($GREEN)📊 ($line)($NC)"
+        }
+      }
+      $result
     }
-    
+
     if $optimize_result.exit_code == 0 {
       print $"($GREEN)✅ Store optimization complete($NC)"
+      # Show new store size
+      let new_store_size = (do { ^du -sh /nix/store } | complete | get stdout | str trim | split row "\t" | get 0? | default "Unknown")
+      print $"($GREEN)📊 New store size: ($new_store_size)($NC)"
     } else {
       print $"($RED)❌ Store optimization failed($NC)"
-      print $optimize_result.stderr
+      if ($optimize_result.stderr | str length) > 0 { print $optimize_result.stderr }
     }
   }
-  
+
   # Calculate space freed
   let after_size = (do { ^du -sb /nix/store } | complete | get stdout | str trim | split row "\t" | get 0? | default "0" | into int)
   let freed = ($before_size - $after_size)
   let freed_mb = ($freed / 1024 / 1024)
-  
+
   print $"($GREEN)✅ Smart garbage collection complete!($NC)"
   if $freed > 0 {
     print $"($GREEN)💾 Space freed: ($freed_mb) MB($NC)"
   } else {
-    print $"($YELLOW)💾 No space was freed (store may have grown during operation)($NC)"
+    print $"($YELLOW)💾 No space was freed \(store may have grown during operation\)($NC)"
   }
 }
 

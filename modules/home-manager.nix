@@ -51,7 +51,7 @@ in
       imports = [
         ./git-security-scripts.nix
         ./home-activation-scripts.nix
-        ./fish-config.nix  # Re-enabled for basic fish functionality (integrations disabled)
+        # fish-config.nix removed - only nushell multicompleter dependency kept
         inputs.catppuccin.homeModules.catppuccin
         # inputs.op-shell-plugins.hmModules.default  # Removed - SSH agent integration sufficient
       ] ++ [ ./nushell ];
@@ -132,7 +132,6 @@ in
           daemon.enable = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
-          enableFishIntegration = false;  # Disabled for faster builds - using nushell/zsh
           settings = {
             # General settings
             auto_sync = true;
@@ -177,7 +176,6 @@ in
         mise = {
           enable = true;
           enableZshIntegration = true;
-          enableFishIntegration = false;  # Disabled for faster builds - using nushell/zsh
           enableNushellIntegration = true;
         };
 
@@ -185,7 +183,6 @@ in
           enable = true;
           enableZshIntegration = true;
           enableNushellIntegration = true;
-          enableFishIntegration = false;  # Disabled for faster builds - using nushell/zsh
           settings = fromTOML(builtins.readFile ./starship.toml);
         };
 
@@ -198,7 +195,6 @@ in
           enable = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
-          enableFishIntegration = false;  # Disabled for faster builds - using nushell/zsh
           settings = {
             mgr = {
               ratio = [1 3 4];
@@ -213,7 +209,6 @@ in
           enable = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
-          enableFishIntegration = false;  # Disabled for faster builds - using nushell/zsh
         };
 
         # Git configuration
