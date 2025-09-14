@@ -39,7 +39,6 @@ let
     withTreeSitter = true;
     withSQLite3 = true;
     withXwidgets = true;
-    withMailutils = true;
   };
 
   emacsPin = pkgs.writeScriptBin "emacs-pin" ''
@@ -59,7 +58,7 @@ let
     # Create cache directory if it doesn't exist
     mkdir -p "''${CACHE_DIR}"
 
-    # Function to extract current emacs-git commit from nix configuration
+    # Function to extract current emacs-git commit from overlay
     extract_current_emacs_commit() {
       # Try to find the darwin-config directory in common locations
       local CONFIG_PATH=""
@@ -82,13 +81,12 @@ let
         return 1
       fi
 
-      echo $'\U1F50D Extracting commit hash from current nix-provided emacs-git...' >&2
+      echo $'\U1F50D Extracting commit hash from current emacs overlay...' >&2
 
-      # Extract commit hash from the current configuration
+      # Extract commit hash from the emacs overlay directly
       local CURRENT_COMMIT
-      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval ".#darwinConfigurations.''${HOSTNAME}.config.home-manager.users.''${USER}.home.packages" \
-        --apply 'pkgs: let emacsPackage = builtins.filter (p: builtins.match ".*emacs-git.*" p.name != null) pkgs; in if builtins.length emacsPackage > 0 then (builtins.head emacsPackage).src.rev or null else null' \
-        --raw)
+      local SYSTEM="$(nix eval --expr 'builtins.currentSystem' --raw)"
+      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval "inputs.emacs-overlay.packages.''${SYSTEM}.emacs-git.src.rev" --raw 2>/dev/null)
 
       if [[ -n "''${CURRENT_COMMIT}" && "''${CURRENT_COMMIT}" != "null" ]]; then
         echo "''${CURRENT_COMMIT}"
@@ -97,7 +95,7 @@ let
       fi
     }
 
-    # Function to extract current emacs-git hash from nix configuration
+    # Function to extract current emacs-git hash from overlay
     extract_current_emacs_hash() {
       # Try to find the darwin-config directory in common locations
       local CONFIG_PATH=""
@@ -120,13 +118,12 @@ let
         return 1
       fi
 
-      echo $'\U1F511 Extracting hash from current nix-provided emacs-git...' >&2
+      echo $'\U1F511 Extracting hash from current emacs overlay...' >&2
 
-      # Extract hash from the current configuration
+      # Extract hash from the emacs overlay directly
       local CURRENT_HASH
-      CURRENT_HASH=$(cd "''${CONFIG_PATH}" && nix eval ".#darwinConfigurations.''${HOSTNAME}.config.home-manager.users.''${USER}.home.packages" \
-        --apply 'pkgs: let emacsPackage = builtins.filter (p: builtins.match ".*emacs-git.*" p.name != null) pkgs; in if builtins.length emacsPackage > 0 then (builtins.head emacsPackage).src.outputHash or null else null' \
-        --raw)
+      local SYSTEM="$(nix eval --expr 'builtins.currentSystem' --raw)"
+      CURRENT_HASH=$(cd "''${CONFIG_PATH}" && nix eval "inputs.emacs-overlay.packages.''${SYSTEM}.emacs-git.src.sha256" --raw 2>/dev/null)
 
       if [[ -n "''${CURRENT_HASH}" && "''${CURRENT_HASH}" != "null" ]]; then
         echo "''${CURRENT_HASH}"
@@ -137,10 +134,20 @@ let
 
     # If no commit hash provided, extract from current emacs
     if [[ -z "''${COMMIT}" ]]; then
-      echo $'\U1F4A1 No commit hash provided. Extracting from current nix-provided emacs-git...'
+      echo $'\U1F4A1 No commit hash provided. Extracting from current emacs overlay...'
 
       if COMMIT=$(extract_current_emacs_commit); then
         echo $'\U2705 Found current commit: '"''${COMMIT}"
+
+        # Check if already pinned to this commit
+        if [[ -f "''${PIN_FILE}" ]]; then
+          EXISTING_COMMIT=$(cat "''${PIN_FILE}")
+          if [[ "''${EXISTING_COMMIT}" == "''${COMMIT}" ]]; then
+            echo $'\U2139\UFE0F Already pinned to current overlay commit: '"''${COMMIT}"
+            echo $'\U1F4A1 No rebuild necessary - configuration already matches pin'
+            exit 0
+          fi
+        fi
 
         # Try to extract the corresponding hash as well
         if HASH=$(extract_current_emacs_hash); then
@@ -227,7 +234,7 @@ let
     # Get hostname from system or use current
     HOSTNAME="${hostname}"
 
-    # Function to extract current emacs-git commit from nix configuration
+    # Function to extract current emacs-git commit from overlay
     extract_current_emacs_commit() {
       # Try to find the darwin-config directory in common locations
       local CONFIG_PATH=""
@@ -250,11 +257,10 @@ let
         return 1
       fi
 
-      # Extract commit hash from the current configuration
+      # Extract commit hash from the emacs overlay directly
       local CURRENT_COMMIT
-      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval ".#darwinConfigurations.''${HOSTNAME}.config.home-manager.users.''${USER}.home.packages" \
-        --apply 'pkgs: let emacsPackage = builtins.filter (p: builtins.match ".*emacs-git.*" p.name != null) pkgs; in if builtins.length emacsPackage > 0 then (builtins.head emacsPackage).src.rev or null else null' \
-        --raw)
+      local SYSTEM="$(nix eval --expr 'builtins.currentSystem' --raw)"
+      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval "inputs.emacs-overlay.packages.''${SYSTEM}.emacs-git.src.rev" --raw 2>/dev/null)
 
       if [[ -n "''${CURRENT_COMMIT}" && "''${CURRENT_COMMIT}" != "null" ]]; then
         echo "''${CURRENT_COMMIT}"
@@ -307,7 +313,7 @@ let
     # Get hostname from system or use current
     HOSTNAME="${hostname}"
 
-    # Function to extract current emacs-git commit from nix configuration
+    # Function to extract current emacs-git commit from overlay
     extract_current_emacs_commit() {
       # Try to find the darwin-config directory in common locations
       local CONFIG_PATH=""
@@ -330,11 +336,10 @@ let
         return 1
       fi
 
-      # Extract commit hash from the current configuration
+      # Extract commit hash from the emacs overlay directly
       local CURRENT_COMMIT
-      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval ".#darwinConfigurations.''${HOSTNAME}.config.home-manager.users.''${USER}.home.packages" \
-        --apply 'pkgs: let emacsPackage = builtins.filter (p: builtins.match ".*emacs-git.*" p.name != null) pkgs; in if builtins.length emacsPackage > 0 then (builtins.head emacsPackage).src.rev or null else null' \
-        --raw)
+      local SYSTEM="$(nix eval --expr 'builtins.currentSystem' --raw)"
+      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval "inputs.emacs-overlay.packages.''${SYSTEM}.emacs-git.src.rev" --raw 2>/dev/null)
 
       if [[ -n "''${CURRENT_COMMIT}" && "''${CURRENT_COMMIT}" != "null" ]]; then
         echo "''${CURRENT_COMMIT}"
@@ -346,7 +351,7 @@ let
     # Get current overlay commit for comparison
     CURRENT_OVERLAY_COMMIT=""
     if CURRENT_OVERLAY_COMMIT=$(extract_current_emacs_commit 2>/dev/null); then
-      echo $'\U1F4C8 Current nix-provided emacs-git commit: '"''${CURRENT_OVERLAY_COMMIT}"
+      echo $'\U1F4C8 Current overlay emacs-git commit: '"''${CURRENT_OVERLAY_COMMIT}"
       echo $'\U1F517 View current: https://github.com/emacs-mirror/emacs/commit/'"''${CURRENT_OVERLAY_COMMIT}"
       echo ""
     fi
