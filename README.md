@@ -1492,7 +1492,7 @@ nu --config modules/nushell/config.nu --commands "exit"
 ### 💡 Shell Integration Tips
 
 - **Emacs Integration**: The default shell setting automatically configures vterm and shell-mode
-- **Terminal Integration**: All shells work seamlessly with Ghostty, Warp, and other terminals
+- **Terminal Integration**: All shells work seamlessly with Ghostty and other terminals
 - **Script Compatibility**: Shell scripts in this repo use bash for maximum compatibility
 - **Interactive vs Script**: Your default shell affects interactive sessions, not system scripts
 

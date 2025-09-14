@@ -314,7 +314,7 @@ fi
 
 # Interactive session detection - if we're inside Zellij or multiplexers, be extra careful
 interactive_session=false
-if [[ -n "${ZELLIJ_SESSION_NAME:-}" ]] || [[ -n "${TMUX:-}" ]] || [[ "${TERM_PROGRAM:-}" == "Ghostty" ]] || [[ "${TERM_PROGRAM:-}" == "WarpTerminal" ]]; then
+if [[ -n "${ZELLIJ_SESSION_NAME:-}" ]] || [[ -n "${TMUX:-}" ]] || [[ "${TERM_PROGRAM:-}" == "Ghostty" ]]; then
     interactive_session=true
 fi
 
