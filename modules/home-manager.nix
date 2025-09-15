@@ -180,6 +180,9 @@ in
             font_size = 18;
             disable_ligatures = "never";
           };
+          shellIntegration = {
+            enableZshIntegration = true;
+          };
         };
 
         mise = {

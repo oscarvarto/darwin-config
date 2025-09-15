@@ -24,7 +24,6 @@ in
     ./modules/path-config.nix
     ./modules/home-manager.nix
     ./modules/overlays.nix
-    ./modules/terminal-support.nix
     agenix.darwinModules.default
   ];
 
