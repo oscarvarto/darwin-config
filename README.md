@@ -122,6 +122,20 @@ nix run .#apply
 # - Your git email and name (if not already configured)
 # - Your GitHub username
 # - Your GitHub secrets repository name
+
+# Optimize Nix build performance for your hardware (RECOMMENDED)
+nix run .#optimize-nix-performance
+# This will:
+# - Detect your CPU cores and memory
+# - Calculate optimal build settings
+# - Update system.nix with hardware-specific values
+# - Create backup of original configuration
+
+# Preview optimization without applying changes
+nix run .#optimize-nix-performance -- --dry-run
+
+# Show detailed hardware detection
+nix run .#optimize-nix-performance -- --verbose
 ```
 
 > **📝 Note**: If you're using a git repository, run `git add .` before building to ensure all files are included in the Nix store.
@@ -473,11 +487,12 @@ This approach ensures that while garbage collection won't remove pinned packages
 
 ### Configuration Management
 
-| Command                        | Description                                        |
-| ------------------------------ | -------------------------------------------------- |
-| `nix run .#add-host`           | Add new host configuration to flake.nix            |
-| `nix run .#configure-user`     | Configure for different user/hostname combinations |
-| `nix run .#update-doom-config` | Update Doom Emacs configuration with user details  |
+| Command                          | Description                                        |
+| -------------------------------- | -------------------------------------------------- |
+| `nix run .#add-host`             | Add new host configuration to flake.nix            |
+| `nix run .#configure-user`       | Configure for different user/hostname combinations |
+| `nix run .#update-doom-config`   | Update Doom Emacs configuration with user details  |
+| `nix run .#optimize-nix-performance` | Optimize build settings based on hardware specs |
 
 ### Security & Secrets
 

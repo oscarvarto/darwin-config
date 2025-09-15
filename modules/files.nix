@@ -66,7 +66,8 @@ in
  
       # Shell configuration (default nushell, can be overridden)
       # Note: Default shell is set below, override with ghostty-config shell <shell-name>
-      shell-integration = none
+      # Enable shell integration for proper cursor handling in Zellij/Nushell
+      shell-integration = detect
       shell-integration-features = cursor,sudo,title
 
       # Default font with fallbacks (can be overridden)
@@ -83,7 +84,8 @@ in
 
       # Window and appearance settings
       window-save-state = always
-      cursor-style = block
+      # Let shell control cursor style for better integration (Nushell manages vi/emacs modes)
+      # cursor-style = block  # Commented out to allow shell-driven cursor shapes
       cursor-color = "#D9905A"
       auto-update-channel = tip
       quit-after-last-window-closed = true

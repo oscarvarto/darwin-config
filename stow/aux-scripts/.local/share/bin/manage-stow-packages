@@ -1,9 +1,14 @@
 #!/usr/bin/env nu
 
-# Script to manage stow packages using GNU Stow
-# Usage: manage-stow-packages <command>
+# Stow Package Manager - Deploy and manage dotfiles and scripts using GNU Stow
+#
+# Manages deployment of scripts, editor configs, and development tools via GNU Stow.
+# Supports deployment, removal, and complete restow operations.
 
-def main [command: string = "help", --force (-f)] {
+def main [
+    command?: string = "help"  # Command: deploy/install, remove/uninstall, restow, status, list, help
+    --force (-f)               # Force deployment with --adopt (imports existing files)
+] {
     let stow_dir = $"($env.HOME)/darwin-config/stow"
     
     if not ($stow_dir | path exists) {
@@ -18,7 +23,9 @@ def main [command: string = "help", --force (-f)] {
         []
     }
     
-    match $command {
+    let cmd = if ($command | is-empty) { "help" } else { $command }
+
+    match $cmd {
         "deploy" | "install" => {
             if $force {
                 print "🚀 Force deploying stow packages (will overwrite existing files)..."
@@ -89,34 +96,67 @@ def main [command: string = "help", --force (-f)] {
         
         "remove" | "uninstall" => {
             print "🗑️  Removing stow packages..."
-            
+
             cd $stow_dir
-            
-            # Core script packages  
-            stow -D -t ~ aux-scripts
-            stow -D -t ~ nix-scripts
-            stow -D -t ~ raycast-scripts
-            
-            # Development tool managers
-            stow -D -t ~ cargo-tools
-            stow -D -t ~ nodejs-tools
-            stow -D -t ~ dotnet-tools
-            
-            # Editor configurations
-            stow -D -t ~ doom-emacs
-            stow -D -t ~ doom-extra-files
-            stow -D -t ~ lazyvim
-            stow -D -t ~ zed
-            
-            # Theme management
-            stow -D -t ~ zellij-theme-management
-            
-            if $env.LAST_EXIT_CODE == 0 {
-                print "✅ Stow packages removed successfully!"
-            } else {
-                print "❌ Failed to remove stow packages"
-                exit 1
+
+            # Remove all packages (simple approach)
+            let packages = [
+                "zellij-theme-management",
+                "doom-emacs",
+                "doom-extra-files",
+                "lazyvim",
+                "zed",
+                "cargo-tools",
+                "nodejs-tools",
+                "dotnet-tools",
+                "nix-scripts",
+                "raycast-scripts",
+                "aux-scripts"  # This will remove this script too
+            ]
+
+            for package in $packages {
+                print $"📦 Removing ($package)..."
+                stow -D -t ~ $package
             }
+
+            print "✅ All stow packages removed successfully!"
+            print "📝 Note: This script was also removed"
+            print "💡 To re-deploy: run 'stow -t ~ aux-scripts' from ~/darwin-config/stow/, then 'manage-stow-packages deploy'"
+        }
+
+        "restow" => {
+            print "🔄 Complete restow: removing all packages and re-deploying..."
+
+            # Step 1: Remove all packages (this will remove this script)
+            cd $stow_dir
+
+            let packages = [
+                "zellij-theme-management",
+                "doom-emacs",
+                "doom-extra-files",
+                "lazyvim",
+                "zed",
+                "cargo-tools",
+                "nodejs-tools",
+                "dotnet-tools",
+                "nix-scripts",
+                "raycast-scripts",
+                "aux-scripts"
+            ]
+
+            print "🗑️  Step 1: Removing all packages..."
+            for package in $packages {
+                print $"📦 Removing ($package)..."
+                stow -D -t ~ $package
+            }
+
+            # Step 2: Re-deploy aux-scripts first to get this script back
+            print "📦 Step 2: Re-deploying aux-scripts..."
+            stow -t ~ aux-scripts
+
+            # Step 3: Call deploy to handle the rest
+            print "🚀 Step 3: Deploying all packages..."
+            nu $"($env.HOME)/.local/share/bin/manage-stow-packages" deploy
         }
         
         "status" => {
@@ -153,7 +193,7 @@ def main [command: string = "help", --force (-f)] {
             }
         }
         
-        "help" | _ => {
+        "help" | "detailed-help" | _ => {
             print "🛠️  Stow Package Manager"
             print ""
             print "Usage: manage-stow-packages <command> [--force]"
@@ -161,6 +201,7 @@ def main [command: string = "help", --force (-f)] {
             print "Commands:"
             print "  deploy, install    Deploy all stow packages using stow"
             print "  remove, uninstall  Remove all stow packages (unstow)"
+            print "  restow             Complete restow: remove all, then re-deploy"
             print "  status             Check deployment status of scripts"
             print "  list               List available scripts in aux-scripts"
             print "  help               Show this help message"
@@ -173,6 +214,10 @@ def main [command: string = "help", --force (-f)] {
             print "Examples:"
             print "  manage-stow-packages deploy          # Safe deployment (fails on conflicts)"
             print "  manage-stow-packages deploy --force  # Force deployment (imports conflicting files)"
+            print "  manage-stow-packages restow          # Complete clean restow (remove + deploy)"
+            print "  manage-stow-packages remove          # Remove all packages"
+            print ""
+            print "💡 Tip: Use 'manage-stow-packages --help' for quick parameter reference"
             print ""
             print "📁 Available Stow Packages:"
             print "  • aux-scripts      - Core utility scripts"

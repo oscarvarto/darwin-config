@@ -163,7 +163,7 @@ in
 
         # Table-like output commands (similar to nushell)
         # Using eza for better ls output with icons and colors
-        alias ls='eza --icons --group-directories-first'
+        alias lls='eza --icons --group-directories-first'
         alias ll='eza --icons --group-directories-first -la --grid --header --git'
         alias lt='eza --icons --group-directories-first -la --tree --level=2'
         alias llt='eza --icons --group-directories-first -la --tree'
@@ -197,7 +197,6 @@ in
         alias gst='git status --short --branch'
         
         # Better cat/bat aliases
-        alias cat='bat --style=plain'
         alias catn='bat --style=numbers'
         alias catf='bat --style=full'
         
@@ -209,7 +208,6 @@ in
         alias hex='hexyl'
         
         # Better grep with ripgrep
-        alias grep='rg'
         alias grepi='rg -i'
         alias grepl='rg -l'
         
@@ -218,11 +216,6 @@ in
         
         # String replacement
         alias replace='sd'
-        
-        # Initialize zoxide for smarter cd
-        eval "$(zoxide init zsh)"
-        alias cd='z'
-        alias cdi='zi'  # Interactive selection
         
         # Function to show directory contents automatically when changing directories
         chpwd() {
@@ -276,17 +269,6 @@ in
                 ns-ghostty-safe "$@"
             fi
         }
-        
-        # Claude Code integration - Shift+Enter key binding
-        # Function to handle Claude Code prompt submission
-        claude-code-submit() {
-          echo "# Claude Code: Submit prompt"
-        }
-        zle -N claude-code-submit
-        
-        # Bind Shift+Enter to the Claude Code submit function
-        # The escape sequence \\\\e[13;2u is for Shift+Enter in modern terminals
-        bindkey '^[[13;2u' claude-code-submit
         
         # Atuin handles history search - removing conflicting bindings
         # Atuin uses Ctrl+R for interactive search and up/down arrows for history navigation

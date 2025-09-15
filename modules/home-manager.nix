@@ -17,8 +17,8 @@ let
   workDirName = builtins.replaceStrings ["~/" "/**"] ["" ""] (workConfig.gitWorkDirPattern or "~/work/**");
   
   # Emacs pinning logic moved to separate module for modularity
-  emacsPinModule = import ./emacs-pinning.nix { inherit pkgs user inputs hostname; };
-  configuredEmacs = emacsPinModule.configuredEmacs;
+  # emacsPinModule = import ./emacs-pinning.nix { inherit pkgs user inputs hostname; };
+  # configuredEmacs = emacsPinModule.configuredEmacs;
 in
 {
 
@@ -51,7 +51,6 @@ in
       imports = [
         ./git-security-scripts.nix
         ./home-activation-scripts.nix
-        # fish-config.nix removed - only nushell multicompleter dependency kept
         inputs.catppuccin.homeModules.catppuccin
         # inputs.op-shell-plugins.hmModules.default  # Removed - SSH agent integration sufficient
       ] ++ [ ./nushell ];
@@ -61,8 +60,8 @@ in
         packages = (pkgs.callPackage ./packages.nix {}) ++ [
           inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default
           inputs.nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
-          configuredEmacs
-        ] ++ emacsPinModule.pinTools;
+          # configuredEmacs
+        ]; # ++ emacsPinModule.pinTools;
         file = sharedFiles // {
           
           # Automatic theme switcher script
@@ -110,11 +109,9 @@ in
         # Enable automatic theme switching for supported programs
         # Programs will automatically use "latte" in light mode and "mocha" in dark mode
 
-        # Enable starship integration for automatic color palette management
-        starship.enable = true;
-        # Enable bat integration for automatic syntax highlighting themes
         bat.enable = true;
-        # Enable zellij integration for automatic theming
+        kitty.enable = true;
+        starship.enable = true;
         zellij.enable = true;
       };
 
@@ -150,6 +147,8 @@ in
           };
         };
 
+        bash.enable = true;
+
         bat = {
           enable = true;
           config = {
@@ -170,6 +169,16 @@ in
               email = userConfig.email;
               name = userConfig.name;
             };
+          };
+        };
+
+        kitty = {
+          enable = true;
+          settings = {
+            # Theme will be automatically managed by Catppuccin
+            font = "MonoLisaVariable Nerd Font";
+            font_size = 18;
+            disable_ligatures = "never";
           };
         };
 
@@ -207,6 +216,7 @@ in
         
         zoxide = {
           enable = true;
+          enableBashIntegration = true;
           enableNushellIntegration = true;
           enableZshIntegration = true;
         };
@@ -328,16 +338,16 @@ in
       } // (import ./shell-config.nix { inherit config pkgs lib; }).programs;
 
       # Enable Emacs service with our configured package
-      services.emacs = {
-        enable = true;
-        package = configuredEmacs;
-        client = {
-          enable = true;
-          arguments = [ "-c" ];
-        };
-        defaultEditor = false;  # Don't set as EDITOR, we use nvim
-        startWithUserSession = true;
-      };
+      # services.emacs = {
+      #   enable = true;
+      #   package = configuredEmacs;
+      #   client = {
+      #     enable = true;
+      #     arguments = [ "-c" ];
+      #   };
+      #   defaultEditor = false;  # Don't set as EDITOR, we use nvim
+      #   startWithUserSession = true;
+      # };
 
       # Marked broken Oct 20, 2022 check later to remove this
       # https://github.com/nix-community/home-manager/issues/3344

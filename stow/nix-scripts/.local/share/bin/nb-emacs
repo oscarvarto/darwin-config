@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+# Enhanced Nix Build for Emacs
+# Builds with verbose output and automatic progress monitoring
+
+set -euo pipefail
+
+echo "🚀 Starting Nix build with Emacs progress monitoring..."
+echo "📊 Build output will show detailed Emacs compilation progress"
+echo "⏱️  Expected total time: 30-60 minutes for full Emacs build"
+echo ""
+
+# Check if emacs-build-monitor is available
+if command -v emacs-build-monitor >/dev/null 2>&1; then
+    echo "🔍 Using emacs-build-monitor for progress tracking"
+    echo "───────────────────────────────────────────────────────"
+
+    # Run nb with verbose output and pipe through the monitor
+    nb --verbose --show-trace "$@" 2>&1 | emacs-build-monitor --follow
+else
+    echo "⚠️  emacs-build-monitor not found, using standard verbose build"
+    echo "───────────────────────────────────────────────────────"
+
+    # Fallback to regular verbose build
+    nb --verbose --show-trace "$@"
+fi
+
+exit_code=$?
+
+echo ""
+if [[ $exit_code -eq 0 ]]; then
+    echo "✅ Build completed successfully!"
+    echo "💡 Run 'ns' to switch to the new configuration"
+else
+    echo "❌ Build failed with exit code $exit_code"
+    echo "💡 Check the error messages above for details"
+fi
+
+exit $exit_code

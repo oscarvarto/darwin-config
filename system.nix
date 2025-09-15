@@ -7,7 +7,8 @@ let
   
   # Shell path mapping
   shellPaths = {
-    zsh = "/run/current-system/sw/bin/zsh";
+    bash = "/Users/${user}/.bin/bash";
+    zsh = "/Users/${user}/.bin/zsh";
     nushell = "/Users/${user}/.nix-profile/bin/nu";
   };
   
@@ -43,18 +44,36 @@ in
         "emacs-ci.cachix.org-1:B5FVOrxhXXrOL0S+tQ7USrThNT2ag4G+BWZZbaaDtwM="
       ];
 
-      # Maximize build performance 
-      max-jobs = "auto";        # Use all available CPU cores
+      # Dynamic build performance settings based on hardware specs
+      # Hardware-optimized settings applied on Sun Sep 14 13:10:00 CST 2025 for 16 cores, 128GB RAM
+      # These settings are auto-detected and configured during setup
+      max-jobs = 48;        # Hardware-optimized: 16 cores detected
       cores = 0;                # Use all available logical cores for each job
-      max-substitution-jobs = 16;  # Increase parallel downloads
-      
+      max-substitution-jobs = 64; # Hardware-optimized for network performance
+
       # Memory optimization - allow large builds with plenty of RAM
       max-silent-time = 3600;   # 1 hour timeout for silent builds (Emacs compilation)
       timeout = 7200;           # 2 hour total timeout for long builds
-      
-      # Sandbox and build optimizations
+
+      # Advanced build performance settings
       sandbox = true;
       build-cores = 0;          # Use all cores for building (same as cores but explicit)
+
+      # Memory and I/O optimizations (will be configured based on available RAM)
+      min-free = 6871947673;    # Hardware-optimized: 6.3GB minimum
+      max-free = 82463372083;    # Hardware-optimized: 76.7GB threshold
+
+      # Network optimizations
+      connect-timeout = 10;     # 10 second connection timeout
+      download-attempts = 3;    # Retry failed downloads
+
+      # Build environment optimizations
+      keep-going = true;        # Continue building other derivations on failure
+      keep-failed = false;      # Don't keep failed build directories (saves space)
+
+      # Experimental features for better performance
+      eval-cache = true;        # Cache evaluation results
+      tarball-ttl = 300;        # Cache tarballs for 5 minutes
       
       warn-dirty = true;
       # produces linking issues when updating on macOS
@@ -62,13 +81,18 @@ in
       auto-optimise-store = false;
       
       # Fix locale issues in nix builds - ensure consistent locale environment
-      extra-sandbox-paths = [];
+      # Allow locale files and environment variables in sandbox
+      extra-sandbox-paths = [
+        "/usr/share/locale"
+      ];
+
+      # Fix locale issues in nix builds - ensure consistent locale environment
+      # These sandbox paths allow access to system locale files
     };
     
-    # Set locale variables for nix daemon and builds
-    daemonIOLowPriority = true;
-    # daemonCPUSchedPolicy is deprecated, using daemonProcessType instead
-    # daemonProcessType = "background"; # Alternative option if needed
+    # Daemon performance settings for faster builds
+    daemonIOLowPriority = false;      # Hardware-optimized: high (plenty of resources)
+    # Don't set daemonProcessType to allow normal CPU scheduling priority
 
     gc = {
       automatic = true;
@@ -78,6 +102,13 @@ in
 
     extraOptions = ''
       experimental-features = nix-command flakes
+      # Enhanced build visibility and progress indicators
+      log-lines = 100
+      show-trace = true
+      # print-build-logs = true  # Removed: unknown setting in current Nix version
+
+      # Fix locale issues for Mexico-based systems
+      # Force consistent en_US.UTF-8 locale in all build environments
     '';
   };
 
@@ -234,7 +265,6 @@ in
     };
   };
 
-
   # Set MACOSX_DEPLOYMENT_TARGET for gcc-15
   launchd.user.agents.setMacOSXDeploymentTargetVar = {
     serviceConfig = {
@@ -244,6 +274,20 @@ in
         "setenv"
         "MACOSX_DEPLOYMENT_TARGET"
         "26.0"
+      ];
+      RunAtLoad = true;
+    };
+  };
+
+  # Fix locale for Nix builds - override macOS en_MX.UTF-8 with en_US.UTF-8
+  # This overrides the system locale for all processes started via launchctl
+  launchd.user.agents.overrideLangForNix = {
+    serviceConfig = {
+      Label = "org.nixos.overrideLangForNix";
+      ProgramArguments = [
+        "/bin/bash"
+        "-c"
+        "launchctl setenv LANG en_US.UTF-8 && launchctl setenv LC_ALL en_US.UTF-8"
       ];
       RunAtLoad = true;
     };

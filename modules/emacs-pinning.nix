@@ -31,14 +31,81 @@ let
       # Use latest version from overlay (when not pinned or hash missing)
       inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git;
 
-  # Apply emacs configuration overrides
+  # Apply emacs configuration overrides with verbose build output
   configuredEmacs = emacsPackage.override {
+    # Native compilation: ESSENTIAL for performance - always enable
     withNativeCompilation = true;
-    withImageMagick = true;
-    withWebP = true;
+
+    # Tree-sitter: Likely enabled by default in emacs-git, but ensure it's on
     withTreeSitter = true;
-    withSQLite3 = true;
+
+    # Lightweight additions that don't significantly impact build time
+    withSQLite3 = true;   # Useful for org-roam, org-mode features
+    withWebP = true;      # Modern image format support
+
+    # Heavy dependencies - only enable if you actually use these features:
+    withImageMagick = true;
     withXwidgets = true;
+  } // {
+    # Override the build process to show detailed progress during compilation
+    overrideAttrs = oldAttrs: {
+      # Enable verbose build output for better progress tracking
+      configureFlags = (oldAttrs.configureFlags or []) ++ [
+        "--enable-checking=yes,glyphs"  # Enable additional checking with progress
+        "--with-file-notification=gfile"  # More descriptive file notification
+      ];
+
+      # Make build process more verbose
+      buildPhase = ''
+        runHook preBuild
+
+        echo "🔨 Starting Emacs compilation with native compilation..."
+        echo "📊 Build will show progress for major compilation phases"
+        echo "⏱️  Expected build time: 20-45 minutes depending on system"
+        echo ""
+
+        # Use make with verbose output and progress indicators
+        make -j$NIX_BUILD_CORES V=1 \
+          MAKEFLAGS="--output-sync=target --print-directory" \
+          || (echo "❌ Emacs build failed during main compilation" && exit 1)
+
+        echo ""
+        echo "✅ Main Emacs compilation complete, starting native compilation..."
+
+        # Native compilation phase with progress
+        if [ -n "''${enableNativeComp:-}" ]; then
+          echo "🚀 Compiling Elisp files to native code (this may take 10-20 minutes)..."
+          make -j$NIX_BUILD_CORES native-comp V=1 \
+            MAKEFLAGS="--output-sync=target" \
+            || (echo "⚠️  Native compilation failed, continuing with regular build" && true)
+        fi
+
+        runHook postBuild
+      '';
+
+      # Add progress indicators to the installation phase
+      installPhase = ''
+        runHook preInstall
+
+        echo "📦 Installing Emacs (final phase)..."
+        make install DESTDIR="$out" V=1
+
+        echo "✅ Emacs installation complete!"
+        echo "📍 Installed to: $out"
+
+        runHook postInstall
+      '';
+
+      # Ensure build logs are preserved and visible
+      meta = (oldAttrs.meta or {}) // {
+        description = "GNU Emacs with enhanced build progress indicators";
+        longDescription = ''
+          GNU Emacs text editor with native compilation and comprehensive feature set.
+          This build includes verbose progress indicators to track compilation status.
+          Build typically takes 20-45 minutes with native compilation enabled.
+        '';
+      };
+    };
   };
 
   emacsPin = pkgs.writeScriptBin "emacs-pin" ''

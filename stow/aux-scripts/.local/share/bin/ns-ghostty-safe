@@ -36,7 +36,7 @@ detect_ghostty() {
   fi
   
   # Method 3: Check standard ghostty environment variables (fallback)
-  if [[ "$TERM_PROGRAM" == "ghostty" ]] || [[ "$TERM" == *"ghostty"* ]]; then
+  if [[ "${TERM_PROGRAM:-}" == "ghostty" ]] || [[ "$TERM" == *"ghostty"* ]]; then
     return 0
   fi
   

@@ -178,6 +178,14 @@
             exec ${self}/scripts/update-doom-config.sh "$@"
           '')}/bin/update-doom-config";
         };
+        "optimize-nix-performance" = {
+          type = "app";
+          program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "optimize-nix-performance" ''
+            #!/usr/bin/env bash
+            # Optimize Nix build performance based on hardware specs
+            exec ${self}/scripts/optimize-nix-performance.sh "$@"
+          '')}/bin/optimize-nix-performance";
+        };
       };
       
       # Helper function to create darwin configurations with host-specific settings

@@ -193,7 +193,7 @@ keybinds clear-defaults=true {
         bind "up" { ScrollUp; }
         bind "right" { PageScrollDown; }
         bind "Ctrl b" { PageScrollUp; }
-        bind "Ctrl c" { ScrollToBottom; SwitchToMode "locked"; }
+        // bind "Ctrl c" { ScrollToBottom; SwitchToMode "locked"; } // Removed to allow system copy
         bind "d" { HalfPageScrollDown; }
         bind "Ctrl f" { PageScrollDown; }
         bind "h" { PageScrollUp; }
@@ -203,7 +203,7 @@ keybinds clear-defaults=true {
         bind "u" { HalfPageScrollUp; }
     }
     entersearch {
-        bind "Ctrl c" { SwitchToMode "scroll"; }
+        // bind "Ctrl c" { SwitchToMode "scroll"; } // Removed to allow system copy
         bind "esc" { SwitchToMode "scroll"; }
         bind "enter" { SwitchToMode "search"; }
     }
@@ -214,7 +214,7 @@ keybinds clear-defaults=true {
         bind "esc" { UndoRenameTab; SwitchToMode "tab"; }
     }
     shared_among "renametab" "renamepane" {
-        bind "Ctrl c" { SwitchToMode "locked"; }
+        // bind "Ctrl c" { SwitchToMode "locked"; } // Removed to allow system copy
     }
     renamepane {
         bind "esc" { UndoRenamePane; SwitchToMode "pane"; }
@@ -353,7 +353,7 @@ copy_command "pbcopy"
 // Enable automatic copying (and clearing) of selection when releasing mouse
 // Default: true
 // 
-// copy_on_select true
+copy_on_select true
  
 // Path to the default editor to use to edit pane scrollbuffer
 // Default: $EDITOR or $VISUAL
@@ -420,8 +420,12 @@ styled_underlines true
 // Enable or disable support for the enhanced Kitty Keyboard Protocol (the host terminal must also support it)
 // (Requires restart)
 // Default: true (if the host terminal supports it)
-// 
+//
 support_kitty_keyboard_protocol true
+
+// Enable terminal state restoration when switching tabs
+// This helps preserve application state including cursors
+restore_terminal_state true
  
 // Whether to stack panes when resizing beyond a certain size
 // Default: true
@@ -435,5 +439,13 @@ show_startup_tips false
  
 // Whether to show release notes on first version run
 // Default: true
-// 
+//
 // show_release_notes false
+
+// Cursor handling for better terminal application compatibility
+// Preserve cursor state when switching between tabs/panes
+preserve_cursor_position true
+
+// Send cursor queries to applications when switching tabs
+// This helps applications like Claude Code restore their cursor state
+send_cursor_queries true

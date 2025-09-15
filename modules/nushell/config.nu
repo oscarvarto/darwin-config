@@ -260,9 +260,9 @@ $env.config = {
     # filesize options have been moved to other configuration sections in newer nushell versions
 
     cursor_shape: {
-        emacs: line # block, underscore, line, blink_block, blink_underscore, blink_line, inherit to skip setting cursor shape (line is the default)
-        vi_insert: block # block, underscore, line, blink_block, blink_underscore, blink_line, inherit to skip setting cursor shape (block is the default)
-        vi_normal: underscore # block, underscore, line, blink_block, blink_underscore, blink_line, inherit to skip setting cursor shape (underscore is the default)
+        emacs: blink_line # Use blinking line for better visibility
+        vi_insert: blink_block # Use blinking block for better visibility in insert mode
+        vi_normal: blink_underscore # Use blinking underscore for better visibility in normal mode
     }
 
     # Static default theme - will be updated after config load
@@ -324,7 +324,10 @@ $env.config = {
     }
 
     hooks: {
-        pre_prompt: [{ null }] # run before the prompt is shown
+        pre_prompt: [
+            # Ensure cursor visibility is restored (fixes cursor disappearing in Zellij tabs)
+            { ansi cursor_on | print -n }
+        ]
         pre_execution: [{ null }] # run before the repl input is run
         env_change: {
             PWD: [{|before, after| null }] # run if the PWD environment is different since the last repl input
@@ -929,11 +932,11 @@ $env.config = {
             event: { edit: selectall }
         }
         {
-            name: claude_code_submit
+            name: claude_code_newline
             modifier: shift
             keycode: enter
             mode: [emacs, vi_normal, vi_insert]
-            event: { send: executehostcommand cmd: "# Claude Code: Submit prompt" }
+            event: { edit:  InsertNewline }
         }
     ]
 }
