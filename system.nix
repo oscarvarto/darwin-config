@@ -81,13 +81,10 @@ in
       auto-optimise-store = false;
       
       # Fix locale issues in nix builds - ensure consistent locale environment
-      # Allow locale files and environment variables in sandbox
+      # These sandbox paths allow access to system locale files
       extra-sandbox-paths = [
         "/usr/share/locale"
       ];
-
-      # Fix locale issues in nix builds - ensure consistent locale environment
-      # These sandbox paths allow access to system locale files
     };
     
     # Daemon performance settings for faster builds
