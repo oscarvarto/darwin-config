@@ -10,7 +10,7 @@
         { path = "/Applications/Obsidian.app/"; }
         { path = "/Applications/Zed Preview.app/"; }
         { path = "/Applications/Ghostty.app/"; }
-        { path = "/Applications/Safari.app/"; }
+        { path = "/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app/"; }
         { path = "/Applications/Firefox.app/"; }
         { path = "/Applications/Google Chrome.app/"; }
         { path = "/Applications/Microsoft Edge.app/"; }

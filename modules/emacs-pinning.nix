@@ -121,7 +121,7 @@ let
     };
   };
 
-  emacsPin = pkgs.writeScriptBin "emacs-pin" ''
+emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     #!/usr/bin/env bash
     # Pin emacs-git to current nix-provided commit (no args) or specified commit
 
