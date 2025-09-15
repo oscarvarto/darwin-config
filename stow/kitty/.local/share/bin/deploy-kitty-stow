@@ -1,0 +1,132 @@
+#!/bin/bash
+
+# Deploy Kitty Stow Package - Smart deployment with conflict resolution
+# This script handles the transition from manual files to stow-managed files
+
+set -e
+
+echo "📦 Deploying Kitty stow package..."
+
+# Get the stow directory (relative to this script)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+STOW_DIR="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
+KITTY_PACKAGE="$STOW_DIR/kitty"
+
+echo "📁 Stow directory: $STOW_DIR"
+echo "📁 Kitty package: $KITTY_PACKAGE"
+
+# Check if we're in the right location
+if [[ ! -d "$KITTY_PACKAGE" ]]; then
+    echo "❌ Error: Kitty stow package not found at $KITTY_PACKAGE"
+    echo "   Please run this script from within the deployed stow package"
+    exit 1
+fi
+
+# Files that will conflict
+CONFLICT_FILES=(
+    ".config/kitty/kitty.conf"
+    ".config/kitty/current-theme.conf"
+    ".local/share/bin/kitty-dark"
+    ".local/share/bin/kitty-light"
+    ".local/share/bin/kitty-theme-switcher"
+    ".local/share/bin/test-kitty-font"
+)
+
+echo ""
+echo "🔍 Checking for conflicting files..."
+
+conflicts_found=false
+for file in "${CONFLICT_FILES[@]}"; do
+    if [[ -f "$HOME/$file" && ! -L "$HOME/$file" ]]; then
+        echo "⚠️  Conflict: $file (regular file, not symlink)"
+        conflicts_found=true
+    elif [[ -L "$HOME/$file" ]]; then
+        echo "✅ Already managed: $file (symlink)"
+    else
+        echo "➕ New file: $file"
+    fi
+done
+
+if [[ "$conflicts_found" == "true" ]]; then
+    echo ""
+    echo "❓ How would you like to resolve conflicts?"
+    echo "   1) Adopt existing files (move them into stow package)"
+    echo "   2) Backup existing files and use stow versions"
+    echo "   3) Show differences and let me decide"
+    echo "   4) Abort deployment"
+    echo ""
+    read -p "Choose option (1-4): " choice
+
+    case $choice in
+        1)
+            echo "📥 Adopting existing files into stow package..."
+            cd "$STOW_DIR"
+            stow --adopt -t ~ kitty
+            echo "✅ Files adopted successfully"
+            echo "   Note: Check 'git status' in stow directory for any changes"
+            ;;
+        2)
+            echo "💾 Backing up existing files..."
+            backup_dir="$HOME/.kitty-config-backup-$(date +%Y%m%d-%H%M%S)"
+            mkdir -p "$backup_dir"
+
+            for file in "${CONFLICT_FILES[@]}"; do
+                if [[ -f "$HOME/$file" && ! -L "$HOME/$file" ]]; then
+                    echo "   Backing up $file"
+                    mkdir -p "$backup_dir/$(dirname "$file")"
+                    cp "$HOME/$file" "$backup_dir/$file"
+                    rm "$HOME/$file"
+                fi
+            done
+
+            echo "📁 Backup created at: $backup_dir"
+
+            cd "$STOW_DIR"
+            stow -t ~ kitty
+            echo "✅ Stow package deployed successfully"
+            ;;
+        3)
+            echo "🔍 Showing differences..."
+            for file in "${CONFLICT_FILES[@]}"; do
+                if [[ -f "$HOME/$file" && ! -L "$HOME/$file" ]]; then
+                    echo ""
+                    echo "=== Differences for $file ==="
+                    if command -v diff &> /dev/null; then
+                        diff -u "$HOME/$file" "$KITTY_PACKAGE/$file" || true
+                    else
+                        echo "diff command not available"
+                        echo "Existing file:"
+                        head -5 "$HOME/$file"
+                        echo "Stow version:"
+                        head -5 "$KITTY_PACKAGE/$file"
+                    fi
+                fi
+            done
+            echo ""
+            echo "Please resolve conflicts manually and run this script again"
+            exit 0
+            ;;
+        4)
+            echo "❌ Deployment aborted"
+            exit 0
+            ;;
+        *)
+            echo "❌ Invalid choice"
+            exit 1
+            ;;
+    esac
+else
+    echo ""
+    echo "✅ No conflicts found, deploying stow package..."
+    cd "$STOW_DIR"
+    stow -t ~ kitty
+    echo "✅ Stow package deployed successfully"
+fi
+
+echo ""
+echo "🎉 Kitty stow package deployment complete!"
+echo ""
+echo "📋 Next steps:"
+echo "  • Run 'setup-kitty-complete' to verify everything works"
+echo "  • Use 'stow -D -t ~ kitty' to remove if needed"
+echo "  • Files are now managed by stow (symlinks to darwin-config/stow/kitty/)"

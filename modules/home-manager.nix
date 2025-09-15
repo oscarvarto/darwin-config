@@ -110,7 +110,7 @@ in
         # Programs will automatically use "latte" in light mode and "mocha" in dark mode
 
         bat.enable = true;
-        kitty.enable = true;
+        # kitty.enable = true; # Disabled - using homebrew kitty
         starship.enable = true;
         zellij.enable = true;
       };
@@ -172,18 +172,18 @@ in
           };
         };
 
-        kitty = {
-          enable = true;
-          settings = {
-            # Theme will be automatically managed by Catppuccin
-            font = "MonoLisaVariable Nerd Font";
-            font_size = 18;
-            disable_ligatures = "never";
-          };
-          shellIntegration = {
-            enableZshIntegration = true;
-          };
-        };
+        # kitty = {
+        #   enable = true;
+        #   settings = {
+        #     # Theme will be automatically managed by Catppuccin
+        #     font = "MonoLisaVariable Nerd Font";
+        #     font_size = 18;
+        #     disable_ligatures = "never";
+        #   };
+        #   shellIntegration = {
+        #     enableZshIntegration = true;
+        #   };
+        # };
 
         mise = {
           enable = true;

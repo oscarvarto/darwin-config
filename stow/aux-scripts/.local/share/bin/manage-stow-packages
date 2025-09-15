@@ -39,7 +39,7 @@ def main [
             # Define all packages to deploy
             let packages = [
                 "aux-scripts",
-                "nix-scripts", 
+                "nix-scripts",
                 "raycast-scripts",
                 "cargo-tools",
                 "nodejs-tools",
@@ -48,7 +48,8 @@ def main [
                 "doom-extra-files",
                 "lazyvim",
                 "zed",
-                "zellij-theme-management"
+                "zellij-theme-management",
+                "kitty"
             ]
             
             # Deploy each package and collect results
@@ -101,6 +102,7 @@ def main [
 
             # Remove all packages (simple approach)
             let packages = [
+                "kitty",
                 "zellij-theme-management",
                 "doom-emacs",
                 "doom-extra-files",
@@ -131,6 +133,7 @@ def main [
             cd $stow_dir
 
             let packages = [
+                "kitty",
                 "zellij-theme-management",
                 "doom-emacs",
                 "doom-extra-files",
@@ -231,12 +234,14 @@ def main [
             print "  • lazyvim          - Neovim LazyVim configuration"
             print "  • zed              - Zed editor configuration"
             print "  • zellij-theme-management - Zellij theme switching tools"
+            print "  • kitty            - Kitty terminal configuration and automation"
             print ""
             print "📂 Deployment Targets:"
             print "  • Scripts → ~/.local/share/bin/ (as symlinks)"
             print "  • Doom Emacs → ~/.doom.d/ (as symlinks)"
             print "  • LazyVim → ~/.config/nvim/ (as symlinks)"
             print "  • Zed → ~/.config/zed/ (as symlinks)"
+            print "  • Kitty → ~/.config/kitty/ + ~/.local/share/bin/ (as symlinks)"
             print "  • Theme Tools → ~/.local/bin/ (as symlinks)"
         }
     }

@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# Setup Kitty Themes - Configure Catppuccin themes with automatic switching
+# This script sets up the theme management we configured manually
+
+set -e
+
+echo "🎨 Setting up Kitty themes..."
+
+# Check if kitty is installed and themes kitten is available
+if ! command -v kitty &> /dev/null; then
+    echo "❌ Error: kitty is not installed"
+    exit 1
+fi
+
+# Check if we're in a kitty terminal for theme operations
+if [[ "$TERM" != "xterm-kitty" ]]; then
+    echo "⚠️  Warning: Not running in kitty terminal"
+    echo "   Some theme operations may not work correctly"
+fi
+
+echo "🔍 Checking current theme configuration..."
+
+# Check if theme is already configured
+if [[ -f "$HOME/.config/kitty/current-theme.conf" ]]; then
+    current_theme=$(grep "^## name:" "$HOME/.config/kitty/current-theme.conf" 2>/dev/null | cut -d: -f2 | xargs || echo "unknown")
+    if [[ "$current_theme" == "Catppuccin-Latte" ]]; then
+        echo "✅ Theme is already configured: $current_theme"
+        echo "🎨 Theme management commands are available:"
+        echo "  • kitty-light, kitty-dark, kitty-theme-switcher"
+        echo "🎉 Theme setup is already complete!"
+        exit 0
+    else
+        echo "📝 Current theme: $current_theme"
+        echo "🔄 Updating to Catppuccin Latte..."
+    fi
+else
+    echo "❌ No theme configuration found"
+fi
+
+# Set default theme to Catppuccin Latte
+echo "🌅 Setting default theme to Catppuccin Latte..."
+
+# Try to set the theme using kitten
+if kitty +kitten themes --reload-in=all Catppuccin-Latte 2>/dev/null; then
+    echo "✅ Default theme set to Catppuccin Latte"
+else
+    echo "⚠️  Could not set theme automatically (not in kitty terminal)"
+    echo "   Theme will be set when you open kitty"
+fi
+
+echo ""
+echo "🎨 Theme management commands available:"
+echo "  • kitty-light         - Switch to Catppuccin Latte (light)"
+echo "  • kitty-dark          - Switch to Catppuccin Mocha (dark)"
+echo "  • kitty-theme-switcher - Auto switch based on system appearance"
+echo "  • kitty +kitten themes - Interactive theme selector"
+
+echo ""
+echo "📋 Current system appearance:"
+appearance=$(defaults read -g AppleInterfaceStyle 2>/dev/null || echo "Light")
+echo "   System: $appearance mode"
+
+if [[ "$appearance" == "Dark" ]]; then
+    echo "   Recommended: Run 'kitty-dark' for Catppuccin Mocha"
+else
+    echo "   Recommended: Run 'kitty-light' for Catppuccin Latte (default)"
+fi
+
+echo ""
+echo "🎉 Kitty themes setup complete!"

@@ -12,6 +12,7 @@ _:
   "gg"
   "ghostty@tip"
   "jetbrains-toolbox"
+  "kitty"
   "mactex"
   "miniforge"
   "neo4j-desktop"

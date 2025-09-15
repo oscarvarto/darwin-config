@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Switch kitty to dark theme (Catppuccin Mocha)
+echo "Switching to Catppuccin Mocha (dark theme)..."
+kitty +kitten themes --reload-in=all Catppuccin-Mocha

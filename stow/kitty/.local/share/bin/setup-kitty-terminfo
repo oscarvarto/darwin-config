@@ -1,0 +1,115 @@
+#!/bin/bash
+
+# Setup Kitty Terminfo - Install terminfo for proper kitty terminal support
+# This script handles the terminfo installation that we did manually
+
+set -e
+
+echo "🐱 Setting up Kitty terminfo..."
+
+# Check if kitty is installed
+if ! command -v kitty &> /dev/null; then
+    echo "❌ Error: kitty is not installed or not in PATH"
+    echo "   Please install kitty via Homebrew: brew install --cask kitty"
+    exit 1
+fi
+
+# Find kitty installation
+KITTY_APP="/Applications/kitty.app"
+HOMEBREW_KITTY="/opt/homebrew/bin/kitty"
+
+if [[ -d "$KITTY_APP" ]]; then
+    TERMINFO_SOURCE="$KITTY_APP/Contents/Resources/kitty/terminfo/kitty.terminfo"
+    echo "📍 Found kitty app at: $KITTY_APP"
+elif [[ -x "$HOMEBREW_KITTY" ]]; then
+    echo "📍 Found homebrew kitty at: $HOMEBREW_KITTY"
+    # For homebrew kitty, we'll use a different approach
+    TERMINFO_SOURCE=""
+else
+    echo "❌ Error: Could not find kitty installation"
+    exit 1
+fi
+
+# Check if terminfo is already properly installed
+echo "🔍 Checking if xterm-kitty terminfo is already available..."
+if infocmp xterm-kitty &> /dev/null; then
+    echo "✅ xterm-kitty terminfo is already installed"
+
+    # Test basic functionality
+    colors=$(TERM=xterm-kitty tput colors 2>/dev/null || echo "unknown")
+    if [[ "$colors" =~ ^[0-9]+$ ]] && [[ "$colors" -ge 256 ]]; then
+        echo "✅ Terminfo is working correctly ($colors colors)"
+
+        # Test emacsclient compatibility if available
+        if command -v emacsclient &> /dev/null; then
+            if TERM=xterm-kitty emacsclient --version &> /dev/null; then
+                echo "✅ emacsclient compatibility verified"
+                echo "🎉 Terminfo setup is already complete and working!"
+                exit 0
+            else
+                echo "⚠️  emacsclient compatibility issue detected, reinstalling..."
+            fi
+        else
+            echo "🎉 Terminfo setup is already complete!"
+            exit 0
+        fi
+    else
+        echo "⚠️  Terminfo exists but seems broken, reinstalling..."
+    fi
+else
+    echo "❌ xterm-kitty terminfo not found, installing..."
+fi
+
+# Create terminfo directory if it doesn't exist
+mkdir -p ~/.terminfo
+
+if [[ -n "$TERMINFO_SOURCE" && -f "$TERMINFO_SOURCE" ]]; then
+    echo "📥 Installing terminfo from kitty app bundle..."
+    # Install using tic command
+    tic -x -o ~/.terminfo "$TERMINFO_SOURCE"
+    echo "✅ Terminfo installed successfully"
+else
+    echo "⚠️  Could not find terminfo source, attempting alternative method..."
+
+    # Alternative: try to extract terminfo from running kitty
+    if command -v infocmp &> /dev/null; then
+        # Check if xterm-kitty already exists
+        if infocmp xterm-kitty &> /dev/null; then
+            echo "✅ xterm-kitty terminfo already available"
+        else
+            echo "❌ Could not install terminfo automatically"
+            echo "   Please run this script from within a kitty terminal"
+            exit 1
+        fi
+    fi
+fi
+
+# Verify terminfo installation
+echo "🔍 Verifying terminfo installation..."
+if infocmp xterm-kitty &> /dev/null; then
+    echo "✅ xterm-kitty terminfo is working correctly"
+
+    # Test basic capabilities
+    colors=$(TERM=xterm-kitty tput colors 2>/dev/null || echo "unknown")
+    echo "🎨 Terminal supports $colors colors"
+
+    # Test emacsclient compatibility
+    if command -v emacsclient &> /dev/null; then
+        if TERM=xterm-kitty emacsclient --version &> /dev/null; then
+            echo "✅ emacsclient compatibility verified"
+        else
+            echo "⚠️  emacsclient compatibility issues detected"
+        fi
+    fi
+else
+    echo "❌ Terminfo verification failed"
+    exit 1
+fi
+
+echo ""
+echo "🎉 Kitty terminfo setup complete!"
+echo ""
+echo "Next steps:"
+echo "  • Open a new kitty terminal"
+echo "  • Run 'test-kitty-font' to verify font configuration"
+echo "  • Run 'kitty +kitten themes' to set up themes"

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Switch kitty to light theme (Catppuccin Latte)
+echo "Switching to Catppuccin Latte (light theme)..."
+kitty +kitten themes --reload-in=all Catppuccin-Latte
