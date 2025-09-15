@@ -4,6 +4,66 @@ let
   pinFile = "/Users/${user}/.cache/emacs-git-pin";
   hashFile = "/Users/${user}/.cache/emacs-git-pin-hash";
 
+  # Shared shell helpers for pinning scripts
+  commonHelpers = pkgs.writeText "emacs-pinning-common.sh" ''
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    pin_resolve_config_path() {
+      local script_dir
+      script_dir="$(cd "$(dirname "''${BASH_SOURCE[0]:-$0}")" && pwd -P)"
+      local candidates=()
+      if [[ -n "''${DARWIN_CONFIG_PATH:-}" ]]; then
+        candidates+=("''${DARWIN_CONFIG_PATH}")
+      fi
+      candidates+=(
+        "''${HOME}/darwin-config"
+        "/Users/''${USER}/darwin-config"
+        "''${PWD}"
+        "''${script_dir}"
+      )
+      local d="''${script_dir}"
+      for _ in 1 2 3 4 5 6; do
+        candidates+=("''${d}")
+        d="$(dirname "''${d}")"
+      done
+      for path in "''${candidates[@]}"; do
+        if [[ -n "''${path}" && -f "''${path}/flake.nix" ]]; then
+          echo "''${path}"
+          return 0
+        fi
+      done
+      return 1
+    }
+
+    pin_extract_current_emacs_commit() {
+      local config_path="''${1:-}"
+      if [[ -z "''${config_path}" ]]; then
+        config_path="$(pin_resolve_config_path)" || return 1
+      fi
+      ( cd "''${config_path}" && nix eval --raw --impure --expr 'let flake = builtins.getFlake (toString ./.); em = flake.inputs.emacs-overlay.packages."${pkgs.stdenv.hostPlatform.system}".emacs-git; in em.src.rev' )
+    }
+
+    pin_extract_current_emacs_src_outpath() {
+      local config_path="''${1:-}"
+      if [[ -z "''${config_path}" ]]; then
+        config_path="$(pin_resolve_config_path)" || return 1
+      fi
+      ( cd "''${config_path}" && nix eval --raw --impure --expr 'let flake = builtins.getFlake (toString ./.); em = flake.inputs.emacs-overlay.packages."${pkgs.stdenv.hostPlatform.system}".emacs-git; in em.src.outPath' )
+    }
+
+    pin_extract_current_emacs_hash_sri() {
+      local config_path="''${1:-}"
+      local out_path
+      out_path="$(pin_extract_current_emacs_src_outpath "''${config_path:-}")" || return 1
+      nix hash path --type sha256 "''${out_path}" 2>/dev/null
+    }
+
+    pin_sri_from_base32() {
+      nix hash to-sri --type sha256 "''${1}" 2>/dev/null
+    }
+  '';
+
   isPinned = builtins.pathExists pinFile;
 
   pinnedCommit = if isPinned
@@ -24,7 +84,8 @@ let
           owner = "emacs-mirror";
           repo = "emacs";
           rev = pinnedCommit;
-          sha256 = pinnedHash;
+          # Use SRI-style hashing for modern Nix
+          hash = pinnedHash;
         };
       }))
     else
@@ -138,79 +199,15 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     # Create cache directory if it doesn't exist
     mkdir -p "''${CACHE_DIR}"
 
-    # Function to extract current emacs-git commit from overlay
-    extract_current_emacs_commit() {
-      # Try to find the darwin-config directory in common locations
-      local CONFIG_PATH=""
-      local POSSIBLE_PATHS=(
-        "''${HOME}/darwin-config"
-        "/Users/''${USER}/darwin-config"
-        "$(pwd)"
-        "$(dirname "$(readlink -f "''${BASH_SOURCE[0]}")")/../../../.."
-      )
-      
-      for path in "''${POSSIBLE_PATHS[@]}"; do
-        if [[ -f "''${path}/flake.nix" ]]; then
-          CONFIG_PATH="''${path}"
-          break
-        fi
-      done
-      
-      if [[ -z "''${CONFIG_PATH}" ]]; then
-        echo "Could not find darwin-config directory" >&2
-        return 1
-      fi
+    # Load shared helpers
+    # shellcheck source=/dev/null
+    . "${commonHelpers}"
 
-      echo $'\U1F50D Extracting commit hash from current emacs overlay...' >&2
+    # Wrapper to common helper
+    extract_current_emacs_commit() { pin_extract_current_emacs_commit "$@"; }
 
-      # Extract commit hash from the emacs overlay directly
-      local CURRENT_COMMIT
-      local SYSTEM="$(nix eval --expr 'builtins.currentSystem' --raw)"
-      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval "inputs.emacs-overlay.packages.''${SYSTEM}.emacs-git.src.rev" --raw 2>/dev/null)
-
-      if [[ -n "''${CURRENT_COMMIT}" && "''${CURRENT_COMMIT}" != "null" ]]; then
-        echo "''${CURRENT_COMMIT}"
-      else
-        return 1
-      fi
-    }
-
-    # Function to extract current emacs-git hash from overlay
-    extract_current_emacs_hash() {
-      # Try to find the darwin-config directory in common locations
-      local CONFIG_PATH=""
-      local POSSIBLE_PATHS=(
-        "''${HOME}/darwin-config"
-        "/Users/''${USER}/darwin-config"
-        "$(pwd)"
-        "$(dirname "$(readlink -f "''${BASH_SOURCE[0]}")")/../../../.."
-      )
-      
-      for path in "''${POSSIBLE_PATHS[@]}"; do
-        if [[ -f "''${path}/flake.nix" ]]; then
-          CONFIG_PATH="''${path}"
-          break
-        fi
-      done
-      
-      if [[ -z "''${CONFIG_PATH}" ]]; then
-        echo "Could not find darwin-config directory" >&2
-        return 1
-      fi
-
-      echo $'\U1F511 Extracting hash from current emacs overlay...' >&2
-
-      # Extract hash from the emacs overlay directly
-      local CURRENT_HASH
-      local SYSTEM="$(nix eval --expr 'builtins.currentSystem' --raw)"
-      CURRENT_HASH=$(cd "''${CONFIG_PATH}" && nix eval "inputs.emacs-overlay.packages.''${SYSTEM}.emacs-git.src.sha256" --raw 2>/dev/null)
-
-      if [[ -n "''${CURRENT_HASH}" && "''${CURRENT_HASH}" != "null" ]]; then
-        echo "''${CURRENT_HASH}"
-      else
-        return 1
-      fi
-    }
+    # Wrapper to common helper (SRI)
+    extract_current_emacs_hash() { pin_extract_current_emacs_hash_sri "$@"; }
 
     # If no commit hash provided, extract from current emacs
     if [[ -z "''${COMMIT}" ]]; then
@@ -238,7 +235,7 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
           echo "''${HASH}" > "''${HASH_FILE}"
 
           echo $'\U1F4CC Pinned emacs-git to current commit: '"''${COMMIT}"
-          echo $'\U1F511 Stored hash: '"''${HASH}"
+          echo $'\U1F511 Stored hash (SRI): '"''${HASH}"
           echo $'\U1F4A1 Rebuild your configuration: nb && ns'
           exit 0
         else
@@ -261,9 +258,21 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
 
     echo $'\U1F50D Fetching hash for commit '"''${COMMIT}"$'...'
 
-    # Use system-installed nix-prefetch-github
-    HASH_RESULT=$(nix-prefetch-github emacs-mirror emacs --rev "''${COMMIT}" 2>/dev/null)
-    HASH=$(echo "''${HASH_RESULT}" | grep '"hash"' | sed 's/.*"hash": "\([^"]*\)".*/\1/')
+    # Use system-installed nix-prefetch-github to fetch or compute hash
+    HASH_RESULT=$(nix-prefetch-github emacs-mirror emacs --rev "''${COMMIT}" 2>/dev/null || true)
+    HASH=$(echo "''${HASH_RESULT}" | grep '"hash"' | sed 's/.*"hash": "\([^"]*\)".*/\1/' || true)
+
+    # Fallback if only base32 sha256 is provided
+    if [[ -z "''${HASH}" || "''${HASH}" == "null" ]]; then
+      BASE32_HASH=$(echo "''${HASH_RESULT}" | grep '"sha256"' | sed 's/.*"sha256": "\([^"]*\)".*/\1/' || true)
+      if [[ -n "''${BASE32_HASH}" && "''${BASE32_HASH}" != "null" ]]; then
+        if HASH=$(pin_sri_from_base32 "''${BASE32_HASH}"); then
+          :
+        else
+          HASH=""
+        fi
+      fi
+    fi
 
     if [[ -z "''${HASH}" || "''${HASH}" == "null" ]]; then
       echo $'\U274C Failed to fetch hash for commit '"''${COMMIT}"
@@ -276,7 +285,7 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     echo "''${HASH}" > "''${HASH_FILE}"
 
     echo $'\U1F4CC Pinned emacs-git to commit: '"''${COMMIT}"
-    echo $'\U1F511 Stored hash: '"''${HASH}"
+    echo $'\U1F511 Stored hash (SRI): '"''${HASH}"
     echo $'\U1F4A1 Rebuild your configuration: nb && ns'
   '';
 
@@ -314,40 +323,10 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     # Get hostname from system or use current
     HOSTNAME="${hostname}"
 
-    # Function to extract current emacs-git commit from overlay
-    extract_current_emacs_commit() {
-      # Try to find the darwin-config directory in common locations
-      local CONFIG_PATH=""
-      local POSSIBLE_PATHS=(
-        "''${HOME}/darwin-config"
-        "/Users/''${USER}/darwin-config"
-        "$(pwd)"
-        "$(dirname "$(readlink -f "''${BASH_SOURCE[0]}")")/../../../.."
-      )
-      
-      for path in "''${POSSIBLE_PATHS[@]}"; do
-        if [[ -f "''${path}/flake.nix" ]]; then
-          CONFIG_PATH="''${path}"
-          break
-        fi
-      done
-      
-      if [[ -z "''${CONFIG_PATH}" ]]; then
-        echo "Could not find darwin-config directory" >&2
-        return 1
-      fi
-
-      # Extract commit hash from the emacs overlay directly
-      local CURRENT_COMMIT
-      local SYSTEM="$(nix eval --expr 'builtins.currentSystem' --raw)"
-      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval "inputs.emacs-overlay.packages.''${SYSTEM}.emacs-git.src.rev" --raw 2>/dev/null)
-
-      if [[ -n "''${CURRENT_COMMIT}" && "''${CURRENT_COMMIT}" != "null" ]]; then
-        echo "''${CURRENT_COMMIT}"
-      else
-        return 1
-      fi
-    }
+    # Load shared helpers and wrap
+    # shellcheck source=/dev/null
+    . "${commonHelpers}"
+    extract_current_emacs_commit() { pin_extract_current_emacs_commit "$@"; }
 
     # Get current overlay commit
     CURRENT_COMMIT=""
@@ -393,40 +372,10 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     # Get hostname from system or use current
     HOSTNAME="${hostname}"
 
-    # Function to extract current emacs-git commit from overlay
-    extract_current_emacs_commit() {
-      # Try to find the darwin-config directory in common locations
-      local CONFIG_PATH=""
-      local POSSIBLE_PATHS=(
-        "''${HOME}/darwin-config"
-        "/Users/''${USER}/darwin-config"
-        "$(pwd)"
-        "$(dirname "$(readlink -f "''${BASH_SOURCE[0]}")")/../../../.."
-      )
-      
-      for path in "''${POSSIBLE_PATHS[@]}"; do
-        if [[ -f "''${path}/flake.nix" ]]; then
-          CONFIG_PATH="''${path}"
-          break
-        fi
-      done
-      
-      if [[ -z "''${CONFIG_PATH}" ]]; then
-        echo "Could not find darwin-config directory" >&2
-        return 1
-      fi
-
-      # Extract commit hash from the emacs overlay directly
-      local CURRENT_COMMIT
-      local SYSTEM="$(nix eval --expr 'builtins.currentSystem' --raw)"
-      CURRENT_COMMIT=$(cd "''${CONFIG_PATH}" && nix eval "inputs.emacs-overlay.packages.''${SYSTEM}.emacs-git.src.rev" --raw 2>/dev/null)
-
-      if [[ -n "''${CURRENT_COMMIT}" && "''${CURRENT_COMMIT}" != "null" ]]; then
-        echo "''${CURRENT_COMMIT}"
-      else
-        return 1
-      fi
-    }
+    # Load shared helpers and wrap
+    # shellcheck source=/dev/null
+    . "${commonHelpers}"
+    extract_current_emacs_commit() { pin_extract_current_emacs_commit "$@"; }
 
     # Get current overlay commit for comparison
     CURRENT_OVERLAY_COMMIT=""
@@ -454,7 +403,7 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
 
       if [[ -f "''${HASH_FILE}" ]]; then
         STORED_HASH=$(cat "''${HASH_FILE}")
-        echo $'\U1F511 Stored hash: '"''${STORED_HASH}"
+        echo $'\U1F511 Stored hash (SRI): '"''${STORED_HASH}"
       else
         echo $'\U26A0\UFE0F Warning: No hash file found - pinning may not work correctly'
         echo "   Run: emacs-pin ''${PINNED_COMMIT} to fix"

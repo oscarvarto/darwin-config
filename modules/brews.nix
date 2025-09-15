@@ -28,7 +28,7 @@
       "ccache"
       "cmake"
       "cmake-language-server"
-      "coursier"
+      "codex"
       "difftastic"
       "eza"
       "ffmpeg"
