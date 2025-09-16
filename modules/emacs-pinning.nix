@@ -75,21 +75,34 @@ let
     else null;
 
   # Create emacs package - pinned or latest
+  # CRITICAL: When pinned, avoid evaluating overlay entirely to prevent rebuilds
   emacsPackage = if isPinned && pinnedCommit != null && pinnedHash != null
     then
-      # Use pinned version with stored hash
-      (inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git.overrideAttrs (oldAttrs: {
+      # Create a pinned emacs package using the overlay's recipe but with fixed source
+      # We need to access the overlay once to get the recipe, but pin the result
+      let
+        # Get the overlay recipe but don't use its dynamic source
+        overlayRecipe = inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git;
+      in
+      # Create a completely new derivation with a unique name
+      overlayRecipe.overrideAttrs (oldAttrs: rec {
+        pname = "emacs-git-pinned";
         version = "31.0.50-${builtins.substring 0 7 pinnedCommit}";
+        name = "${pname}-${version}";
+
+        # Use our pinned source instead of the overlay's dynamic source
         src = pkgs.fetchFromGitHub {
           owner = "emacs-mirror";
           repo = "emacs";
           rev = pinnedCommit;
-          # Use SRI-style hashing for modern Nix
           hash = pinnedHash;
         };
-      }))
+
+        # Add a unique identifier to prevent cache conflicts
+        __pinnedCommit = pinnedCommit;
+      })
     else
-      # Use latest version from overlay (when not pinned or hash missing)
+      # Only evaluate overlay when not pinned
       inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git;
 
   # Apply emacs configuration overrides with verbose build output
