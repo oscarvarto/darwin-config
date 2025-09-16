@@ -19,6 +19,24 @@ let
   # Emacs pinning logic moved to separate module for modularity
   emacsPinModule = import ./emacs-pinning.nix { inherit pkgs user inputs hostname; };
   configuredEmacs = emacsPinModule.configuredEmacs;
+
+  # Wrapper to ensure we only launch the GUI daemon when not already running
+  emacsDaemonWrapper = pkgs.writeShellScript "emacs-fg-daemon-wrapper" ''
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    EMACSCLIENT="${configuredEmacs}/bin/emacsclient"
+    APP="${configuredEmacs}/Applications/Emacs.app"
+
+    # If daemon responds, do nothing (successful exit so launchd doesn't complain)
+    if "$EMACSCLIENT" -e "(emacs-version)" >/dev/null 2>&1; then
+      exit 0
+    fi
+
+    # Launch via LaunchServices so the Dock uses the app bundle icon
+    /usr/bin/open -a "$APP" --args --fg-daemon || true
+    exit 0
+  '';
 in
 {
 
@@ -110,7 +128,6 @@ in
         # Programs will automatically use "latte" in light mode and "mocha" in dark mode
 
         bat.enable = true;
-        # kitty.enable = true; # Disabled - using homebrew kitty
         starship.enable = true;
         zellij.enable = true;
       };
@@ -171,19 +188,6 @@ in
             };
           };
         };
-
-        # kitty = {
-        #   enable = true;
-        #   settings = {
-        #     # Theme will be automatically managed by Catppuccin
-        #     font = "MonoLisaVariable Nerd Font";
-        #     font_size = 18;
-        #     disable_ligatures = "never";
-        #   };
-        #   shellIntegration = {
-        #     enableZshIntegration = true;
-        #   };
-        # };
 
         mise = {
           enable = true;
@@ -340,19 +344,33 @@ in
         };
       } // (import ./shell-config.nix { inherit config pkgs lib; }).programs;
 
-      # Enable Emacs service with our configured package
-      services.emacs = {
+      # Custom Emacs launchd service with proper terminal environment
+      launchd.agents.emacs = {
         enable = true;
-        package = configuredEmacs;
-        client = {
-          enable = true;
-          arguments = [ "-c" ];
+        config = {
+          Label = "org.nix-community.home.emacs";
+          # Use wrapper so we don't error when daemon already exists
+          ProgramArguments = [ "${emacsDaemonWrapper}" ];
+          # We don't need to keep a helper process alive
+          KeepAlive = false;
+          RunAtLoad = true;
+          # Ensure this runs only in the Aqua (GUI) session and behaves like an interactive app
+          LimitLoadToSessionType = "Aqua";
+          ProcessType = "Interactive";
+          WorkingDirectory = "/Users/${user}";
+          EnvironmentVariables = {
+            # Set proper terminal environment for emacsclient terminal mode
+            SHELL = "/bin/zsh";
+            LANG = "en_US.UTF-8";
+            LC_ALL = "en_US.UTF-8";
+            TERM = "xterm-256color";  # widely compatible terminal type
+            COLORTERM = "truecolor";
+          };
+          StandardErrorPath = "/tmp/emacs-daemon.log";
+          StandardOutPath = "/tmp/emacs-daemon.log";
         };
-        defaultEditor = false;  # Don't set as EDITOR, we use nvim
-        startWithUserSession = true;
       };
 
-      # Marked broken Oct 20, 2022 check later to remove this
       # https://github.com/nix-community/home-manager/issues/3344
       manual.manpages.enable = false;
     };

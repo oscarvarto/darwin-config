@@ -222,5 +222,20 @@
     apps = nixpkgs.lib.genAttrs darwinSystems mkDarwinApps;
 
     darwinConfigurations = nixpkgs.lib.mapAttrs mkDarwinConfig hostConfigs;
+
+    # Expose configuredEmacs for each host so scripts can reference it
+    packages = nixpkgs.lib.genAttrs darwinSystems (system:
+      nixpkgs.lib.mapAttrs' (hostname: hostConfig:
+        let
+          emacsPinModule = import ./modules/emacs-pinning.nix {
+            pkgs = nixpkgs.legacyPackages.${system};
+            user = hostConfig.user;
+            inputs = inputs;
+            inherit hostname;
+          };
+        in
+          nixpkgs.lib.nameValuePair "${hostname}-configuredEmacs" emacsPinModule.configuredEmacs
+      ) hostConfigs
+    );
   };
 }

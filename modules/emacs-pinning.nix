@@ -106,7 +106,7 @@ let
       inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git;
 
   # Apply emacs configuration overrides with verbose build output
-  configuredEmacs = emacsPackage.override {
+  configuredEmacs = (emacsPackage.override {
     # Native compilation: ESSENTIAL for performance - always enable
     withNativeCompilation = true;
 
@@ -120,67 +120,36 @@ let
     # Heavy dependencies - only enable if you actually use these features:
     withImageMagick = true;
     withXwidgets = true;
-  } // {
-    # Override the build process to show detailed progress during compilation
-    overrideAttrs = oldAttrs: {
-      # Enable verbose build output for better progress tracking
-      configureFlags = (oldAttrs.configureFlags or []) ++ [
-        "--enable-checking=yes,glyphs"  # Enable additional checking with progress
-        "--with-file-notification=gfile"  # More descriptive file notification
-      ];
+  }).overrideAttrs (oldAttrs: {
+      # Add custom icon integration
+      postInstall = ''
+        ${oldAttrs.postInstall or ""}
 
-      # Fix locale issues in sandboxed nix build environment
-      # Explicitly set locale environment variables to prevent en_MX.UTF-8 fallback
-      env = (oldAttrs.env or {}) // {
-        LANG = "en_US.UTF-8";
-        LC_ALL = "en_US.UTF-8";
-        LC_COLLATE = "en_US.UTF-8";
-        LC_CTYPE = "en_US.UTF-8";
-        LC_MESSAGES = "en_US.UTF-8";
-        LC_MONETARY = "en_US.UTF-8";
-        LC_NUMERIC = "en_US.UTF-8";
-        LC_TIME = "en_US.UTF-8";
-      };
+        # Integrate custom Emacs icon used across the repo (also used by Raycast)
+        # Keep a single source of truth under stow/ so Dock and Raycast match
+        CUSTOM_ICON_SOURCE="${../stow/nix-scripts/.local/share/img/icons/Emacs.icns}"
+        if [[ -f "$CUSTOM_ICON_SOURCE" ]]; then
+          echo "🎨 Integrating custom curvy-blender Emacs icon..."
 
-      # Make build process more verbose
-      buildPhase = ''
-        runHook preBuild
+          # Find the Emacs.app bundle in the output
+          EMACS_APP=$(find "$out" -name "Emacs.app" -type d | head -1)
+          if [[ -n "$EMACS_APP" && -d "$EMACS_APP/Contents/Resources" ]]; then
+            # Backup original icon
+            if [[ -f "$EMACS_APP/Contents/Resources/Emacs.icns" ]]; then
+              cp "$EMACS_APP/Contents/Resources/Emacs.icns" "$EMACS_APP/Contents/Resources/Emacs.icns.original"
+            fi
 
-        echo "🔨 Starting Emacs compilation with native compilation..."
-        echo "📊 Build will show progress for major compilation phases"
-        echo "⏱️  Expected build time: 20-45 minutes depending on system"
-        echo ""
-
-        # Use make with verbose output and progress indicators
-        make -j$NIX_BUILD_CORES V=1 \
-          MAKEFLAGS="--output-sync=target --print-directory" \
-          || (echo "❌ Emacs build failed during main compilation" && exit 1)
-
-        echo ""
-        echo "✅ Main Emacs compilation complete, starting native compilation..."
-
-        # Native compilation phase with progress
-        if [ -n "''${enableNativeComp:-}" ]; then
-          echo "🚀 Compiling Elisp files to native code (this may take 10-20 minutes)..."
-          make -j$NIX_BUILD_CORES native-comp V=1 \
-            MAKEFLAGS="--output-sync=target" \
-            || (echo "⚠️  Native compilation failed, continuing with regular build" && true)
+            # Install custom icon
+            cp "$CUSTOM_ICON_SOURCE" "$EMACS_APP/Contents/Resources/Emacs.icns"
+            echo "✅ Custom icon installed: $EMACS_APP/Contents/Resources/Emacs.icns"
+          else
+            echo "⚠️  Could not find Emacs.app bundle or Resources directory"
+          fi
+        elif [[ ! -f "$CUSTOM_ICON_SOURCE" ]]; then
+          echo "ℹ️  Custom icon not found at: $CUSTOM_ICON_SOURCE"
+        else
+          echo "ℹ️  Not a GUI Emacs build, skipping icon installation"
         fi
-
-        runHook postBuild
-      '';
-
-      # Add progress indicators to the installation phase
-      installPhase = ''
-        runHook preInstall
-
-        echo "📦 Installing Emacs (final phase)..."
-        make install DESTDIR="$out" V=1
-
-        echo "✅ Emacs installation complete!"
-        echo "📍 Installed to: $out"
-
-        runHook postInstall
       '';
 
       # Ensure build logs are preserved and visible
@@ -192,8 +161,7 @@ let
           Build typically takes 20-45 minutes with native compilation enabled.
         '';
       };
-    };
-  };
+  });
 
 emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     #!/usr/bin/env bash

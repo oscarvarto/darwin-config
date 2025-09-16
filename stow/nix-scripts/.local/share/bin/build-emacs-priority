@@ -211,7 +211,7 @@ echo "🚀 Phase 1: Building Emacs with dedicated resources..."
 if [[ "$DRY_RUN" == "true" ]]; then
   echo "🔍 DRY RUN - Would execute:"
   echo "   # Building configured Emacs (emacs-git with pinning + custom build options)"
-  echo "   nix build --max-jobs $EMACS_MAX_JOBS --cores $EMACS_CORES .#darwinConfigurations.$HOSTNAME.config.home-manager.users.$USER.services.emacs.package"
+  echo "   nix build --max-jobs $EMACS_MAX_JOBS --cores $EMACS_CORES .#packages.aarch64-darwin.$HOSTNAME-configuredEmacs"
   echo ""
   echo "   This builds the emacs-git version with:"
   echo "   • Version pinning support (respects ~/.cache/emacs-git-pin)"
@@ -231,7 +231,7 @@ else
   verbose_log "   Locale environment: LANG=$LANG, LC_ALL=$LC_ALL"
 
   if nix build --max-jobs "$EMACS_MAX_JOBS" --cores "$EMACS_CORES" \
-      ".#darwinConfigurations.$HOSTNAME.config.home-manager.users.$USER.services.emacs.package"; then
+      ".#packages.aarch64-darwin.$HOSTNAME-configuredEmacs"; then
     echo "✅ Configured Emacs build completed successfully!"
   else
     echo "❌ Configured Emacs build failed!"

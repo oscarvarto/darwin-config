@@ -124,7 +124,8 @@
 
        :os
        (:if (featurep :system 'macos) macos)  ; improve compatibility with macOS
-       (tty +osc)          ; improve the terminal Emacs experience
+       ;; (tty +osc)          ; improve the terminal Emacs experience
+       tty                 ; improve the terminal Emacs experience
 
        :lang
        ;;agda              ; types of types of types of types...

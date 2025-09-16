@@ -229,7 +229,6 @@
     :hook ((org-mode text-mode) . idle-highlight-mode))
 
   (global-centered-cursor-mode +1)
-  ;; Treemacs
   (load (expand-file-name "config/ui/my-treemacs-config" doom-user-dir))
 
   (use-package indent-bars
@@ -237,21 +236,12 @@
     (indent-bars-no-descend-lists t) ; no extra bars in continued func arg lists
     (indent-bars-treesit-support t)
     (indent-bars-treesit-ignore-blank-lines-types '("module"))
-    ;; (setq
-    ;;  indent-bars-pattern "."
-    ;;  indent-bars-width-frac 0.5
-    ;;  indent-bars-pad-frac 0.25
-    ;;  indent-bars-color-by-depth nil
-    ;;  indent-bars-highlight-current-depth '(:face default :blend 0.4))
-    (setopt
-      indent-bars-color '(highlight :face-bg t :blend 0.8)
-      indent-bars-pattern "."
-      indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 0.8)
-      indent-bars-highlight-current-depth '(:blend 1.0 :width 0.4 :pad 0.1 :pattern "!.!.!." :zigzag 0.1)
-      indent-bars-pad-frac 0.3
-      indent-bars-ts-highlight-current-depth '(no-inherit) ; equivalent to nil
-      indent-bars-ts-color-by-depth '(no-inherit)
-      indent-bars-ts-color '(inherit fringe :face-bg t :blend 0.2))
+    (setq
+     indent-bars-pattern "."
+     indent-bars-width-frac 0.5
+     indent-bars-pad-frac 0.25
+     indent-bars-color-by-depth nil
+     indent-bars-highlight-current-depth '(:face default :blend 0.4))
     :hook (prog-mode . indent-bars-mode))
 
   ;; Ultra scroll

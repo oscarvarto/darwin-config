@@ -57,7 +57,6 @@
 (require 'my-defaults-config)
 (require 'my-banner-config)
 (require 'my-gui-appearance-config)
-(require 'my-terminal-config)
 ;; (require 'my-startup-benchmark)
 
 ;; Helper function for loading

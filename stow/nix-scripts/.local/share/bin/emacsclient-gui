@@ -11,21 +11,43 @@
 # @raycast.iconDark ~/.local/share/img/icons/Emacs.icns
 
 # Enhanced emacsclient wrapper for proper macOS window recognition
-# This ensures the Emacs window is properly recognized by macOS window management
-# while maintaining connection to the home-manager daemon
+# Note: the @raycast.icon only affects Raycast’s UI, not the Dock icon.
+# The Dock icon comes from the running Emacs application bundle.
 
-EMACSCLIENT="$HOME/.nix-profile/bin/emacsclient"
+EMACSCLIENT="${EMACSCLIENT:-}"
+if [[ -z "$EMACSCLIENT" ]]; then
+    if command -v emacsclient >/dev/null 2>&1; then
+        EMACSCLIENT="$(command -v emacsclient)"
+    else
+        EMACSCLIENT="$HOME/.nix-profile/bin/emacsclient"
+    fi
+fi
 
 # Check if server is running
 if ! "$EMACSCLIENT" -e "(emacs-version)" >/dev/null 2>&1; then
     echo "Emacs daemon not running. Waiting for home-manager service..." >&2
     # Give the home-manager service a moment to start
     sleep 2
-    
+
     # Check again
     if ! "$EMACSCLIENT" -e "(emacs-version)" >/dev/null 2>&1; then
         echo "Error: Emacs daemon still not available" >&2
         exit 1
+    fi
+fi
+
+# Determine Emacs app path and bundle identifier for activation (defaults to org.gnu.Emacs)
+EMACS_APP_PATH="$HOME/Applications/Home Manager Apps/Emacs.app"
+if [[ ! -e "$EMACS_APP_PATH" ]]; then
+    EMACS_APP_PATH="/Applications/Emacs.app"
+fi
+
+# Try to determine bundle identifier for activation (defaults to org.gnu.Emacs)
+EMACS_BUNDLE_ID="org.gnu.Emacs"
+if [[ -e "$EMACS_APP_PATH/Contents/Info.plist" ]]; then
+    BID=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$EMACS_APP_PATH/Contents/Info.plist" 2>/dev/null || true)
+    if [[ -n "${BID:-}" ]]; then
+        EMACS_BUNDLE_ID="$BID"
     fi
 fi
 
@@ -37,22 +59,22 @@ fi
     --no-wait \
     "$@"
 
-# Immediately raise and focus the frame using emacsclient itself
-# This avoids launching a new Emacs instance
+# Use only Emacs built-in frame management to avoid multiple Accessibility entries
+# This method works reliably without requiring external AppleScript calls
 "$EMACSCLIENT" --eval '(progn
   (select-frame-set-input-focus (selected-frame))
   (raise-frame)
-  (when (fboundp (quote ns-do-applescript))
-    (ns-do-applescript "tell application \"System Events\" to set frontmost of process \"Emacs\" to true"))
   t)' >/dev/null 2>&1 || true
 
-# Alternative focus method using System Events directly
-# This avoids the "tell application Emacs" which might launch a new instance
-osascript <<EOF 2>/dev/null || true
+# Ensure macOS focuses the existing Emacs app so the Dock icon is shown
+if command -v osascript >/dev/null 2>&1; then
+    # Only focus if an Emacs process is already running; do NOT launch a new one
+    osascript >/dev/null 2>&1 <<EOF || true
 tell application "System Events"
-    set emacsProcList to every process whose name contains "Emacs"
-    if length of emacsProcList > 0 then
-        set frontmost of item 1 of emacsProcList to true
-    end if
+  set emProcs to (application processes whose bundle identifier is "$EMACS_BUNDLE_ID")
+  if (count of emProcs) > 0 then
+    set frontmost of item 1 of emProcs to true
+  end if
 end tell
 EOF
+fi

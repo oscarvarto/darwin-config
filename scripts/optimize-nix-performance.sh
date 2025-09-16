@@ -142,7 +142,7 @@ MEM_GIB=$((MEM_BYTES / 1024 / 1024 / 1024))
 # ----------------------------------------------------------------------
 # Use multiple jobs per core for maximum CPU utilization
 # Modern processors with hyperthreading can handle 2-4 jobs per logical core
-MAX_JOBS=$((CORES * 3))
+MAX_JOBS=$((CORES * 4))
 [[ $MAX_JOBS -lt 1 ]] && MAX_JOBS=1
 
 # Network downloads can be very aggressive - 4x cores up to 64
@@ -151,12 +151,12 @@ MAX_SUB_JOBS=$((CORES * 4))
 # Memory limits based on available RAM
 # min-free: Keep 2GB minimum or 5% of RAM, whichever is larger
 MIN_FREE_BYTES=$(echo "$MEM_GIB * 1024 * 1024 * 1024 * 0.05" | bc | cut -d. -f1)
-[[ $MIN_FREE_BYTES -lt 2147483648 ]] && MIN_FREE_BYTES=2147483648  # 2GB minimum
+[[ $MIN_FREE_BYTES -lt 2147483648 ]] && MIN_FREE_BYTES=2147483648 # 2GB minimum
 MIN_FREE_DESC="$(echo "scale=1; $MIN_FREE_BYTES / 1024 / 1024 / 1024" | bc)GB"
 
 # max-free: Trigger GC when using 60% of RAM or 5GB, whichever is larger
 MAX_FREE_BYTES=$(echo "$MEM_GIB * 1024 * 1024 * 1024 * 0.6" | bc | cut -d. -f1)
-[[ $MAX_FREE_BYTES -lt 5368709120 ]] && MAX_FREE_BYTES=5368709120  # 5GB minimum
+[[ $MAX_FREE_BYTES -lt 5368709120 ]] && MAX_FREE_BYTES=5368709120 # 5GB minimum
 MAX_FREE_DESC="$(echo "scale=1; $MAX_FREE_BYTES / 1024 / 1024 / 1024" | bc)GB"
 
 # Upper‑bound workers: one per core, but never exceed 1/2 of RAM in GiB.
@@ -271,4 +271,3 @@ if [[ "$DRY_RUN" != "true" ]]; then
   echo "💡 To revert: restore from system.nix.backup and rebuild"
   echo "   cp system.nix.backup system.nix && nb && ns"
 fi
-

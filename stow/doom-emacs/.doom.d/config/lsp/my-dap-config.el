@@ -47,10 +47,12 @@
   ;; :custom
   ;;(dap-netcore-install-dir "/Users/oscarvarto/.emacs.d/.local/cache/.cache/lsp/netcoredbg"))
 
+(defvar editorconfig-exclude-regexps nil
+  "List of regexps to exclude files from editorconfig processing.")
+
 (require 'editorconfig)
 
 ;; Exclude csharp-mode, csproj-mode, sharper-mode, sln-mode from editorconfig
 ;; (add-to-list 'editorconfig-exclude-modes '(csproj-mode sharper-mode sln-mode dap-mode))
 (editorconfig-mode 1)
-
 
