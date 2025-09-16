@@ -20,7 +20,7 @@ OPTIONS:
     -v, --version       Show version information
     -s, --status        Show current theme status across all applications
     -f, --force-light   Force light theme (Catppuccin Latte) regardless of system setting
-    -d, --force-dark    Force dark theme (Catppuccin Macchiato) regardless of system setting
+    -d, --force-dark    Force dark theme (Catppuccin Mocha) regardless of system setting
     -a, --auto          Use automatic system appearance detection (default)
     -q, --quiet         Run silently without output
     --dry-run          Show what would be changed without making changes
@@ -37,12 +37,12 @@ SUPPORTED APPLICATIONS:
 
 THEME MAPPING:
     Light Mode:  Catppuccin Latte (official built-in theme)
-    Dark Mode:   Catppuccin Macchiato (official built-in theme)
+    Dark Mode:   Catppuccin Mocha (official built-in theme)
 
 AUTOMATIC MODE:
     The script automatically detects macOS system appearance:
     • System Light Mode → Catppuccin Latte
-    • System Dark Mode  → Catppuccin Macchiato
+    • System Dark Mode  → Catppuccin Mocha
 
 EXAMPLES:
     catppuccin-theme-switcher              # Auto-detect and apply theme
@@ -240,7 +240,7 @@ fi
 
 # Set theme variables
 if [[ "$APPEARANCE" == "dark" ]]; then
-    CATPPUCCIN_FLAVOR="macchiato"
+    CATPPUCCIN_FLAVOR="mocha"
 else
     CATPPUCCIN_FLAVOR="latte"
 fi
@@ -324,35 +324,35 @@ GHOSTTY_OVERRIDES="$HOME/.config/ghostty/overrides.conf"
 if [[ -f "$GHOSTTY_OVERRIDES" ]]; then
     if [[ "$APPEARANCE" == "light" ]]; then
         # Switch from dark themes to catppuccin-latte or light fallback
-        if grep -q 'theme = dracula\|theme = catppuccin-mocha' "$GHOSTTY_OVERRIDES"; then
+        if grep -q 'theme = Dracula\|theme = Catppuccin Mocha' "$GHOSTTY_OVERRIDES"; then
             if [[ "$DRY_RUN" != "true" ]]; then
-                sed -i "" 's/theme = dracula/theme = catppuccin-latte/' "$GHOSTTY_OVERRIDES"
-                sed -i "" 's/theme = catppuccin-mocha/theme = catppuccin-latte/' "$GHOSTTY_OVERRIDES"
+                sed -i "" 's/theme = Dracula/theme = Catppuccin Latte/' "$GHOSTTY_OVERRIDES"
+                sed -i "" 's/theme = Catppuccin Mocha/theme = Catppuccin Latte/' "$GHOSTTY_OVERRIDES"
             fi
-            log "   ✅ Updated Ghostty theme to catppuccin-latte (light mode)"
-        elif ! grep -q 'theme = catppuccin-latte\|theme = BlulocoLight' "$GHOSTTY_OVERRIDES"; then
+            log "   ✅ Updated Ghostty theme to Catppuccin Latte (light mode)"
+        elif ! grep -q 'theme = Catppuccin Latte\|theme = BlulocoLight' "$GHOSTTY_OVERRIDES"; then
             # Add light theme if no theme is set
             if [[ "$DRY_RUN" != "true" ]]; then
-                echo "theme = catppuccin-latte" >> "$GHOSTTY_OVERRIDES"
+                echo "theme = Catppuccin Latte" >> "$GHOSTTY_OVERRIDES"
             fi
-            log "   ✅ Added Ghostty theme catppuccin-latte (light mode)"
+            log "   ✅ Added Ghostty theme Catppuccin Latte (light mode)"
         else
             log "   ✅ Ghostty already using a light theme"
         fi
     else
         # Switch from light themes to catppuccin-mocha or dark fallback
-        if grep -q 'theme = BlulocoLight\|theme = catppuccin-latte' "$GHOSTTY_OVERRIDES"; then
+        if grep -q 'theme = BlulocoLight\|theme = Catppuccin Latte' "$GHOSTTY_OVERRIDES"; then
             if [[ "$DRY_RUN" != "true" ]]; then
-                sed -i "" 's/theme = BlulocoLight/theme = catppuccin-mocha/' "$GHOSTTY_OVERRIDES"
-                sed -i "" 's/theme = catppuccin-latte/theme = catppuccin-mocha/' "$GHOSTTY_OVERRIDES"
+                sed -i "" 's/theme = BlulocoLight/theme = Catppuccin Mocha/' "$GHOSTTY_OVERRIDES"
+                sed -i "" 's/theme = Catppuccin Latte/theme = Catppuccin Mocha/' "$GHOSTTY_OVERRIDES"
             fi
-            log "   ✅ Updated Ghostty theme to catppuccin-mocha (dark mode)"
-        elif ! grep -q 'theme = catppuccin-mocha\|theme = dracula' "$GHOSTTY_OVERRIDES"; then
+            log "   ✅ Updated Ghostty theme to Catppuccin Mocha (dark mode)"
+        elif ! grep -q 'theme = Catppuccin Mocha\|theme = Dracula' "$GHOSTTY_OVERRIDES"; then
             # Add dark theme if no theme is set
             if [[ "$DRY_RUN" != "true" ]]; then
-                echo "theme = catppuccin-mocha" >> "$GHOSTTY_OVERRIDES"
+                echo "theme = Catppuccin Mocha" >> "$GHOSTTY_OVERRIDES"
             fi
-            log "   ✅ Added Ghostty theme catppuccin-mocha (dark mode)"
+            log "   ✅ Added Ghostty theme Catppuccin Mocha (dark mode)"
         else
             log "   ✅ Ghostty already using a dark theme"
         fi
