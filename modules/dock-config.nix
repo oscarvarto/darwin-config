@@ -22,6 +22,7 @@
         { path = "/Applications/Preview.app/"; }
         { path = "/System/Applications/Music.app/"; }
         { path = "/System/Applications/Calendar.app/"; }
+        { path = "/Applications/News.app/"; }
         { path = "/Applications/Xcode.app/"; }
         { path = "/System/Applications/System Settings.app/"; }
       ];

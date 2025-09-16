@@ -1051,27 +1051,29 @@ alias ds = doom sync --aot --gc -j (nproc)
 alias dup = doom sync -u --aot --gc -j (nproc)
 alias sdup = doom sync -u --aot --gc -j (nproc) --rebuild
 
-# Nix shortcuts - enhanced with -v flag support
-def nb [...args] {
-    let verbose = ($args | any {|arg| $arg == "-v"})
-    let filtered_args = ($args | where {|arg| $arg != "-v"})
-    
+# Nix shortcuts - enhanced with -v flag support (nushell-native flags)
+def nb [--verbose(-v) ...args] {
+    # Also accept positional "v"/"verbose" for convenience (zsh muscle memory)
+    let v_positional = ($args | any {|a| $a == "v" or $a == "verbose"})
+    let passthrough = if $v_positional { $args | where {|a| $a != "v" and $a != "verbose"} } else { $args }
+
     dirs add ~/darwin-config
-    
-    if $verbose {
-        nix run .#build --verbose ...$filtered_args
+
+    if ($verbose or $v_positional) {
+        nix run .#build -- --verbose ...$passthrough
     } else {
-        nix run .#build ...$filtered_args
+        nix run .#build -- ...$passthrough
     }
-    
+
     dirs drop
 }
 
 # ns function - nushell-native implementation with ghostty/zellij compatibility
 # Enhanced with -v flag support for verbose output
-def "ns" [...args] {
-    let verbose = ($args | any {|arg| $arg == "-v"})
-    let filtered_args = ($args | where {|arg| $arg != "-v"})
+def "ns" [--verbose(-v) ...args] {
+    # Also accept positional "v"/"verbose" for convenience
+    let v_positional = ($args | any {|a| $a == "v" or $a == "verbose"})
+    let filtered_args = if $v_positional { $args | where {|a| $a != "v" and $a != "verbose"} } else { $args }
     # Colors for output
     let GREEN = (ansi green_bold)
     let YELLOW = (ansi yellow_bold)
@@ -1155,15 +1157,15 @@ def "ns" [...args] {
             try {
                 if $verbose {
                     if ($filtered_args | length) > 0 {
-                        nix run .#build-switch --verbose ...$filtered_args
+                        nix run .#build-switch -- --verbose ...$filtered_args
                     } else {
-                        nix run .#build-switch --verbose
+                        nix run .#build-switch -- --verbose
                     }
                 } else {
                     if ($filtered_args | length) > 0 {
-                        nix run .#build-switch ...$filtered_args
+                        nix run .#build-switch -- ...$filtered_args
                     } else {
-                        nix run .#build-switch
+                        nix run .#build-switch --
                     }
                 }
                 print $"($GREEN)Switch to new generation complete!($NC)"
@@ -1189,15 +1191,15 @@ def "ns" [...args] {
                 
                 if $verbose {
                     if ($filtered_args | length) > 0 {
-                        nix run .#build-switch --verbose ...$filtered_args
+                        nix run .#build-switch -- --verbose ...$filtered_args
                     } else {
-                        nix run .#build-switch --verbose
+                        nix run .#build-switch -- --verbose
                     }
                 } else {
                     if ($filtered_args | length) > 0 {
-                        nix run .#build-switch ...$filtered_args
+                        nix run .#build-switch -- ...$filtered_args
                     } else {
-                        nix run .#build-switch
+                        nix run .#build-switch --
                     }
                 }
                 
@@ -1217,15 +1219,15 @@ def "ns" [...args] {
         try {
             if $verbose {
                 if ($filtered_args | length) > 0 {
-                    nix run .#build-switch --verbose ...$filtered_args
+                    nix run .#build-switch -- --verbose ...$filtered_args
                 } else {
-                    nix run .#build-switch --verbose
+                    nix run .#build-switch -- --verbose
                 }
             } else {
                 if ($filtered_args | length) > 0 {
-                    nix run .#build-switch ...$filtered_args
+                    nix run .#build-switch -- ...$filtered_args
                 } else {
-                    nix run .#build-switch
+                    nix run .#build-switch --
                 }
             }
             

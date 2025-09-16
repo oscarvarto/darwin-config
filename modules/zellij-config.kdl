@@ -141,6 +141,19 @@ keybinds clear-defaults=true {
         bind "Alt Shift down" { MoveFocus "down"; }
         bind "Alt Shift up" { MoveFocus "up"; }
         bind "Alt Shift right" { MoveFocusOrTab "right"; }
+        // Quick tab switching with Alt+F1..F12 (works in locked/normal)
+        bind "Alt F1" { GoToTab 1; SwitchToMode "locked"; }
+        bind "Alt F2" { GoToTab 2; SwitchToMode "locked"; }
+        bind "Alt F3" { GoToTab 3; SwitchToMode "locked"; }
+        bind "Alt F4" { GoToTab 4; SwitchToMode "locked"; }
+        bind "Alt F5" { GoToTab 5; SwitchToMode "locked"; }
+        bind "Alt F6" { GoToTab 6; SwitchToMode "locked"; }
+        bind "Alt F7" { GoToTab 7; SwitchToMode "locked"; }
+        bind "Alt F8" { GoToTab 8; SwitchToMode "locked"; }
+        bind "Alt F9" { GoToTab 9; SwitchToMode "locked"; }
+        bind "Alt F10" { GoToTab 10; SwitchToMode "locked"; }
+        bind "Alt F11" { GoToTab 11; SwitchToMode "locked"; }
+        bind "Alt F12" { GoToTab 12; SwitchToMode "locked"; }
         bind "Alt Shift +" { Resize "Increase"; }
         bind "Alt Shift -" { Resize "Decrease"; }
         bind "Alt Shift =" { Resize "Increase"; }
