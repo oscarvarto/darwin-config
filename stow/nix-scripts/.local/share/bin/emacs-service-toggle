@@ -24,14 +24,19 @@ print_msg() {
 }
 
 # Function to check service status
+# Returns one of: running, stopped, not-loaded
 check_status() {
-    if launchctl list | grep -q "$SERVICE_NAME"; then
-        local status=$(launchctl list | grep "$SERVICE_NAME" | awk '{print $1}')
-        if [[ "$status" == "-" ]]; then
-            echo "stopped"
-        else
+    # Prefer checking the actual Emacs daemon availability via emacsclient
+    if command -v emacsclient >/dev/null 2>&1; then
+        if emacsclient -e '(progn (require (quote server)) (server-running-p))' >/dev/null 2>&1; then
             echo "running"
+            return 0
         fi
+    fi
+
+    # Fall back to launchctl to determine if the agent is loaded
+    if launchctl list | grep -q "$SERVICE_NAME"; then
+        echo "stopped"
     else
         echo "not-loaded"
     fi
@@ -56,6 +61,13 @@ stop_service() {
     # Force kill if still running
     pkill -9 -f "emacs.*--daemon" 2>/dev/null || true
     pkill -9 -f "Emacs.app" 2>/dev/null || true
+
+    # Clean up stale server sockets/lock files (best-effort, safe paths only)
+    for dir in "$HOME/.emacs.d/server" "$HOME/.config/emacs/server" "/tmp/emacs$(id -u)"; do
+        if [[ -d "$dir" ]]; then
+            rm -f "$dir"/server* 2>/dev/null || true
+        fi
+    done
     
     print_msg "$GREEN" "✅ Emacs service stopped"
 }
@@ -70,17 +82,30 @@ start_service() {
         return 1
     fi
     
-    launchctl load "$PLIST_PATH"
-    
-    # Wait for the service to start
-    sleep 2
-    
-    if [[ "$(check_status)" == "running" ]]; then
-        print_msg "$GREEN" "✅ Emacs service started successfully"
-    else
-        print_msg "$RED" "⚠️  Service may not have started properly. Check logs with:"
-        print_msg "$BLUE" "   log show --predicate 'process == \"emacs\"' --last 5m"
-    fi
+    # Load (enable) the LaunchAgent and trigger RunAtLoad
+    launchctl load -w "$PLIST_PATH" 2>/dev/null || launchctl load "$PLIST_PATH" 2>/dev/null || true
+
+    # Poll for daemon availability (up to ~15s)
+    for i in {1..15}; do
+        # Primary check: emacsclient connectivity
+        if command -v emacsclient >/dev/null 2>&1; then
+            if emacsclient -e '(progn (require (quote server)) (server-running-p))' >/dev/null 2>&1; then
+                print_msg "$GREEN" "✅ Emacs service started successfully"
+                return 0
+            fi
+        fi
+        # Secondary check: Emacs app/process present (may be warming up)
+        if pgrep -f "Emacs\.app|--fg-daemon" >/dev/null 2>&1; then
+            # keep waiting for server to come up
+            sleep 1
+            continue
+        fi
+        sleep 1
+    done
+
+    print_msg "$RED" "⚠️  Service may not have started properly. Check logs with:"
+    print_msg "$BLUE" "   log show --predicate 'process == \"emacs\"' --last 5m"
+    return 1
 }
 
 # Function to restart the service
