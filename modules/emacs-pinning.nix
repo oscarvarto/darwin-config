@@ -3,6 +3,7 @@ let
   # Emacs pinning system with hash management
   pinFile = "/Users/${user}/.cache/emacs-git-pin";
   hashFile = "/Users/${user}/.cache/emacs-git-pin-hash";
+  storePathFile = "/Users/${user}/.cache/emacs-git-store-path";
 
   # Shared shell helpers for pinning scripts
   commonHelpers = pkgs.writeText "emacs-pinning-common.sh" ''
@@ -62,6 +63,17 @@ let
     pin_sri_from_base32() {
       nix hash to-sri --type sha256 "''${1}" 2>/dev/null
     }
+
+    pin_extract_configured_emacs_outpath() {
+      # Extract the outPath of the configuredEmacs package exposed by this flake
+      # We rely on the hostname to reference the exported package name
+      local config_path="''${1:-}"
+      if [[ -z "''${config_path}" ]]; then
+        config_path="$(pin_resolve_config_path)" || return 1
+      fi
+      ( cd "''${config_path}" \
+        && nix eval --raw --impure --expr 'let flake = builtins.getFlake (toString ./.); in flake.packages."${pkgs.stdenv.hostPlatform.system}"."${hostname}-configuredEmacs".outPath' )
+    }
   '';
 
   isPinned = builtins.pathExists pinFile;
@@ -74,94 +86,90 @@ let
     then builtins.replaceStrings ["\n"] [""] (builtins.readFile hashFile)
     else null;
 
+  # If available, prefer using the already-built configuredEmacs store path
+  hasPinnedStorePath = isPinned && builtins.pathExists storePathFile;
+  pinnedStorePath = if hasPinnedStorePath
+    then builtins.replaceStrings ["\n"] [""] (builtins.readFile storePathFile)
+    else null;
+  # Only treat the saved store path as valid if it exists in the local store
+  validPinnedStorePath = hasPinnedStorePath && pinnedStorePath != null && pinnedStorePath != ""
+    && builtins.pathExists (/. + pinnedStorePath);
+
   # Create emacs package - pinned or latest
-  # CRITICAL: When pinned, avoid evaluating overlay entirely to prevent rebuilds
-  emacsPackage = if isPinned && pinnedCommit != null && pinnedHash != null
-    then
-      # Create a pinned emacs package using the overlay's recipe but with fixed source
-      # We need to access the overlay once to get the recipe, but pin the result
-      let
-        # Get the overlay recipe but don't use its dynamic source
-        overlayRecipe = inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git;
-      in
-      # Create a completely new derivation with a unique name
-      overlayRecipe.overrideAttrs (oldAttrs: rec {
-        pname = "emacs-git-pinned";
-        version = "31.0.50-${builtins.substring 0 7 pinnedCommit}";
-        name = "${pname}-${version}";
-
-        # Use our pinned source instead of the overlay's dynamic source
-        src = pkgs.fetchFromGitHub {
-          owner = "emacs-mirror";
-          repo = "emacs";
-          rev = pinnedCommit;
-          hash = pinnedHash;
-        };
-
-        # Add a unique identifier to prevent cache conflicts
-        __pinnedCommit = pinnedCommit;
-      })
+  # When pinned and a stored path is available, avoid overlay evaluation entirely.
+  emacsPackage =
+    if validPinnedStorePath then
+      # Lightweight wrapper derivation that re-exports the prebuilt store path
+      pkgs.runCommandNoCC "emacs-git-pinned-${builtins.substring 0 7 (if pinnedCommit != null then pinnedCommit else "unknown")}" { } ''
+        ln -s ${pinnedStorePath} "$out"
+      ''
     else
-      # Only evaluate overlay when not pinned
+      # No valid stored path (possibly GC'd) or not pinned: use latest overlay
       inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git;
 
   # Apply emacs configuration overrides with verbose build output
-  configuredEmacs = (emacsPackage.override {
-    # Native compilation: ESSENTIAL for performance - always enable
-    withNativeCompilation = true;
+  configuredEmacs =
+    if validPinnedStorePath then
+      # When using a stored path, do not attempt to override features; the
+      # stored build already encapsulates the desired configuration.
+      emacsPackage
+    else
+      (emacsPackage.override {
+        # Native compilation: ESSENTIAL for performance - always enable
+        withNativeCompilation = true;
 
-    # Tree-sitter: Likely enabled by default in emacs-git, but ensure it's on
-    withTreeSitter = true;
+        # Tree-sitter: Likely enabled by default in emacs-git, but ensure it's on
+        withTreeSitter = true;
 
-    # Lightweight additions that don't significantly impact build time
-    withSQLite3 = true;   # Useful for org-roam, org-mode features
-    withWebP = true;      # Modern image format support
+        # Lightweight additions that don't significantly impact build time
+        withSQLite3 = true;   # Useful for org-roam, org-mode features
+        withWebP = true;      # Modern image format support
 
-    # Heavy dependencies - only enable if you actually use these features:
-    withImageMagick = true;
-    withXwidgets = true;
-  }).overrideAttrs (oldAttrs: {
-      # Add custom icon integration
-      postInstall = ''
-        ${oldAttrs.postInstall or ""}
+        # Heavy dependencies - only enable if you actually use these features:
+        withImageMagick = true;
+        withXwidgets = true;
+      }).overrideAttrs (oldAttrs: {
+        # Add custom icon integration
+        postInstall = ''
+          ${oldAttrs.postInstall or ""}
 
-        # Integrate custom Emacs icon used across the repo (also used by Raycast)
-        # Keep a single source of truth under stow/ so Dock and Raycast match
-        CUSTOM_ICON_SOURCE="${../stow/nix-scripts/.local/share/img/icons/Emacs.icns}"
-        if [[ -f "$CUSTOM_ICON_SOURCE" ]]; then
-          echo "🎨 Integrating custom curvy-blender Emacs icon..."
+          # Integrate custom Emacs icon used across the repo (also used by Raycast)
+          # Keep a single source of truth under stow/ so Dock and Raycast match
+          CUSTOM_ICON_SOURCE="${../stow/nix-scripts/.local/share/img/icons/Emacs.icns}"
+          if [[ -f "$CUSTOM_ICON_SOURCE" ]]; then
+            echo "🎨 Integrating custom curvy-blender Emacs icon..."
 
-          # Find the Emacs.app bundle in the output
-          EMACS_APP=$(find "$out" -name "Emacs.app" -type d | head -1)
-          if [[ -n "$EMACS_APP" && -d "$EMACS_APP/Contents/Resources" ]]; then
-            # Backup original icon
-            if [[ -f "$EMACS_APP/Contents/Resources/Emacs.icns" ]]; then
-              cp "$EMACS_APP/Contents/Resources/Emacs.icns" "$EMACS_APP/Contents/Resources/Emacs.icns.original"
+            # Find the Emacs.app bundle in the output
+            EMACS_APP=$(find "$out" -name "Emacs.app" -type d | head -1)
+            if [[ -n "$EMACS_APP" && -d "$EMACS_APP/Contents/Resources" ]]; then
+              # Backup original icon
+              if [[ -f "$EMACS_APP/Contents/Resources/Emacs.icns" ]]; then
+                cp "$EMACS_APP/Contents/Resources/Emacs.icns" "$EMACS_APP/Contents/Resources/Emacs.icns.original"
+              fi
+
+              # Install custom icon
+              cp "$CUSTOM_ICON_SOURCE" "$EMACS_APP/Contents/Resources/Emacs.icns"
+              echo "✅ Custom icon installed: $EMACS_APP/Contents/Resources/Emacs.icns"
+            else
+              echo "⚠️  Could not find Emacs.app bundle or Resources directory"
             fi
-
-            # Install custom icon
-            cp "$CUSTOM_ICON_SOURCE" "$EMACS_APP/Contents/Resources/Emacs.icns"
-            echo "✅ Custom icon installed: $EMACS_APP/Contents/Resources/Emacs.icns"
+          elif [[ ! -f "$CUSTOM_ICON_SOURCE" ]]; then
+            echo "ℹ️  Custom icon not found at: $CUSTOM_ICON_SOURCE"
           else
-            echo "⚠️  Could not find Emacs.app bundle or Resources directory"
+            echo "ℹ️  Not a GUI Emacs build, skipping icon installation"
           fi
-        elif [[ ! -f "$CUSTOM_ICON_SOURCE" ]]; then
-          echo "ℹ️  Custom icon not found at: $CUSTOM_ICON_SOURCE"
-        else
-          echo "ℹ️  Not a GUI Emacs build, skipping icon installation"
-        fi
-      '';
-
-      # Ensure build logs are preserved and visible
-      meta = (oldAttrs.meta or {}) // {
-        description = "GNU Emacs with enhanced build progress indicators";
-        longDescription = ''
-          GNU Emacs text editor with native compilation and comprehensive feature set.
-          This build includes verbose progress indicators to track compilation status.
-          Build typically takes 20-45 minutes with native compilation enabled.
         '';
-      };
-  });
+
+        # Ensure build logs are preserved and visible
+        meta = (oldAttrs.meta or {}) // {
+          description = "GNU Emacs with enhanced build progress indicators";
+          longDescription = ''
+            GNU Emacs text editor with native compilation and comprehensive feature set.
+            This build includes verbose progress indicators to track compilation status.
+            Build typically takes 20-45 minutes with native compilation enabled.
+          '';
+        };
+      });
 
 emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     #!/usr/bin/env bash
@@ -173,6 +181,7 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     CACHE_DIR="''${HOME}/.cache"
     PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
     HASH_FILE="''${CACHE_DIR}/emacs-git-pin-hash"
+    STORE_FILE="''${CACHE_DIR}/emacs-git-store-path"
     
     # Get hostname from system or use current
     HOSTNAME="${hostname}"
@@ -189,6 +198,9 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
 
     # Wrapper to common helper (SRI)
     extract_current_emacs_hash() { pin_extract_current_emacs_hash_sri "$@"; }
+
+    # Wrapper to extract configuredEmacs outPath from this flake
+    extract_configured_emacs_outpath() { pin_extract_configured_emacs_outpath "$@"; }
 
     # If no commit hash provided, extract from current emacs
     if [[ -z "''${COMMIT}" ]]; then
@@ -211,12 +223,29 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
         if HASH=$(extract_current_emacs_hash); then
           echo $'\U2705 Found current hash: '"''${HASH}"
 
-          # Save both directly without fetching
+          # Capture the current configuredEmacs outPath BEFORE changing pin state
+          # This preserves the exact already-built store path, avoiding rebuilds later.
+          CURRENT_OUT_PATH=""
+          if CURRENT_OUT_PATH=$(extract_configured_emacs_outpath 2>/dev/null); then
+            # Resolve to the real path if it's a symlink (avoid storing wrapper path)
+            if [[ -n "''${CURRENT_OUT_PATH}" && -L "''${CURRENT_OUT_PATH}" ]]; then
+              CURRENT_OUT_PATH="$(realpath -P "''${CURRENT_OUT_PATH}" 2>/dev/null || echo "''${CURRENT_OUT_PATH}")"
+            fi
+          fi
+
+          # Save both commit and hash
           echo "''${COMMIT}" > "''${PIN_FILE}"
           echo "''${HASH}" > "''${HASH_FILE}"
 
           echo $'\U1F4CC Pinned emacs-git to current commit: '"''${COMMIT}"
           echo $'\U1F511 Stored hash (SRI): '"''${HASH}"
+          # Save the previously-built outPath if it exists
+          if [[ -n "''${CURRENT_OUT_PATH}" && -e "''${CURRENT_OUT_PATH}" ]]; then
+            echo "''${CURRENT_OUT_PATH}" > "''${STORE_FILE}"
+            echo $'\U1F4E6 Saved built path: '"''${CURRENT_OUT_PATH}"
+          else
+            echo $'\U2139\UFE0F Could not resolve an existing configuredEmacs outPath at pin time (will build if needed)'
+          fi
           echo $'\U1F4A1 Rebuild your configuration: nb && ns'
           exit 0
         else
@@ -264,6 +293,15 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     # Save the commit hash and its corresponding SHA256
     echo "''${COMMIT}" > "''${PIN_FILE}"
     echo "''${HASH}" > "''${HASH_FILE}"
+    # Attempt to capture a currently existing configuredEmacs outPath
+    if OUT_PATH=$(extract_configured_emacs_outpath 2>/dev/null) && [[ -e "''${OUT_PATH}" ]]; then
+      # Resolve to the actual target if a symlink
+      if [[ -L "''${OUT_PATH}" ]]; then
+        OUT_PATH="$(realpath -P "''${OUT_PATH}" 2>/dev/null || echo "''${OUT_PATH}")"
+      fi
+      echo "''${OUT_PATH}" > "''${STORE_FILE}"
+      echo $'\U1F4E6 Saved built path: '"''${OUT_PATH}"
+    fi
 
     echo $'\U1F4CC Pinned emacs-git to commit: '"''${COMMIT}"
     echo $'\U1F511 Stored hash (SRI): '"''${HASH}"
@@ -279,11 +317,13 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     CACHE_DIR="''${HOME}/.cache"
     PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
     HASH_FILE="''${CACHE_DIR}/emacs-git-pin-hash"
+    STORE_FILE="''${CACHE_DIR}/emacs-git-store-path"
 
     if [[ -f "''${PIN_FILE}" ]]; then
       PINNED_COMMIT=$(cat "''${PIN_FILE}")
       rm "''${PIN_FILE}"
       [[ -f "''${HASH_FILE}" ]] && rm "''${HASH_FILE}"
+      [[ -f "''${STORE_FILE}" ]] && rm "''${STORE_FILE}"
       echo $'\U1F513 Unpinned emacs-git from commit: '"''${PINNED_COMMIT}"
       echo $'\U1F4A1 Rebuild your configuration: nb && ns'
       echo "   This will use the latest emacs-git commit from the overlay."
@@ -349,6 +389,7 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     CACHE_DIR="''${HOME}/.cache"
     PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
     HASH_FILE="''${CACHE_DIR}/emacs-git-pin-hash"
+    STORE_FILE="''${CACHE_DIR}/emacs-git-store-path"
     
     # Get hostname from system or use current
     HOSTNAME="${hostname}"
@@ -388,6 +429,14 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
       else
         echo $'\U26A0\UFE0F Warning: No hash file found - pinning may not work correctly'
         echo "   Run: emacs-pin ''${PINNED_COMMIT} to fix"
+      fi
+
+      if [[ -f "''${STORE_FILE}" ]]; then
+        STORED_PATH=$(cat "''${STORE_FILE}")
+        echo $'\U1F4E6 Stored build path: '"''${STORED_PATH}"
+      else
+        echo $'\U26A0\UFE0F Stored build path not found (likely GC\'d)'
+        echo "   Behavior: will build latest overlay commit and auto-pin to it after switch"
       fi
     else
       echo $'\U1F513 emacs-git is not pinned (using latest from overlay)'

@@ -218,6 +218,18 @@ modules/                      # Modular configuration components
 4. Unpin for latest: `emacs-unpin`
 5. Rebuild: `nb && ns`
 
+#### Emacs Pinning Behavior (Contributor Notes)
+- Pin state files (in `~/.cache`):
+  - `emacs-git-pin` (commit), `emacs-git-pin-hash` (SRI), `emacs-git-store-path` (built outPath)
+- Behavior matrix:
+  - Pinned + stored path exists → `configuredEmacs` re-exports that exact path; overlay updates do not rebuild.
+  - Pinned + stored path missing (GC’d) → build latest overlay commit; after switch, Home Manager auto-runs `emacs-pin` to lock to that new build.
+  - Unpinned → always use latest overlay commit.
+- Scripts:
+  - `emacs-pin` captures the already-built `configuredEmacs` outPath before changing pin state to avoid rebuild.
+  - `emacs-pin-status` prints overlay commit, pinned commit, stored hash, and stored path if present.
+- Caveat: Pinning to an older commit only avoids rebuild if that exact build already exists locally. Otherwise, next `ns` will build latest and auto-pin to it by design.
+
 ### Adding New Host/User
 1. `nix run .#add-host -- --hostname HOST --user USER`
 2. Configure host-specific settings in generated config

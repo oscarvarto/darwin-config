@@ -847,6 +847,41 @@ Doom Emacs itself is installed at ~/.emacs.d/
 | `doom upgrade`                | Update Doom Emacs itself              |
 | `doom doctor`                 | Diagnose configuration issues         |
 
+#### Emacs Version Pinning
+
+This repo includes a robust Emacs pinning system to control when Emacs rebuilds, even as the emacs-overlay advances.
+
+- Files used (in `~/.cache`):
+  - `emacs-git-pin` — the pinned emacs-mirror commit (SHA)
+  - `emacs-git-pin-hash` — the SRI hash for that commit (informational)
+  - `emacs-git-store-path` — the exact Nix store path of your built Emacs
+
+- Core behavior:
+  - Pinned + stored path present: `ns` reuses the exact stored build. Overlay updates do not rebuild Emacs.
+  - Pinned + stored path missing (likely GC): `ns` builds the latest overlay commit instead, then auto‑pins to it after the switch. This replaces the previous pin.
+  - Unpinned: `ns` builds the latest overlay commit as usual.
+
+- Commands:
+  - `emacs-pin` — Pin to the current overlay commit and capture the already‑built store path (no rebuild). Use this right after a successful build to lock the exact version.
+  - `emacs-pin <commit>` — Pin to a specific emacs‑mirror commit (stores commit + hash). If that commit is not already built locally, the next `ns` will build the latest overlay commit (by design) and auto‑pin to that instead.
+  - `emacs-unpin` — Remove pin and stored path; `ns` uses the latest overlay.
+  - `emacs-pin-status` — Show current overlay commit, pinned commit, stored hash, and stored build path if present.
+
+- Typical workflows:
+  - Lock current build after an update:
+    1) `ns -v` (builds latest overlay), 2) `emacs-pin`, 3) `emacs-pin-status` (shows stored build path). Future `ns` runs won’t rebuild Emacs until you unpin or the path is GC’d.
+  - After GC removed the stored path:
+    - Run `ns -v`. Emacs builds at the latest overlay commit and, after switch, the system auto‑pins to it. Check with `emacs-pin-status`.
+  - Forget to pin before building:
+    - Just run `emacs-pin` after a successful `ns`; it will capture the already‑built Emacs and prevent further rebuilds on overlay updates.
+
+- Notes and caveats:
+  - The stored path is the key to “no rebuilds”. Keep it alive or expect a one‑time rebuild to the latest overlay commit on the next `ns`.
+  - Pinning to an older, specific commit only makes sense if that exact build already exists locally. If it doesn’t, the next `ns` will intentionally build the latest overlay and auto‑pin to it.
+  - Status output includes direct links to both current overlay and pinned commits for quick comparison.
+
+Contributors: see CLAUDE.md (Managing Emacs Versions → Emacs Pinning Behavior) for implementation details and contributor notes.
+
 #### Font Integration
 
 - **Smart Font Detection**: Automatically uses best available programming font

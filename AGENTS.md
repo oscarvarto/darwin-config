@@ -45,6 +45,10 @@
 - Stow usage: always target home with `stow -t ~ PACKAGE`; prefer `manage-stow-packages deploy`. Symlinked executables should land in `~/.local/share/bin`.
 - Nix-embedded scripts: escape `${` and `$` correctly. Quick refs — double-quoted: `\"`, `\\`, `\${}`; indented strings: `''${}`, `''\n`.
 - Emacs/Elisp edits: validate with `elisp-formatter elisp FILE --check` (or `smart`), ensure balanced parens; rebuild with `nb && ns`.
+- Emacs pinning (contributors):
+  - Use `emacs-pin` after a successful build to capture the exact store path and prevent rebuilds on overlay updates.
+  - If pinned but the stored path was GC'd, the next `ns` builds the latest overlay commit and auto-pins to it after switch.
+  - `emacs-pin-status` shows overlay vs pinned commits and whether a stored path is present.
 - PATH edits belong in `modules/path-config.nix` (centralized precedence); apply with `ns`.
 - Prefer fast Rust tools (`rg`, `fd`) over legacy `grep/find` in examples and scripts.
 - Do not introduce NordVPN CLI dependencies (intentionally unsupported).
