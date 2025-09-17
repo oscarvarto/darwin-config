@@ -1,13 +1,17 @@
 # Example enhanced secrets.nix - showing optimal agenix usage
-{ config, pkgs, agenix, secrets, user ? "oscarvarto", ... }:
-
-let 
-  # user is passed as parameter or falls back to default
-in
 {
+  config,
+  pkgs,
+  agenix,
+  secrets,
+  user ? "oscarvarto",
+  ...
+}: let
+  # user is passed as parameter or falls back to default
+in {
   age.identityPaths = [
     "/Users/${user}/.ssh/id_ed25519"
-    "/Users/${user}/.ssh/id_ed25519_agenix"  # Dedicated agenix key
+    "/Users/${user}/.ssh/id_ed25519_agenix" # Dedicated agenix key
   ];
 
   # SSH Keys (Deploy-time secrets - perfect for agenix)

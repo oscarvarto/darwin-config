@@ -1,12 +1,15 @@
-{ config, pkgs, lib, ... }:
-
 {
+  config,
+  pkgs,
+  lib,
+  ...
+}: {
   homebrew = {
     enable = true;
     onActivation = {
       autoUpdate = true;
       cleanup = "none";
-      extraFlags = [ "--verbose" ];
+      extraFlags = ["--verbose"];
       upgrade = true;
     };
 

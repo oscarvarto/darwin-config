@@ -1,7 +1,5 @@
-{ pkgs }:
-
-with pkgs;
-[
+{pkgs}:
+with pkgs; [
   # Basic system packages
   coreutils
   curl
@@ -27,23 +25,23 @@ with pkgs;
   unrar
   unzip
   fd
-  
+
   # Nix development tools
-  nix-prefetch-github  # For emacs pinning system
+  nix-prefetch-github # For emacs pinning system
 
   # Table-like output tools (nushell-like experience)
-  procs        # Modern replacement for ps with table output
-  dust         # Intuitive disk usage with tree view
-  bandwhich    # Network utilization by process, connection, etc.
-  bottom       # System monitor with table views (aliased as btm)
-  gping        # Ping with graph
-  hexyl        # Hex viewer with colored output
-  tokei        # Code statistics in table format
-  hyperfine    # Command-line benchmarking tool with tables
-  sd           # Better sed with intuitive syntax
-  bat          # Better cat with syntax highlighting
-  delta        # Better git diff viewer
-  zoxide       # Smarter cd with frecency tracking
+  procs # Modern replacement for ps with table output
+  dust # Intuitive disk usage with tree view
+  bandwhich # Network utilization by process, connection, etc.
+  bottom # System monitor with table views (aliased as btm)
+  gping # Ping with graph
+  hexyl # Hex viewer with colored output
+  tokei # Code statistics in table format
+  hyperfine # Command-line benchmarking tool with tables
+  sd # Better sed with intuitive syntax
+  bat # Better cat with syntax highlighting
+  delta # Better git diff viewer
+  zoxide # Smarter cd with frecency tracking
 
   # Encryption and security tools
   age
@@ -64,7 +62,7 @@ with pkgs;
   nodejs
 
   # Spell checking
-  (aspellWithDicts (dicts: with dicts; [ en en-computers en-science es]))
+  (aspellWithDicts (dicts: with dicts; [en en-computers en-science es]))
   enchant
   isync
 
@@ -75,34 +73,35 @@ with pkgs;
   font-awesome
 
   # Python packages with GUI dependencies
-  (python3.withPackages (python-pkgs: with python-pkgs; [
-    debugpy
-    pandas
-    requests
-    sexpdata
-    tld
-    epc
-    pysocks
-    polars
-    sympy
-    uv
-    # GUI-related packages
-    grip
-    pyqt6
-    pyqt6-webengine
-    matplotlib
-    scipy
-    numpy
-  ]))
+  (python3.withPackages (python-pkgs:
+    with python-pkgs; [
+      debugpy
+      pandas
+      requests
+      sexpdata
+      tld
+      epc
+      pysocks
+      polars
+      sympy
+      uv
+      # GUI-related packages
+      grip
+      pyqt6
+      pyqt6-webengine
+      matplotlib
+      scipy
+      numpy
+    ]))
 
   # Darwin-specific packages
-  awscli2  # AWS CLI v2 with SSO support
+  awscli2 # AWS CLI v2 with SSO support
   dockutil
   mas
   netcoredbg
 
   # Shell completion tools
-  fish  # Required for Nushell's fish completer
+  fish # Required for Nushell's fish completer
   nushell
   carapace
   zellij

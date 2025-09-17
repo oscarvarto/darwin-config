@@ -53,150 +53,165 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-  outputs = { self,
-              nixpkgs,
-              agenix,
-              bash-env-json,
-              bash-env-nushell,
-              catppuccin,
-              darwin,
-              home-manager,
-              homebrew-bundle,
-              homebrew-cask,
-              homebrew-core,
-              neovim-nightly-overlay,
-              nix-homebrew,
-              nixd-ls,
-              secrets,
-              emacs-overlay,
-              } @inputs:
-    let
-      # Supported systems (macOS only)
-      darwinSystems = [ "x86_64-darwin" "aarch64-darwin" ];
-      forAllSystems = nixpkgs.lib.genAttrs darwinSystems;
-      
-      # Default user configuration - can be overridden per hostname
-      defaultUser = "oscarvarto";
-      
-      # Host configurations - add new hosts here
-      hostConfigs = {
-        predator = {
-          user = "oscarvarto";
-          system = "aarch64-darwin";
-          defaultShell = "zsh";  # Options: "zsh", "nushell"
-          # Add host-specific settings here
-          hostSettings = {
-            enablePersonalConfig = true;
-            workProfile = false;
-            # Work-specific configuration
-            workConfig = {
-              companyName = "YourCompany";  # Replace with actual company name
-              gitWorkDirPattern = "~/work/**";  # Pattern for work git directories
-              databaseName = "your_db";  # Work database name
-              databaseHost = "localhost";
-              databasePort = "3306";
-              opVaultName = "Work";  # 1Password vault for work credentials
-              opItemName = "CompanyName";  # 1Password item name for work credentials
-            };
+  outputs = {
+    self,
+    nixpkgs,
+    agenix,
+    bash-env-json,
+    bash-env-nushell,
+    catppuccin,
+    darwin,
+    home-manager,
+    homebrew-bundle,
+    homebrew-cask,
+    homebrew-core,
+    neovim-nightly-overlay,
+    nix-homebrew,
+    nixd-ls,
+    secrets,
+    emacs-overlay,
+  } @ inputs: let
+    # Supported systems (macOS only)
+    darwinSystems = ["x86_64-darwin" "aarch64-darwin"];
+    forAllSystems = nixpkgs.lib.genAttrs darwinSystems;
+
+    # Default user configuration - can be overridden per hostname
+    defaultUser = "oscarvarto";
+
+    # Host configurations - add new hosts here
+    hostConfigs = {
+      predator = {
+        user = "oscarvarto";
+        system = "aarch64-darwin";
+        defaultShell = "zsh"; # Options: "zsh", "nushell"
+        # Add host-specific settings here
+        hostSettings = {
+          enablePersonalConfig = true;
+          workProfile = false;
+          # Work-specific configuration
+          workConfig = {
+            companyName = "YourCompany"; # Replace with actual company name
+            gitWorkDirPattern = "~/work/**"; # Pattern for work git directories
+            databaseName = "your_db"; # Work database name
+            databaseHost = "localhost";
+            databasePort = "3306";
+            opVaultName = "Work"; # 1Password vault for work credentials
+            opItemName = "CompanyName"; # 1Password item name for work credentials
           };
         };
       };
-      
+    };
 
-      devShell = system: let pkgs = nixpkgs.legacyPackages.${system}; in {
-        default = with pkgs; mkShell {
-          nativeBuildInputs = with pkgs; [ bashInteractive git ];
+    devShell = system: let
+      pkgs = nixpkgs.legacyPackages.${system};
+    in {
+      default = with pkgs;
+        mkShell {
+          nativeBuildInputs = with pkgs; [bashInteractive git];
           shellHook = with pkgs; ''
             export EDITOR=nvim
           '';
         };
+    };
+
+    mkApp = scriptName: system: {
+      type = "app";
+      program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin scriptName ''
+        #!/usr/bin/env bash
+        PATH=${nixpkgs.legacyPackages.${system}.git}/bin:$PATH
+        echo "Running ${scriptName} for ${system}"
+        exec ${self}/apps/${system}/${scriptName} "$@"
+      '')}/bin/${scriptName}";
+      meta = {
+        description = "${scriptName} app for ${system}";
       };
-      
-      mkApp = scriptName: system: {
+    };
+
+    mkDarwinApps = system: {
+      "apply" = mkApp "apply" system;
+      "build" = mkApp "build" system;
+      "build-switch" = mkApp "build-switch" system;
+      "copy-keys" = mkApp "copy-keys" system;
+      "create-keys" = mkApp "create-keys" system;
+      "check-keys" = mkApp "check-keys" system;
+      "rollback" = mkApp "rollback" system;
+      "configure-user" = {
         type = "app";
-        program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin scriptName ''
+        program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "configure-user" ''
           #!/usr/bin/env bash
-          PATH=${nixpkgs.legacyPackages.${system}.git}/bin:$PATH
-          echo "Running ${scriptName} for ${system}"
-          exec ${self}/apps/${system}/${scriptName} "$@"
-        '')}/bin/${scriptName}";
+          # Run the zsh script - compatible with any macOS system
+          exec ${self}/scripts/configure-user.sh "$@"
+        '')}/bin/configure-user";
+        meta = {description = "configure-user app for ${system}";};
       };
-      
-      mkDarwinApps = system: {
-        "apply" = mkApp "apply" system;
-        "build" = mkApp "build" system;
-        "build-switch" = mkApp "build-switch" system;
-        "copy-keys" = mkApp "copy-keys" system;
-        "create-keys" = mkApp "create-keys" system;
-        "check-keys" = mkApp "check-keys" system;
-        "rollback" = mkApp "rollback" system;
-        "configure-user" = {
-          type = "app";
-          program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "configure-user" ''
-            #!/usr/bin/env bash
-            # Run the zsh script - compatible with any macOS system
-            exec ${self}/scripts/configure-user.sh "$@"
-          '')}/bin/configure-user";
-        };
-        "add-host" = {
-          type = "app";
-          program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "add-host" ''
-            #!/usr/bin/env bash
-            # Run the zsh script - compatible with any macOS system
-            exec ${self}/scripts/add-host.sh "$@"
-          '')}/bin/add-host";
-        };
-        "setup-1password-secrets" = {
-          type = "app";
-          program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "setup-1password-secrets" ''
-            #!/usr/bin/env bash
-            # Set up 1Password for secure git credentials
-            exec ${self}/scripts/setup-1password-secrets.sh "$@"
-          '')}/bin/setup-1password-secrets";
-        };
-        "setup-pass-secrets" = {
-          type = "app";
-          program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "setup-pass-secrets" ''
-            #!/usr/bin/env bash
-            # Set up pass for secure git credentials
-            exec ${self}/scripts/setup-pass-secrets.sh "$@"
-          '')}/bin/setup-pass-secrets";
-        };
-        "sanitize-repo" = {
-          type = "app";
-          program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "sanitize-repo" ''
-            #!/usr/bin/env bash
-            # Sanitize repository of sensitive information
-            exec ${self}/scripts/sanitize-sensitive-data.sh "$@"
-          '')}/bin/sanitize-repo";
-        };
-        "update-doom-config" = {
-          type = "app";
-          program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "update-doom-config" ''
-            #!/usr/bin/env zsh
-            # Update Doom Emacs configuration with user details and shell settings
-            exec ${self}/scripts/update-doom-config.sh "$@"
-          '')}/bin/update-doom-config";
-        };
-        "optimize-nix-performance" = {
-          type = "app";
-          program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "optimize-nix-performance" ''
-            #!/usr/bin/env bash
-            # Optimize Nix build performance based on hardware specs
-            exec ${self}/scripts/optimize-nix-performance.sh "$@"
-          '')}/bin/optimize-nix-performance";
-        };
+      "add-host" = {
+        type = "app";
+        program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "add-host" ''
+          #!/usr/bin/env bash
+          # Run the zsh script - compatible with any macOS system
+          exec ${self}/scripts/add-host.sh "$@"
+        '')}/bin/add-host";
+        meta = {description = "add-host app for ${system}";};
       };
-      
-      # Helper function to create darwin configurations with host-specific settings
-      mkDarwinConfig = hostname: hostConfig: darwin.lib.darwinSystem {
+      "setup-1password-secrets" = {
+        type = "app";
+        program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "setup-1password-secrets" ''
+          #!/usr/bin/env bash
+          # Set up 1Password for secure git credentials
+          exec ${self}/scripts/setup-1password-secrets.sh "$@"
+        '')}/bin/setup-1password-secrets";
+        meta = {description = "setup-1password-secrets app for ${system}";};
+      };
+      "setup-pass-secrets" = {
+        type = "app";
+        program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "setup-pass-secrets" ''
+          #!/usr/bin/env bash
+          # Set up pass for secure git credentials
+          exec ${self}/scripts/setup-pass-secrets.sh "$@"
+        '')}/bin/setup-pass-secrets";
+        meta = {description = "setup-pass-secrets app for ${system}";};
+      };
+      "sanitize-repo" = {
+        type = "app";
+        program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "sanitize-repo" ''
+          #!/usr/bin/env bash
+          # Sanitize repository of sensitive information
+          exec ${self}/scripts/sanitize-sensitive-data.sh "$@"
+        '')}/bin/sanitize-repo";
+        meta = {description = "sanitize-repo app for ${system}";};
+      };
+      "update-doom-config" = {
+        type = "app";
+        program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "update-doom-config" ''
+          #!/usr/bin/env zsh
+          # Update Doom Emacs configuration with user details and shell settings
+          exec ${self}/scripts/update-doom-config.sh "$@"
+        '')}/bin/update-doom-config";
+        meta = {description = "update-doom-config app for ${system}";};
+      };
+      "optimize-nix-performance" = {
+        type = "app";
+        program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "optimize-nix-performance" ''
+          #!/usr/bin/env bash
+          # Optimize Nix build performance based on hardware specs
+          exec ${self}/scripts/optimize-nix-performance.sh "$@"
+        '')}/bin/optimize-nix-performance";
+        meta = {description = "optimize-nix-performance app for ${system}";};
+      };
+    };
+
+    # Helper function to create darwin configurations with host-specific settings
+    mkDarwinConfig = hostname: hostConfig:
+      darwin.lib.darwinSystem {
         system = hostConfig.system;
-        specialArgs = inputs // { 
-          inherit (hostConfig) user;
-          inherit hostname;
-          hostSettings = hostConfig.hostSettings;
-          defaultShell = hostConfig.defaultShell or "zsh";  # Default to zsh if not specified
-        };
+        specialArgs =
+          inputs
+          // {
+            inherit (hostConfig) user;
+            inherit hostname;
+            hostSettings = hostConfig.hostSettings;
+            defaultShell = hostConfig.defaultShell or "zsh"; # Default to zsh if not specified
+          };
         modules = [
           home-manager.darwinModules.home-manager
           nix-homebrew.darwinModules.nix-homebrew
@@ -216,26 +231,30 @@
           ./system.nix
         ];
       };
-  in
-  {
+  in {
     devShells = forAllSystems devShell;
     apps = nixpkgs.lib.genAttrs darwinSystems mkDarwinApps;
+
+    # Default formatter for `nix fmt .` (Alejandra)
+    formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
     darwinConfigurations = nixpkgs.lib.mapAttrs mkDarwinConfig hostConfigs;
 
     # Expose configuredEmacs for each host so scripts can reference it
-    packages = nixpkgs.lib.genAttrs darwinSystems (system:
-      nixpkgs.lib.mapAttrs' (hostname: hostConfig:
-        let
-          emacsPinModule = import ./modules/emacs-pinning.nix {
-            pkgs = nixpkgs.legacyPackages.${system};
-            user = hostConfig.user;
-            inputs = inputs;
-            inherit hostname;
-          };
-        in
-          nixpkgs.lib.nameValuePair "${hostname}-configuredEmacs" emacsPinModule.configuredEmacs
-      ) hostConfigs
+    packages = nixpkgs.lib.genAttrs darwinSystems (
+      system:
+        nixpkgs.lib.mapAttrs' (
+          hostname: hostConfig: let
+            emacsPinModule = import ./modules/emacs-pinning.nix {
+              pkgs = nixpkgs.legacyPackages.${system};
+              user = hostConfig.user;
+              inputs = inputs;
+              inherit hostname;
+            };
+          in
+            nixpkgs.lib.nameValuePair "${hostname}-configuredEmacs" emacsPinModule.configuredEmacs
+        )
+        hostConfigs
     );
   };
 }

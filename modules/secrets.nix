@@ -1,17 +1,21 @@
-{ config, pkgs, agenix, secrets, user ? "oscarvarto", ... }:
-
-let 
-  # user is passed as parameter or falls back to default
-in
 {
+  config,
+  pkgs,
+  agenix,
+  secrets,
+  user ? "oscarvarto",
+  ...
+}: let
+  # user is passed as parameter or falls back to default
+in {
   age.identityPaths = [
     "/Users/${user}/.ssh/id_ed25519"
-    "/Users/${user}/.ssh/id_ed25519_agenix"  # Dedicated agenix key
+    "/Users/${user}/.ssh/id_ed25519_agenix" # Dedicated agenix key
   ];
 
   # SSH Keys (Deploy-time secrets - perfect for agenix)
   # Uncomment these when you have the corresponding .age files in your secrets repo
-  
+
   # age.secrets."github-ssh-key" = {
   #   symlink = true;
   #   path = "/Users/${user}/.ssh/id_github";
@@ -31,7 +35,7 @@ in
 
   # API Keys & Tokens (System-level secrets)
   # Uncomment and create corresponding .age files as needed
-  
+
   # age.secrets."openai-api-key" = {
   #   file = "${secrets}/openai-api-key.age";
   #   mode = "600";
@@ -65,5 +69,4 @@ in
   #   mode = "600";
   #   owner = "${user}";
   # };
-
 }

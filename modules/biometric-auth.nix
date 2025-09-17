@@ -1,6 +1,10 @@
-{ config, pkgs, lib, user, ... }:
-
 {
+  config,
+  pkgs,
+  lib,
+  user,
+  ...
+}: {
   # Enable Touch ID authentication for sudo
   security.pam.enableSudoTouchIdAuth = true;
 
@@ -21,10 +25,10 @@
     extraConfig = ''
       # 1Password SSH Agent Configuration
       # When 1Password SSH agent is enabled, it listens on a specific socket
-      
+
       # Ensure we try the 1Password agent if available
       AddKeysToAgent yes
-      
+
       # Use 1Password SSH agent socket when available
       # This will be automatically managed by 1Password app when SSH agent is enabled
     '';
@@ -52,10 +56,10 @@
       text = ''
         # Enhanced biometric authentication for sudo
         # This supplements the default pam_tid.so configuration
-        
+
         # Use Touch ID first (most secure and convenient)
         auth       sufficient     pam_tid.so
-        
+
         # Fall back to standard authentication if Touch ID fails
         auth       required       pam_opendirectory.so
       '';

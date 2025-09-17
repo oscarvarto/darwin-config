@@ -1,10 +1,14 @@
-{ config, pkgs, lib, inputs, pathConfig ? null, ... }:
-
-let
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  pathConfig ? null,
+  ...
+}: let
   cfg = config.local.nushell;
   inherit (lib) mkEnableOption mkIf;
-in
-{
+in {
   options.local.nushell = {
     enable = mkEnableOption "nushell";
     package = lib.mkOption {
@@ -12,8 +16,16 @@ in
       default = pkgs.nushell;
       description = "The nushell package to use";
     };
-    left_prompt_cmd = lib.mkOption { default = "hostname -s"; type = lib.types.str; description = "Command to use to generate left prompt text"; };
-    history_file_format = lib.mkOption { default = "sqlite"; type = lib.types.str; description = "History file format, either sqlite or plaintext"; };
+    left_prompt_cmd = lib.mkOption {
+      default = "hostname -s";
+      type = lib.types.str;
+      description = "Command to use to generate left prompt text";
+    };
+    history_file_format = lib.mkOption {
+      default = "sqlite";
+      type = lib.types.str;
+      description = "History file format, either sqlite or plaintext";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -21,37 +33,44 @@ in
       nushell = {
         enable = true;
         package = cfg.package;
-        configFile.text = (builtins.replaceStrings [
-          "HISTORY_FILE_FORMAT"
-          "NIX_BASH_ENV_NU_MODULE"
-        ] [
-          config.local.nushell.history_file_format
-"${inputs.bash-env-nushell.packages.${pkgs.stdenv.hostPlatform.system}.default}/bash-env.nu"
-        ]
-          (builtins.readFile ./config.nu));
-        envFile.text = ''
-          # Nushell Environment Config File
+        configFile.text =
+          builtins.replaceStrings [
+            "HISTORY_FILE_FORMAT"
+            "NIX_BASH_ENV_NU_MODULE"
+          ] [
+            config.local.nushell.history_file_format
+            "${inputs.bash-env-nushell.packages.${pkgs.stdenv.hostPlatform.system}.default}/bash-env.nu"
+          ]
+          (builtins.readFile ./config.nu);
+        envFile.text =
+          ''
+            # Nushell Environment Config File
 
-          # Nix daemon initialization (equivalent to Fish shell initialization)
-          if ('/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' | path exists) {
-              $env.NIX_SSL_CERT_FILE = '/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt'
-              $env.NIX_PROFILES = '/nix/var/nix/profiles/default ~/.nix-profile'
-              $env.NIX_PATH = 'nixpkgs=flake:nixpkgs'
-          }
+            # Nix daemon initialization (equivalent to Fish shell initialization)
+            if ('/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' | path exists) {
+                $env.NIX_SSL_CERT_FILE = '/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt'
+                $env.NIX_PROFILES = '/nix/var/nix/profiles/default ~/.nix-profile'
+                $env.NIX_PATH = 'nixpkgs=flake:nixpkgs'
+            }
 
-          # Apply centralized PATH configuration from modules/path-config.nix
-          ${if pathConfig != null then pathConfig.nushell.pathSetup else "# Centralized PATH config not available"}
+            # Apply centralized PATH configuration from modules/path-config.nix
+            ${
+              if pathConfig != null
+              then pathConfig.nushell.pathSetup
+              else "# Centralized PATH config not available"
+            }
 
-          # Ensure Enchant uses aspell and aspell finds Nix-installed dictionaries
-          $env.ENCHANT_ORDERING = 'en:aspell,es:aspell,*:aspell'
-          $env.ASPELL_CONF = 'dict-dir ${pkgs.aspellWithDicts (dicts: with dicts; [ en en-computers en-science es ])}/lib/aspell; data-dir ${pkgs.aspell}/share/aspell'
+            # Ensure Enchant uses aspell and aspell finds Nix-installed dictionaries
+            $env.ENCHANT_ORDERING = 'en:aspell,es:aspell,*:aspell'
+            $env.ASPELL_CONF = 'dict-dir ${pkgs.aspellWithDicts (dicts: with dicts; [en en-computers en-science es])}/lib/aspell; data-dir ${pkgs.aspell}/share/aspell'
 
-          def create_left_prompt [] {
-              let hostname_color = (if (is-admin) { ansi red_bold } else { ansi green_bold })
-              $"($hostname_color)(${config.local.nushell.left_prompt_cmd})(ansi reset)"
-          }
+            def create_left_prompt [] {
+                let hostname_color = (if (is-admin) { ansi red_bold } else { ansi green_bold })
+                $"($hostname_color)(${config.local.nushell.left_prompt_cmd})(ansi reset)"
+            }
 
-        '' + (builtins.readFile ./env.nu);
+          ''
+          + (builtins.readFile ./env.nu);
 
         # plugins temporarily disabled due to version compatibility issues
         plugins = with pkgs.nushellPlugins; [

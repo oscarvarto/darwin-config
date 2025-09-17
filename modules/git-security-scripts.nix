@@ -1,6 +1,10 @@
-{ config, pkgs, lib, user ? "oscarvarto", ... }:
-
 {
+  config,
+  pkgs,
+  lib,
+  user ? "oscarvarto",
+  ...
+}: {
   # Git pre-commit hook (nushell version)
   home.file.".config/git/hooks/pre-commit" = {
     executable = true;

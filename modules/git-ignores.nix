@@ -1,6 +1,9 @@
-{ config, pkgs, lib, ... }:
-
 {
+  config,
+  pkgs,
+  lib,
+  ...
+}: {
   git.ignores = [
     # Vim/Neovim temporary files
     "*.swp"
@@ -240,10 +243,10 @@
     "*.rar"
     "*.tar"
     "*.zip"
-    
+
     # General .local directory ignore (common for temporary/cache files)
     ".local/"
-    
+
     # But allow .local directories in stow packages (they contain legitimate config files)
     "!stow/**/.local/"
     "!stow/**/.local/**"

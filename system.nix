@@ -1,22 +1,29 @@
-{ agenix, config, pkgs, user, hostname, hostSettings, defaultShell ? "zsh", /* nixCats, */ ... }:
-
-let 
+{
+  agenix,
+  config,
+  pkgs,
+  user,
+  hostname,
+  hostSettings,
+  defaultShell ? "zsh",
+  /*
+  nixCats,
+  */
+  ...
+}: let
   # user and hostname are passed from flake.nix
   # hostSettings contains host-specific configuration flags
   # defaultShell specifies which shell to use as default login shell
-  
   # Shell path mapping
   shellPaths = {
     bash = "/Users/${user}/.bin/bash";
     zsh = "/Users/${user}/.bin/zsh";
     nushell = "/Users/${user}/.nix-profile/bin/nu";
   };
-  
+
   # Get the shell path, fallback to zsh if invalid shell specified
   selectedShellPath = shellPaths.${defaultShell} or shellPaths.zsh;
-in
-
-{
+in {
   imports = [
     ./modules/secrets.nix
     ./modules/secure-credentials.nix
@@ -30,9 +37,9 @@ in
   # Setup user, packages, programs
   nix = {
     settings = {
-      trusted-users = [ "@admin" "${user}" ];
-      substituters = [ 
-        "https://nix-community.cachix.org" 
+      trusted-users = ["@admin" "${user}"];
+      substituters = [
+        "https://nix-community.cachix.org"
         "https://cache.nixos.org"
         # Add emacs-overlay cache for pre-built Emacs binaries
         "https://emacs-ci.cachix.org"
@@ -46,53 +53,57 @@ in
       # Dynamic build performance settings based on hardware specs
       # Hardware-optimized settings applied on Sun Sep 14 13:10:00 CST 2025 for 16 cores, 128GB RAM
       # These settings are auto-detected and configured during setup
-      max-jobs = 64;        # Hardware-optimized: 16 cores detected
-      cores = 0;                # Use all available logical cores for each job
+      max-jobs = 64; # Hardware-optimized: 16 cores detected
+      cores = 0; # Use all available logical cores for each job
       max-substitution-jobs = 64; # Hardware-optimized for network performance
 
       # Memory optimization - allow large builds with plenty of RAM
-      max-silent-time = 3600;   # 1 hour timeout for silent builds (Emacs compilation)
-      timeout = 7200;           # 2 hour total timeout for long builds
+      max-silent-time = 3600; # 1 hour timeout for silent builds (Emacs compilation)
+      timeout = 7200; # 2 hour total timeout for long builds
 
       # Advanced build performance settings
       sandbox = true;
-      build-cores = 0;          # Use all cores for building (same as cores but explicit)
+      build-cores = 0; # Use all cores for building (same as cores but explicit)
 
       # Memory and I/O optimizations (will be configured based on available RAM)
-      min-free = 6871947673;    # Hardware-optimized: 6.3GB minimum
-      max-free = 82463372083;    # Hardware-optimized: 76.7GB threshold
+      min-free = 6871947673; # Hardware-optimized: 6.3GB minimum
+      max-free = 82463372083; # Hardware-optimized: 76.7GB threshold
 
       # Network optimizations
-      connect-timeout = 10;     # 10 second connection timeout
-      download-attempts = 3;    # Retry failed downloads
+      connect-timeout = 10; # 10 second connection timeout
+      download-attempts = 3; # Retry failed downloads
 
       # Build environment optimizations
-      keep-going = true;        # Continue building other derivations on failure
-      keep-failed = false;      # Don't keep failed build directories (saves space)
+      keep-going = true; # Continue building other derivations on failure
+      keep-failed = false; # Don't keep failed build directories (saves space)
 
       # Experimental features for better performance
-      eval-cache = true;        # Cache evaluation results
-      tarball-ttl = 300;        # Cache tarballs for 5 minutes
-      
+      eval-cache = true; # Cache evaluation results
+      tarball-ttl = 300; # Cache tarballs for 5 minutes
+
       warn-dirty = true;
       # produces linking issues when updating on macOS
       # https://github.com/NixOS/nix/issues/7273
       auto-optimise-store = false;
-      
+
       # Fix locale issues in nix builds - ensure consistent locale environment
       # These sandbox paths allow access to system locale files
       extra-sandbox-paths = [
         "/usr/share/locale"
       ];
     };
-    
+
     # Daemon performance settings for faster builds
-    daemonIOLowPriority = false;      # Hardware-optimized: high (plenty of resources)
+    daemonIOLowPriority = false; # Hardware-optimized: high (plenty of resources)
     # Don't set daemonProcessType to allow normal CPU scheduling priority
 
     gc = {
       automatic = true;
-      interval = { Weekday = 0; Hour = 2; Minute = 0; };
+      interval = {
+        Weekday = 0;
+        Hour = 2;
+        Minute = 0;
+      };
       options = "--delete-older-than 10d";
     };
 
@@ -110,19 +121,19 @@ in
 
   # Global nixpkgs configuration to silence evaluation warnings
   nixpkgs.config = {
-    allowAliases = false;  # Disable package aliases to prevent warnings
-    allowBroken = true;    # Allow broken packages to work around SDK issues
+    allowAliases = false; # Disable package aliases to prevent warnings
+    allowBroken = true; # Allow broken packages to work around SDK issues
   };
-  
+
   # Global overlay to provide _1password for shell plugins
   nixpkgs.overlays = [
     (final: prev: {
       _1password = prev._1password-cli;
     })
   ];
-  
+
   # Biometric authentication configuration (main setting is below in security.pam.services)
-  
+
   # Environment variables for 1Password integration with multiple vaults
   environment.variables = {
     OP_BIOMETRIC_UNLOCK_ENABLED = "true";
@@ -139,7 +150,6 @@ in
     LC_NUMERIC = "en_US.UTF-8";
     LC_TIME = "en_US.UTF-8";
   };
-  
 
   ids.gids.nixbld = 350;
 
@@ -147,16 +157,27 @@ in
   system.checks.verifyNixPath = false;
 
   # Load configuration that is shared across systems
-  environment.systemPackages = with pkgs; [
-    agenix.packages."${pkgs.stdenv.hostPlatform.system}".default
-  ] ++ (import ./modules/packages.nix { inherit pkgs; });
+  environment.systemPackages = with pkgs;
+    [
+      agenix.packages."${pkgs.stdenv.hostPlatform.system}".default
+    ]
+    ++ (import ./modules/packages.nix {inherit pkgs;});
 
   # Add selected shell and commonly used shells to available shells
-  environment.shells = [ selectedShellPath ] ++ 
-    (if defaultShell != "zsh" then [ shellPaths.zsh ] else []) ++
-    (if defaultShell != "nushell" then [ shellPaths.nushell ] else []);
-    # fish shell removed - only kept as nushell multicompleter dependency
-  
+  environment.shells =
+    [selectedShellPath]
+    ++ (
+      if defaultShell != "zsh"
+      then [shellPaths.zsh]
+      else []
+    )
+    ++ (
+      if defaultShell != "nushell"
+      then [shellPaths.nushell]
+      else []
+    );
+  # fish shell removed - only kept as nushell multicompleter dependency
+
   # Configure the selected user with the chosen shell
   users.users.${user} = {
     name = "${user}";
@@ -199,13 +220,13 @@ in
           "/Users/${user}/.nix-profile/bin"
           "/run/current-system/sw/bin"
           "/nix/var/nix/profiles/default/bin"
-          
+
           # Homebrew paths
           "/opt/homebrew/bin"
           "/opt/homebrew/opt/llvm/bin"
           "/opt/homebrew/opt/mysql@8.4/bin"
           "/opt/homebrew/opt/gnu-tar/libexec/gnubin"
-          
+
           # System paths
           "/usr/local/bin"
           "/usr/bin"
@@ -293,12 +314,12 @@ in
   # This allows Touch ID to work with Duet Display and similar screen sharing apps
   # IMPORTANT: This setting affects system authorization (sudo, etc.) only
   # Apple Pay uses a separate security framework and should NOT be affected
-  # 
+  #
   # TO REVERT IF NEEDED:
   # 1. Comment out or remove the "setTouchIdIgnoreArd" launchd agent below
-  # 2. Run: nb && ns  
+  # 2. Run: nb && ns
   # 3. Manually run: defaults delete ~/Library/Preferences/com.apple.security.authorization.plist ignoreArd
-  # 
+  #
   # If you experience ANY issues with Apple Pay or other Touch ID features,
   # immediately revert this setting using the steps above.
   launchd.user.agents.setTouchIdIgnoreArd = {

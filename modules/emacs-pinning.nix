@@ -1,5 +1,10 @@
-{ pkgs, user, inputs, hostname, ... }:
-let
+{
+  pkgs,
+  user,
+  inputs,
+  hostname,
+  ...
+}: let
   # Emacs pinning system with hash management
   pinFile = "/Users/${user}/.cache/emacs-git-pin";
   hashFile = "/Users/${user}/.cache/emacs-git-pin-hash";
@@ -78,29 +83,40 @@ let
 
   isPinned = builtins.pathExists pinFile;
 
-  pinnedCommit = if isPinned
+  pinnedCommit =
+    if isPinned
     then builtins.replaceStrings ["\n"] [""] (builtins.readFile pinFile)
     else null;
 
-  pinnedHash = if isPinned && builtins.pathExists hashFile
+  pinnedHash =
+    if isPinned && builtins.pathExists hashFile
     then builtins.replaceStrings ["\n"] [""] (builtins.readFile hashFile)
     else null;
 
   # If available, prefer using the already-built configuredEmacs store path
   hasPinnedStorePath = isPinned && builtins.pathExists storePathFile;
-  pinnedStorePath = if hasPinnedStorePath
+  pinnedStorePath =
+    if hasPinnedStorePath
     then builtins.replaceStrings ["\n"] [""] (builtins.readFile storePathFile)
     else null;
   # Only treat the saved store path as valid if it exists in the local store
-  validPinnedStorePath = hasPinnedStorePath && pinnedStorePath != null && pinnedStorePath != ""
+  validPinnedStorePath =
+    hasPinnedStorePath
+    && pinnedStorePath != null
+    && pinnedStorePath != ""
     && builtins.pathExists (/. + pinnedStorePath);
 
   # Create emacs package - pinned or latest
   # When pinned and a stored path is available, avoid overlay evaluation entirely.
   emacsPackage =
-    if validPinnedStorePath then
+    if validPinnedStorePath
+    then
       # Lightweight wrapper derivation that re-exports the prebuilt store path
-      pkgs.runCommandNoCC "emacs-git-pinned-${builtins.substring 0 7 (if pinnedCommit != null then pinnedCommit else "unknown")}" { } ''
+      pkgs.runCommandNoCC "emacs-git-pinned-${builtins.substring 0 7 (
+        if pinnedCommit != null
+        then pinnedCommit
+        else "unknown"
+      )}" {} ''
         ln -s ${pinnedStorePath} "$out"
       ''
     else
@@ -109,7 +125,8 @@ let
 
   # Apply emacs configuration overrides with verbose build output
   configuredEmacs =
-    if validPinnedStorePath then
+    if validPinnedStorePath
+    then
       # When using a stored path, do not attempt to override features; the
       # stored build already encapsulates the desired configuration.
       emacsPackage
@@ -122,8 +139,8 @@ let
         withTreeSitter = true;
 
         # Lightweight additions that don't significantly impact build time
-        withSQLite3 = true;   # Useful for org-roam, org-mode features
-        withWebP = true;      # Modern image format support
+        withSQLite3 = true; # Useful for org-roam, org-mode features
+        withWebP = true; # Modern image format support
 
         # Heavy dependencies - only enable if you actually use these features:
         withImageMagick = true;
@@ -161,17 +178,19 @@ let
         '';
 
         # Ensure build logs are preserved and visible
-        meta = (oldAttrs.meta or {}) // {
-          description = "GNU Emacs with enhanced build progress indicators";
-          longDescription = ''
-            GNU Emacs text editor with native compilation and comprehensive feature set.
-            This build includes verbose progress indicators to track compilation status.
-            Build typically takes 20-45 minutes with native compilation enabled.
-          '';
-        };
+        meta =
+          (oldAttrs.meta or {})
+          // {
+            description = "GNU Emacs with enhanced build progress indicators";
+            longDescription = ''
+              GNU Emacs text editor with native compilation and comprehensive feature set.
+              This build includes verbose progress indicators to track compilation status.
+              Build typically takes 20-45 minutes with native compilation enabled.
+            '';
+          };
       });
 
-emacsPin = pkgs.writeScriptBin "emacs-pin" ''
+  emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     #!/usr/bin/env bash
     # Pin emacs-git to current nix-provided commit (no args) or specified commit
 
@@ -182,7 +201,7 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
     HASH_FILE="''${CACHE_DIR}/emacs-git-pin-hash"
     STORE_FILE="''${CACHE_DIR}/emacs-git-store-path"
-    
+
     # Get hostname from system or use current
     HOSTNAME="${hostname}"
 
@@ -340,7 +359,7 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
 
     CACHE_DIR="''${HOME}/.cache"
     PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
-    
+
     # Get hostname from system or use current
     HOSTNAME="${hostname}"
 
@@ -390,7 +409,7 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     PIN_FILE="''${CACHE_DIR}/emacs-git-pin"
     HASH_FILE="''${CACHE_DIR}/emacs-git-pin-hash"
     STORE_FILE="''${CACHE_DIR}/emacs-git-store-path"
-    
+
     # Get hostname from system or use current
     HOSTNAME="${hostname}"
 
@@ -452,8 +471,7 @@ emacsPin = pkgs.writeScriptBin "emacs-pin" ''
       emacs --version | head -1
     fi
   '';
-
 in {
   inherit configuredEmacs;
-  pinTools = [ emacsPin emacsUnpin emacsPinDiff emacsPinStatus ];
+  pinTools = [emacsPin emacsUnpin emacsPinDiff emacsPinStatus];
 }

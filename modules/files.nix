@@ -1,14 +1,16 @@
-{ pkgs, config, user ? "oscarvarto", ... }:
-
-let
-  # User is passed as parameter or falls back to default
-  homeDir = if config ? users.users.${user}.home 
-            then config.users.users.${user}.home 
-            else "/Users/${user}";
-  xdg_configHome = "${homeDir}/.config";
-in
 {
-  
+  pkgs,
+  config,
+  user ? "oscarvarto",
+  ...
+}: let
+  # User is passed as parameter or falls back to default
+  homeDir =
+    if config ? users.users.${user}.home
+    then config.users.users.${user}.home
+    else "/Users/${user}";
+  xdg_configHome = "${homeDir}/.config";
+in {
   # NOTE: Nix cleanup scripts are now managed via stow (nix-scripts package)
   # Run: cd ~/darwin-config/stow && stow nix-scripts
 
@@ -33,26 +35,26 @@ in
         }
       }
     '';
- 
+
     # Use onChange to merge the configurations
     onChange = ''
       # Ensure the op config directory exists
       mkdir -p "$HOME/.config/op"
-      
+
       if [ -f "$HOME/.config/op/config" ]; then
         # Create a temporary file for the merged config
         TEMP_FILE=$(mktemp)
- 
+
         # Use jq to merge the existing config with the biometric settings
         jq -s '.[0] * .[1]' "$HOME/.config/op/config" "$HOME/.config/op/biometric-config.json" > "$TEMP_FILE"
- 
+
         # Replace the config file with the merged version
         mv "$TEMP_FILE" "$HOME/.config/op/config"
       else
         # If no config exists yet, just copy the biometric config
         cp "$HOME/.config/op/biometric-config.json" "$HOME/.config/op/config"
       fi
-      
+
       # Set proper permissions for 1Password CLI security requirements
       chmod 600 "$HOME/.config/op/config"
     '';
@@ -63,7 +65,7 @@ in
     text = ''
       # Ghostty Configuration - Base settings managed by Nix
       # Override settings in ~/.config/ghostty/overrides.conf for quick changes
- 
+
       # Shell configuration (default nushell, can be overridden)
       # Note: Default shell is set below, override with ghostty-config shell <shell-name>
       # Enable shell integration for proper cursor handling in Zellij/Nushell
@@ -74,7 +76,7 @@ in
       # font-family = PragmataPro Mono Liga
       font-family = MonoLisaVariable Nerd Font, JetBrains Mono, SF Mono, monospace
       font-size = 18
- 
+
       # Default theme (can be overridden)
       theme = dracula
 
@@ -110,12 +112,12 @@ in
     executable = true;
     text = ''
       #!/usr/bin/env bash
-      
+
       # 1Password SSH Agent Setup Helper
       # This script helps you enable 1Password SSH agent integration
-      
+
       set -e
-      
+
       echo "🔐 1Password SSH Agent Setup"
       echo "=============================="
       echo ""
@@ -152,6 +154,4 @@ in
   ".config/zellij/config.kdl" = {
     source = ./zellij-config.kdl;
   };
-
 }
-
