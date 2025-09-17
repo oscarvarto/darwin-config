@@ -65,6 +65,7 @@
 (defun my/quick-vterm ()
   "Quick vterm that loads vterm if needed."
   (interactive)
+  (setq vterm-always-compile-module t)
   (require 'vterm)
   (vterm))
 

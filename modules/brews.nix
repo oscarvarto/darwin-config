@@ -45,7 +45,6 @@
       "imagemagick"
       "jq"
       "libedit"
-      "libvterm"
       "libsql"
       "libtool"
       "llvm"

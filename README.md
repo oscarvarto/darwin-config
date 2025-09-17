@@ -847,6 +847,12 @@ Doom Emacs itself is installed at ~/.emacs.d/
 | `doom upgrade`                | Update Doom Emacs itself              |
 | `doom doctor`                 | Diagnose configuration issues         |
 
+##### VTerm Included (No Runtime Compile)
+
+- Emacs is built with `vterm` via Nix (`emacsWithPackages` + `epkgs.vterm`).
+- No y/n prompts and no runtime compilation; vterm is ready after `ns`.
+- Uses Nix-provided libvterm automatically; no Homebrew dependency required.
+
 #### Emacs Version Pinning
 
 This repo includes a robust Emacs pinning system to control when Emacs rebuilds, even as the emacs-overlay advances.

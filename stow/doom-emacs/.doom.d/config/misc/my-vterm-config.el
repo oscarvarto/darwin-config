@@ -1,12 +1,15 @@
 ;;; my-vterm-config.el -*- lexical-binding: t; no-byte-compile: t; -*-
 ;; Configuration for vterm.
 
+;; Always compile vterm module automatically (no prompt)
+;; Set this BEFORE loading vterm so it takes effect during first require
+(setq vterm-always-compile-module t)
+
 ;;[INFO] Improve speed when using in terminal.
 ;;     Ref: https://www.reddit.com/r/emacs/comments/pjtm91/vterm_a_little_bit_slow/
-(require 'vterm)
 
 (after! vterm
-  (setq! vterm-timer-delay 0.01))
+  (setq vterm-timer-delay 0.01))
 
 (add-hook 'vterm-mode-hook
           (lambda ()
@@ -14,9 +17,8 @@
                (buffer-face-mode t)))
 
 (setq vterm-module-cmake-args "-DCMAKE_BUILD_TYPE=Release -DUSE_SYSTEM_LIBVTERM=yes"
-       vterm-enable-manipulate-selection-data-by-osc52 t
-       vterm-term-environment-variable "eterm-color"
-       vterm-always-compile-module t)
+      vterm-enable-manipulate-selection-data-by-osc52 t
+      vterm-term-environment-variable "eterm-color")
 
 (add-hook 'term-mode-hook #'eterm-256color-mode)
 

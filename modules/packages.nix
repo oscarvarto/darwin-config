@@ -42,6 +42,9 @@ with pkgs; [
   bat # Better cat with syntax highlighting
   delta # Better git diff viewer
   zoxide # Smarter cd with frecency tracking
+  # Tools like cmake/pkg-config are no longer required for runtime
+  # vterm compilation since vterm is prebuilt via Nix. Keep your
+  # environment lean; add them back only if needed elsewhere.
 
   # Encryption and security tools
   age

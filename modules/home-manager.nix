@@ -438,6 +438,8 @@ in {
 
       # https://github.com/nix-community/home-manager/issues/3344
       manual.manpages.enable = false;
+
+      # vterm module is prebuilt via Nix (emacsWithPackages), no runtime compile needed
     };
   };
 }

@@ -93,102 +93,101 @@
     then builtins.replaceStrings ["\n"] [""] (builtins.readFile hashFile)
     else null;
 
-  # If available, prefer using the already-built configuredEmacs store path
-  hasPinnedStorePath = isPinned && builtins.pathExists storePathFile;
-  pinnedStorePath =
-    if hasPinnedStorePath
-    then builtins.replaceStrings ["\n"] [""] (builtins.readFile storePathFile)
-    else null;
-  # Only treat the saved store path as valid if it exists in the local store
-  validPinnedStorePath =
-    hasPinnedStorePath
-    && pinnedStorePath != null
-    && pinnedStorePath != ""
-    && builtins.pathExists (/. + pinnedStorePath);
-
-  # Create emacs package - pinned or latest
-  # When pinned and a stored path is available, avoid overlay evaluation entirely.
+  # Base emacs derivation: pinned (fixed src) or latest overlay
+  baseOverlayEmacs = inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git;
   emacsPackage =
-    if validPinnedStorePath
+    if isPinned && pinnedCommit != null && pinnedHash != null
     then
-      # Lightweight wrapper derivation that re-exports the prebuilt store path
-      pkgs.runCommandNoCC "emacs-git-pinned-${builtins.substring 0 7 (
-        if pinnedCommit != null
-        then pinnedCommit
-        else "unknown"
-      )}" {} ''
-        ln -s ${pinnedStorePath} "$out"
-      ''
-    else
-      # No valid stored path (possibly GC'd) or not pinned: use latest overlay
-      inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git;
+      baseOverlayEmacs.overrideAttrs (old: rec {
+        pname = "emacs-git-pinned";
+        version = "31.0.50-${builtins.substring 0 7 pinnedCommit}";
+        name = "${pname}-${version}";
+        src = pkgs.fetchFromGitHub {
+          owner = "emacs-mirror";
+          repo = "emacs";
+          rev = pinnedCommit;
+          hash = pinnedHash;
+        };
+        __pinnedCommit = pinnedCommit;
+      })
+    else baseOverlayEmacs;
 
   # Apply emacs configuration overrides with verbose build output
-  configuredEmacs =
-    if validPinnedStorePath
-    then
-      # When using a stored path, do not attempt to override features; the
-      # stored build already encapsulates the desired configuration.
-      emacsPackage
-    else
-      (emacsPackage.override {
-        # Native compilation: ESSENTIAL for performance - always enable
-        withNativeCompilation = true;
+  emacsBase =
+    (emacsPackage.override {
+      # Native compilation: ESSENTIAL for performance - always enable
+      withNativeCompilation = true;
 
-        # Tree-sitter: Likely enabled by default in emacs-git, but ensure it's on
-        withTreeSitter = true;
+      # Tree-sitter: Likely enabled by default in emacs-git, but ensure it's on
+      withTreeSitter = true;
 
-        # Lightweight additions that don't significantly impact build time
-        withSQLite3 = true; # Useful for org-roam, org-mode features
-        withWebP = true; # Modern image format support
+      # Lightweight additions that don't significantly impact build time
+      withSQLite3 = true; # Useful for org-roam, org-mode features
+      withWebP = true; # Modern image format support
 
-        # Heavy dependencies - only enable if you actually use these features:
-        withImageMagick = true;
-        withXwidgets = true;
-      }).overrideAttrs (oldAttrs: {
-        # Add custom icon integration
-        postInstall = ''
-          ${oldAttrs.postInstall or ""}
+      # Heavy dependencies - only enable if you actually use these features:
+      withImageMagick = true;
+      withXwidgets = true;
+    }).overrideAttrs (oldAttrs: {
+      # Add custom icon integration
+      postInstall = ''
+        ${oldAttrs.postInstall or ""}
 
-          # Integrate custom Emacs icon used across the repo (also used by Raycast)
-          # Keep a single source of truth under stow/ so Dock and Raycast match
-          CUSTOM_ICON_SOURCE="${../stow/nix-scripts/.local/share/img/icons/Emacs.icns}"
-          if [[ -f "$CUSTOM_ICON_SOURCE" ]]; then
-            echo "🎨 Integrating custom curvy-blender Emacs icon..."
+        # Integrate custom Emacs icon used across the repo (also used by Raycast)
+        # Keep a single source of truth under stow/ so Dock and Raycast match
+        CUSTOM_ICON_SOURCE="${../stow/nix-scripts/.local/share/img/icons/Emacs.icns}"
+        if [[ -f "$CUSTOM_ICON_SOURCE" ]]; then
+          echo "🎨 Integrating custom curvy-blender Emacs icon..."
 
-            # Find the Emacs.app bundle in the output
-            EMACS_APP=$(find "$out" -name "Emacs.app" -type d | head -1)
-            if [[ -n "$EMACS_APP" && -d "$EMACS_APP/Contents/Resources" ]]; then
-              # Backup original icon
-              if [[ -f "$EMACS_APP/Contents/Resources/Emacs.icns" ]]; then
-                cp "$EMACS_APP/Contents/Resources/Emacs.icns" "$EMACS_APP/Contents/Resources/Emacs.icns.original"
-              fi
-
-              # Install custom icon
-              cp "$CUSTOM_ICON_SOURCE" "$EMACS_APP/Contents/Resources/Emacs.icns"
-              echo "✅ Custom icon installed: $EMACS_APP/Contents/Resources/Emacs.icns"
-            else
-              echo "⚠️  Could not find Emacs.app bundle or Resources directory"
+          # Find the Emacs.app bundle in the output
+          EMACS_APP=$(find "$out" -name "Emacs.app" -type d | head -1)
+          if [[ -n "$EMACS_APP" && -d "$EMACS_APP/Contents/Resources" ]]; then
+            # Backup original icon
+            if [[ -f "$EMACS_APP/Contents/Resources/Emacs.icns" ]]; then
+              cp "$EMACS_APP/Contents/Resources/Emacs.icns" "$EMACS_APP/Contents/Resources/Emacs.icns.original"
             fi
-          elif [[ ! -f "$CUSTOM_ICON_SOURCE" ]]; then
-            echo "ℹ️  Custom icon not found at: $CUSTOM_ICON_SOURCE"
-          else
-            echo "ℹ️  Not a GUI Emacs build, skipping icon installation"
-          fi
-        '';
 
-        # Ensure build logs are preserved and visible
-        meta =
-          (oldAttrs.meta or {})
-          // {
-            description = "GNU Emacs with enhanced build progress indicators";
-            longDescription = ''
-              GNU Emacs text editor with native compilation and comprehensive feature set.
-              This build includes verbose progress indicators to track compilation status.
-              Build typically takes 20-45 minutes with native compilation enabled.
-            '';
-          };
-      });
+            # Install custom icon
+            cp "$CUSTOM_ICON_SOURCE" "$EMACS_APP/Contents/Resources/Emacs.icns"
+            echo "✅ Custom icon installed: $EMACS_APP/Contents/Resources/Emacs.icns"
+          else
+            echo "⚠️  Could not find Emacs.app bundle or Resources directory"
+          fi
+        elif [[ ! -f "$CUSTOM_ICON_SOURCE" ]]; then
+          echo "ℹ️  Custom icon not found at: $CUSTOM_ICON_SOURCE"
+        else
+          echo "ℹ️  Not a GUI Emacs build, skipping icon installation"
+        fi
+      '';
+
+      # Ensure build logs are preserved and visible
+      meta =
+        (oldAttrs.meta or {})
+        // {
+          description = "GNU Emacs with enhanced build progress indicators";
+          longDescription = ''
+            GNU Emacs text editor with native compilation and comprehensive feature set.
+            This build includes verbose progress indicators to track compilation status.
+            Build typically takes 20-45 minutes with native compilation enabled.
+          '';
+        };
+    });
+
+  # Build Emacs with prebuilt vterm (no runtime compilation) and keep .app bundle
+  configuredEmacs = let
+    epkgs = pkgs.emacsPackagesFor emacsBase;
+    withPkgs = epkgs.emacsWithPackages (p: [p.vterm]);
+  in
+    withPkgs.overrideAttrs (old: {
+      postInstall = ''
+        ${old.postInstall or ""}
+        # Ensure the Emacs.app bundle is available from the base build
+        if [ -d ${emacsBase}/Applications ]; then
+          mkdir -p "$out/Applications"
+          ln -s ${emacsBase}/Applications/Emacs.app "$out/Applications/Emacs.app" || true
+        fi
+      '';
+    });
 
   emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     #!/usr/bin/env bash
