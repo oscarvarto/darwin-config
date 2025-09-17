@@ -4,8 +4,9 @@ return {
   -- Use the exact spec from LazyVim docs but with our flavour
   {
     "catppuccin/nvim",
-    lazy = true,
     name = "catppuccin",
+    lazy = false,          -- load immediately so colors are ready
+    priority = 1000,       -- load before other UI plugins
     opts = {
       flavour = "latte", -- Add our preferred flavour
       integrations = {
@@ -49,7 +50,12 @@ return {
     },
     -- Patch the breaking change in catppuccin's API
     config = function(_, opts)
+      -- Ensure proper color support and light background for Latte
+      vim.opt.termguicolors = true
+      vim.o.background = "light"
       require("catppuccin").setup(opts)
+      -- In case LazyVim colorscheme apply happens earlier, enforce it here too
+      pcall(vim.cmd.colorscheme, "catppuccin")
       
       -- Monkey-patch the old get() method to use the new get_theme() API
       local bufferline_integration = require("catppuccin.groups.integrations.bufferline")

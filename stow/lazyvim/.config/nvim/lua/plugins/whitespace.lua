@@ -7,6 +7,10 @@ return {
     config = function(_, opts)
       require("mini.trailspace").setup(opts)
 
+      -- Default: do NOT highlight trailing whitespace anywhere.
+      -- We keep on-demand trim commands only to avoid theme conflicts.
+      vim.g.minitrailspace_disable = true
+
       -- Do not highlight in dashboards or special buffers
       local disable_ft = {
         "alpha",
@@ -22,12 +26,8 @@ return {
         "oil",
         "trouble",
       }
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = disable_ft,
-        callback = function()
-          vim.b.minitrailspace_disable = true
-        end,
-      })
+      -- If you prefer selective highlight later, you can re-enable on demand:
+      -- :let g:minitrailspace_disable = 0
 
       -- User commands for on-demand cleanup
       vim.api.nvim_create_user_command("WhitespaceTrim", function()
@@ -82,4 +82,3 @@ return {
   --   },
   -- },
 }
-
