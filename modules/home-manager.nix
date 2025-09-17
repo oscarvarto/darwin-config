@@ -65,7 +65,9 @@ in {
   # User configuration is now handled in system.nix based on defaultShell
 
   environment.variables = {
-    EDITOR = "nvim";
+    EDITOR = "emacsclient -t";
+    VISUAL = "emacsclient -c";
+    GIT_EDITOR = "emacsclient -t";
     LANG = "en_US.UTF-8";
     LC_ALL = "en_US.UTF-8";
     BAT_THEME = "ansi";
@@ -244,7 +246,7 @@ in {
           jujutsu = {
             enable = true;
             settings = {
-              ui.editor = "nvim";
+              ui.editor = "emacsclient -t";
               lazyjj.highlight-color = "#8839ef";
               user = {
                 email = userConfig.email;
@@ -301,7 +303,7 @@ in {
             extraConfig = {
               init.defaultBranch = "main";
               core = {
-                editor = "nvim";
+                editor = "emacsclient -t";
                 autocrlf = false;
                 eol = "lf";
                 ignorecase = false;

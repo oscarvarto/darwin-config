@@ -122,10 +122,9 @@ in {
         # Ripgrep alias
         alias search=rg -p --glob '!node_modules/*' $@
 
-        export ALTERNATE_EDITOR=""
-        export EDITOR="nvim"
-        # VISUAL will use dynamic socket finding via ec function
-        export VISUAL="$HOME/.nix-profile/bin/emacsclient -nc"
+        export ALTERNATE_EDITOR=""   # empty means emacsclient will start server if needed
+        export EDITOR="emacsclient -t"
+        export VISUAL="emacsclient -c"
 
         # Load theme from cache file set by catppuccin theme switcher
         if [[ -f ~/.cache/zsh_theme ]]; then

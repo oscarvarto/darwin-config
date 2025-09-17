@@ -269,7 +269,7 @@ $env.config = {
     color_config: $dark_theme
     footer_mode: 25 # always, never, number_of_rows, auto
     float_precision: 2 # the precision for displaying floats in tables
-    buffer_editor: "nvim" # command that will be used to edit the current line buffer with ctrl+o, if unset fallback to $env.EDITOR and $env.VISUAL
+    buffer_editor: ["emacsclient", "-t"] # use emacsclient in terminal for buffer edits
     use_ansi_coloring: true
     bracketed_paste: true # enable bracketed paste, currently useless on windows
     edit_mode: vi # emacs, vi
@@ -1030,7 +1030,9 @@ use std/dirs
 alias search = rg -p --glob '!node_modules/*'
 alias diff = difft
 
-$env.EDITOR = "nvim"
+$env.EDITOR = "emacsclient -t"
+$env.VISUAL = "emacsclient -c"
+$env.ALTERNATE_EDITOR = ""
 
 # Terminal and editor shortcuts
 alias tg  = ^$env.EDITOR ~/.config/ghostty/config
