@@ -7,17 +7,38 @@ return {
       local function format_elisp_buffer()
         local file = vim.fn.expand("%:p")
         if file and file ~= "" then
-          if vim.fn.executable("elisp-formatter.js") == 1 then
-            local cmd = string.format("elisp-formatter.js elisp '%s'", file)
-            local result = vim.fn.system(cmd)
-            if vim.v.shell_error == 0 then
-              vim.cmd("edit!") -- Reload the file
-              vim.notify("Elisp buffer formatted successfully", vim.log.levels.INFO)
-            else
-              vim.notify("Elisp formatting failed: " .. result, vim.log.levels.ERROR)
+          -- Try full path first, then fallback to PATH resolution
+          local home = os.getenv("HOME")
+          local elisp_formatter_cmd = home .. "/darwin-config/modules/elisp-formatter/elisp-formatter.js"
+          if vim.fn.executable(elisp_formatter_cmd) == 0 then
+            elisp_formatter_cmd = "elisp-formatter.js"
+            if vim.fn.executable(elisp_formatter_cmd) == 0 then
+              vim.notify("elisp-formatter.js not found", vim.log.levels.WARN)
+              return
             end
+          end
+
+          -- Save cursor position and view
+          local cursor_pos = vim.api.nvim_win_get_cursor(0)
+          local view = vim.fn.winsaveview()
+
+          local cmd = string.format("%s elisp '%s'", elisp_formatter_cmd, file)
+          local result = vim.fn.system(cmd)
+          if vim.v.shell_error == 0 then
+            -- Read the formatted content and update buffer
+            local lines = vim.fn.readfile(file)
+            vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+
+            -- Restore cursor position and view
+            vim.fn.winrestview(view)
+            vim.api.nvim_win_set_cursor(0, cursor_pos)
+
+            -- Trigger syntax highlighting refresh
+            vim.cmd("syntax sync fromstart")
+
+            vim.notify("Elisp buffer formatted successfully", vim.log.levels.INFO)
           else
-            vim.notify("elisp-formatter.js not found in PATH", vim.log.levels.WARN)
+            vim.notify("Elisp formatting failed: " .. result, vim.log.levels.ERROR)
           end
         end
       end
@@ -26,16 +47,23 @@ return {
       local function check_elisp_syntax()
         local file = vim.fn.expand("%:p")
         if file and file ~= "" then
-          if vim.fn.executable("elisp-formatter.js") == 1 then
-            local cmd = string.format("elisp-formatter.js check '%s'", file)
-            local result = vim.fn.system(cmd)
-            if vim.v.shell_error == 0 then
-              vim.notify("Elisp syntax is valid", vim.log.levels.INFO)
-            else
-              vim.notify("Elisp syntax errors: " .. result, vim.log.levels.WARN)
+          -- Try full path first, then fallback to PATH resolution
+          local home = os.getenv("HOME")
+          local elisp_formatter_cmd = home .. "/darwin-config/modules/elisp-formatter/elisp-formatter.js"
+          if vim.fn.executable(elisp_formatter_cmd) == 0 then
+            elisp_formatter_cmd = "elisp-formatter.js"
+            if vim.fn.executable(elisp_formatter_cmd) == 0 then
+              vim.notify("elisp-formatter.js not found", vim.log.levels.WARN)
+              return
             end
+          end
+
+          local cmd = string.format("%s check '%s'", elisp_formatter_cmd, file)
+          local result = vim.fn.system(cmd)
+          if vim.v.shell_error == 0 then
+            vim.notify("Elisp syntax is valid", vim.log.levels.INFO)
           else
-            vim.notify("elisp-formatter.js not found in PATH", vim.log.levels.WARN)
+            vim.notify("Elisp syntax errors: " .. result, vim.log.levels.WARN)
           end
         end
       end
