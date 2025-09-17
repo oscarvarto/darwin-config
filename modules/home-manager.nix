@@ -160,45 +160,46 @@ in {
       # Enable the local nushell module
       local.nushell.enable = true; # Re-enabled to test if it causes fish config issue
 
+      # Global EditorConfig (Home Manager module)
+      editorconfig = {
+        enable = true;
+        settings = {
+          "*" = {
+            charset = "utf-8";
+            end_of_line = "lf";
+            insert_final_newline = true;
+            trim_trailing_whitespace = false;
+            indent_style = "space";
+            indent_size = 2;
+          };
+          "*.md" = {trim_trailing_whitespace = false;};
+          Makefile = {indent_style = "tab";};
+          "*.go" = {indent_style = "tab";};
+          "*.py" = {
+            indent_style = "space";
+            indent_size = 4;
+          };
+          "*.nix" = {
+            indent_style = "space";
+            indent_size = 2;
+          };
+          "*.lua" = {
+            indent_style = "space";
+            indent_size = 2;
+          };
+          "*.nu" = {
+            indent_style = "space";
+            indent_size = 2;
+          };
+          "*.{js,jsx,ts,tsx,json,yml,yaml,toml,sh,bash,zsh}" = {
+            indent_style = "space";
+            indent_size = 2;
+          };
+        };
+      };
+
       programs =
         {
-          editorconfig = {
-            enable = true;
-            settings = {
-              "*" = {
-                charset = "utf-8";
-                end_of_line = "lf";
-                insert_final_newline = true;
-                trim_trailing_whitespace = false;
-                indent_style = "space";
-                indent_size = 2;
-              };
-              "*.md" = { trim_trailing_whitespace = false; };
-              Makefile = { indent_style = "tab"; };
-              "*.go" = { indent_style = "tab"; };
-              "*.py" = {
-                indent_style = "space";
-                indent_size = 4;
-              };
-              "*.nix" = {
-                indent_style = "space";
-                indent_size = 2;
-              };
-              "*.lua" = {
-                indent_style = "space";
-                indent_size = 2;
-              };
-              "*.nu" = {
-                indent_style = "space";
-                indent_size = 2;
-              };
-              "*.{js,jsx,ts,tsx,json,yml,yaml,toml,sh,bash,zsh}" = {
-                indent_style = "space";
-                indent_size = 2;
-              };
-            };
-          };
-
           # 1Password shell plugins removed - SSH agent integration is sufficient
           # SSH-based authentication works for GitHub/GitLab via 1Password SSH agent
           # Manual `op` CLI commands available when direct credential access needed
