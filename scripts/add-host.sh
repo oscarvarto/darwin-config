@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 # Add a new host configuration to flake.nix
-# Usage: add-host.sh --hostname HOSTNAME --user USER [--system SYSTEM] [--work-profile] [--personal-config]
+# Usage: add-host.sh --hostname HOSTNAME --user USER [--work-profile] [--personal-config]
 
 set -e
 
@@ -33,7 +33,7 @@ show_help() {
     echo "  -u, --user USER        Target username"
     echo ""
     echo "Options:"
-    echo "  -s, --system ARCH      System architecture (default: aarch64-darwin)"
+    # Architecture is fixed to aarch64-darwin (Apple Silicon)
     echo "  --shell SHELL          Default shell: zsh, nushell, or fish (default: zsh)"
     echo "  -w, --work-profile     Enable work profile configuration"
     echo "  -p, --personal-config  Enable personal configuration"
@@ -42,7 +42,7 @@ show_help() {
     echo ""
     echo "Examples:"
     echo "  add-host.sh --hostname alice-macbook --user alice --personal-config"
-    echo "  add-host.sh --hostname work-laptop --user bob --work-profile --system x86_64-darwin"
+    echo "  add-host.sh --hostname work-laptop --user bob --work-profile"
     echo "  add-host.sh --hostname dev-machine --user dev --shell nushell"
 }
 
@@ -57,8 +57,8 @@ while [[ $# -gt 0 ]]; do
             USER_ARG="$2"
             shift 2
             ;;
+        # system arg is no longer supported; always aarch64-darwin
         -s|--system)
-            SYSTEM_ARG="$2"
             shift 2
             ;;
         --shell)
@@ -107,11 +107,8 @@ if [[ -z "$USER_ARG" ]]; then
     exit 1
 fi
 
-# Validate system architecture
-if [[ "$SYSTEM_ARG" != "aarch64-darwin" && "$SYSTEM_ARG" != "x86_64-darwin" ]]; then
-    echo -e "${RED}❌ Error: Invalid system '$SYSTEM_ARG'. Must be 'aarch64-darwin' or 'x86_64-darwin'${NC}"
-    exit 1
-fi
+# System architecture is fixed to aarch64-darwin
+SYSTEM_ARG="aarch64-darwin"
 
 # Validate shell choice
 if [[ "$DEFAULT_SHELL" != "zsh" && "$DEFAULT_SHELL" != "nushell" && "$DEFAULT_SHELL" != "fish" ]]; then

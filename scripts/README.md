@@ -72,8 +72,8 @@ nix run .#add-host -- --hostname HOST --user USER [OPTIONS]
 # Add a new personal machine
 nix run .#add-host -- --hostname alice-macbook --user alice --personal-config
 
-# Add a work machine with Intel Mac
-nix run .#add-host -- --hostname work-laptop --user bob --work-profile --system x86_64-darwin
+# Add a work machine
+nix run .#add-host -- --hostname work-laptop --user bob --work-profile
 
 # Preview changes without applying
 nix run .#add-host -- --hostname test --user test --dry-run
@@ -87,9 +87,8 @@ nix run .#add-host -- --hostname test --user test --dry-run
 
 ## Architecture Support
 
-Both scripts support:
+Supported:
 - `aarch64-darwin`: Apple Silicon Macs (M1, M2, M3, etc.)
-- `x86_64-darwin`: Intel Macs
 
 ## Configuration Flags
 

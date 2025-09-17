@@ -71,8 +71,8 @@
     secrets,
     emacs-overlay,
   } @ inputs: let
-    # Supported systems (macOS only)
-    darwinSystems = ["x86_64-darwin" "aarch64-darwin"];
+    # Supported systems (Apple Silicon only)
+    darwinSystems = ["aarch64-darwin"];
     forAllSystems = nixpkgs.lib.genAttrs darwinSystems;
 
     # Default user configuration - can be overridden per hostname

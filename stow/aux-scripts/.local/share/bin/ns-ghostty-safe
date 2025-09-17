@@ -62,11 +62,8 @@ detect_ghostty() {
   return 1
 }
 
-# Determine the system type
+# Assume Apple Silicon only
 SYSTEM_TYPE="aarch64-darwin"
-if [[ "$(uname -m)" == "x86_64" ]]; then
-    SYSTEM_TYPE="x86_64-darwin"
-fi
 
 # Use the same command structure as nb and ns aliases
 

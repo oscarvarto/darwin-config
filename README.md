@@ -55,7 +55,7 @@ A comprehensive macOS system configuration using Nix-Darwin and Home Manager wit
 
 ## 🚀 Installation Guide for macOS
 
-This configuration supports both Apple Silicon (M1/M2/M3) and Intel Macs running macOS Monterey (12.0) or later.
+This configuration supports Apple Silicon Macs (M1/M2/M3) running macOS Monterey (12.0) or later.
 
 ### Prerequisites
 
@@ -1575,8 +1575,7 @@ nu --config modules/nushell/config.nu --commands "exit"
 flake.nix              # Main flake with inputs, hostConfigs, and apps
 ├── system.nix         # System-level macOS configuration
 ├── apps/              # System-specific executable scripts
-│   ├── aarch64-darwin/    # Apple Silicon scripts
-│   └── x86_64-darwin/     # Intel Mac scripts
+│   └── aarch64-darwin/    # Apple Silicon scripts
 ├── modules/           # Modular configuration components
 │   ├── home-manager.nix   # User environment & programs
 │   ├── packages.nix       # Nix packages
@@ -1641,7 +1640,7 @@ work-laptop = {
 ```nix
 minimal-system = {
   user = "bob";
-  system = "x86_64-darwin";
+  system = "aarch64-darwin";
   defaultShell = "fish";     # Limited support, no integrations
   hostSettings = {
     enablePersonalConfig = true;

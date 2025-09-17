@@ -29,7 +29,7 @@ hostConfigs = {
   # Add your host here
   your-hostname = {
     user = "yourusername";
-    system = "aarch64-darwin";  # or "x86_64-darwin" for Intel Macs
+    system = "aarch64-darwin";
     hostSettings = {
       enablePersonalConfig = true;   # Set to false for work machines
       workProfile = false;           # Set to true if this is a work machine
@@ -84,7 +84,7 @@ Use the `add-host` app to automatically add new host configurations:
 nix run .#add-host -- --hostname alice-macbook --user alice --personal-config
 
 # Add a new work machine
-nix run .#add-host -- --hostname work-laptop --user bob --work-profile --system x86_64-darwin
+nix run .#add-host -- --hostname work-laptop --user bob --work-profile
 
 # Preview changes without applying
 nix run .#add-host -- --hostname test --user test --dry-run
@@ -120,7 +120,6 @@ This tool will:
 
 ### System Architecture
 - `aarch64-darwin` - Apple Silicon Macs (M1, M2, M3, etc.)
-- `x86_64-darwin` - Intel Macs
 
 ### Host Settings
 

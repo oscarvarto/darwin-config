@@ -81,7 +81,7 @@ in {
       eval-cache = true; # Cache evaluation results
       tarball-ttl = 300; # Cache tarballs for 5 minutes
 
-      warn-dirty = true;
+      warn-dirty = false;
       # produces linking issues when updating on macOS
       # https://github.com/NixOS/nix/issues/7273
       auto-optimise-store = false;

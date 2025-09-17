@@ -1124,8 +1124,8 @@ def "ns" [--verbose(-v) ...args] {
     # Check for zellij session
     let in_zellij = ($env.ZELLIJ? | default "" | str length) > 0 or ($env.ZELLIJ_SESSION_NAME? | default "" | str length) > 0
     
-    # Determine system type  
-    let system_type = if (^uname -m | str trim) == "x86_64" { "x86_64-darwin" } else { "aarch64-darwin" }
+    # Assume Apple Silicon only
+    let system_type = "aarch64-darwin"
     
     # Set NIXPKGS_ALLOW_UNFREE
     $env.NIXPKGS_ALLOW_UNFREE = "1"

@@ -119,7 +119,7 @@ else
     echo "Add this to your flake.nix hostConfigs:"
     echo "  \"$TARGET_HOSTNAME\" = {"
     echo "    user = \"$TARGET_USER\";"
-    echo "    system = \"aarch64-darwin\";  # or x86_64-darwin"
+    echo "    system = \"aarch64-darwin\";"
     echo "    defaultShell = \"zsh\";  # Options: \"zsh\", \"nushell\", \"fish\""
     echo "    hostSettings = {"
     echo "      enablePersonalConfig = $PERSONAL_CONFIG;"
