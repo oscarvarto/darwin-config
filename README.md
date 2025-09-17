@@ -977,6 +977,8 @@ nvim
         ├── python.lua      # Python development
         ├── lisp.lua        # Lisp languages support
         ├── elisp.lua       # Emacs Lisp specific support
+        ├── whitespace.lua  # On-demand whitespace tools and tabify/untabify
+        └── markdown_fill.lua # Emacs-like fill for Markdown
         └── example.lua     # Plugin examples
 ```
 
@@ -1011,6 +1013,41 @@ nvim
 - `<leader>e` - Toggle file explorer
 - `<leader>gg` - Open lazygit
 - `<leader>l` - LSP commands
+
+#### Whitespace Cleanup (On-Demand)
+
+- Keymaps:
+  - `<leader>cw` — Trim trailing whitespace and final blank lines in the buffer
+  - `<leader>cT` — Untabify (tabs → spaces) using current buffer indent settings
+  - `<leader>ct` — Tabify (spaces → tabs) using current buffer indent settings
+- Behavior:
+  - No auto-trim on save; all actions are on-demand
+  - Respects EditorConfig indentation for each filetype
+  - Whitespace highlighting is disabled in dashboards/special buffers (alpha, lazy, mason, NvimTree, TelescopePrompt, etc.)
+
+#### Markdown Fill (Emacs‑Like)
+
+- Commands and keymaps (Markdown only):
+  - `:FillParagraph` or `<leader>fm` — Reflow current paragraph to `textwidth` (default 80)
+  - Visual select → `:FillRegion` or `<leader>fr` — Reflow selected region
+  - `:FillBuffer` or `<leader>fB` — Reflow entire buffer
+- Behavior:
+  - Skips fenced (```/~~~) and indented code blocks
+  - Uses `gq` formatting; no auto-wrap while typing (formatoptions removes `t`, keeps `q`)
+  - `textwidth` defaults to 80 for Markdown; adjust per file/buffer if needed
+
+Tip — Adjust Markdown wrap width
+
+- One-off buffer: `:setlocal textwidth=88` then use `:FillParagraph`/`:FillRegion`/`:FillBuffer`.
+- Session/global: `:lua vim.g.markdown_fill_textwidth = 88` (put in any user Lua file loaded at startup, e.g., `~/.config/nvim/lua/config/options.lua` or a small plugin file). The fill commands use this value for `textwidth` when opening Markdown.
+
+#### EditorConfig (Global)
+
+- Managed via Home Manager; applies across editors and tools.
+- Defaults:
+  - Global: UTF‑8, LF, final newline; no auto-trim; 2‑space indent
+  - Makefile/Go: tabs; Python: 4 spaces; Nix/Lua/Nu/Web/Shell: 2 spaces
+  - See `modules/home-manager.nix` → `editorconfig.settings` for full list
 
 #### Configuration Management
 
