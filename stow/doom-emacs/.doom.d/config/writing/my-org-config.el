@@ -25,15 +25,89 @@
       org-src-tab-acts-natively t)
 
 (setq org-latex-packages-alist '(("top=1.5cm, bottom=3cm, left=1.5cm, right=1.5cm" "geometry" nil)
-                                 ("" "minted"))
+                                 ("" "minted")
+                                 ("" "enumitem")  ; For deep list nesting
+                                 ("" "fontspec")  ; For Unicode font handling with XeLaTeX
+                                 ("" "xunicode")) ; Additional Unicode support
       org-latex-caption-above nil
       org-latex-listings 'minted
       org-latex-hyperref-template "\\hypersetup{\n pdfauthor={%a},\n pdftitle={%t},\n pdfkeywords={%k},\n pdfsubject={%d},\n pdfcreator={%c}, \n pdflang={%L},\n colorlinks=true,\n linkcolor=blue,\n urlcolor=blue,\n citecolor=blue,\n filecolor=blue,\n pdfborder={0 0 0}\n}"
-      org-latex-pdf-process '("latexmk -xelatex -shell-escape -interaction=nonstopmode -output-directory=%o %f"))
+      org-latex-pdf-process '("latexmk -xelatex -shell-escape -interaction=nonstopmode -output-directory=%o %f")
+      ;; Default header to handle Unicode and fonts
+      org-latex-default-packages-alist '(("AUTO" "inputenc" t ("pdflatex"))
+                                         ("T1" "fontenc" t ("pdflatex"))
+                                         ("" "graphicx" t)
+                                         ("" "longtable" nil)
+                                         ("" "wrapfig" nil)
+                                         ("" "rotating" nil)
+                                         ("normalem" "ulem" t)
+                                         ("" "amsmath" t)
+                                         ("" "amssymb" t)
+                                         ("" "capt-of" nil)
+                                         ("" "hyperref" nil))
+      ;; Custom header for XeLaTeX Unicode support
+      org-latex-inputenc-alist nil
+      org-latex-fontenc-alist nil)
 
 (with-eval-after-load 'ox-latex
+  ;; Custom article class with deep nesting support
   (add-to-list 'org-latex-classes
-               '("scrartcl" "\\documentclass{scrartcl}"
+               '("scrartcl" "\\documentclass{scrartcl}
+% Deep nesting configuration
+\\usepackage{enumitem}
+\\setlistdepth{20}
+\\renewlist{enumerate}{enumerate}{20}
+\\renewlist{itemize}{itemize}{20}
+% Configure each level
+\\setlist[enumerate,1]{label=\\arabic*.}
+\\setlist[enumerate,2]{label=\\alph*.}
+\\setlist[enumerate,3]{label=\\roman*.}
+\\setlist[enumerate,4]{label=\\arabic*.}
+\\setlist[enumerate,5]{label=\\alph*.}
+\\setlist[enumerate,6]{label=\\roman*.}
+\\setlist[enumerate,7]{label=\\arabic*.}
+\\setlist[enumerate,8]{label=\\alph*.}
+% Continue pattern for deeper levels
+\\setlist[itemize,1]{label=\\textbullet}
+\\setlist[itemize,2]{label=--}
+\\setlist[itemize,3]{label=*}
+\\setlist[itemize,4]{label=\\textbullet}
+\\setlist[itemize,5]{label=--}
+\\setlist[itemize,6]{label=*}
+\\setlist[itemize,7]{label=\\textbullet}
+\\setlist[itemize,8]{label=--}"
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+  ;; Also configure default article class with deep nesting
+  (add-to-list 'org-latex-classes
+               '("article-deep" "\\documentclass{article}
+% Deep nesting configuration
+\\usepackage{enumitem}
+\\setlistdepth{20}
+\\renewlist{enumerate}{enumerate}{20}
+\\renewlist{itemize}{itemize}{20}
+% Configure each level
+\\setlist[enumerate,1]{label=\\arabic*.}
+\\setlist[enumerate,2]{label=\\alph*.}
+\\setlist[enumerate,3]{label=\\roman*.}
+\\setlist[enumerate,4]{label=\\arabic*.}
+\\setlist[enumerate,5]{label=\\alph*.}
+\\setlist[enumerate,6]{label=\\roman*.}
+\\setlist[enumerate,7]{label=\\arabic*.}
+\\setlist[enumerate,8]{label=\\alph*.}
+% Continue pattern for deeper levels
+\\setlist[itemize,1]{label=\\textbullet}
+\\setlist[itemize,2]{label=--}
+\\setlist[itemize,3]{label=*}
+\\setlist[itemize,4]{label=\\textbullet}
+\\setlist[itemize,5]{label=--}
+\\setlist[itemize,6]{label=*}
+\\setlist[itemize,7]{label=\\textbullet}
+\\setlist[itemize,8]{label=--}"
                  ("\\section{%s}" . "\\section*{%s}")
                  ("\\subsection{%s}" . "\\subsection*{%s}")
                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")

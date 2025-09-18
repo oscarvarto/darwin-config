@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
 # ~/.doom.d/shell-profiles.sh
-# 
-# Add this to your shell config (e.g., ~/.zshrc, ~/.bashrc, ~/.config/fish/config.fish)
-# Source it with: source ~/.doom.d/shell-profiles.sh
+#
+# DEPRECATED: Multiple Doom Emacs Profile System
+# This file is disabled to prevent conflicts with home-manager service
+# The home-manager service now manages a single unified daemon
+#
+# Use instead:
+#   emacs-service-toggle start/stop/restart
+#   emacsclient-gui (for Raycast)
+#   e, t, et (shell aliases)
+
+exit 0
 
 # =============================================================================
-# EMACS PROFILE FUNCTIONS
+# EMACS PROFILE FUNCTIONS (DISABLED)
 # =============================================================================
 
 # Function to start Emacs with minimal configuration (fastest startup)

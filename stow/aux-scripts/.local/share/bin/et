@@ -1,11 +1,14 @@
 #!/usr/bin/env zsh
 
-# Start Emacs in background
-tag="${1:-emacs}"
+# Launch GUI Emacs client (using home-manager daemon service)
+# This replaces the old standalone Emacs launcher to avoid conflicts
 
-# Start emacs in background with nohup and redirect output
-nohup "$HOME/.nix-profile/bin/emacs" >/dev/null 2>&1 &
-pid=$!
+# Check if daemon is running, do not auto-start
+if ! ALTERNATE_EDITOR=false "$HOME/.nix-profile/bin/emacsclient" -e '(server-running-p)' >/dev/null 2>&1; then
+    echo "❌ Emacs daemon not running"
+    echo "💡 Start it with: emacs-service-toggle start"
+    exit 1
+fi
 
-echo "Started Emacs with PID $pid (tag: $tag)"
-echo "$pid:$tag" >> ~/.emacs_jobs
+# Launch GUI client
+exec "$HOME/.nix-profile/bin/emacsclient" -nc "$@"

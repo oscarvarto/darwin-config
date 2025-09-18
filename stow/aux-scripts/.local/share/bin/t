@@ -8,4 +8,11 @@ if [[ "$TERM" == "xterm-ghostty" ]]; then
     export TERMINFO="$HOME/.terminfo"
 fi
 
+# Verify daemon is running without triggering auto-start
+if ! ALTERNATE_EDITOR=false "$HOME/.nix-profile/bin/emacsclient" -e '(server-running-p)' >/dev/null 2>&1; then
+    echo "❌ Emacs daemon not running"
+    echo "💡 Start it with: emacs-service-toggle start"
+    exit 1
+fi
+
 exec "$HOME/.nix-profile/bin/emacsclient" -nw "$@"

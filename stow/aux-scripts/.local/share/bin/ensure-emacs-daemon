@@ -8,8 +8,8 @@
 socket_path=$(doom-socket)
 
 if [[ -z "$socket_path" ]]; then
-    echo "Emacs daemon socket not found. Starting Emacs daemon first with: emacs --daemon=doom" >&2
-    "$HOME/.nix-profile/bin/emacs" --daemon=doom
+    echo "Emacs daemon not found. Starting via home-manager service..." >&2
+    emacs-service-toggle start >/dev/null 2>&1 || true
 
     # Wait for daemon to start and create socket
     retries=0

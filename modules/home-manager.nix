@@ -45,7 +45,7 @@
     APP="${configuredEmacs}/Applications/Emacs.app"
 
     # If daemon responds, do nothing (successful exit so launchd doesn't complain)
-    if "$EMACSCLIENT" -e "(emacs-version)" >/dev/null 2>&1; then
+    if ALTERNATE_EDITOR=false "$EMACSCLIENT" -e "(emacs-version)" >/dev/null 2>&1; then
       exit 0
     fi
 
@@ -65,6 +65,9 @@ in {
   # User configuration is now handled in system.nix based on defaultShell
 
   environment.variables = {
+    # Prevent emacsclient from auto-starting a background daemon; the Emacs
+    # daemon is managed by a LaunchAgent that starts the GUI app with --fg-daemon
+    ALTERNATE_EDITOR = "false";
     EDITOR = "emacsclient -t";
     VISUAL = "emacsclient -c";
     GIT_EDITOR = "emacsclient -t";
@@ -441,6 +444,7 @@ in {
             LC_ALL = "en_US.UTF-8";
             TERM = "xterm-256color"; # widely compatible terminal type
             COLORTERM = "truecolor";
+            # Note: PATH is managed by Doom Emacs via ~/.emacs.d/.local/env
           };
           StandardErrorPath = "/tmp/emacs-daemon.log";
           StandardOutPath = "/tmp/emacs-daemon.log";

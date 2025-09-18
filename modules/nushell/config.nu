@@ -1032,7 +1032,8 @@ alias diff = difft
 
 $env.EDITOR = "emacsclient -t"
 $env.VISUAL = "emacsclient -c"
-$env.ALTERNATE_EDITOR = ""
+# Do not allow emacsclient to auto-start a background daemon
+$env.ALTERNATE_EDITOR = "false"
 
 # Terminal and editor shortcuts
 alias tg  = ^$env.EDITOR ~/.config/ghostty/config

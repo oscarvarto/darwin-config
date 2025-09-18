@@ -23,15 +23,16 @@ if [[ -z "$EMACSCLIENT" ]]; then
     fi
 fi
 
-# Check if server is running
-if ! "$EMACSCLIENT" -e "(emacs-version)" >/dev/null 2>&1; then
-    echo "Emacs daemon not running. Waiting for home-manager service..." >&2
+# Check if server is running (do not auto-start background daemon)
+if ! ALTERNATE_EDITOR=false "$EMACSCLIENT" -e "(emacs-version)" >/dev/null 2>&1; then
+    echo "❌ Emacs daemon not running. Waiting for home-manager service..." >&2
     # Give the home-manager service a moment to start
     sleep 2
 
     # Check again
-    if ! "$EMACSCLIENT" -e "(emacs-version)" >/dev/null 2>&1; then
-        echo "Error: Emacs daemon still not available" >&2
+    if ! ALTERNATE_EDITOR=false "$EMACSCLIENT" -e "(emacs-version)" >/dev/null 2>&1; then
+        echo "❌ Emacs daemon still not available" >&2
+        echo "💡 Start it with: emacs-service-toggle start" >&2
         exit 1
     fi
 fi

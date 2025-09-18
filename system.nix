@@ -255,6 +255,20 @@ in {
     };
   };
 
+  # Prevent emacsclient from auto-starting a background daemon for GUI apps
+  launchd.user.agents.setAlternateEditorVar = {
+    serviceConfig = {
+      Label = "org.nixos.setAlternateEditorVar";
+      ProgramArguments = [
+        "/bin/launchctl"
+        "setenv"
+        "ALTERNATE_EDITOR"
+        "false"
+      ];
+      RunAtLoad = true;
+    };
+  };
+
   launchd.user.agents.setLcAllVar = {
     serviceConfig = {
       Label = "org.nixos.setLcAllVar";

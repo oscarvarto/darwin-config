@@ -120,7 +120,10 @@ in {
         # Ripgrep alias
         alias search=rg -p --glob '!node_modules/*' $@
 
-        export ALTERNATE_EDITOR=""   # empty means emacsclient will start server if needed
+        # Prevent emacsclient from auto-starting its own daemon; use the
+        # home-manager LaunchAgent (emacs-service-toggle) as the single
+        # source of truth for starting/stopping the daemon.
+        export ALTERNATE_EDITOR="false"
         export EDITOR="emacsclient -t"
         export VISUAL="emacsclient -c"
 
