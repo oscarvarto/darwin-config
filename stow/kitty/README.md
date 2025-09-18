@@ -97,6 +97,16 @@ If you prefer to run setup components individually:
 
 ## Key Configuration Features
 
+### macOS Window Behavior
+To ensure Kitty fully quits when the last tab/window is closed (so the app exits instead of remaining in the dock with no windows), this config enables:
+
+```
+macos_quit_when_last_window_closed yes
+confirm_os_window_close 0
+```
+
+Close all tabs in the last window and the Kitty app will exit automatically without a confirmation prompt.
+
 ### Font Settings
 ```
 font_family MonoLisaVariable Nerd Font Regular
