@@ -8,7 +8,7 @@
   pathConfig = args.pathConfig or null;
 in {
   programs.zsh = {
-    # Darwin-specific zsh configuration
+    # Darwin-specific zsh configuration (nix-darwin options)
     shellInit = ''
       # Environment variables
       export DOTNET_ROOT=/usr/local/share/dotnet

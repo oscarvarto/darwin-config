@@ -103,18 +103,8 @@ in {
         export DOOMDIR=$HOME/.doom.d
         export DOOMLOCALDIR=$HOME/.emacs.d/.local
 
-        # Add Maven 4 to PATH first (before Homebrew Maven 3.9.11)
-        # PATH="$HOME/mvn4/apache-maven-4.0.0-rc-4/bin:$PATH"
-        PATH="$HOME/darwin-config/modules/elisp-formatter:$PATH"
-        PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
-        PATH=$HOME/.local/share/bin:$PATH
-        PATH=$HOME/.local/bin:$PATH
-        PATH=$HOME/.cargo/bin:$PATH
-        PATH=$EMACSDIR/bin:$PATH
-        PATH=$HOME/bin:$PATH
-        PATH="$HOME/Library/Application Support/Coursier/bin:$PATH"
-
-        export PATH="$HOME/.volta/bin:$PATH"
+        # PATH is centrally managed in modules/path-config.nix for all shells
+        # Do not edit PATH here; zsh uses envExtra/initExtra from zsh-darwin.nix
 
         # Remove history data we don't want to see
         export HISTIGNORE="pwd:ls:cd"

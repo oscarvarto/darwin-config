@@ -26,16 +26,31 @@ print_msg() {
 # Function to check service status
 # Returns one of: running, stopped, not-loaded
 check_status() {
-    # Prefer checking the actual Emacs daemon availability via emacsclient
-    if command -v emacsclient >/dev/null 2>&1; then
-        if emacsclient -e '(progn (require (quote server)) (server-running-p))' >/dev/null 2>&1; then
-            echo "running"
-            return 0
+    # Check if service is loaded and enabled first
+    local service_loaded=false
+    local service_enabled=false
+
+    if launchctl list | grep -q "$SERVICE_NAME"; then
+        service_loaded=true
+        # Check if service is enabled (look for exit code 0 which means running)
+        local exit_code=$(launchctl list | grep "$SERVICE_NAME" | awk '{print $1}')
+        if [[ "$exit_code" == "0" ]]; then
+            service_enabled=true
         fi
     fi
 
-    # Fall back to launchctl to determine if the agent is loaded
-    if launchctl list | grep -q "$SERVICE_NAME"; then
+    # Check if Emacs daemon is actually running via emacsclient
+    local daemon_running=false
+    if command -v emacsclient >/dev/null 2>&1; then
+        if emacsclient -e '(progn (require (quote server)) (server-running-p))' >/dev/null 2>&1; then
+            daemon_running=true
+        fi
+    fi
+
+    # Determine status based on daemon state and service state
+    if [[ "$daemon_running" == true && "$service_loaded" == true ]]; then
+        echo "running"
+    elif [[ "$service_loaded" == true ]]; then
         echo "stopped"
     else
         echo "not-loaded"
@@ -45,22 +60,31 @@ check_status() {
 # Function to stop the service
 stop_service() {
     print_msg "$YELLOW" "🛑 Stopping Emacs service..."
-    
-    # First, try to unload the service
+
+    # First, try to unload the service with -w flag to disable it
     if [[ -f "$PLIST_PATH" ]]; then
+        launchctl unload -w "$PLIST_PATH" 2>/dev/null || true
+        # Also try without -w for compatibility
         launchctl unload "$PLIST_PATH" 2>/dev/null || true
+        # Remove from launchctl completely
+        launchctl remove "$SERVICE_NAME" 2>/dev/null || true
     fi
-    
-    # Kill any running Emacs daemon processes
-    pkill -f "emacs.*--daemon" 2>/dev/null || true
+
+    # Kill any running Emacs daemon processes (all variations)
+    pkill -f "emacs.*--.*daemon" 2>/dev/null || true
+    pkill -f "emacs.*daemon" 2>/dev/null || true
     pkill -f "Emacs.app" 2>/dev/null || true
-    
+
     # Wait a moment for processes to terminate
     sleep 2
-    
+
     # Force kill if still running
-    pkill -9 -f "emacs.*--daemon" 2>/dev/null || true
+    pkill -9 -f "emacs.*--.*daemon" 2>/dev/null || true
+    pkill -9 -f "emacs.*daemon" 2>/dev/null || true
     pkill -9 -f "Emacs.app" 2>/dev/null || true
+
+    # Additional wait to ensure processes are terminated
+    sleep 1
 
     # Clean up stale server sockets/lock files (best-effort, safe paths only)
     for dir in "$HOME/.emacs.d/server" "$HOME/.config/emacs/server" "/tmp/emacs$(id -u)"; do
@@ -68,7 +92,7 @@ stop_service() {
             rm -f "$dir"/server* 2>/dev/null || true
         fi
     done
-    
+
     print_msg "$GREEN" "✅ Emacs service stopped"
 }
 

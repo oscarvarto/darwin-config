@@ -26,7 +26,7 @@
          :version "21"
          :default nil)  ;; Default for LSP servers and most builds
         (:name "JavaSE-24"
-         :path (shell-command "mise where java@25")
+         :path (shell-command "mise where java@corretto-25")
          :version "24"
          :default t)))
     "List of JDK installations available for use by LSP servers and build tools.")

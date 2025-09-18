@@ -61,14 +61,12 @@
       (java . t)         ;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-java.html
       (mermaid . t)      ;; https://github.com/arnm/ob-mermaid
       (nushell . t)      ;; https://github.com/ln-nl/ob-nushell
-      ;; (python . t)       ;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html
+      (python . t)       ;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html
       (rust . t)         ;; https://github.com/emacs-rustic/rustic?tab=readme-ov-file#org-babel
       (shell . t)        ;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-shell.html
-      ;; Scala support removed
       (sql . t)          ;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-sql.html
       (sqlite . t)       ;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-sqlite.html
       (verb . t)))
-
 
 ;; Add frame borders and window dividers
 (modify-all-frames-parameters
