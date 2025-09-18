@@ -1,1 +1,0 @@
-stow/doom-emacs/.doom.d

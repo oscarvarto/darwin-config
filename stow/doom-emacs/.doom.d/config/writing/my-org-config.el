@@ -32,7 +32,6 @@
       org-latex-caption-above nil
       org-latex-listings 'minted
       org-latex-hyperref-template "\\hypersetup{\n pdfauthor={%a},\n pdftitle={%t},\n pdfkeywords={%k},\n pdfsubject={%d},\n pdfcreator={%c}, \n pdflang={%L},\n colorlinks=true,\n linkcolor=blue,\n urlcolor=blue,\n citecolor=blue,\n filecolor=blue,\n pdfborder={0 0 0}\n}"
-      org-latex-pdf-process '("latexmk -xelatex -shell-escape -interaction=nonstopmode -output-directory=%o %f")
       ;; Default header to handle Unicode and fonts
       org-latex-default-packages-alist '(("AUTO" "inputenc" t ("pdflatex"))
                                          ("T1" "fontenc" t ("pdflatex"))
@@ -48,6 +47,21 @@
       ;; Custom header for XeLaTeX Unicode support
       org-latex-inputenc-alist nil
       org-latex-fontenc-alist nil)
+
+;; Ensure org-latex uses absolute paths for LaTeX tools to avoid PATH issues
+(let* ((latexmk (or (executable-find "latexmk")
+                    (and (file-exists-p "/Library/TeX/texbin/latexmk")
+                         "/Library/TeX/texbin/latexmk")))
+       (xelatex (or (executable-find "xelatex")
+                    (and (file-exists-p "/Library/TeX/texbin/xelatex")
+                         "/Library/TeX/texbin/xelatex"))))
+  (when (and latexmk xelatex)
+    ;; Use -pdf with an explicit -pdflatex pointing to xelatex with required flags.
+    ;; This bypasses reliance on the shell PATH for both latexmk and xelatex.
+    (setq org-latex-pdf-process
+          (list (format "%s -pdf -pdflatex='%s -interaction=nonstopmode -shell-escape %%%%O %%%%S' -output-directory=%%%%o %%%%f"
+                        (shell-quote-argument latexmk)
+                        (shell-quote-argument xelatex))))))
 
 (with-eval-after-load 'ox-latex
   ;; Custom article class with deep nesting support
