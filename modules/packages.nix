@@ -84,6 +84,7 @@ with pkgs; [
       sexpdata
       tld
       epc
+      pygments
       pysocks
       polars
       sympy

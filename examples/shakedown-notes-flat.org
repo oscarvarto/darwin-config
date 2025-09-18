@@ -1,0 +1,152 @@
+#+TITLE: Shakedown Notes (Flattened Rewrite)
+#+AUTHOR: Oscar Vargas Torres
+#+DATE: <2025-09-18>
+#+OPTIONS: toc:2 num:t
+#+LANGUAGE: en
+#+LATEX_CLASS: article-deep
+#+LATEX_HEADER: \usepackage{enumitem}
+#+LATEX_HEADER: \setlistdepth{6}
+#+LATEX_HEADER: \usepackage{tabularx,booktabs,array,makecell}
+
+#+MACRO: br @@latex:\\@@
+#+MACRO: par @@latex:\par@@
+
+This is a flattened rewrite of the original =shakedown-notes.org= that reduces
+list nesting in favor of headings and structured tables. Migrate content from the
+original file into the placeholders below to avoid LaTeX “Too deeply nested” errors.
+
+Guidelines
+- Prefer headings over multi-level lists; keep lists at 2–3 levels maximum.
+- Record steps in tables with explicit columns (Step, Action, Expected).
+- Use property drawers under headings to capture metadata.
+- Use IDs/Custom IDs for stable references between sections.
+
+* Index
+- [[#delivery][Delivery]]
+- [[#full-automation][Full Automation in CI/CD]]
+- [[#backlog-items-main][Backlog Items (Main)]]
+- [[#cross-train][Cross-train]]
+
+* Delivery
+:PROPERTIES:
+:CUSTOM_ID: delivery
+:END:
+
+** Get the Project Delivered
+:PROPERTIES:
+:CUSTOM_ID: delivery-project
+:END:
+
+*** Development
+:PROPERTIES:
+:CUSTOM_ID: delivery-dev
+:END:
+Replace deep lists with a concise plan and a steps table.
+
+#+ATTR_LATEX: :environment tabularx :width \textwidth :align |l|X|X|
+#+NAME: dev-steps
+| Step | Action | Expected Result |
+|------+--------+-----------------|
+|    1 | Paragraph one. {{{br}}} Paragraph two. | Wraps automatically in X columns. |
+|    2 |        |                 |
+
+*** Testing
+:PROPERTIES:
+:CUSTOM_ID: delivery-test
+:END:
+Organize documentation, manual testing, and automation as peer subsections.
+
+**** UI Testing
+:PROPERTIES:
+:CUSTOM_ID: delivery-test-ui
+:END:
+
+***** Documentation
+Capture concise guidance and links; avoid nested bullets.
+
+***** Manual Testing
+Replace nested checklists with a flat steps table.
+
+#+ATTR_LATEX: :environment tabularx :width \textwidth :align |l|X|X|
+#+NAME: ui-manual-steps
+| Step | Action | Expected Result |
+|------+--------+-----------------|
+|    1 |        |                 |
+|    2 |        |                 |
+
+***** Automated Testing
+Summarize scenarios; link to test specs. Keep lists shallow.
+
+**** Web Service (WS) Testing
+:PROPERTIES:
+:CUSTOM_ID: delivery-test-ws
+:END:
+
+***** Documentation
+
+***** Manual Testing
+
+#+ATTR_LATEX: :environment tabularx :width \textwidth :align |l|X|X|
+#+NAME: ws-manual-steps
+| Step | Action | Expected Result |
+|------+--------+-----------------|
+|    1 |        |                 |
+|    2 |        |                 |
+
+***** Automated Testing
+
+*** Backlog Items (Under Delivery)
+:PROPERTIES:
+:CUSTOM_ID: delivery-backlog
+:END:
+Use a flat table of backlog items rather than deeply nested lists.
+
+#+ATTR_LATEX: :environment tabularx :width \textwidth :align |l|l|l|l|X|
+#+NAME: delivery-backlog-table
+| ID  | Title | Owner | Status   | Notes |
+|-----+-------+-------+----------+-------|
+| BL1 |       |       | Planned  |       |
+| BL2 |       |       | In Prog. |       |
+
+** Add in Full Automation in CI/CD Pipeline
+:PROPERTIES:
+:CUSTOM_ID: full-automation
+:END:
+Outline stages and responsibilities with shallow lists or tables.
+
+#+ATTR_LATEX: :environment tabularx :width \textwidth :align |l|X|l|X|
+#+NAME: cicd-automation-plan
+| Stage  | Change | Owner | Success Criteria |
+|--------+--------+-------+------------------|
+| Build  |        |       |                  |
+| Test   |        |       |                  |
+| Deploy |        |       |                  |
+
+** Backlog Items (Main)
+:PROPERTIES:
+:CUSTOM_ID: backlog-items-main
+:END:
+
+#+ATTR_LATEX: :environment tabularx :width \textwidth :align |l|l|l|l|X|
+#+NAME: backlog-main
+| ID  | Title | Owner | Status   | Notes |
+|-----+-------+-------+----------+-------|
+| BL3 |       |       | Planned  |       |
+| BL4 |       |       | In Prog. |       |
+
+** Cross-train
+:PROPERTIES:
+:CUSTOM_ID: cross-train
+:END:
+Document curriculum, sessions, and outcomes with tables.
+
+#+ATTR_LATEX: :environment tabularx :width \textwidth :align |l|l|l|l|l|X|
+#+NAME: cross-train-plan
+| Session | Topic | Trainer | Audience | Date | Outcome |
+|---------+-------+---------+----------+------+---------|
+|       1 |       |         |          |      |         |
+|       2 |       |         |          |      |         |
+
+* Appendix
+- Keep long code or logs in separate files, link here using [[file:...][links]].
+- Prefer tags and CUSTOM_IDs over deeply nested list references.

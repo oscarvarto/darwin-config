@@ -10,8 +10,13 @@
 (setq org-directory (my/get-path :org))
 
 (require 'org)
+(load! "my-org-tools")
 
 (setq org-startup-indented t)
+
+;; Use the deep-nesting aware LaTeX class by default so highly nested
+;; lists in Org export without hitting LaTeX's default depth limits.
+(setq org-latex-default-class "article-deep")
 
 (add-hook 'org-mode-hook
           #'(lambda ()
@@ -23,6 +28,20 @@
 (setq org-use-sub-superscripts '{}
       org-edit-src-content-indentation 2
       org-src-tab-acts-natively t)
+
+;; Keybindings (Doom/Evil friendly)
+;;
+;; SPC m T x  List → Tabularx table (insert after list)
+;; SPC m T h  List → Headings (insert after list)
+;; Use C-u before the command to replace the list in-place.
+(after! org
+  (map! :map org-mode-map
+        :localleader
+        ;; Use existing tables group on `b` to avoid conflicts with `T`.
+        (:prefix ("b" . "tables")
+         :desc "List → Tabularx table (C-u: replace)" "x" #'my/org-list-to-tabularx
+         :desc "List → Headings (C-u: replace)"       "H" #'my/org-list-to-headings
+         :desc "List → Headings (C-u: replace)"       "p" #'my/org-list-to-headings)))
 
 (setq org-latex-packages-alist '(("top=1.5cm, bottom=3cm, left=1.5cm, right=1.5cm" "geometry" nil)
                                  ("" "minted")
@@ -57,11 +76,12 @@
                          "/Library/TeX/texbin/xelatex"))))
   (when (and latexmk xelatex)
     ;; Use -pdf with an explicit -pdflatex pointing to xelatex with required flags.
-    ;; This bypasses reliance on the shell PATH for both latexmk and xelatex.
+    ;; Keep Org placeholders as single % (escaped as %% for format), and use
+    ;; latexmk placeholders %O and %S (also escaped for format).
     (setq org-latex-pdf-process
-          (list (format "%s -pdf -pdflatex='%s -interaction=nonstopmode -shell-escape %%%%O %%%%S' -output-directory=%%%%o %%%%f"
-                        (shell-quote-argument latexmk)
-                        (shell-quote-argument xelatex))))))
+          (list (format "\"%s\" -pdf -pdflatex=\"%s -interaction=nonstopmode -shell-escape %%%%O %%%%S\" -output-directory=%%o %%f"
+                        latexmk
+                        xelatex)))))
 
 (with-eval-after-load 'ox-latex
   ;; Custom article class with deep nesting support
