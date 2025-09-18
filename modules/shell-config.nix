@@ -3,6 +3,7 @@
   pkgs,
   lib,
   user ? "oscarvarto",
+  pathConfig ? null,
   ...
 }: let
   # user is passed as parameter or falls back to default
@@ -65,6 +66,13 @@ in {
           . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
           . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
         fi
+
+        # Centralized PATH setup (pre-plugins)
+        ${
+          if pathConfig != null
+          then pathConfig.zsh.pathSetup
+          else "# Centralized PATH config not available"
+        }
 
         # Load zsh plugins
         # Autosuggestions plugin for fish-like suggestions
@@ -302,6 +310,13 @@ in {
         export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --preview 'echo {}'"
         export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :500 {} 2>/dev/null || ls -la {}'"
         export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -200'"
+
+        # Final centralized PATH override (post-plugins)
+        ${
+          if pathConfig != null
+          then pathConfig.zsh.pathOverride
+          else "# Centralized PATH override not available"
+        }
       '';
     };
   };

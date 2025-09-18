@@ -68,10 +68,7 @@ with pkgs; [
   (aspellWithDicts (dicts: with dicts; [en en-computers en-science es]))
   enchant
   isync
-
-  # LaTeX and document processing (moved to home-manager for better integration)
-  # texlive configuration moved to home-manager.nix
-
+  
   # Qt6 packages
   qt6.full
 

@@ -23,6 +23,7 @@
     # -------------------------------------------------------------------------
     # DEVELOPMENT TOOLS (highest priority after custom)
     # -------------------------------------------------------------------------
+    "$HOME/.local/share/mise/shims" # mise shims (preferred)
     "$HOME/.volta/bin" # Node.js version manager
     "$HOME/Library/Application Support/Coursier/bin" # Scala/JVM tools
     "$HOME/bin" # User binaries
@@ -53,6 +54,7 @@
     # -------------------------------------------------------------------------
     # SYSTEM AND FRAMEWORK PATHS
     # -------------------------------------------------------------------------
+    "/Library/TeX/texbin" # LaTeX tools (homebrew mactex)
     "/run/current-system/sw/bin" # NixOS system tools
     "/usr/local/share/dotnet" # .NET Core
     "$HOME/.dotnet/tools" # .NET user tools
@@ -77,7 +79,7 @@
   # Generate the PATH list with expanded variables
   expandedPaths = map expandPath pathEntries;
 
-  # Generate zsh-compatible path array
+  # Generate zsh-compatible path array (leave $HOME/$USER for runtime expansion)
   zshPaths = lib.concatStringsSep "\n        " (map (path: "\"${path}\"") pathEntries);
 
   # Generate nushell-compatible path list
@@ -95,7 +97,12 @@ in {
         # ============================================================================
         # This overrides mise, homebrew, and any other tool that tries to modify PATH
 
-        declare -a desired_paths=(
+        # Seed PATH from macOS path_helper (adds entries from /etc/paths and /etc/paths.d)
+        if [[ -x /usr/libexec/path_helper ]]; then
+          eval "$(/usr/libexec/path_helper -s)"
+        fi
+
+        typeset -a desired_paths=(
         ${zshPaths}
         )
 
@@ -104,7 +111,8 @@ in {
         for path in "''${desired_paths[@]}"; do
           # Expand environment variables for zsh
           expanded_path=''${path//\$HOME/$HOME}
-          if [[ -d "$expanded_path" ]]; then
+          expanded_path=''${expanded_path//\$USER/$USER}
+          if [[ -d "$expanded_path" || -L "$expanded_path" ]]; then
             if [[ -z "$new_path" ]]; then
               new_path="$expanded_path"
             else
@@ -115,6 +123,8 @@ in {
 
         # Override any system or tool-set PATH with our authoritative version
         export PATH="$new_path"
+        path=(''${(s.:.)PATH})
+        rehash
       '';
 
       # This runs AFTER all integrations to enforce our PATH
@@ -124,7 +134,17 @@ in {
         # ============================================================================
         # This ensures our PATH takes precedence over mise, homebrew, etc.
 
-        declare -a desired_paths=(
+        # Snapshot current PATH after all integrations
+        original_path="$PATH"
+
+        # Incorporate macOS path_helper (e.g., TeX from /etc/paths.d/TeX)
+        if [[ -x /usr/libexec/path_helper ]]; then
+          eval "$(/usr/libexec/path_helper -s)"
+          # Merge original PATH back in so we don't lose tool-added entries
+          PATH="$PATH:$original_path"
+        fi
+
+        typeset -a desired_paths=(
         ${zshPaths}
         )
 
@@ -132,7 +152,8 @@ in {
         our_path=""
         for path in "''${desired_paths[@]}"; do
           expanded_path=''${path//\$HOME/$HOME}
-          if [[ -d "$expanded_path" ]]; then
+          expanded_path=''${expanded_path//\$USER/$USER}
+          if [[ -d "$expanded_path" || -L "$expanded_path" ]]; then
             if [[ -z "$our_path" ]]; then
               our_path="$expanded_path"
             else
@@ -141,18 +162,23 @@ in {
           fi
         done
 
-        # Force our PATH to take precedence
-        export PATH="$our_path"
+        # Start with our desired list (which includes mise shims at top)
+        final_path="$our_path"
 
-        # Optional: Preserve additional tool-added paths at lower priority
-        # Uncomment if you want to keep some tool-added paths:
-        # current_path_array=(''${PATH//:/ })
-        # for path in "''${current_path_array[@]}"; do
-        #   if [[ ":$our_path:" != *":$path:"* ]] && [[ -d "$path" ]]; then
-        #     our_path="$our_path:$path"
-        #   fi
-        # done
-        # export PATH="$our_path"
+        # Preserve additional tool-added paths (after our desired list)
+        original_path_array=(''${original_path//:/ })
+        for p in "''${original_path_array[@]}"; do
+          if [[ -n "$p" && -e "$p" ]]; then
+            if [[ ":$final_path:" != *":$p:"* ]]; then
+              final_path="$final_path:$p"
+            fi
+          fi
+        done
+
+        # Force final PATH to our computed value
+        export PATH="$final_path"
+        path=(''${(s.:.)PATH})
+        rehash
       '';
     };
 

@@ -104,16 +104,6 @@ in {
             inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default
             inputs.nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
             configuredEmacs
-            # TeXLive with essential packages for computer science/programming
-            (pkgs.texlive.combine {
-              inherit (pkgs.texlive) scheme-medium;
-              # Essential compilation tools (following wiki examples)
-              inherit (pkgs.texlive) latexmk;
-              # Mathematics packages (from wiki)
-              inherit (pkgs.texlive) amsmath;
-              # Computer science packages (from wiki)
-              inherit (pkgs.texlive) listings algorithm2e;
-            })
           ]
           ++ emacsPinModule.pinTools;
         file =
@@ -406,6 +396,15 @@ in {
             autosuggestion.enable = true; # Fish-like autosuggestions
             syntaxHighlighting.enable = true; # Fish-like syntax highlighting
             historySubstringSearch.enable = true; # Better history search
+            # Ensure final PATH override runs at end of ~/.zshrc so it wins
+            initExtra = lib.mkAfter ''
+              # Centralized PATH final override (post-plugins)
+              ${
+                if pathConfig != null
+                then pathConfig.zsh.pathOverride
+                else "# Centralized PATH override not available"
+              }
+            '';
             plugins = [
               {
                 name = "fzf-tab";
@@ -419,7 +418,7 @@ in {
             ];
           };
         }
-        // (import ./shell-config.nix {inherit config pkgs lib;}).programs;
+        // (import ./shell-config.nix {inherit config pkgs lib pathConfig;}).programs;
 
       # Custom Emacs launchd service with proper terminal environment
       launchd.agents.emacs = {
