@@ -104,6 +104,16 @@ in {
             inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default
             inputs.nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
             configuredEmacs
+            # TeXLive with essential packages for computer science/programming
+            (pkgs.texlive.combine {
+              inherit (pkgs.texlive) scheme-medium;
+              # Essential compilation tools (following wiki examples)
+              inherit (pkgs.texlive) latexmk;
+              # Mathematics packages (from wiki)
+              inherit (pkgs.texlive) amsmath;
+              # Computer science packages (from wiki)
+              inherit (pkgs.texlive) listings algorithm2e;
+            })
           ]
           ++ emacsPinModule.pinTools;
         file =

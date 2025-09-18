@@ -11,7 +11,6 @@ _: [
   "ghostty@tip"
   "jetbrains-toolbox"
   "kitty"
-  "mactex"
   "miniforge"
   "neo4j-desktop"
   "ollama"

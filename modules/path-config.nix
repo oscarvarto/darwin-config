@@ -38,6 +38,7 @@
     # -------------------------------------------------------------------------
     "$HOME/.nix-profile/bin" # Nix user profile
     "/nix/var/nix/profiles/default/bin" # Nix system profile
+    "/etc/profiles/per-user/$USER/bin" # Nix-darwin user profile
 
     # -------------------------------------------------------------------------
     # HOMEBREW TOOLS
@@ -52,7 +53,6 @@
     # -------------------------------------------------------------------------
     # SYSTEM AND FRAMEWORK PATHS
     # -------------------------------------------------------------------------
-    "/Library/TeX/texbin" # LaTeX tools
     "/run/current-system/sw/bin" # NixOS system tools
     "/usr/local/share/dotnet" # .NET Core
     "$HOME/.dotnet/tools" # .NET user tools
