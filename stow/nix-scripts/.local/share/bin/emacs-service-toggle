@@ -15,6 +15,7 @@ NC='\033[0m' # No Color
 # Get the launchd service name
 SERVICE_NAME="org.nix-community.home.emacs"
 PLIST_PATH="$HOME/Library/LaunchAgents/${SERVICE_NAME}.plist"
+GUI_DOMAIN="gui/$(id -u)"
 
 # Never allow emacsclient to auto-start a background daemon from this script
 export ALTERNATE_EDITOR="false"
@@ -66,10 +67,12 @@ stop_service() {
 
     # First, try to unload the service with -w flag to disable it
     if [[ -f "$PLIST_PATH" ]]; then
+        # Prefer modern launchctl flow on recent macOS versions
+        launchctl disable "${GUI_DOMAIN}/${SERVICE_NAME}" 2>/dev/null || true
+        launchctl bootout "${GUI_DOMAIN}" "$PLIST_PATH" 2>/dev/null || true
+        # Fallback to legacy commands for compatibility
         launchctl unload -w "$PLIST_PATH" 2>/dev/null || true
-        # Also try without -w for compatibility
         launchctl unload "$PLIST_PATH" 2>/dev/null || true
-        # Remove from launchctl completely
         launchctl remove "$SERVICE_NAME" 2>/dev/null || true
     fi
 
@@ -109,11 +112,17 @@ start_service() {
         return 1
     fi
     
-    # Load (enable) the LaunchAgent and trigger RunAtLoad
+    # Load and enable the LaunchAgent using modern launchctl where possible
+    # 1) bootstrap (load), 2) enable, 3) kickstart to run immediately
+    launchctl bootstrap "${GUI_DOMAIN}" "$PLIST_PATH" 2>/dev/null || true
+    launchctl enable "${GUI_DOMAIN}/${SERVICE_NAME}" 2>/dev/null || true
+    launchctl kickstart -k "${GUI_DOMAIN}/${SERVICE_NAME}" 2>/dev/null || true
+
+    # Fallback to legacy load if needed
     launchctl load -w "$PLIST_PATH" 2>/dev/null || launchctl load "$PLIST_PATH" 2>/dev/null || true
 
-    # Poll for daemon availability (up to ~15s)
-    for i in {1..15}; do
+    # Poll for daemon availability (up to ~30s)
+    for i in {1..30}; do
         # Primary check: emacsclient connectivity
         if command -v emacsclient >/dev/null 2>&1; then
             if emacsclient -e '(progn (require (quote server)) (server-running-p))' >/dev/null 2>&1; then
@@ -122,16 +131,24 @@ start_service() {
             fi
         fi
         # Secondary check: Emacs app/process present (may be warming up)
-        if pgrep -f "Emacs\.app|--fg-daemon" >/dev/null 2>&1; then
+        if pgrep -f "Emacs\\.app|--fg-daemon" >/dev/null 2>&1; then
             # keep waiting for server to come up
             sleep 1
             continue
         fi
+        # Tertiary check: server socket file exists
+        for dir in "$HOME/.emacs.d/server" "$HOME/.config/emacs/server" "/tmp/emacs$(id -u)"; do
+            if [[ -S "$dir/server" ]]; then
+                print_msg "$GREEN" "✅ Emacs server socket detected"
+                return 0
+            fi
+        done
         sleep 1
     done
 
     print_msg "$RED" "⚠️  Service may not have started properly. Check logs with:"
-    print_msg "$BLUE" "   log show --predicate 'process == \"emacs\"' --last 5m"
+    print_msg "$BLUE" "   log show --predicate 'process == \"Emacs\" || process == \"emacs\"' --last 5m"
+    print_msg "$BLUE" "   tail -n +1 /tmp/emacs-daemon.log 2>/dev/null | tail -n 200"
     return 1
 }
 
