@@ -8,6 +8,13 @@
 (setenv "LANG" "en_US.UTF-8")
 (setenv "LC_ALL" "en_US.UTF-8")
 
+;; Load PATH and env vars captured by `doom env` so Emacs inherits shell PATH
+;; (including MacTeX at /Library/TeX/texbin and Nix profile bins for pygmentize).
+;; This avoids needing exec-path-from-shell and ensures LaTeX/minted can find tools.
+(let ((env-file (expand-file-name "~/.emacs.d/.local/env")))
+  (when (file-readable-p env-file)
+    (doom-load-envvars-file env-file)))
+
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
 ;;

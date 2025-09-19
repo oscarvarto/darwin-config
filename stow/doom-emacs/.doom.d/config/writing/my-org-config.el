@@ -45,11 +45,10 @@
 
 (setq org-latex-packages-alist '(("top=1.5cm, bottom=3cm, left=1.5cm, right=1.5cm" "geometry" nil)
                                  ("" "minted")
-                                 ("" "enumitem")  ; For deep list nesting
-                                 ("" "fontspec")  ; For Unicode font handling with XeLaTeX
-                                 ("" "xunicode")) ; Additional Unicode support
+                                 ("" "enumitem"))  ; For deep list nesting
       org-latex-caption-above nil
       org-latex-listings 'minted
+      org-latex-compiler "xelatex"
       org-latex-hyperref-template "\\hypersetup{\n pdfauthor={%a},\n pdftitle={%t},\n pdfkeywords={%k},\n pdfsubject={%d},\n pdfcreator={%c}, \n pdflang={%L},\n colorlinks=true,\n linkcolor=blue,\n urlcolor=blue,\n citecolor=blue,\n filecolor=blue,\n pdfborder={0 0 0}\n}"
       ;; Default header to handle Unicode and fonts
       org-latex-default-packages-alist '(("AUTO" "inputenc" t ("pdflatex"))
@@ -67,13 +66,36 @@
       org-latex-inputenc-alist nil
       org-latex-fontenc-alist nil)
 
+;; Use tiny font for minted code blocks (not inline)
+;; Note: Org uses \texttt for inline code (~, =) which will pick up the monospaced
+;; font via \setmonofont; minted is used for src blocks.
+(setq org-latex-minted-options '(("fontsize" "\\footnotesize")
+                                 ("breaklines" "true")
+                                 ("breakanywhere" "true")
+                                 ;; Visual continuation markers
+                                 ("breaksymbolleft" "\\textcolor{gray}{\\tiny\\ensuremath{\\hookleftarrow}}")
+                                 ("breaksymbolright" "\\textcolor{gray}{\\tiny\\ensuremath{\\hookrightarrow}}")
+                                 ("breaksymbolsepleft" "0.25em")
+                                 ("breaksymbolsepright" "0.25em")
+                                 ("breakindent" "0pt")))
+
 ;; Ensure org-latex uses absolute paths for LaTeX tools to avoid PATH issues
 (let* ((latexmk (or (executable-find "latexmk")
                     (and (file-exists-p "/Library/TeX/texbin/latexmk")
                          "/Library/TeX/texbin/latexmk")))
        (xelatex (or (executable-find "xelatex")
                     (and (file-exists-p "/Library/TeX/texbin/xelatex")
-                         "/Library/TeX/texbin/xelatex"))))
+                         "/Library/TeX/texbin/xelatex")))
+       ;; Prefer a TeX bin dir we can prepend to PATH if latexminted isn't found
+       (texbin-dir (or (and latexmk (file-name-directory latexmk))
+                       (and xelatex (file-name-directory xelatex))
+                       "/Library/TeX/texbin")))
+  ;; Ensure latexminted (minted v3 helper) is discoverable during shell-escape
+  (unless (executable-find "latexminted")
+    (when (and (file-directory-p texbin-dir)
+               (not (member texbin-dir exec-path)))
+      (setenv "PATH" (concat texbin-dir ":" (getenv "PATH")))
+      (add-to-list 'exec-path texbin-dir)))
   (when (and latexmk xelatex)
     ;; Use -pdf with an explicit -pdflatex pointing to xelatex with required flags.
     ;; Keep Org placeholders as single % (escaped as %% for format), and use
@@ -88,6 +110,27 @@
   (add-to-list 'org-latex-classes
                '("scrartcl" "\\documentclass{scrartcl}
 % Deep nesting configuration
+\\usepackage{fontspec}
+% Enable ligatures globally for fontspec-aware fonts
+\\defaultfontfeatures{Ligatures={TeX,Common,Contextual}}
+% Text font: MonoLisaVariable Nerd Font (variable) for main/sans
+% Define NFSS shapes using variable weight axis so \bfseries selects true bold
+\\setmainfont{MonoLisa Nerd Font}[
+  FontFace = {m}{n}{MonoLisa Nerd Font},
+  FontFace = {b}{n}{MonoLisa Nerd Font Bold},
+  FontFace = {m}{it}{MonoLisa Nerd Font Italic},
+  FontFace = {b}{it}{MonoLisa Nerd Font Bold Italic}
+]
+\\setsansfont{MonoLisa Nerd Font}[
+  FontFace = {m}{n}{MonoLisa Nerd Font},
+  FontFace = {b}{n}{MonoLisa Nerd Font Bold},
+  FontFace = {m}{it}{MonoLisa Nerd Font Italic},
+  FontFace = {b}{it}{MonoLisa Nerd Font Bold Italic}
+]
+% Code font: PragmataPro Mono Liga for monospaced (inline/src blocks)
+\\setmonofont{PragmataPro Mono Liga}
+% Ensure minted v3 helper is found even if PATH is sanitized
+\\AtBeginDocument{\\makeatletter\\edef\\MintedExecutable{\\detokenize{/Library/TeX/texbin/latexminted}}\\makeatother}
 \\usepackage{enumitem}
 \\setlistdepth{20}
 \\renewlist{enumerate}{enumerate}{20}
@@ -120,6 +163,27 @@
   (add-to-list 'org-latex-classes
                '("article-deep" "\\documentclass{article}
 % Deep nesting configuration
+\\usepackage{fontspec}
+% Enable ligatures globally for fontspec-aware fonts
+\\defaultfontfeatures{Ligatures={TeX,Common,Contextual}}
+% Text font: MonoLisaVariable Nerd Font (variable) for main/sans
+% Define NFSS shapes using variable weight axis so \bfseries selects true bold
+\\setmainfont{MonoLisa Nerd Font}[
+  FontFace = {m}{n}{MonoLisa Nerd Font},
+  FontFace = {b}{n}{MonoLisa Nerd Font Bold},
+  FontFace = {m}{it}{MonoLisa Nerd Font Italic},
+  FontFace = {b}{it}{MonoLisa Nerd Font Bold Italic}
+]
+\\setsansfont{MonoLisa Nerd Font}[
+  FontFace = {m}{n}{MonoLisa Nerd Font},
+  FontFace = {b}{n}{MonoLisa Nerd Font Bold},
+  FontFace = {m}{it}{MonoLisa Nerd Font Italic},
+  FontFace = {b}{it}{MonoLisa Nerd Font Bold Italic}
+]
+% Code font: PragmataPro Mono Liga for monospaced (inline/src blocks)
+\\setmonofont{PragmataPro Mono Liga}
+% Ensure minted v3 helper is found even if PATH is sanitized
+\\AtBeginDocument{\\makeatletter\\edef\\MintedExecutable{\\detokenize{/Library/TeX/texbin/latexminted}}\\makeatother}
 \\usepackage{enumitem}
 \\setlistdepth{20}
 \\renewlist{enumerate}{enumerate}{20}
