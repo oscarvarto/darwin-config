@@ -1052,7 +1052,29 @@ def gp [] {
 # Doom Emacs shortcuts
 alias ds = doom sync --aot --gc -j (nproc)
 alias dup = doom sync -u --aot --gc -j (nproc)
-alias sdup = doom sync -u --aot --gc -j (nproc) --rebuild
+# Smart doom sync with stale bytecode cleanup
+def sdup [] {
+    print "🧹 Cleaning stale .elc files from org-mode and other packages..."
+    # Remove stale .elc files that can interfere with compilation
+    let elc_files = (^fd -e elc . ~/.emacs.d/.local/straight/repos | lines | length)
+    if $elc_files > 0 {
+        print $"Found ($elc_files) .elc files to clean"
+        ^fd -e elc . ~/.emacs.d/.local/straight/repos -x rm {}
+    }
+
+    # Clean ELN native compilation cache that might be stale
+    let eln_cache = "~/.emacs.d/.local/etc/eln-cache" | path expand
+    if ($eln_cache | path exists) {
+        print "🗑️  Cleaning ELN native compilation cache..."
+        rm -rf $eln_cache
+    }
+
+    print "🔄 Running doom gc to clean orphaned packages..."
+    ^doom gc --force
+
+    print "🚀 Starting sync with update, rebuild, and AOT compilation..."
+    ^doom sync -u --aot --gc -j (^nproc) --rebuild --force
+}
 
 # Nix shortcuts - enhanced with -v flag support (nushell-native flags)
 def nb [--verbose(-v) ...args] {
