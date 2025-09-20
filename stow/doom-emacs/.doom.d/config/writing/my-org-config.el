@@ -73,8 +73,8 @@
                                  ("breaklines" "true")
                                  ("breakanywhere" "true")
                                  ;; Visual continuation markers
-                                 ("breaksymbolleft" "\\textcolor{gray}{\\tiny\\ensuremath{\\hookleftarrow}}")
-                                 ("breaksymbolright" "\\textcolor{gray}{\\tiny\\ensuremath{\\hookrightarrow}}")
+                                 ("breaksymbolleft" "\\textcolor{gray}{\\tiny\\ensuremath{\\hookrightarrow}}")
+                                 ("breaksymbolright" "\\textcolor{gray}{\\tiny\\ensuremath{\\hookleftarrow}}")
                                  ("breaksymbolsepleft" "0.25em")
                                  ("breaksymbolsepright" "0.25em")
                                  ("breakindent" "0pt")))
