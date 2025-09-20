@@ -10,6 +10,21 @@
   hashFile = "/Users/${user}/.cache/emacs-git-pin-hash";
   storePathFile = "/Users/${user}/.cache/emacs-git-store-path";
 
+  # If pinned, and we have a previously built configuredEmacs store path
+  # that still exists, prefer re-exporting that path to avoid rebuilds
+  storedPathString =
+    if builtins.pathExists storePathFile
+    then builtins.replaceStrings ["\n"] [""] (builtins.readFile storePathFile)
+    else null;
+  storedPathValue =
+    if storedPathString != null
+    then
+      let
+        try = builtins.tryEval (builtins.storePath storedPathString);
+      in
+        if try.success then try.value else null
+    else null;
+
   # Shared shell helpers for pinning scripts
   commonHelpers = pkgs.writeText "emacs-pinning-common.sh" ''
     #!/usr/bin/env bash
@@ -174,20 +189,30 @@
     });
 
   # Build Emacs with prebuilt vterm (no runtime compilation) and keep .app bundle
-  configuredEmacs = let
-    epkgs = pkgs.emacsPackagesFor emacsBase;
-    withPkgs = epkgs.emacsWithPackages (p: [p.vterm]);
-  in
-    withPkgs.overrideAttrs (old: {
-      postInstall = ''
-        ${old.postInstall or ""}
-        # Ensure the Emacs.app bundle is available from the base build
-        if [ -d ${emacsBase}/Applications ]; then
-          mkdir -p "$out/Applications"
-          ln -s ${emacsBase}/Applications/Emacs.app "$out/Applications/Emacs.app" || true
-        fi
-      '';
-    });
+  configuredEmacs =
+    if isPinned && storedPathValue != null
+    then
+      # Fast path: reuse previously built configuredEmacs store path to avoid rebuilds
+      pkgs.runCommand "emacs-git-with-packages-reuse-${builtins.substring 0 7 pinnedCommit}" {
+        preferLocalBuild = true;
+        allowSubstitutes = false;
+      } ''
+        ln -s ${storedPathValue} "$out"
+      ''
+    else let
+      epkgs = pkgs.emacsPackagesFor emacsBase;
+      withPkgs = epkgs.emacsWithPackages (p: [p.vterm]);
+    in
+      withPkgs.overrideAttrs (old: {
+        postInstall = ''
+          ${old.postInstall or ""}
+          # Ensure the Emacs.app bundle is available from the base build
+          if [ -d ${emacsBase}/Applications ]; then
+            mkdir -p "$out/Applications"
+            ln -s ${emacsBase}/Applications/Emacs.app "$out/Applications/Emacs.app" || true
+          fi
+        '';
+      });
 
   emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     #!/usr/bin/env bash

@@ -485,6 +485,13 @@ This approach ensures that while garbage collection won't remove pinned packages
 | `nix run .#apply`        | Apply configuration changes           |
 | `nix run .#rollback`     | Rollback to previous generation       |
 
+Note on evaluation mode for nb/ns:
+- Default: impure evaluation to allow Emacs pin reuse (reuses stored path when pinned).
+- Force pure: add `--pure` or set `NS_IMPURE=0`.
+- Explicit impure: add `--impure` or set `NS_IMPURE=1`.
+
+Tip: run `ns --help` or `nb --help` for all options.
+
 ### Configuration Management
 
 | Command                          | Description                                        |
@@ -863,7 +870,7 @@ This repo includes a robust Emacs pinning system to control when Emacs rebuilds,
   - `emacs-git-store-path` — the exact Nix store path of your built Emacs
 
 - Core behavior:
-  - Pinned + stored path present: `ns` reuses the exact stored build. Overlay updates do not rebuild Emacs.
+  - Pinned + stored path present: `ns` reuses the exact stored build. Overlay updates do not rebuild Emacs. This reuse requires impure evaluation; `nb`/`ns` default to impure.
   - Pinned + stored path missing (likely GC): `ns` builds the latest overlay commit instead, then auto‑pins to it after the switch. This replaces the previous pin.
   - Unpinned: `ns` builds the latest overlay commit as usual.
 
@@ -883,6 +890,7 @@ This repo includes a robust Emacs pinning system to control when Emacs rebuilds,
 
 - Notes and caveats:
   - The stored path is the key to “no rebuilds”. Keep it alive or expect a one‑time rebuild to the latest overlay commit on the next `ns`.
+  - Reuse is an impure-eval feature. Disable with `--pure` or `NS_IMPURE=0` to force a clean evaluation/build.
   - Pinning to an older, specific commit only makes sense if that exact build already exists locally. If it doesn’t, the next `ns` will intentionally build the latest overlay and auto‑pin to it.
   - Status output includes direct links to both current overlay and pinned commits for quick comparison.
 
@@ -1441,6 +1449,11 @@ ps | where cpu > 50 | select name cpu
 | `diff`   | `difft`                                                          | Better diff tool                      |
 | `edd`    | `emacs --daemon=doom`                                            | Start Emacs daemon                    |
 | `ds`     | `doom sync --aot --gc`                                           | Doom sync with optimization           |
+
+Impure/pure switches for nb/ns:
+- Default: impure evaluation (reuses pinned Emacs store path when available).
+- Force pure: `ns --pure` or `NS_IMPURE=0 ns` (same for `nb`).
+- Explicit impure: `ns --impure` or `NS_IMPURE=1 ns`.
 
 #### Shell Configuration Shortcuts
 

@@ -16,6 +16,11 @@
 - Stow deploy: `manage-stow-packages deploy` — symlink dotfiles/configs.
 - Maintenance: `smart-gc status|dry-run|clean` — inspect/clean generations.
 
+Impure vs Pure evaluation (nb/ns):
+- Default: nb/ns run with impure evaluation to enable Emacs pin reuse (reads `~/.cache/emacs-git-store-path`).
+- Force pure: add `--pure` or set `NS_IMPURE=0` to disable reuse and get a fully pure evaluation.
+- Explicit impure: add `--impure` or set `NS_IMPURE=1`.
+
 ## Coding Style & Naming Conventions
 - Nix: 2‑space indent, no trailing whitespace, kebab‑case filenames (e.g., `packages.nix`).
 - Keep modules small, composable, and import via `modules/`.

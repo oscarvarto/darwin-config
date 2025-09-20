@@ -230,6 +230,13 @@ modules/                      # Modular configuration components
   - `emacs-pin-status` prints overlay commit, pinned commit, stored hash, and stored path if present.
 - Caveat: Pinning to an older commit only avoids rebuild if that exact build already exists locally. Otherwise, next `ns` will build latest and auto-pin to it by design.
 
+##### Impure vs. Pure Evaluation
+- Why: Reusing a previously built Emacs relies on reading `~/.cache/emacs-git-store-path` during evaluation, which is an impure input.
+- Default: `nb`/`ns` now default to impure evaluation so `configuredEmacs` can re-export the stored path when pinned and present (no rebuild on overlay updates).
+- Force pure (reproducible eval, no reuse): add `--pure` or set `NS_IMPURE=0` when running `nb`/`ns`.
+- Explicit impure: add `--impure` or set `NS_IMPURE=1`.
+- CI guidance: prefer pure evaluation in CI or when you need strictly reproducible builds; expect Emacs to rebuild if inputs changed or the stored path is missing.
+
 ### Adding New Host/User
 1. `nix run .#add-host -- --hostname HOST --user USER`
 2. Configure host-specific settings in generated config
