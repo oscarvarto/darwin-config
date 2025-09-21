@@ -1066,11 +1066,19 @@ def sdup [] {
     let eln_cache = "~/.emacs.d/.local/etc/eln-cache" | path expand
     if ($eln_cache | path exists) {
         print "🗑️  Cleaning ELN native compilation cache..."
-        rm -rf $eln_cache
+        # Nushell flags must be separate: -r -f
+        rm -r -f $eln_cache
     }
 
     print "🔄 Running doom gc to clean orphaned packages..."
-    ^doom gc --force
+    # If package state is incomplete, perform a quick sync first then retry gc
+    try {
+        ^doom gc --force
+    } catch {
+        print "⚠️  Package state incomplete; running 'doom sync' first..."
+        ^doom sync --force
+        ^doom gc --force
+    }
 
     print "🚀 Starting sync with update, rebuild, and AOT compilation..."
     ^doom sync -u --aot --gc -j (^nproc) --rebuild --force
