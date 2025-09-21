@@ -14,6 +14,7 @@
         {path = "/Applications/Obsidian.app/";}
         {path = "/Applications/Zed Preview.app/";}
         {path = "/Applications/Ghostty.app/";}
+        {path = "/Applications/kitty.app/";}
         {path = "/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app/";}
         {path = "/Applications/Firefox.app/";}
         {path = "/Applications/Google Chrome.app/";}
@@ -26,7 +27,6 @@
         {path = "/Applications/Preview.app/";}
         {path = "/System/Applications/Music.app/";}
         {path = "/System/Applications/Calendar.app/";}
-        {path = "/Applications/News.app/";}
         {path = "/Applications/Xcode.app/";}
         {path = "/System/Applications/System Settings.app/";}
       ];

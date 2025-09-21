@@ -90,6 +90,7 @@ with pkgs; [
       sympy
       uv
       # GUI-related packages
+      pillow
       grip
       pyqt6
       pyqt6-webengine
