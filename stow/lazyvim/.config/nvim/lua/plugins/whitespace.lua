@@ -1,7 +1,7 @@
 return {
   -- Lightweight trailing whitespace tools (Neovim-native)
   {
-    "echasnovski/mini.trailspace",
+    "nvim-mini/mini.trailspace",
     event = "VeryLazy",
     opts = {},
     config = function(_, opts)

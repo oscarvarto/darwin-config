@@ -218,7 +218,7 @@ return {
 
   -- Mason tool installation for Lisp support
   {
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
     opts = function(_, opts)
       vim.list_extend(opts.ensure_installed, {
         "clojure-lsp",
