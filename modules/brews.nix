@@ -71,6 +71,8 @@
       "stow"
       "swig"
       "trash-cli"
+      "tree-sitter"
+      "tree-sitter-cli"
       "vivid"
       "vcpkg"
       "volta"
