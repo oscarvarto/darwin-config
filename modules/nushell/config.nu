@@ -1082,6 +1082,7 @@ def sdup [] {
 
     print "🚀 Starting sync with update, rebuild, and AOT compilation..."
     ^doom sync -u --aot --gc -j (^nproc) --rebuild --force
+    ^doom sync --aot --gc -j (^nproc)
 }
 
 # Nix shortcuts - enhanced with -v flag support (nushell-native flags)
