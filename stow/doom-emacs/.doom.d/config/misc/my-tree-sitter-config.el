@@ -46,7 +46,7 @@
                   (json-mode . json-ts-mode)
                   (python-mode . python-ts-mode)
                   (sh-mode . bash-ts-mode)
-                  ;; (swift-mode . swift-ts-mode)
+                  (swift-mode . swift-ts-mode)
                   (typescript-mode . typescript-ts-mode)
                   (rust-mode . rust-ts-mode)
                   (yaml-mode . yaml-ts-mode))

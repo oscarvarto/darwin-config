@@ -39,9 +39,14 @@
   :custom
   (lsp-idle-delay 0.6)
   (lsp-inlay-hint-enable t)
+  :hook ((clojure-ts-mode clojure-mode) . lsp)
+  :hook ((clojure-ts-mode clojure-mode) . treesit-fold-indicators-mode)
   :hook ((java-ts-mode java-mode) . lsp)
   :hook ((java-ts-mode java-mode) . treesit-fold-indicators-mode)
-  ;; Scala hooks removed - Scala support disabled
+  :hook ((rust-mode rust-ts-mode rustic-mode) . lsp)
+  :hook ((rust-mode rust-ts-mode rustic-mode) . treesit-fold-indicators-mode)
+  :hook ((swift-ts-mode swift-mode) . lsp)
+  :hook ((swift-ts-mode swift-mode) . treesit-fold-indicators-mode)
   :hook ((typescript-ts-mode typescript-mode) . lsp)
   :hook ((typescript-ts-mode typescript-mode) . treesit-fold-indicators-mode)
   ;; if you want which-key integration

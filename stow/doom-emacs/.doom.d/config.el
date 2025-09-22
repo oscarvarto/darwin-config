@@ -91,6 +91,7 @@
 (my/load-config 'nix 'languages)
 (my/load-config 'rust 'languages)
 (my/load-config 'python 'languages)
+(my/load-config 'swift 'languages)
 
 ;;; Tool-specific configurations
 (my/load-config 'vterm 'misc)
