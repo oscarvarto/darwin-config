@@ -23,9 +23,6 @@
 ;;(require 'ejc-autocomplete)
 
 (setq nrepl-sync-request-timeout 60)
-(setq clomacs-httpd-default-port 8090) ; Use a port other than 8080.
-;; Allow use any CIDER nREPL not only library dedicated nREPL
-(setq clomacs-allow-other-repl t)
 
 ;; Show results of SQL snippets evaluation in `org-mode'
 ;; in same buffer.

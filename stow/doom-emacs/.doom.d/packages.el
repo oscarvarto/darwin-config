@@ -22,7 +22,6 @@
   :recipe (:host github
            :repo "manzaltu/claude-code-ide.el"
            :depth 1))
-(package! clomacs)
 (package! combobulate)
 (package! dash)
 (package! diminish)
