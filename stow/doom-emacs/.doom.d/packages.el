@@ -114,7 +114,6 @@
 (package! s)
 (package! saveplace-pdf-view)
 (package! shackle)
-(package! simple-httpd)
 (package! tabnine)
 (package! track-changes :built-in t)
 (package! treesit-fold
