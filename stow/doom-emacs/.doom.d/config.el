@@ -15,6 +15,15 @@
   (when (file-readable-p env-file)
     (doom-load-envvars-file env-file)))
 
+;; Hotfix: some workspace/perspective hooks may call `deactivate-mark`
+;; with extra arguments (e.g., during workspace activation), which causes
+;; a wrong-number-of-arguments error. Ensure it ignores any extraneous args.
+(defun my/deactivate-mark--ignore-args (orig-fn &rest args)
+  ;; If any args were passed, treat it as a forced deactivation.
+  (funcall orig-fn (when args t)))
+(when (fboundp 'deactivate-mark)
+  (advice-add 'deactivate-mark :around #'my/deactivate-mark--ignore-args))
+
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
 ;;
