@@ -46,6 +46,7 @@
       "hugo"
       "imagemagick"
       "jq"
+      # "JetBrains/utils/kotlin-lsp"
       "libedit"
       "libsql"
       "libtool"

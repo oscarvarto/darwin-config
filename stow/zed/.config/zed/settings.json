@@ -22,10 +22,11 @@
     "enabled_in_text_threads": false
   },
   "agent": {
-    "default_model": {
-      "provider": "copilot_chat",
-      "model": "gpt-4.1"
-    }
+    // "default_model": {
+    // "provider": "copilot_chat",
+    // "model": "gpt-4.1"
+    // }
+    "play_sound_when_agent_done": true
   },
   "features": {
     "edit_prediction_provider": "zed"
@@ -47,11 +48,11 @@
   "buffer_line_height": "standard",
   "terminal": {
     "font_family": "PragmataPro Liga",
-    "font_size": 18,
+    "font_size": 16,
     "line_height": "standard",
     "shell": {
       "with_arguments": {
-        "program": "/Users/oscarvarto/.nix-profile/bin/nu",
+        "program": "/Users/oscarvarto/.nix-profile/bin/zsh",
         "args": ["--login", "--interactive"]
       }
     }
@@ -171,6 +172,13 @@
           }
         }
       }
+    },
+    "nixd": {
+      "settings": {
+        "diagnostic": {
+          "suppress": ["sema-extra-with"]
+        }
+      }
     }
   },
   "languages": {
@@ -179,6 +187,15 @@
     },
     "Java": {
       "format_on_save": "off"
+    },
+    "Nix": {
+      "language_servers": ["nixd", "!nil"],
+      "formatter": {
+        "external": {
+          "command": "alejandra",
+          "arguments": ["--quiet", "--"]
+        }
+      }
     }
   }
 }

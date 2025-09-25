@@ -19,7 +19,7 @@ This is a comprehensive macOS system configuration using Nix-Darwin and Home Man
 - `nix run .#apply` - Apply user/secrets repo placeholders into files
 
 ### Emacs Management (NEW in feature/emacs)
-- `emacs-pin [commit]` - Pin Emacs to specific commit or current version
+- `emacs-pin [commit]` - Pin Emacs to specific commit or current version (automatically called after `ns`)
 - `emacs-unpin` - Unpin Emacs to use latest from overlay
 - `emacs-pin-diff` - Show differences between pinned and latest Emacs
 - `emacs-pin-status` - Show current Emacs pinning status
@@ -212,19 +212,19 @@ modules/                      # Modular configuration components
 4. Rebuild with `nb && ns`
 
 ### Managing Emacs Versions
-1. Pin to current: `emacs-pin` (no args)
+1. Pin to current: `emacs-pin` (no args) - **automatically called after every `ns`**
 2. Pin to specific: `emacs-pin abc123def`
 3. Check status: `emacs-pin-status`
 4. Unpin for latest: `emacs-unpin`
-5. Rebuild: `nb && ns`
+5. Rebuild: `nb && ns` (automatically pins Emacs after switch)
 
 #### Emacs Pinning Behavior (Contributor Notes)
 - Pin state files (in `~/.cache`):
   - `emacs-git-pin` (commit), `emacs-git-pin-hash` (SRI), `emacs-git-store-path` (built outPath)
 - Behavior matrix:
   - Pinned + stored path exists → `configuredEmacs` re-exports that exact path; overlay updates do not rebuild.
-  - Pinned + stored path missing (GC’d) → build latest overlay commit; after switch, Home Manager auto-runs `emacs-pin` to lock to that new build.
-  - Unpinned → always use latest overlay commit.
+  - Pinned + stored path missing (GC’d) → build latest overlay commit; after switch, `ns` auto-runs `emacs-pin` to lock to that new build.
+  - Unpinned → always use latest overlay commit; `ns` auto-pins after successful switch.
 - Scripts:
   - `emacs-pin` captures the already-built `configuredEmacs` outPath before changing pin state to avoid rebuild.
   - `emacs-pin-status` prints overlay commit, pinned commit, stored hash, and stored path if present.

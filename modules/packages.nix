@@ -68,7 +68,7 @@ with pkgs; [
   (aspellWithDicts (dicts: with dicts; [en en-computers en-science es]))
   enchant
   isync
-  
+
   # Qt6 packages
   qt6.full
 
