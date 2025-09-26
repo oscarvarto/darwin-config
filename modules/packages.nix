@@ -15,6 +15,7 @@ with pkgs; [
   pixi
 
   # Text and terminal utilities
+  fd
   htop
   iftop
   jq
@@ -24,7 +25,6 @@ with pkgs; [
   tree
   unrar
   unzip
-  fd
 
   # Nix development tools
   nix-prefetch-github # For emacs pinning system

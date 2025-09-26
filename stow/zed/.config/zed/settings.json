@@ -7,6 +7,7 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "base_keymap": "VSCode",
   "ssh_connections": [
     {
       "host": "github.com",
@@ -23,11 +24,17 @@
   },
   "agent": {
     // "default_model": {
-    // "provider": "copilot_chat",
-    // "model": "gpt-4.1"
+    // "provider": "zed.dev",
+    // "model": "claude-sonnet-4"
     // }
     "play_sound_when_agent_done": true
   },
+  // "agent_servers": {
+  //   "claude": {
+  //     "command": "npx",
+  //     "args": ["claude-code-acp"]
+  //   }
+  // },
   "features": {
     "edit_prediction_provider": "zed"
   },
@@ -52,7 +59,7 @@
     "line_height": "standard",
     "shell": {
       "with_arguments": {
-        "program": "/Users/oscarvarto/.nix-profile/bin/zsh",
+        "program": "/Users/oscarvarto/.nix-profile/bin/nu",
         "args": ["--login", "--interactive"]
       }
     }
@@ -61,7 +68,7 @@
   "theme": {
     "mode": "system",
     "light": "Catppuccin Latte",
-    "dark": "Catppuccin Mocha"
+    "dark": "One Dark"
   },
   "indent_guides": {
     "enabled": true,
@@ -179,6 +186,26 @@
           "suppress": ["sema-extra-with"]
         }
       }
+    },
+    "sourcekit-lsp": {
+      "binary": {
+        "path": "xcrun",
+        "arguments": [
+          "sourcekit-lsp",
+          "--scratch-path=/Users/oscarvarto/Library/Caches/sourcekit-lsp/scratch",
+          "--generated-files-path=/Users/oscarvarto/Library/Caches/sourcekit-lsp/generated"
+        ]
+      },
+      "initialization_options": {
+        "defaultWorkspaceType": "swiftPM",
+        "backgroundIndexing": true,
+        "backgroundPreparationMode": "enabled",
+        "swiftPM": {
+          "configuration": "debug",
+          "scratchPath": "/Users/oscarvarto/Library/Caches/sourcekit-lsp/scratch"
+        },
+        "generatedFilesPath": "/Users/oscarvarto/Library/Caches/sourcekit-lsp/generated"
+      }
     }
   },
   "languages": {
@@ -196,6 +223,9 @@
           "arguments": ["--quiet", "--"]
         }
       }
+    },
+    "Swift": {
+      "language_servers": ["sourcekit-lsp"]
     }
   }
 }

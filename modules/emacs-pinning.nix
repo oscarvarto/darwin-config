@@ -18,11 +18,12 @@
     else null;
   storedPathValue =
     if storedPathString != null
-    then
-      let
-        try = builtins.tryEval (builtins.storePath storedPathString);
-      in
-        if try.success then try.value else null
+    then let
+      try = builtins.tryEval (builtins.storePath storedPathString);
+    in
+      if try.success
+      then try.value
+      else null
     else null;
 
   # Shared shell helpers for pinning scripts

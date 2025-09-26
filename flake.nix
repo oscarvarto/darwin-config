@@ -33,6 +33,10 @@
       url = "github:homebrew/homebrew-core";
       flake = false;
     };
+    homebrew-utils = {
+      url = "github:JetBrains/homebrew-utils";
+      flake = false;
+    };
     neovim-nightly-overlay = {
       url = "github:nix-community/neovim-nightly-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -65,6 +69,7 @@
     homebrew-bundle,
     homebrew-cask,
     homebrew-core,
+    homebrew-utils,
     neovim-nightly-overlay,
     nix-homebrew,
     nixd-ls,
@@ -223,6 +228,7 @@
                 "homebrew/homebrew-core" = homebrew-core;
                 "homebrew/homebrew-cask" = homebrew-cask;
                 "homebrew/homebrew-bundle" = homebrew-bundle;
+                "jetbrains/utils" = homebrew-utils;
               };
               mutableTaps = true;
               autoMigrate = true;

@@ -151,7 +151,7 @@
 ;;         (setenv "JAVA_TOOL_OPTIONS" "-Djava.awt.headless=true")
 ;;
 ;;         ;; Build Maven classpath using standard Maven
-;;         (let* ((project-root (or (projectile-project-root) default-directory))
+;;         (let * ((project-root (or (projectile-project-root) default-directory))
 ;;                (pom-path (expand-file-name "pom.xml" project-root)))
 ;;           (when (file-exists-p pom-path)
 ;;             (let ((classpath-cmd
@@ -268,10 +268,7 @@
   (define-key envrc-mode-map (kbd "C-c e") 'envrc-command-map))
 
 (require 'mise)
-
 (add-hook 'after-init-hook #'global-mise-mode)
-
-(add-hook 'prog-mode-hook #'idle-highlight-mode)
 
 (defun remove-dos-eol ()
   "Do not show ^M in files containing mixed UNIX and DOS line endings."

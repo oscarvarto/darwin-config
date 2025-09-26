@@ -13,9 +13,6 @@
       upgrade = true;
     };
 
-    taps = [
-    ];
-
     brews = [
       "7-zip"
       "angular-cli"
@@ -46,7 +43,7 @@
       "hugo"
       "imagemagick"
       "jq"
-      # "JetBrains/utils/kotlin-lsp"
+      "kotlin-lsp"
       "libedit"
       "libsql"
       "libtool"
@@ -73,6 +70,7 @@
       "prettier"
       "resvg"
       "stow"
+      "swiftly"
       "swig"
       "trash-cli"
       "tree-sitter"
@@ -82,6 +80,7 @@
       "volta"
       "wmctrl"
       "xz" # lzma is part of xz
+      "xcode-build-server"
       "yq"
       "zig"
     ];
