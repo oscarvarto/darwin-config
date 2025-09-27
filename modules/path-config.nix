@@ -23,9 +23,8 @@
     # -------------------------------------------------------------------------
     # DEVELOPMENT TOOLS (highest priority after custom)
     # -------------------------------------------------------------------------
-    "/Applications/Xcode.app/Contents/Developer/usr/bin"
-    "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin"
     "$HOME/.local/share/mise/shims" # mise shims (preferred)
+    "$HOME/.swiftly/bin"
     "$HOME/.volta/bin" # Node.js version manager
     "$HOME/bin" # User binaries
     "$HOME/.emacs.d/bin" # Doom Emacs tools

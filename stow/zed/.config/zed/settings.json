@@ -189,9 +189,8 @@
     },
     "sourcekit-lsp": {
       "binary": {
-        "path": "xcrun",
+        "path": "/Users/oscarvarto/.swiftly/bin/sourcekit-lsp",
         "arguments": [
-          "sourcekit-lsp",
           "--scratch-path=/Users/oscarvarto/Library/Caches/sourcekit-lsp/scratch",
           "--generated-files-path=/Users/oscarvarto/Library/Caches/sourcekit-lsp/generated"
         ]

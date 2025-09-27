@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   user,
   hostname,
@@ -10,6 +11,8 @@
 } @ inputs: let
   sharedFiles = import ./files.nix {inherit config pkgs user;};
   inherit (builtins) fromTOML;
+
+  userHome = lib.attrByPath ["users" "users" user "home"] "/Users/${user}" config;
 
   # User configuration based on hostSettings
   userConfig = {
@@ -77,6 +80,10 @@ in {
     # Force Enchant to use aspell and point aspell to the Nix-provided dictionaries
     ENCHANT_ORDERING = "en:aspell,es:aspell,*:aspell";
     ASPELL_CONF = "dict-dir ${pkgs.aspellWithDicts (dicts: with dicts; [en en-computers en-science es])}/lib/aspell";
+
+    SWIFTLY_HOME_DIR = "${userHome}/.swiftly";
+    SWIFTLY_BIN_DIR = "${userHome}/.swiftly/bin";
+    SWIFTLY_TOOLCHAINS_DIR = "${userHome}/Library/Developer/Toolchains";
   };
 
   # Enable home-manager
@@ -141,6 +148,10 @@ in {
           WORK_DB_PORT = workConfig.databasePort or "3306";
           WORK_OP_VAULT = workConfig.opVaultName or "Work";
           WORK_OP_ITEM = workConfig.opItemName or "CompanyName";
+
+          SWIFTLY_HOME_DIR = "${config.home.homeDirectory}/.swiftly";
+          SWIFTLY_BIN_DIR = "${config.home.homeDirectory}/.swiftly/bin";
+          SWIFTLY_TOOLCHAINS_DIR = "${config.home.homeDirectory}/Library/Developer/Toolchains";
         };
 
         stateVersion = "25.05";
