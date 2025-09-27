@@ -16,8 +16,8 @@
   # defaultShell specifies which shell to use as default login shell
   # Shell path mapping
   shellPaths = {
-    bash = "/Users/${user}/.bin/bash";
-    zsh = "/Users/${user}/.bin/zsh";
+    bash = "/Users/${user}/.nix-profile/bin/bash";
+    zsh = "/Users/${user}/.nix-profile/bin/zsh";
     nushell = "/Users/${user}/.nix-profile/bin/nu";
   };
 
@@ -215,7 +215,6 @@ in {
           "/Users/${user}/.cargo/bin"
           "/Users/${user}/.emacs.d/bin"
           "/Users/${user}/.volta/bin"
-          "/Users/${user}/Library/Application Support/Coursier/bin"
           # Nix paths (essential for Nix-managed tools)
           "/Users/${user}/.nix-profile/bin"
           "/run/current-system/sw/bin"
@@ -375,10 +374,10 @@ in {
       };
 
       dock = {
-        autohide = true;
+        autohide = false;
         show-recents = false;
         launchanim = false;
-        orientation = "bottom";
+        orientation = "left";
         tilesize = 50;
       };
 

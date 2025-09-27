@@ -90,23 +90,23 @@
         "arguments": ["-background-index", "-compile-commands-dir=build"]
       }
     },
-    "pyrefly": {
-      "binary": {
-        "path": "/Users/oscarvarto/.local/bin/pyrefly",
-        "arguments": ["lsp"]
-      },
-      "settings": {
-        "python": {
-          "pythonPath": ".venv/bin/python"
-        },
-        "pyrefly": {
-          "project_includes": ["src/**/*.py", "tests/**/*.py"],
-          "project_excludes": ["**/.[!/.]*", "**/*venv/**"],
-          "search_path": ["src"],
-          "ignore_errors_in_generated_code": true
-        }
-      }
-    },
+    // "pyrefly": {
+    //   "binary": {
+    //     "path": "/Users/oscarvarto/.local/bin/pyrefly",
+    //     "arguments": ["lsp"]
+    //   },
+    //   "settings": {
+    //     "python": {
+    //       "pythonPath": ".venv/bin/python"
+    //     },
+    //     "pyrefly": {
+    //       "project_includes": ["src/**/*.py", "tests/**/*.py"],
+    //       "project_excludes": ["**/.[!/.]*", "**/*venv/**"],
+    //       "search_path": ["src"],
+    //       "ignore_errors_in_generated_code": true
+    //     }
+    //   }
+    // },
     "jdtls": {
       "initialization_options": {
         "bundles": [],
@@ -209,7 +209,7 @@
   },
   "languages": {
     "Python": {
-      "language_servers": ["pyrefly", "!pyright", "!pylsp"]
+      "language_servers": ["ty", "!basedpyright", "!pylsp"]
     },
     "Java": {
       "format_on_save": "off"

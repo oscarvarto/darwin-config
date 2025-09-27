@@ -6,12 +6,13 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("7235b77f371f46cbfae9271dce65f5017b61ec1c8687a90ff30c6db281bfd6b7"
-     "5e39e95c703e17a743fb05a132d727aa1d69d9d2c9cde9353f5350e545c793d4" default))
+    '("7235b77f371f46cbfae9271dce65f5017b61ec1c8687a90ff30c6db281bfd6b7"
+       "5e39e95c703e17a743fb05a132d727aa1d69d9d2c9cde9353f5350e545c793d4" default))
  '(safe-local-variable-values
-   '((no-byte-compiling . t) (lsp-rust-analyzer-proc-macro-enable . t) (+format-with isort black)
-     (org-todo-keywords (sequence "TODO" "TESTING" "|" "DONE")) (org-enforce-todo-dependencies . t)
-     (org-confirm-babel-evaluate) (byte-no-compile . t))))
+    '((web-mode-indent-style . 2) (web-mode-block-padding . 2) (web-mode-script-padding . 2) (web-mode-style-padding . 2)
+       (no-byte-compiling . t) (lsp-rust-analyzer-proc-macro-enable . t) (+format-with isort black)
+       (org-todo-keywords (sequence "TODO" "TESTING" "|" "DONE")) (org-enforce-todo-dependencies . t)
+       (org-confirm-babel-evaluate) (byte-no-compile . t))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

@@ -114,4 +114,6 @@ with pkgs; [
   # Zsh plugins for enhanced shell experience
   zsh-autosuggestions
   zsh-syntax-highlighting
+
+  super-productivity
 ]
