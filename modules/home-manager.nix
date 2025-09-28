@@ -47,14 +47,31 @@
 
     EMACSCLIENT="${configuredEmacs}/bin/emacsclient"
     APP="${configuredEmacs}/Applications/Emacs.app"
+    DAEMON="${configuredEmacs}/Applications/Emacs.app/Contents/MacOS/Emacs"
+
+    log() {
+      printf '[%s] %s\n' "$(date -Iseconds)" "$*" >&2
+    }
 
     # If daemon responds, do nothing (successful exit so launchd doesn't complain)
     if ALTERNATE_EDITOR=false "$EMACSCLIENT" -e "(emacs-version)" >/dev/null 2>&1; then
       exit 0
     fi
 
-    # Launch via LaunchServices so the Dock uses the app bundle icon
-    /usr/bin/open -a "$APP" --args --fg-daemon || true
+    # Launch via LaunchServices so we get the Dock icon when available
+    if /usr/bin/open -a "$APP" --args --fg-daemon; then
+      exit 0
+    fi
+
+    # Fall back to launching the binary directly (e.g. when LaunchServices refuses the bundle)
+    log "LaunchServices failed to start Emacs; falling back to direct daemon launch"
+    if [[ ! -x "$DAEMON" ]]; then
+      log "Emacs binary not found or not executable at $DAEMON"
+      exit 1
+    fi
+
+    # Start the daemon in the background so launchd can finish quickly
+    "$DAEMON" --fg-daemon &
     exit 0
   '';
 in {
