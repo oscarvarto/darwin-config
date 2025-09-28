@@ -3,6 +3,7 @@
   pkgs,
   lib,
   user,
+  darwinConfigPath,
   ...
 }: let
   # ============================================================================
@@ -32,7 +33,7 @@
     "$HOME/.local/bin" # User local binaries
     "$HOME/.local/share/bin" # User shared binaries
     "$HOME/.npm-packages/bin" # Global npm packages
-    "$HOME/darwin-config/modules/elisp-formatter" # Emacs Lisp formatter
+    "${darwinConfigPath}/modules/elisp-formatter" # Emacs Lisp formatter
 
     # -------------------------------------------------------------------------
     # PACKAGE MANAGERS

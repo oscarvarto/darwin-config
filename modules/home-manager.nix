@@ -7,6 +7,7 @@
   hostSettings,
   defaultShell ? "zsh",
   pathConfig ? null,
+  darwinConfigPath,
   ...
 } @ inputs: let
   sharedFiles = import ./files.nix {inherit config pkgs user;};
@@ -36,7 +37,7 @@
   workDirName = builtins.replaceStrings ["~/" "/**"] ["" ""] (workConfig.gitWorkDirPattern or "~/work/**");
 
   # Emacs pinning logic moved to separate module for modularity
-  emacsPinModule = import ./emacs-pinning.nix {inherit pkgs user inputs hostname;};
+  emacsPinModule = import ./emacs-pinning.nix {inherit pkgs user inputs hostname darwinConfigPath;};
   configuredEmacs = emacsPinModule.configuredEmacs;
 
   # Wrapper to ensure we only launch the GUI daemon when not already running
@@ -140,6 +141,7 @@ in {
           DEVELOPER_DIR = "/Applications/Xcode.app/Contents/Developer";
           # Ghostty terminfo location for proper terminal support
           TERMINFO_DIRS = "${config.home.homeDirectory}/.terminfo:/usr/share/terminfo";
+          DARWIN_CONFIG_PATH = darwinConfigPath;
           # Work configuration environment variables
           WORK_COMPANY_NAME = workConfig.companyName or "CompanyName";
           WORK_GIT_DIR_PATTERN = workConfig.gitWorkDirPattern or "~/work/**";
@@ -330,7 +332,7 @@ in {
               rebase.autoStash = true;
               safe.directory = [
                 "*"
-                "/Users/${user}/darwin-config"
+                "${darwinConfigPath}"
                 "/nix/store/*"
                 "/opt/homebrew/*"
               ];
@@ -432,7 +434,7 @@ in {
             ];
           };
         }
-        // (import ./shell-config.nix {inherit config pkgs lib pathConfig;}).programs;
+        // (import ./shell-config.nix {inherit config pkgs lib pathConfig darwinConfigPath;}).programs;
 
       # Custom Emacs launchd service with proper terminal environment
       launchd.agents.emacs = {

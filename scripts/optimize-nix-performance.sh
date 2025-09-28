@@ -56,7 +56,7 @@ NIX RUN USAGE:
 
 SHELL COMPATIBILITY:
     Works in both zsh and nushell environments.
-    Run from your darwin-config directory for best results.
+    Requires DARWIN_CONFIG_PATH to point at your darwin-config checkout.
 
 EXIT CODES:
     0    Success
@@ -183,19 +183,19 @@ verbose_log "   Daemon I/O priority: $DAEMON_PRIORITY_DESC"
 # ----------------------------------------------------------------------
 echo "📝 Updating system.nix with hardware-optimized settings..."
 
-# Find system.nix in the current working directory (should be darwin-config root)
-if [[ -f "./system.nix" ]]; then
-  SYSTEM_NIX="./system.nix"
-elif [[ -f "../system.nix" ]]; then
-  SYSTEM_NIX="../system.nix"
-elif [[ -f "~/darwin-config/system.nix" ]]; then
-  SYSTEM_NIX="~/darwin-config/system.nix"
-else
-  # Try to find it relative to script location (fallback)
-  SYSTEM_NIX="$(dirname "$0")/../system.nix"
+# Resolve system.nix using DARWIN_CONFIG_PATH
+if [[ -z "${DARWIN_CONFIG_PATH:-}" ]]; then
+  echo "❌ DARWIN_CONFIG_PATH is not set."
+  echo "   Run 'nix run .#record-config-path' in your darwin-config checkout,"
+  echo "   then restart your shell before re-running this script."
+  exit 1
 fi
+
+SYSTEM_NIX="${DARWIN_CONFIG_PATH}/system.nix"
+
 if [[ ! -f "$SYSTEM_NIX" ]]; then
-  echo "❌ Error: system.nix not found at $SYSTEM_NIX"
+  echo "❌ Expected system.nix at $SYSTEM_NIX, but it was not found."
+  echo "   Update DARWIN_CONFIG_PATH by running 'nix run .#record-config-path'."
   exit 1
 fi
 

@@ -36,20 +36,15 @@ OPTIONS:
     --dry-run          Show what would be built without building
 
 WHAT IT DOES:
-    1. Auto-detects your darwin-config directory location
+    1. Uses DARWIN_CONFIG_PATH to locate your configuration checkout
     2. Detects your system configuration (hostname, user, hardware)
     3. Builds Emacs with max-jobs=48, cores=0 (all resources)
     4. Optionally continues with system rebuild using balanced settings
 
-DIRECTORY DETECTION:
-    Automatically searches for darwin-config in common locations:
-    • ~/darwin-config
-    • ~/.config/darwin-config
-    • ~/src/darwin-config
-    • ~/projects/darwin-config
-    • ~/code/darwin-config
-    • Current working directory
-    • Script's parent directory
+REQUIREMENTS:
+    • DARWIN_CONFIG_PATH must point to your darwin-config checkout
+      (Run `nix run .#record-config-path` after cloning, or rerun
+       any time you move the repository.)
 
 EXAMPLES:
     build-emacs-priority                       # Build Emacs only (from anywhere)
@@ -154,53 +149,27 @@ if [[ "$CONTINUE_BUILD" == "true" ]]; then
   echo "   System max-jobs: $SYSTEM_MAX_JOBS (after Emacs)"
 fi
 
-# Auto-detect darwin-config directory
-DARWIN_CONFIG_DIR=""
+# Resolve darwin-config directory from environment
+DARWIN_CONFIG_DIR="${DARWIN_CONFIG_PATH:-}"
 
-# Function to find darwin-config directory
-find_darwin_config() {
-  local search_dirs=(
-    "$HOME/darwin-config"
-    "$HOME/.config/darwin-config"
-    "$HOME/src/darwin-config"
-    "$HOME/projects/darwin-config"
-    "$HOME/code/darwin-config"
-    "$PWD"  # Current directory
-    "$(dirname "$0")/.."  # Script's parent directory
-  )
-
-  for dir in "${search_dirs[@]}"; do
-    if [[ -d "$dir" ]] && [[ -f "$dir/flake.nix" ]] && [[ -f "$dir/system.nix" ]]; then
-      echo "$(cd "$dir" && pwd)"  # Return absolute path
-      return 0
-    fi
-  done
-
-  return 1
-}
-
-verbose_log "🔍 Searching for darwin-config directory..."
-
-if DARWIN_CONFIG_DIR=$(find_darwin_config); then
-  verbose_log "   Found: $DARWIN_CONFIG_DIR"
-  cd "$DARWIN_CONFIG_DIR" || {
-    echo "❌ Error: Cannot change to darwin-config directory: $DARWIN_CONFIG_DIR"
-    exit 2
-  }
-else
-  echo "❌ Error: Cannot find darwin-config directory"
-  echo "   Searched in:"
-  echo "     • $HOME/darwin-config"
-  echo "     • $HOME/.config/darwin-config"
-  echo "     • $HOME/src/darwin-config"
-  echo "     • $HOME/projects/darwin-config"
-  echo "     • $HOME/code/darwin-config"
-  echo "     • Current directory: $PWD"
-  echo "     • Script directory: $(dirname "$0")/.."
-  echo ""
-  echo "   Please ensure your darwin-config directory contains flake.nix and system.nix"
+if [[ -z "$DARWIN_CONFIG_DIR" ]]; then
+  echo "❌ DARWIN_CONFIG_PATH is not set for this shell session."
+  echo "   Run 'nix run .#record-config-path' after cloning/moving the repo,"
+  echo "   then reopen your shell so the environment is updated."
   exit 2
 fi
+
+if [[ ! -d "$DARWIN_CONFIG_DIR" ]] || [[ ! -f "$DARWIN_CONFIG_DIR/flake.nix" ]]; then
+  echo "❌ DARWIN_CONFIG_PATH points to '$DARWIN_CONFIG_DIR', but that directory"
+  echo "   does not look like a darwin-config checkout."
+  echo "   Update the path by running 'nix run .#record-config-path'."
+  exit 2
+fi
+
+cd "$DARWIN_CONFIG_DIR" || {
+  echo "❌ Error: Cannot change to darwin-config directory: $DARWIN_CONFIG_DIR"
+  exit 2
+}
 
 echo "📂 Using darwin-config: $DARWIN_CONFIG_DIR"
 

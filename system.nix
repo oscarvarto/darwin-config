@@ -6,6 +6,7 @@
   hostname,
   hostSettings,
   defaultShell ? "zsh",
+  darwinConfigPath,
   /*
   nixCats,
   */
@@ -136,6 +137,7 @@ in {
 
   # Environment variables for 1Password integration with multiple vaults
   environment.variables = {
+    DARWIN_CONFIG_PATH = darwinConfigPath;
     OP_BIOMETRIC_UNLOCK_ENABLED = "true";
     OP_VAULT_PERSONAL = "Personal";
     OP_VAULT_WORK = "Work";
@@ -235,6 +237,19 @@ in {
           "/Library/Apple/usr/bin"
           "/Library/TeX/texbin"
         ])
+      ];
+      RunAtLoad = true;
+    };
+  };
+
+  launchd.user.agents.setDarwinConfigPath = {
+    serviceConfig = {
+      Label = "org.nixos.setDarwinConfigPath";
+      ProgramArguments = [
+        "/bin/launchctl"
+        "setenv"
+        "DARWIN_CONFIG_PATH"
+        darwinConfigPath
       ];
       RunAtLoad = true;
     };

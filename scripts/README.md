@@ -2,6 +2,10 @@
 
 This directory contains helper scripts to automate multi-user and multi-host configuration management.
 
+> **Prerequisite**
+>
+> Run `nix run .#record-config-path` after cloning (and again whenever you relocate the repository), then restart your shell. Every script in this directory expects the `DARWIN_CONFIG_PATH` environment variable to point at your darwin-config checkout and will refuse to run if it is missing.
+
 ## Scripts
 
 ### `configure-user.sh`

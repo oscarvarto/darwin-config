@@ -107,6 +107,11 @@
       };
     };
 
+    recordedConfigPath =
+      if builtins.pathExists ./darwin-config-path.nix
+      then import ./darwin-config-path.nix
+      else null;
+
     devShell = system: let
       pkgs = nixpkgs.legacyPackages.${system};
     in {
@@ -194,6 +199,15 @@
         '')}/bin/update-doom-config";
         meta = {description = "update-doom-config app for ${system}";};
       };
+      "record-config-path" = {
+        type = "app";
+        program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "record-config-path" ''
+          #!/usr/bin/env bash
+          # Persist the working copy path so scripts can reuse it
+          exec ${self}/scripts/record-darwin-config-path.sh "$@"
+        '')}/bin/record-config-path";
+        meta = {description = "record-config-path app for ${system}";};
+      };
       "optimize-nix-performance" = {
         type = "app";
         program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "optimize-nix-performance" ''
@@ -206,7 +220,14 @@
     };
 
     # Helper function to create darwin configurations with host-specific settings
-    mkDarwinConfig = hostname: hostConfig:
+    mkDarwinConfig = hostname: hostConfig: let
+      darwinConfigPath =
+        if hostConfig ? configPath
+        then hostConfig.configPath
+        else if recordedConfigPath != null
+        then recordedConfigPath
+        else "/Users/${hostConfig.user}/darwin-config";
+    in
       darwin.lib.darwinSystem {
         system = hostConfig.system;
         specialArgs =
@@ -216,6 +237,7 @@
             inherit hostname;
             hostSettings = hostConfig.hostSettings;
             defaultShell = hostConfig.defaultShell or "zsh"; # Default to zsh if not specified
+            inherit darwinConfigPath;
           };
         modules = [
           home-manager.darwinModules.home-manager
@@ -256,6 +278,12 @@
               user = hostConfig.user;
               inputs = inputs;
               inherit hostname;
+              darwinConfigPath =
+                if hostConfig ? configPath
+                then hostConfig.configPath
+                else if recordedConfigPath != null
+                then recordedConfigPath
+                else "/Users/${hostConfig.user}/darwin-config";
             };
           in
             nixpkgs.lib.nameValuePair "${hostname}-configuredEmacs" emacsPinModule.configuredEmacs

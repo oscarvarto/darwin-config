@@ -4,6 +4,7 @@
   lib,
   user ? "oscarvarto",
   pathConfig ? null,
+  darwinConfigPath,
   ...
 }: let
   # user is passed as parameter or falls back to default
@@ -126,6 +127,7 @@ in {
         export ALTERNATE_EDITOR="false"
         export EDITOR="emacsclient -t"
         export VISUAL="emacsclient -c"
+        export DARWIN_CONFIG_PATH="${darwinConfigPath}"
 
         # Load theme from cache file set by catppuccin theme switcher
         if [[ -f ~/.cache/zsh_theme ]]; then
@@ -160,8 +162,8 @@ in {
         }
 
         # Source shell functions from external file
-        if [[ -f "$HOME/darwin-config/modules/shell-functions.sh" ]]; then
-            source "$HOME/darwin-config/modules/shell-functions.sh"
+        if [[ -f "$DARWIN_CONFIG_PATH/modules/shell-functions.sh" ]]; then
+            source "$DARWIN_CONFIG_PATH/modules/shell-functions.sh"
         fi
 
         # Table-like output commands (similar to nushell)
@@ -248,7 +250,7 @@ in {
                 shift
             fi
 
-            pushd "$HOME/darwin-config" > /dev/null
+            pushd "$DARWIN_CONFIG_PATH" > /dev/null
 
             if $verbose; then
                 nix run .#build -- --verbose "$@"

@@ -3,6 +3,7 @@
   user,
   inputs,
   hostname,
+  darwinConfigPath,
   ...
 }: let
   # Emacs pinning system with hash management
@@ -32,52 +33,33 @@
     set -euo pipefail
 
     pin_resolve_config_path() {
-      local script_dir
-      script_dir="$(cd "$(dirname "''${BASH_SOURCE[0]:-$0}")" && pwd -P)"
-      local candidates=()
-      if [[ -n "''${DARWIN_CONFIG_PATH:-}" ]]; then
-        candidates+=("''${DARWIN_CONFIG_PATH}")
+      local path="''${DARWIN_CONFIG_PATH:-}"
+      if [[ -z "$path" ]]; then
+        echo "DARWIN_CONFIG_PATH is not set" >&2
+        return 1
       fi
-      candidates+=(
-        "''${HOME}/darwin-config"
-        "/Users/''${USER}/darwin-config"
-        "''${PWD}"
-        "''${script_dir}"
-      )
-      local d="''${script_dir}"
-      for _ in 1 2 3 4 5 6; do
-        candidates+=("''${d}")
-        d="$(dirname "''${d}")"
-      done
-      for path in "''${candidates[@]}"; do
-        if [[ -n "''${path}" && -f "''${path}/flake.nix" ]]; then
-          echo "''${path}"
-          return 0
-        fi
-      done
-      return 1
+      if [[ ! -f "$path/flake.nix" ]]; then
+        echo "DARWIN_CONFIG_PATH ($path) does not point to a darwin-config checkout" >&2
+        return 1
+      fi
+      echo "$path"
     }
 
     pin_extract_current_emacs_commit() {
-      local config_path="''${1:-}"
-      if [[ -z "''${config_path}" ]]; then
-        config_path="$(pin_resolve_config_path)" || return 1
-      fi
+      local config_path
+      config_path="$(pin_resolve_config_path)" || return 1
       ( cd "''${config_path}" && nix eval --raw --impure --expr 'let flake = builtins.getFlake (toString ./.); em = flake.inputs.emacs-overlay.packages."${pkgs.stdenv.hostPlatform.system}".emacs-git; in em.src.rev' )
     }
 
     pin_extract_current_emacs_src_outpath() {
-      local config_path="''${1:-}"
-      if [[ -z "''${config_path}" ]]; then
-        config_path="$(pin_resolve_config_path)" || return 1
-      fi
+      local config_path
+      config_path="$(pin_resolve_config_path)" || return 1
       ( cd "''${config_path}" && nix eval --raw --impure --expr 'let flake = builtins.getFlake (toString ./.); em = flake.inputs.emacs-overlay.packages."${pkgs.stdenv.hostPlatform.system}".emacs-git; in em.src.outPath' )
     }
 
     pin_extract_current_emacs_hash_sri() {
-      local config_path="''${1:-}"
       local out_path
-      out_path="$(pin_extract_current_emacs_src_outpath "''${config_path:-}")" || return 1
+      out_path="$(pin_extract_current_emacs_src_outpath)" || return 1
       nix hash path --type sha256 "''${out_path}" 2>/dev/null
     }
 
@@ -88,10 +70,8 @@
     pin_extract_configured_emacs_outpath() {
       # Extract the outPath of the configuredEmacs package exposed by this flake
       # We rely on the hostname to reference the exported package name
-      local config_path="''${1:-}"
-      if [[ -z "''${config_path}" ]]; then
-        config_path="$(pin_resolve_config_path)" || return 1
-      fi
+      local config_path
+      config_path="$(pin_resolve_config_path)" || return 1
       ( cd "''${config_path}" \
         && nix eval --raw --impure --expr 'let flake = builtins.getFlake (toString ./.); in flake.packages."${pkgs.stdenv.hostPlatform.system}"."${hostname}-configuredEmacs".outPath' )
     }

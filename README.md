@@ -103,9 +103,14 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 git clone <your-repo-url> ~/darwin-config
 cd ~/darwin-config
 
+# Record the repository path so DARWIN_CONFIG_PATH is set for all tools
+nix run .#record-config-path
+
 # Make scripts executable
 find apps/$(uname -m | sed 's/arm64/aarch64/')-darwin -type f -exec chmod +x {} \;
 ```
+
+> **Tip:** After recording the path, open a new shell so the `DARWIN_CONFIG_PATH` environment variable is loaded. Every helper script expects this variable to be defined and will error if it is missing.
 
 ### 4. Configure for Your Environment
 

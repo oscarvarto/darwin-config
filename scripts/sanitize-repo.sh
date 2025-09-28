@@ -12,6 +12,16 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+if [[ -z "${DARWIN_CONFIG_PATH:-}" ]]; then
+    echo -e "${RED}❌ DARWIN_CONFIG_PATH is not set. Run 'nix run .#record-config-path' and restart your shell.${NC}"
+    exit 1
+fi
+
+cd "${DARWIN_CONFIG_PATH}" || {
+    echo -e "${RED}❌ Cannot change directory to DARWIN_CONFIG_PATH=${DARWIN_CONFIG_PATH}${NC}"
+    exit 1
+}
+
 # Default values
 DRY_RUN=false
 FORCE=false
