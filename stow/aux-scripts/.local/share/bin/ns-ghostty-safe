@@ -22,30 +22,32 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 NC='\033[0m'
 
-# Simplified ghostty detection - zellij is only used in ghostty
+# Simplified ghostty detection - relies on ghostty environment hints
 detect_ghostty() {
   # Method 1: Force detection for testing
   if [[ "${FORCE_GHOSTTY_DETECTION:-}" == "1" ]]; then
     return 0
   fi
   
-  # Method 2: Primary detection - if we're in zellij, we're in ghostty
-  # Design decision: zellij is ONLY used in ghostty
-  if [[ -n "${ZELLIJ:-}" ]] || [[ -n "${ZELLIJ_SESSION_NAME:-}" ]]; then
+  # Method 2: Check terminal metadata
+  local term_program_lower
+  term_program_lower=$(printf '%s' "${TERM_PROGRAM:-}" | tr '[:upper:]' '[:lower:]')
+  if [[ "$term_program_lower" == "ghostty" ]]; then
     return 0
   fi
   
-  # Method 3: Check standard ghostty environment variables (fallback)
-  if [[ "${TERM_PROGRAM:-}" == "ghostty" ]] || [[ "$TERM" == *"ghostty"* ]]; then
+  local term_value_lower
+  term_value_lower=$(printf '%s' "${TERM:-}" | tr '[:upper:]' '[:lower:]')
+  if [[ "$term_value_lower" == *"ghostty"* ]]; then
     return 0
   fi
   
-  # Method 4: Check for ghostty-specific environment variables (fallback)
+  # Method 3: Check for ghostty-specific environment variables (fallback)
   if [[ -n "${GHOSTTY_RESOURCES_DIR:-}" ]] || [[ -n "${GHOSTTY_CONFIG_PATH:-}" ]]; then
     return 0
   fi
   
-  # Method 5: Manual hint file (for testing/troubleshooting)
+  # Method 4: Manual hint file (for testing/troubleshooting)
   local hint_file="$HOME/.cache/ghostty_hint"
   if [[ -f "$hint_file" ]]; then
     local hint_time=$(cat "$hint_file" 2>/dev/null || echo "0")

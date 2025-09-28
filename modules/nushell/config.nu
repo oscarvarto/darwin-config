@@ -1121,36 +1121,36 @@ def "ns" [--verbose(-v) ...args] {
         if ($env.FORCE_GHOSTTY_DETECTION? | default "0") == "1" {
             return true
         }
-        
-        # Method 2: Primary detection - if we're in zellij, we're in ghostty
-        # Design decision: zellij is ONLY used in ghostty
-        if ($env.ZELLIJ? | default "" | str length) > 0 or ($env.ZELLIJ_SESSION_NAME? | default "" | str length) > 0 {
+
+        # Method 2: Inspect terminal metadata
+        let term_program = ($env.TERM_PROGRAM? | default "" | str downcase)
+        if $term_program == "ghostty" {
             return true
         }
-        
-        # Method 3: Check standard ghostty environment variables (fallback)
-        if ($env.TERM_PROGRAM? | default "") == "ghostty" or ($env.TERM? | default "" | str contains "ghostty") {
+
+        let term_value = ($env.TERM? | default "" | str downcase)
+        if ($term_value | str contains "ghostty") {
             return true
         }
-        
-        # Method 4: Check for ghostty-specific environment variables (fallback)
+
+        # Method 3: Check for ghostty-specific environment variables (fallback)
         if ($env.GHOSTTY_RESOURCES_DIR? | default "" | str length) > 0 or ($env.GHOSTTY_CONFIG_PATH? | default "" | str length) > 0 {
             return true
         }
-        
-        # Method 5: Manual hint file (for testing/troubleshooting)
+
+        # Method 4: Manual hint file (for testing/troubleshooting)
         let hint_file = ($env.HOME | path join ".cache" "ghostty_hint")
         if ($hint_file | path exists) {
             let hint_time = (try { open $hint_file | into int } catch { 0 })
             let current_time = (date now | format date "%s" | into int)
             let time_diff = ($current_time - $hint_time)
-            
+
             # If hint file is less than 30 minutes old, assume ghostty
             if $time_diff < 1800 {
                 return true
             }
         }
-        
+
         # Not ghostty
         false
     }
@@ -1444,19 +1444,27 @@ def --env "apply-theme" [] {
 # Apply theme immediately after config is loaded
 apply-theme
 
-# Auto-launch Zellij when starting nushell in Ghostty
-# This provides the automatic Zellij launch while keeping nushell as the main process
-if ($env.TERM_PROGRAM? | default "" | str contains "ghostty") and ($env.ZELLIJ? | default "" | is-empty) {
+# Auto-launch Zellij when starting nushell in Ghostty (opt-in via NS_AUTO_ZELLIJ)
+let auto_zellij_pref = ($env.NS_AUTO_ZELLIJ? | default "" | str downcase)
+let auto_launch_zellij = match $auto_zellij_pref {
+    "1" => true
+    "true" => true
+    "yes" => true
+    "on" => true
+    _ => false
+}
+
+if $auto_launch_zellij and ($env.TERM_PROGRAM? | default "" | str contains "ghostty") and ($env.ZELLIJ? | default "" | is-empty) {
     # We're in Ghostty and not already in Zellij - auto-launch Zellij
     print "🚀 Auto-launching Zellij in Ghostty..."
-    
+
     # Launch Zellij with current theme, but don't exit nushell when Zellij exits
     try {
         zellij attach --create
     } catch {
         print "⚠️  Could not auto-launch Zellij, continuing with nushell..."
     }
-    
+
     # When Zellij exits, we return here to nushell (Ghostty stays alive)
     print "\n👋 Zellij session ended. You're back in nushell."
     print "💡 Run 'zt <theme>' to launch Zellij again with a specific theme."
