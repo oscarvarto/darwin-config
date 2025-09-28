@@ -34,7 +34,7 @@ User runs `ns` in Nushell
 → Nix calls darwin-rebuild
 → darwin-rebuild calls home-manager
 → home-manager runs activation scripts
-→ Activation script calls theme-switcher
+→ (Legacy) Activation script called theme-switcher
 → Theme-switcher kills Zellij sessions (❌ UNEXPECTED)
 → `ns` process dies because its shell session was terminated
 ```

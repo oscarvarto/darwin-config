@@ -1,34 +1,32 @@
 #!/usr/bin/env bash
 
 # Catppuccin Theme Switcher
-# Automatically switches themes across all supported applications
+# Manually switches themes across supported applications
 
-VERSION="1.2.0"
+VERSION="2.0.0"
 
 show_help() {
     cat << 'HELP_EOF'
 🎨 Catppuccin Theme Switcher v$VERSION
 
-A unified theme switcher that synchronizes Catppuccin themes across all your applications
-based on macOS system appearance or manual selection.
+Manually synchronize Catppuccin themes across all your applications.
 
 USAGE:
-    catppuccin-theme-switcher [OPTIONS]
+    catppuccin-theme-switcher [OPTIONS] (--light | --dark)
 
 OPTIONS:
     -h, --help          Show this help message
     -v, --version       Show version information
     -s, --status        Show current theme status across all applications
-    -f, --force-light   Force light theme (Catppuccin Latte) regardless of system setting
-    -d, --force-dark    Force dark theme (Catppuccin Mocha) regardless of system setting
-    -a, --auto          Use automatic system appearance detection (default)
+    -l, --light         Apply the light theme (Catppuccin Latte)
+    -d, --dark          Apply the dark theme (Catppuccin Mocha)
     -q, --quiet         Run silently without output
     --dry-run          Show what would be changed without making changes
 
 SUPPORTED APPLICATIONS:
-    • Starship (shell prompt) - Automatically managed by Nix Catppuccin module
-    • BAT (syntax highlighter) - Automatically managed by Nix Catppuccin module
-    • Zellij (terminal multiplexer) - Automatically managed by Nix Catppuccin module
+    • Starship (shell prompt) - Fixed to Catppuccin Mocha (dark)
+    • BAT (syntax highlighter) - Managed via Nix Catppuccin module
+    • Zellij (terminal multiplexer) - Managed via Nix Catppuccin module
     • Atuin (shell history)
     • Ghostty (terminal emulator) - Live config reload without restart
     • Nushell (shell syntax highlighting)
@@ -39,23 +37,11 @@ THEME MAPPING:
     Light Mode:  Catppuccin Latte (official built-in theme)
     Dark Mode:   Catppuccin Mocha (official built-in theme)
 
-AUTOMATIC MODE:
-    The script automatically detects macOS system appearance:
-    • System Light Mode → Catppuccin Latte
-    • System Dark Mode  → Catppuccin Mocha
-
 EXAMPLES:
-    catppuccin-theme-switcher              # Auto-detect and apply theme
-    catppuccin-theme-switcher --status     # Show current theme status
-    catppuccin-theme-switcher --force-dark # Force dark theme
-    catppuccin-theme-switcher --force-light --quiet # Force light theme silently
-    catppuccin-theme-switcher --dry-run    # Preview changes
-
-INTEGRATION:
-    This script runs automatically when macOS appearance changes via LaunchAgent.
-    Manual theme switching functions are also available:
-    • catppuccin-theme-switch (alias)
-    • ghostty-theme-light.nu / ghostty-theme-dark.nu (Ghostty-specific)
+    catppuccin-theme-switcher --light          # Apply light theme
+    catppuccin-theme-switcher --dark           # Apply dark theme
+    catppuccin-theme-switcher --status         # Show current theme status
+    catppuccin-theme-switcher --dark --dry-run # Preview dark theme changes
 
 FILES:
     ~/.cache/nushell_theme    Theme cache for Nushell
@@ -72,7 +58,7 @@ HELP_EOF
 
 show_version() {
     echo "Catppuccin Theme Switcher v$VERSION"
-    echo "Unified theme management for macOS development environment"
+    echo "Manual theme management for macOS development environment"
 }
 
 show_status() {
@@ -103,7 +89,7 @@ show_status() {
     
     # Starship
     if [[ -f "$HOME/.config/starship.toml" ]]; then
-        echo "   Starship: Managed by Nix Catppuccin (automatic theme switching)"
+        echo "   Starship: Catppuccin Mocha (fixed)"
     else
         echo "   Starship: not configured"
     fi
@@ -126,7 +112,7 @@ show_status() {
     
     # Zellij
     if [[ -f "$HOME/.config/zellij/config.kdl" ]]; then
-        echo "   Zellij: Managed by Nix Catppuccin (automatic theme switching)"
+        echo "   Zellij: Managed by Nix Catppuccin module"
     else
         echo "   Zellij: not configured"
     fi
@@ -143,7 +129,7 @@ show_status() {
 }
 
 # Parse command line arguments
-FORCE_THEME=""
+REQUESTED_THEME=""
 QUIET=false
 DRY_RUN=false
 
@@ -161,16 +147,12 @@ while [[ $# -gt 0 ]]; do
             show_status
             exit 0
             ;;
-        -f|--force-light)
-            FORCE_THEME="light"
+        -l|--light|--force-light)
+            REQUESTED_THEME="light"
             shift
             ;;
-        -d|--force-dark)
-            FORCE_THEME="dark"
-            shift
-            ;;
-        -a|--auto)
-            FORCE_THEME=""
+        -d|--dark|--force-dark)
+            REQUESTED_THEME="dark"
             shift
             ;;
         -q|--quiet)
@@ -194,13 +176,6 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Check for manual override file
-MANUAL_OVERRIDE_FILE="$HOME/.cache/catppuccin_manual_override"
-MANUAL_OVERRIDE=""
-if [[ -f "$MANUAL_OVERRIDE_FILE" ]]; then
-    MANUAL_OVERRIDE=$(cat "$MANUAL_OVERRIDE_FILE" 2>/dev/null | head -n1 | tr -d '\n')
-fi
-
 # Output function that respects quiet mode
 log() {
     if [[ "$QUIET" != "true" ]]; then
@@ -208,42 +183,29 @@ log() {
     fi
 }
 
-# Store original arguments as string to work around Nix string interpolation
-ORIGINAL_ARGS="$*"
-
-# Check if --auto was used to clear override first
-if [[ "$ORIGINAL_ARGS" == *"--auto"* ]] || [[ "$ORIGINAL_ARGS" == *"-a"* ]]; then
-    rm -f "$MANUAL_OVERRIDE_FILE" 2>/dev/null
-    log "🔄 Cleared manual override - back to automatic mode"
-    MANUAL_OVERRIDE=""  # Clear override so it won't be used
-fi
-
-# Determine theme based on priority: CLI args > manual override > system appearance
-if [[ -n "$FORCE_THEME" ]]; then
-    APPEARANCE="$FORCE_THEME"
-    # If this is a manual force, save it as override (but not for --auto)
-    if [[ "$FORCE_THEME" == "light" && "$ORIGINAL_ARGS" != *"--auto"* && "$ORIGINAL_ARGS" != *"-a"* ]]; then
-        echo "light" > "$MANUAL_OVERRIDE_FILE"
-        log "💾 Saved light theme as manual override"
-    elif [[ "$FORCE_THEME" == "dark" && "$ORIGINAL_ARGS" != *"--auto"* && "$ORIGINAL_ARGS" != *"-a"* ]]; then
-        echo "dark" > "$MANUAL_OVERRIDE_FILE"
-        log "💾 Saved dark theme as manual override"
-    fi
-elif [[ -n "$MANUAL_OVERRIDE" && ("$MANUAL_OVERRIDE" == "light" || "$MANUAL_OVERRIDE" == "dark") ]]; then
-    APPEARANCE="$MANUAL_OVERRIDE"
-    log "🔒 Using manual override: $MANUAL_OVERRIDE mode"
-elif defaults read -g AppleInterfaceStyle 2>/dev/null | grep -q "Dark"; then
-    APPEARANCE="dark"
-else
-    APPEARANCE="light"
+# Ensure a theme was requested
+if [[ -z "$REQUESTED_THEME" ]]; then
+    echo "Error: No theme specified. Use --light or --dark." >&2
+    echo "Use --help for usage information" >&2
+    exit 2
 fi
 
 # Set theme variables
-if [[ "$APPEARANCE" == "dark" ]]; then
-    CATPPUCCIN_FLAVOR="mocha"
-else
-    CATPPUCCIN_FLAVOR="latte"
-fi
+case "$REQUESTED_THEME" in
+    light)
+        APPEARANCE="light"
+        CATPPUCCIN_FLAVOR="latte"
+        ;;
+    dark)
+        APPEARANCE="dark"
+        CATPPUCCIN_FLAVOR="mocha"
+        ;;
+    *)
+        echo "Error: Unsupported theme '$REQUESTED_THEME'." >&2
+        echo "Use --help for usage information" >&2
+        exit 2
+        ;;
+esac
 
 # Dry run prefix
 if [[ "$DRY_RUN" == "true" ]]; then
@@ -252,16 +214,12 @@ if [[ "$DRY_RUN" == "true" ]]; then
 fi
 
 log "🎨 Catppuccin Theme Switcher"
-if [[ -n "$FORCE_THEME" ]]; then
-    log "🔧 Mode: Forced $APPEARANCE mode"
-else
-    log "🔧 Mode: Auto-detect (system appearance: $APPEARANCE)"
-fi
+log "🔧 Mode: Manual $APPEARANCE mode"
 log "🎨 Catppuccin flavor: $CATPPUCCIN_FLAVOR"
 log ""
 
-# Starship theme is now automatically managed by Nix Catppuccin module
-log "⭐ Starship prompt theme: Managed by Nix Catppuccin (automatic)"
+# Starship stays on the Catppuccin Mocha palette
+log "⭐ Starship prompt theme: Catppuccin Mocha (fixed dark palette)"
 
 # Update atuin theme via environment variables (Nix-managed configs are read-only)
 log "📖 Updating Atuin history theme..."
@@ -291,8 +249,8 @@ else
     log "   🔍 Would create Atuin override for $APPEARANCE theme"
 fi
 
-# Zellij theme is now automatically managed by Nix Catppuccin module
-log "🖼️  Zellij multiplexer theme: Managed by Nix Catppuccin (automatic)"
+# Zellij theme is managed by the Nix Catppuccin module
+log "🖼️  Zellij multiplexer theme: Managed by Nix Catppuccin module"
 
 # Build detection for safe theme switching (used by Ghostty logic)
 build_in_progress=false
@@ -312,9 +270,15 @@ if [[ "$0" == *"home-manager-generation"* ]] || [[ "$0" == *"darwin-system"* ]] 
     build_in_progress=true
 fi
 
-# Interactive session detection - if we're inside Zellij or multiplexers, be extra careful
+# Ghostty session detection (case-insensitive) for safe reload decisions
+ghostty_env=false
+if [[ "${TERM_PROGRAM:-}" =~ [Gg]hostty ]] || [[ "${TERM:-}" =~ [Gg]hostty ]] || [[ -n "${GHOSTTY_RESOURCES_DIR:-}" ]] || [[ -n "${GHOSTTY_CONFIG_PATH:-}" ]]; then
+    ghostty_env=true
+fi
+
+# Interactive session detection - if we're inside Zellij, tmux, or Ghostty, be extra careful
 interactive_session=false
-if [[ -n "${ZELLIJ_SESSION_NAME:-}" ]] || [[ -n "${TMUX:-}" ]] || [[ "${TERM_PROGRAM:-}" == "Ghostty" ]]; then
+if [[ -n "${ZELLIJ_SESSION_NAME:-}" ]] || [[ -n "${TMUX:-}" ]] || [[ "$ghostty_env" == "true" ]]; then
     interactive_session=true
 fi
 
@@ -386,7 +350,7 @@ if [[ -f "$GHOSTTY_OVERRIDES" ]]; then
                 fi
                 
                 # If that failed and we're not in an interactive context, try menu method
-                if [[ "$reload_success" == "false" ]] && [[ "$TERM_PROGRAM" != "Ghostty" ]]; then
+                if [[ "$reload_success" == "false" ]] && [[ "$ghostty_env" != "true" ]]; then
                     if osascript -e 'tell application "System Events" to tell process "Ghostty" to click menu item "Reload Configuration" of menu "Ghostty" of menu bar 1' >/dev/null 2>&1; then
                         log "   🔄 Reloaded Ghostty configuration via menu"
                         reload_success=true
@@ -412,7 +376,7 @@ fi
 # Update shell themes
 log "🐚 Updating shell theme configurations..."
 
-# BAT theme is now automatically managed by Nix Catppuccin module
+# BAT theme is managed by the Nix Catppuccin module
 
 # Set shell theme environment variables
 if [[ "$APPEARANCE" == "light" ]]; then

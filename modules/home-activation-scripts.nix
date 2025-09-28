@@ -18,19 +18,6 @@
       echo "✅ Backup file cleanup completed"
     '';
 
-    # Set up automatic theme switching
-    setupCatppuccinThemeSwitcher = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      # Load the LaunchAgent for automatic theme switching
-      $DRY_RUN_CMD launchctl unload ~/Library/LaunchAgents/com.user.catppuccin-theme-switcher.plist 2>/dev/null || true
-      $DRY_RUN_CMD launchctl load -w ~/Library/LaunchAgents/com.user.catppuccin-theme-switcher.plist 2>/dev/null || true
-
-      # Run the theme switcher once to set initial theme
-      # Preserve safe mode environment variables to prevent Zellij termination during builds
-      $DRY_RUN_CMD env GHOSTTY_SAFE_MODE="''${GHOSTTY_SAFE_MODE:-}" NUSHELL_NIX_BUILD="''${NUSHELL_NIX_BUILD:-}" NIX_BUILD_TOP="''${NIX_BUILD_TOP:-}" ~/.local/bin/catppuccin-theme-switcher || true
-
-      echo "Catppuccin automatic theme switcher has been set up!"
-    '';
-
     # Auto-pin Emacs after a successful build if pinned store path was GC'd
     autoPinEmacsAfterBuild = lib.hm.dag.entryAfter ["writeBoundary"] ''
       PIN_FILE="$HOME/.cache/emacs-git-pin"

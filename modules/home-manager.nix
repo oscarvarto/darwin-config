@@ -120,15 +120,10 @@ in {
         file =
           sharedFiles
           // {
-            # Automatic theme switcher script
+            # Catppuccin theme switcher script (manual invocation)
             ".local/bin/catppuccin-theme-switcher" = {
               executable = true;
               source = ./catppuccin-theme-switcher.sh;
-            };
-
-            # LaunchAgent for automatic theme switching
-            "Library/LaunchAgents/com.user.catppuccin-theme-switcher.plist" = {
-              text = builtins.replaceStrings ["__USER__"] [user] (builtins.readFile ./catppuccin-launchagent.plist);
             };
           };
 
@@ -162,16 +157,14 @@ in {
       # Test: re-enable font management to see if it still causes issues
       fonts.fontconfig.enable = true;
 
-      # Enable catppuccin with automatic light/dark switching
+      # Enable Catppuccin theming for supported programs
       catppuccin = {
         enable = true;
         flavor = "latte"; # Default light theme
         accent = "mauve"; # Accent color
-        # Enable automatic theme switching for supported programs
-        # Programs will automatically use "latte" in light mode and "mocha" in dark mode
 
         bat.enable = true;
-        starship.enable = true;
+        starship.enable = false;
         zellij.enable = true;
       };
 
