@@ -20,6 +20,7 @@
     bash = "/Users/${user}/.nix-profile/bin/bash";
     zsh = "/Users/${user}/.nix-profile/bin/zsh";
     nushell = "/Users/${user}/.nix-profile/bin/nu";
+    xonsh = "/Users/${user}/.nix-profile/bin/xonsh";
   };
 
   # Get the shell path, fallback to zsh if invalid shell specified

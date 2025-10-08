@@ -28,8 +28,8 @@ $cmd_duration\
 $line_break\
 $character"""
 
-# Use the Catppuccin Mocha palette for consistent dark styling
-palette = "catppuccin_mocha"
+# Palette is set dynamically by home-manager based on catppuccin.flavor
+# palette = "catppuccin_latte"  # This is now handled dynamically
 
 [os]
 disabled = false
@@ -166,7 +166,7 @@ disabled = false
 show_notifications = false
 min_time_to_notify = 45000
 
-# Starship always uses the Catppuccin Mocha palette for a consistent dark prompt
+# Starship palette definitions for Catppuccin themes
 
 [palettes.catppuccin_mocha]
 rosewater = "#f5e0dc"
@@ -195,3 +195,31 @@ surface0 = "#313244"
 base = "#1e1e2e"
 mantle = "#181825"
 crust = "#11111b"
+
+[palettes.catppuccin_latte]
+rosewater = "#dc8a78"
+flamingo = "#dd7878"
+pink = "#ea76cb"
+mauve = "#8839ef"
+red = "#d20f39"
+maroon = "#e64553"
+peach = "#fe640b"
+yellow = "#df8e1d"
+green = "#40a02b"
+teal = "#179299"
+sky = "#04a5e5"
+sapphire = "#209fb5"
+blue = "#1e66f5"
+lavender = "#7287fd"
+text = "#4c4f69"
+subtext1 = "#5c5f77"
+subtext0 = "#6c6f85"
+overlay2 = "#7c7f93"
+overlay1 = "#8c8fa1"
+overlay0 = "#9ca0b0"
+surface2 = "#acb0be"
+surface1 = "#bcc0cc"
+surface0 = "#ccd0da"
+base = "#eff1f5"
+mantle = "#e6e9ef"
+crust = "#dce0e8"

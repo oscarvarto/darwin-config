@@ -85,6 +85,9 @@
 
   # Generate nushell-compatible path list
   nushellPaths = lib.concatStringsSep "\n    " (map (path: "\"${expandPath path}\"") pathEntries);
+
+  # Generate xonsh-compatible path list
+  xonshPaths = lib.concatStringsSep ",\n          " (map (path: "\"${expandPath path}\"") pathEntries);
 in {
   # Export the path configuration for use in other modules
   _module.args.pathConfig = {
@@ -275,6 +278,51 @@ in {
         #     end
         # end
         # set -gx PATH $our_path
+      '';
+    };
+
+    xonsh = {
+      pathEntries = expandedPaths;
+
+      pathSetup = ''
+        # ============================================================================
+        # CENTRALIZED PATH SETUP - CONTROLLED BY modules/path-config.nix
+        # ============================================================================
+        # This overrides mise, homebrew, and any other tool that tries to modify PATH
+
+        desired_paths = [
+          ${xonshPaths}
+        ]
+
+        # Build authoritative PATH - only include paths that exist
+        import os
+        valid_paths = []
+        for path in desired_paths:
+            if os.path.exists(path):
+                valid_paths.append(path)
+
+        # Set the PATH environment variable
+        $PATH = valid_paths
+      '';
+
+      pathOverride = ''
+        # ============================================================================
+        # AUTHORITATIVE PATH OVERRIDE - RUNS AFTER ALL INTEGRATIONS
+        # ============================================================================
+        # This ensures our PATH takes precedence over mise, homebrew, etc.
+
+        desired_paths = [
+          ${xonshPaths}
+        ]
+
+        # Force our PATH to take precedence
+        import os
+        valid_paths = []
+        for path in desired_paths:
+            if os.path.exists(path):
+                valid_paths.append(path)
+
+        $PATH = valid_paths
       '';
     };
   };

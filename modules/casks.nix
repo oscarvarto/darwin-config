@@ -12,7 +12,7 @@ _: [
   "jetbrains-toolbox"
   "kitty"
   "miniforge"
-  "neo4j-desktop"
+  # "neo4j-desktop"  # Temporarily disabled due to brew upgrade issues
   "ollama"
   "postman"
   "powershell"

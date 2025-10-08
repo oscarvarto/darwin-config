@@ -23,7 +23,8 @@
       "bat"
       "bat-extras"
       "bfg"
-      "carapace"
+      # Moved to Nix packages to avoid conflicts with xonsh xontrib
+      # "carapace"
       "cargo-binstall"
       "ccache"
       "cmake"

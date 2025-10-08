@@ -1,0 +1,239 @@
+#!/usr/bin/env bash
+
+# Xontrib Management Script
+# Fallback tool for managing xontribs when Nix-based installation has issues
+
+set -euo pipefail
+
+# Configuration
+XONTRIBS=(
+    # Core functionality provided by xonsh itself (no PyPI package required)
+    "xontrib-sh"
+
+    # Tab completions
+    "xontrib-argcomplete"
+    "xontrib-zoxide"
+
+    # Prompt
+    "xontrib-prompt-starship"
+
+    # Integration
+    "xontrib-kitty"
+    "xontrib-homebrew"
+    "xontrib-1password"
+
+    # Useful plugins
+    "xontrib-clp"
+    "xontrib-pipeliner"
+
+    # Educational
+    "xontrib-cheatsheet"
+)
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Helper functions
+info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
+}
+
+success() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
+
+warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+error() {
+    echo -e "${RED}❌ $1${NC}"
+}
+
+# Check if Python and pip are available
+check_python() {
+    if ! command -v python3 >/dev/null 2>&1; then
+        error "Python3 not found. Please ensure Python3 is installed."
+        exit 1
+    fi
+
+    if ! python3 -m pip --version >/dev/null 2>&1; then
+        error "pip not available. Installing pip..."
+        python3 -m ensurepip --user --default-pip || {
+            error "Failed to install pip"
+            exit 1
+        }
+    fi
+}
+
+# Install xontribs
+install_xontribs() {
+    info "Installing xontribs..."
+    check_python
+
+    local failed_count=0
+    local success_count=0
+
+    for xontrib in "${XONTRIBS[@]}"; do
+        info "Installing $xontrib..."
+        if python3 -m pip install --user --upgrade "$xontrib" >/dev/null 2>&1; then
+            success "Installed $xontrib"
+            ((success_count++))
+        else
+            warning "Failed to install $xontrib"
+            ((failed_count++))
+        fi
+    done
+
+    echo
+    success "Installation complete: $success_count successful, $failed_count failed"
+
+    if [ $failed_count -gt 0 ]; then
+        warning "Some xontribs failed to install. This is normal - not all xontribs are available on PyPI."
+        warning "You can manually install missing ones or disable them in your xonsh config."
+    fi
+}
+
+# Uninstall xontribs
+uninstall_xontribs() {
+    info "Uninstalling xontribs..."
+    check_python
+
+    for xontrib in "${XONTRIBS[@]}"; do
+        info "Uninstalling $xontrib..."
+        python3 -m pip uninstall -y "$xontrib" >/dev/null 2>&1 || true
+    done
+
+    success "Uninstallation complete"
+}
+
+# List installed xontribs
+list_xontribs() {
+    info "Checking installed xontribs..."
+    check_python
+
+    echo
+    echo "Available xontribs to install:"
+    for xontrib in "${XONTRIBS[@]}"; do
+        if python3 -m pip show "$xontrib" >/dev/null 2>&1; then
+            echo -e "${GREEN}✅ $xontrib${NC} (installed)"
+        else
+            echo -e "${RED}❌ $xontrib${NC} (not installed)"
+        fi
+    done
+}
+
+# Test xontribs in xonsh
+test_xontribs() {
+    info "Testing xontribs in xonsh..."
+
+    if ! command -v xonsh >/dev/null 2>&1; then
+        error "xonsh not found. Please ensure xonsh is installed."
+        exit 1
+    fi
+
+    info "Testing xonsh configuration..."
+    if xonsh -c "print('✅ Xonsh loads successfully')" 2>/dev/null; then
+        success "Xonsh configuration test passed"
+    else
+        error "Xonsh configuration test failed"
+        warning "Check your ~/.xonshrc for errors"
+    fi
+}
+
+# Force reinstall all xontribs
+reinstall_xontribs() {
+    info "Force reinstalling all xontribs..."
+    uninstall_xontribs
+    install_xontribs
+}
+
+# Show usage
+usage() {
+    cat << EOF
+🐚 Xontrib Management Script
+
+USAGE:
+    $0 [COMMAND]
+
+COMMANDS:
+    install      Install all configured xontribs
+    uninstall    Uninstall all configured xontribs
+    reinstall    Uninstall and reinstall all xontribs
+    list         List installation status of all xontribs
+    test         Test xonsh configuration
+    status       Show detailed status information
+
+EXAMPLES:
+    $0 install     # Install xontribs
+    $0 list        # Check what's installed
+    $0 test        # Test xonsh works
+
+This script is a fallback for when Nix-based xontrib installation has issues.
+Prefer the Nix configuration when possible.
+EOF
+}
+
+# Show status
+show_status() {
+    info "Xontrib Management Status"
+    echo
+
+    # Check Python/pip
+    if command -v python3 >/dev/null 2>&1; then
+        success "Python3: $(python3 --version)"
+    else
+        error "Python3: Not found"
+    fi
+
+    if python3 -m pip --version >/dev/null 2>&1; then
+        success "pip: $(python3 -m pip --version)"
+    else
+        error "pip: Not available"
+    fi
+
+    # Check xonsh
+    if command -v xonsh >/dev/null 2>&1; then
+        success "xonsh: $(xonsh --version)"
+    else
+        error "xonsh: Not found"
+    fi
+
+    # Check xontribs
+    echo
+    list_xontribs
+}
+
+# Main
+main() {
+    case "${1:-}" in
+        install)
+            install_xontribs
+            ;;
+        uninstall)
+            uninstall_xontribs
+            ;;
+        reinstall)
+            reinstall_xontribs
+            ;;
+        list)
+            list_xontribs
+            ;;
+        test)
+            test_xontribs
+            ;;
+        status)
+            show_status
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

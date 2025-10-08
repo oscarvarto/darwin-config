@@ -102,13 +102,16 @@ in {
     SWIFTLY_HOME_DIR = "${userHome}/.swiftly";
     SWIFTLY_BIN_DIR = "${userHome}/.swiftly/bin";
     SWIFTLY_TOOLCHAINS_DIR = "${userHome}/Library/Developer/Toolchains";
+
+    # Xonsh configuration - suppress xontrib warnings during startup health checks
+    XONSH_SUPPRESS_COMP_WARNINGS = "True";
   };
 
   # Enable home-manager
   home-manager = {
     useGlobalPkgs = true;
     backupFileExtension = "bak";
-    extraSpecialArgs = {inherit inputs user pathConfig;};
+    extraSpecialArgs = {inherit inputs user pathConfig darwinConfigPath;};
     users.${user} = {
       pkgs,
       config,
@@ -122,7 +125,8 @@ in {
           inputs.catppuccin.homeModules.catppuccin
           # inputs.op-shell-plugins.hmModules.default  # Removed - SSH agent integration sufficient
         ]
-        ++ [./nushell];
+        ++ [./nushell]
+        ++ [./xonsh/default.nix];
 
       home = {
         enableNixpkgsReleaseCheck = false;
@@ -149,6 +153,8 @@ in {
           ENCHANT_ORDERING = "en:aspell,es:aspell,*:aspell";
           ASPELL_CONF = "dict-dir ${pkgs.aspellWithDicts (dicts: with dicts; [en en-computers en-science es])}/lib/aspell; data-dir ${pkgs.aspell}/share/aspell";
           STARSHIP_CONFIG = "${config.home.homeDirectory}/.config/starship.toml";
+          # Xonsh configuration - suppress xontrib warnings during startup health checks
+          XONSH_SUPPRESS_COMP_WARNINGS = "True";
           # Set Xcode developer directory to release version for GUI applications
           DEVELOPER_DIR = "/Applications/Xcode.app/Contents/Developer";
           # Ghostty terminfo location for proper terminal support
@@ -181,12 +187,15 @@ in {
         accent = "mauve"; # Accent color
 
         bat.enable = true;
-        starship.enable = false;
+        # starship configuration moved to programs.starship section below
         zellij.enable = true;
       };
 
       # Enable the local nushell module
       local.nushell.enable = true; # Re-enabled to test if it causes fish config issue
+
+      # Enable the local xonsh module (disabled by default)
+      local.xonsh.enable = true; # Set to true to enable xonsh
 
       # Global EditorConfig (Home Manager module)
       editorconfig = {
@@ -291,7 +300,15 @@ in {
             enable = true;
             enableZshIntegration = true;
             enableNushellIntegration = true;
-            settings = fromTOML (builtins.readFile ./starship.toml);
+            settings =
+              fromTOML (builtins.readFile ./starship.toml)
+              // {
+                # Dynamic palette selection based on catppuccin flavor
+                palette =
+                  if config.catppuccin.flavor == "mocha"
+                  then "catppuccin_mocha"
+                  else "catppuccin_latte";
+              };
           };
 
           vscode = {

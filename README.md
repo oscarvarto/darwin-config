@@ -1315,7 +1315,7 @@ This tool is particularly useful in JVM development environments where IntelliJ'
 
 ## 🐚 Choosing Your Default Shell
 
-This configuration provides primary support for **Nushell** and **Zsh**, with limited support for **Fish**. The focus is on optimizing build times for Emacs development, so Fish shell support is minimal.
+This configuration provides primary support for **Nushell** and **Zsh**, with limited support for **Fish**, and experimental support for **Xonsh**. The focus is on optimizing build times for Emacs development, so Fish shell support is minimal.
 
 ### 🎯 Shell Support Levels
 
@@ -1323,6 +1323,7 @@ This configuration provides primary support for **Nushell** and **Zsh**, with li
 | ----------- | ------------- | --------------------------------------------------- | ---------------------------------------------------- |
 | **Nushell** | ⭐ Primary    | Full integration with all features                  | Data manipulation, pipelines, modern workflows       |
 | **Zsh**     | ⭐ Primary    | Full integration, extensive plugin support          | Power users, legacy compatibility, extensive plugins |
+| **Xonsh**   | 🧪 Experimental | Manual integrations, Python scripting capabilities | Python developers, scripting automation, experimentation |
 | **Fish**    | ⚠️ Limited    | Basic functionality only, no tool integrations      | Users who need Fish but accept minimal features      |
 
 ### ⚠️ Important: Fish Shell Limitations
@@ -1334,6 +1335,64 @@ This configuration provides primary support for **Nushell** and **Zsh**, with li
 - ✅ **Essential aliases**: Only the most basic aliases are configured
 
 **If you need a fully-featured shell, use Nushell or Zsh.**
+
+### 🧪 Experimental: Xonsh Support
+
+**Xonsh is available as an experimental shell option** with the unique ability to execute Python code directly in the shell environment. This makes it particularly powerful for Python developers and automation tasks.
+
+#### ✅ Xonsh Advantages
+
+- **🐍 Native Python Integration**: Execute Python code directly in shell (e.g., `print(f"Hello {2+2}")`)
+- **📦 Manual Tool Integration**: Starship, Zoxide, Atuin, and Carapace completions work via manual setup
+- **🎨 Dynamic Theming**: Automatically adapts colors based on system light/dark mode
+- **⚡ Functional Core**: All essential shell operations work correctly
+
+#### ⚠️ Known Limitations
+
+**Integration Differences:**
+- **Manual vs Native**: Tool integrations are manually configured in RC files rather than native home-manager integrations
+- **Missing Tools**: No Mise, Yazi, enhanced direnv, autosuggestions, or fzf-tab integration
+- **Development Status**: Experimental support - not as polished as Zsh/Nushell
+
+**Known Cosmetic Issues:**
+```bash
+# These warnings appear on startup but don't affect functionality:
+The following xontribs are enabled but not installed:
+   ['carapace-bin']
+   ['starship']
+```
+These warnings are cosmetic and can be safely ignored. The underlying functionality (completions, prompts) works correctly.
+
+#### 🚀 Using Xonsh
+
+**Starting Xonsh:**
+```bash
+xonsh  # Launch xonsh session
+```
+
+**Python Integration Examples:**
+```python
+# Execute Python directly in shell
+ls $(Path.home() / "Documents")   # Python pathlib in shell commands
+[f"file_{i}.txt" for i in range(3)]  # List comprehensions
+import json; json.dumps({"key": "value"})  # Import and use modules
+```
+
+**Available Integrations:**
+- ✅ **Starship**: Cross-shell prompt with Catppuccin theme support
+- ✅ **Zoxide**: Smart directory jumping (`z` command)
+- ✅ **Atuin**: Enhanced history search and sync
+- ✅ **Carapace**: Multi-shell tab completions
+- ✅ **Modern aliases**: `eza`, `bat`, `fd`, `rg` and other modern CLI tools
+
+#### 📝 Configuration
+
+Xonsh configuration is managed in `modules/xonsh/`:
+- **Main config**: `modules/xonsh/rc.xsh` - Shell behavior and tool integrations
+- **Xontribs**: `modules/xonsh/xontrib-packages.nix` - Plugin package definitions
+- **Theme logic**: Automatic light/dark mode detection with appropriate color schemes
+
+**Note**: Xonsh is not available as a `defaultShell` option. Access it by running `xonsh` from your primary shell.
 
 ### 🔧 Setting Your Default Shell
 
@@ -1409,6 +1468,15 @@ hostConfigs = {
 - **No Integrations**: No Atuin, Zoxide, Mise, or other tool integrations
 - **PATH Management**: Basic PATH setup without tool integrations
 
+#### Xonsh Shell - Experimental Features
+
+- **Starship Prompt**: Cross-shell prompt with manual integration (cosmetic warnings)
+- **Python Integration**: Native Python code execution in shell environment
+- **Manual Integrations**: Zoxide, Atuin, Carapace via manual RC configuration
+- **Dynamic Theming**: Automatic light/dark color scheme adaptation
+- **Modern Aliases**: Complete set of shortcuts (`eza`, `bat`, `fd`, `rg`)
+- **Missing Tools**: No Mise, Yazi, enhanced direnv, autosuggestions, fzf-tab
+
 #### Shell-Specific Strengths
 
 **Nushell Features:**
@@ -1431,6 +1499,22 @@ ps | where cpu > 50 | select name cpu
 # Glob patterns and extended matching
 # Plugin ecosystem compatibility
 # Customizable prompt systems
+```
+
+**Xonsh Features (Experimental):**
+
+```python
+# Native Python integration
+print(f"Current directory: {Path.cwd()}")
+files = [f for f in Path('.').iterdir() if f.suffix == '.py']
+
+# Python libraries in shell
+import requests
+response = requests.get('https://api.github.com/user').json()
+
+# Subprocess with Python
+result = $(grep -r "pattern" .)
+lines = result.split('\n')
 ```
 
 **Fish Features (Limited):**
@@ -1545,6 +1629,14 @@ initContent = lib.mkAfter ''
 - Prefer traditional Unix shell behavior
 - Have existing zsh configurations to port
 - Want full integration with all development tools
+
+**Consider Xonsh if you:**
+
+- Are a Python developer who wants native Python in shell
+- Need to write complex shell automation using Python libraries
+- Want to experiment with Python-based shell scripting
+- Can accept experimental status and cosmetic warnings
+- Don't need all the integrations available in Zsh/Nushell
 
 **Only choose Fish if you:**
 
