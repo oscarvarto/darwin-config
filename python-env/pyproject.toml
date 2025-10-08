@@ -1,0 +1,45 @@
+[project]
+name = "darwin-config-env"
+version = "0.1.0"
+description = "Python environment for darwin-config tooling"
+requires-python = ">=3.13"
+dependencies = [
+  "beautifulsoup4",
+  "debugpy",
+  "pandas",
+  "requests",
+  "sexpdata",
+  "tld",
+  "pygments",
+  "pysocks",
+  "polars",
+  "sympy",
+  "uv",
+  "pillow",
+  "grip",
+  "PyQt6",
+  "PyQt6-WebEngine",
+  "matplotlib",
+  "scipy",
+  "numpy",
+  "pip",
+  "setuptools",
+  "wheel",
+  "xonsh",
+  "xontrib-argcomplete",
+  "xontrib-cheatsheet",
+  "xontrib-clp",
+  "xontrib-homebrew",
+  "xontrib-pipeliner",
+  "xontrib-sh",
+  "xontrib-zoxide",
+  "prompt_toolkit",
+]
+
+[tool.uv]
+managed = true
+package = true
+
+
+[tool.uv.workspace]
+members = []

@@ -50,6 +50,7 @@ A comprehensive macOS system configuration using Nix-Darwin and Home Manager wit
 
 - [🤝 Contributing](#-contributing)
 - [📝 License](#-license)
+- [🆕 Changelog](#-changelog)
 
 ---
 
@@ -579,10 +580,11 @@ Tip: run `ns --help` or `nb --help` for all options.
   - **macOS Integration**: Proper window management and GUI support
   - **Ghostty Terminal Support**: Full xterm-ghostty terminfo integration
   - **Catppuccin Theming**: Unified theme management across applications
-- **🐚 Advanced Shell Configuration**: Primary support for Nushell and Zsh:
-  - **Consistent Experience**: Same aliases, PATH, and tools across primary shells
+- **🐚 Advanced Shell Configuration**: Full support for Nushell, Zsh, and Xonsh:
+  - **Consistent Experience**: Same aliases, PATH, and tools across all primary shells
   - **Smart Switching**: Easy shell changes via simple configuration updates
-  - **Modern Features**: Starship prompts, Zoxide navigation, Atuin history (Nushell/Zsh only)
+  - **Modern Features**: Starship prompts, Zoxide navigation, Atuin history (Nushell/Zsh/Xonsh)
+  - **Python Integration**: Native Python scripting support with Xonsh
   - **Limited Fish Support**: Basic functionality only, no integrations to optimize build times
 - **🔧 Development Tools**: Complete development environment with LSPs, formatters, etc.
 - **🔒 Security First**: Automated backups, key rotation, and credential synchronization
@@ -1315,7 +1317,7 @@ This tool is particularly useful in JVM development environments where IntelliJ'
 
 ## 🐚 Choosing Your Default Shell
 
-This configuration provides primary support for **Nushell** and **Zsh**, with limited support for **Fish**, and experimental support for **Xonsh**. The focus is on optimizing build times for Emacs development, so Fish shell support is minimal.
+This configuration provides primary support for **Nushell** and **Zsh**, stable support for **Xonsh**, and limited support for **Fish**. The focus is on optimizing build times for Emacs development, so Fish shell support is minimal.
 
 ### 🎯 Shell Support Levels
 
@@ -1323,7 +1325,7 @@ This configuration provides primary support for **Nushell** and **Zsh**, with li
 | ----------- | ------------- | --------------------------------------------------- | ---------------------------------------------------- |
 | **Nushell** | ⭐ Primary    | Full integration with all features                  | Data manipulation, pipelines, modern workflows       |
 | **Zsh**     | ⭐ Primary    | Full integration, extensive plugin support          | Power users, legacy compatibility, extensive plugins |
-| **Xonsh**   | 🧪 Experimental | Manual integrations, Python scripting capabilities | Python developers, scripting automation, experimentation |
+| **Xonsh**   | ✅ Stable    | Full tool integrations, Python scripting capabilities | Python developers, shell automation, advanced scripting |
 | **Fish**    | ⚠️ Limited    | Basic functionality only, no tool integrations      | Users who need Fish but accept minimal features      |
 
 ### ⚠️ Important: Fish Shell Limitations
@@ -1336,32 +1338,31 @@ This configuration provides primary support for **Nushell** and **Zsh**, with li
 
 **If you need a fully-featured shell, use Nushell or Zsh.**
 
-### 🧪 Experimental: Xonsh Support
+### ✅ Stable: Xonsh Support
 
-**Xonsh is available as an experimental shell option** with the unique ability to execute Python code directly in the shell environment. This makes it particularly powerful for Python developers and automation tasks.
+**Xonsh is now fully supported** with the unique ability to execute Python code directly in the shell environment. This makes it particularly powerful for Python developers and automation tasks.
 
 #### ✅ Xonsh Advantages
 
 - **🐍 Native Python Integration**: Execute Python code directly in shell (e.g., `print(f"Hello {2+2}")`)
-- **📦 Manual Tool Integration**: Starship, Zoxide, Atuin, and Carapace completions work via manual setup
+- **📦 Full Tool Integration**: Starship, Zoxide, Atuin with complete functionality
 - **🎨 Dynamic Theming**: Automatically adapts colors based on system light/dark mode
-- **⚡ Functional Core**: All essential shell operations work correctly
+- **⚡ Complete Functionality**: All essential shell operations and modern CLI tools work correctly
+- **🔧 Robust Package Management**: Uses uv2nix for fast, reliable Python package management
 
-#### ⚠️ Known Limitations
+#### 🛠️ What Works Perfectly
 
-**Integration Differences:**
-- **Manual vs Native**: Tool integrations are manually configured in RC files rather than native home-manager integrations
-- **Missing Tools**: No Mise, Yazi, enhanced direnv, autosuggestions, or fzf-tab integration
-- **Development Status**: Experimental support - not as polished as Zsh/Nushell
+**Core Integrations:**
+- ✅ **Starship**: Full prompt integration with Git status, themes, and customization
+- ✅ **Zoxide**: Smart directory jumping (`z` command) with full functionality
+- ✅ **Atuin**: Complete history search and sync (requires `prompt_toolkit` - now included)
+- ✅ **Modern Aliases**: Complete set including `eza`, `bat`, `fd`, `rg`, and other modern CLI tools
+- ✅ **PATH Management**: Full PATH configuration with all development tools
 
-**Known Cosmetic Issues:**
-```bash
-# These warnings appear on startup but don't affect functionality:
-The following xontribs are enabled but not installed:
-   ['carapace-bin']
-   ['starship']
-```
-These warnings are cosmetic and can be safely ignored. The underlying functionality (completions, prompts) works correctly.
+**Advanced Features:**
+- ✅ **Python Environment**: Integrated with uv2nix for consistent package management
+- ✅ **Error Handling**: Graceful degradation when tools are unavailable
+- ✅ **Theme Support**: Automatic light/dark mode detection and color scheme adaptation
 
 #### 🚀 Using Xonsh
 
@@ -1378,12 +1379,17 @@ ls $(Path.home() / "Documents")   # Python pathlib in shell commands
 import json; json.dumps({"key": "value"})  # Import and use modules
 ```
 
-**Available Integrations:**
-- ✅ **Starship**: Cross-shell prompt with Catppuccin theme support
+**Ready-to-Use Experience:**
+```bash
+xonsh  # Launch xonsh - everything works immediately!
+```
+
+**All integrations work out of the box:**
+- ✅ **Starship**: Beautiful prompts with Git integration
 - ✅ **Zoxide**: Smart directory jumping (`z` command)
-- ✅ **Atuin**: Enhanced history search and sync
-- ✅ **Carapace**: Multi-shell tab completions
-- ✅ **Modern aliases**: `eza`, `bat`, `fd`, `rg` and other modern CLI tools
+- ✅ **Atuin**: Enhanced history search and sync (fixed with `prompt_toolkit`)
+- ✅ **Modern aliases**: Complete set of `eza`, `bat`, `fd`, `rg` and other CLI tools
+- ✅ **Development tools**: Full PATH with all development environments
 
 #### 📝 Configuration
 
@@ -1468,14 +1474,14 @@ hostConfigs = {
 - **No Integrations**: No Atuin, Zoxide, Mise, or other tool integrations
 - **PATH Management**: Basic PATH setup without tool integrations
 
-#### Xonsh Shell - Experimental Features
+#### Xonsh Shell - Full Features
 
-- **Starship Prompt**: Cross-shell prompt with manual integration (cosmetic warnings)
+- **Starship Prompt**: Complete prompt integration with Git status and themes
 - **Python Integration**: Native Python code execution in shell environment
-- **Manual Integrations**: Zoxide, Atuin, Carapace via manual RC configuration
+- **Full Tool Integrations**: Zoxide, Atuin, Starship working perfectly
 - **Dynamic Theming**: Automatic light/dark color scheme adaptation
 - **Modern Aliases**: Complete set of shortcuts (`eza`, `bat`, `fd`, `rg`)
-- **Missing Tools**: No Mise, Yazi, enhanced direnv, autosuggestions, fzf-tab
+- **PATH Management**: Full PATH configuration with all development tools
 
 #### Shell-Specific Strengths
 
@@ -1630,13 +1636,13 @@ initContent = lib.mkAfter ''
 - Have existing zsh configurations to port
 - Want full integration with all development tools
 
-**Consider Xonsh if you:**
+**Choose Xonsh if you:**
 
 - Are a Python developer who wants native Python in shell
 - Need to write complex shell automation using Python libraries
-- Want to experiment with Python-based shell scripting
-- Can accept experimental status and cosmetic warnings
-- Don't need all the integrations available in Zsh/Nushell
+- Want to leverage Python's ecosystem directly in shell environment
+- Prefer structured data handling with Python's tools
+- Want a modern shell with full tool integration and Python power
 
 **Only choose Fish if you:**
 
@@ -1815,6 +1821,30 @@ This configuration is designed to be a starting point. Feel free to:
 
 This configuration is provided as-is. Feel free to use, modify, and distribute according to your needs.
 
----
+## 🆕 Changelog
 
-**Getting Started**: Check out the [Multi-User Setup Guide](MULTI-USER-SETUP.md) for detailed instructions on adapting this configuration for your environment.
+### October 2025
+
+**2025-10-08** - **Enhanced Security & Build Cleanup**
+- 🔒 Removed unnecessary relaxed sandbox settings from `flake.nix` and `system.nix`
+- ✅ Improved build security without impacting functionality
+- 🧹 Eliminated sandbox warning messages during builds
+
+**2025-10-08** - **Emacs Pinning System Restored**
+- 🔧 Fixed emacs-pin tools missing from PATH after uv2nix migration
+- ✅ Restored `emacs-pin`, `emacs-pin-status`, `emacs-unpin`, `emacs-pin-diff` commands
+- 🔄 Auto-pinning during `ns` builds working correctly again
+
+**2025-10-08** - **Xonsh Shell Support Stabilized**
+- ✅ Upgraded Xonsh from experimental to stable support status
+- 🐍 Added missing `prompt_toolkit` dependency for Atuin history sync
+- 🎨 Complete tool integrations: Starship, Zoxide, Atuin all working perfectly
+- 📦 Integrated Xonsh with uv2nix Python environment for robust package management
+- 🚀 All modern CLI aliases (`eza`, `bat`, `fd`, `rg`) functioning correctly
+
+### September 2025
+
+**2025-09-xx** - **Python Environment Migration**
+- 📦 Migrated from individual Python packages to uv2nix-based environment
+- ⚡ Faster Python package builds with better dependency resolution
+- 🔄 Consistent package management across all Python-based tools

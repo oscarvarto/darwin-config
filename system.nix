@@ -7,6 +7,10 @@
   hostSettings,
   defaultShell ? "zsh",
   darwinConfigPath,
+  uv2nix,
+  pyproject-nix,
+  pyproject-build-systems,
+  pythonWorkspace,
   /*
   nixCats,
   */
@@ -64,7 +68,6 @@ in {
       timeout = 7200; # 2 hour total timeout for long builds
 
       # Advanced build performance settings
-      sandbox = true;
       build-cores = 0; # Use all cores for building (same as cores but explicit)
 
       # Memory and I/O optimizations (will be configured based on available RAM)
@@ -132,6 +135,29 @@ in {
     (final: prev: {
       _1password = prev._1password-cli;
     })
+    (final: prev: {
+      rubyPackages_3_3 = prev.rubyPackages_3_3.overrideScope' (self: super: {
+        nokogiri = super.nokogiri.overrideAttrs (old: {
+          NIX_CFLAGS_COMPILE =
+            (old.NIX_CFLAGS_COMPILE or "")
+            + " -Wno-error=unused-command-line-argument"
+            + " -Wno-error=default-const-init-field-unsafe";
+        });
+      });
+      assimp = prev.assimp.overrideAttrs (old: {
+        NIX_CFLAGS_COMPILE =
+          (old.NIX_CFLAGS_COMPILE or "")
+          + " -Wno-error=character-conversion";
+        cmakeFlags = (old.cmakeFlags or []) ++ ["-DASSIMP_BUILD_TESTS=OFF"];
+        doCheck = false;
+      });
+      bash-preexec = prev.bash-preexec.overrideAttrs (old: {
+        doCheck = false;
+        checkPhase = "";
+        nativeBuildInputs =
+          builtins.filter (pkg: pkg != prev.bats) (old.nativeBuildInputs or []);
+      });
+    })
   ];
 
   # Biometric authentication configuration (main setting is below in security.pam.services)
@@ -164,7 +190,17 @@ in {
     [
       agenix.packages."${pkgs.stdenv.hostPlatform.system}".default
     ]
-    ++ (import ./modules/packages.nix {inherit pkgs;});
+    ++ (
+      import ./modules/packages.nix {
+        inherit
+          pkgs
+          uv2nix
+          pyproject-nix
+          pyproject-build-systems
+          pythonWorkspace
+          ;
+      }
+    );
 
   # Add selected shell and commonly used shells to available shells
   environment.shells =

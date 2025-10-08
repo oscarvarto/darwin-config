@@ -20,13 +20,29 @@ def main() -> None:
         raise SystemExit(f"xontrib-zoxide patch: {target_path} does not exist")
 
     text = target_path.read_text()
-    original = (
-        "  else:\n"
-        "    z_cache_path\t= Path(os.path.dirname(__file__)).parent / _cache_name\n"
-        "  sys.path.append(str(z_cache_path.parent))\n"
-    )
+    # Look for the pattern that actually exists (with variable whitespace)
+    original_patterns = [
+        # Original pattern with tabs
+        ("  else:\n"
+         "    z_cache_path\t= Path(os.path.dirname(__file__)).parent / _cache_name\n"
+         "  sys.path.append(str(z_cache_path.parent))\n"),
+        # Pattern with spaces instead of tabs
+        ("  else:\n"
+         "    z_cache_path = Path(os.path.dirname(__file__)).parent / _cache_name\n"
+         "  sys.path.append(str(z_cache_path.parent))\n"),
+        # Pattern with different indentation
+        ("  else:\n"
+         "    z_cache_path	= Path(os.path.dirname(__file__)).parent / _cache_name\n"
+         "  sys.path.append(str(z_cache_path.parent))\n")
+    ]
 
-    if original not in text:
+    original = None
+    for pattern in original_patterns:
+        if pattern in text:
+            original = pattern
+            break
+
+    if original is None:
         # Already patched or upstream changed – be tolerant.
         return
 

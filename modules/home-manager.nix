@@ -8,6 +8,10 @@
   defaultShell ? "zsh",
   pathConfig ? null,
   darwinConfigPath,
+  uv2nix,
+  pyproject-nix,
+  pyproject-build-systems,
+  pythonWorkspace,
   ...
 } @ inputs: let
   sharedFiles = import ./files.nix {inherit config pkgs user;};
@@ -131,7 +135,9 @@ in {
       home = {
         enableNixpkgsReleaseCheck = false;
         packages =
-          (pkgs.callPackage ./packages.nix {})
+          (import ./packages.nix {
+            inherit pkgs uv2nix pyproject-nix pyproject-build-systems pythonWorkspace;
+          })
           ++ [
             inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default
             inputs.nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
@@ -186,7 +192,6 @@ in {
         flavor = "latte"; # Default light theme
         accent = "mauve"; # Accent color
 
-        bat.enable = true;
         # starship configuration moved to programs.starship section below
         zellij.enable = true;
       };
@@ -265,17 +270,6 @@ in {
             };
           };
 
-          bash.enable = true;
-
-          bat = {
-            enable = true;
-            config = {
-              # Theme will be automatically managed by Catppuccin
-              # pager = "less -FR";
-              # style = "numbers,changes,header";
-            };
-          };
-
           helix.enable = true;
 
           jujutsu = {
@@ -311,11 +305,6 @@ in {
               };
           };
 
-          vscode = {
-            enable = true;
-            mutableExtensionsDir = true;
-          };
-
           yazi = {
             enable = true;
             enableNushellIntegration = true;
@@ -329,6 +318,8 @@ in {
 
           # Zellij is configured via files.nix to avoid conflicts with custom KDL config
           # programs.zellij.enable = true; (disabled - using manual config file)
+
+          bash.enable = true;
 
           zoxide = {
             enable = true;

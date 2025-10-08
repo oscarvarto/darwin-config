@@ -83,10 +83,56 @@
     $XONTRIBS_TO_LOAD = ${xontribsJson}
   '';
 
+  # Direct tool integration (since xontribs have issues)
+  toolIntegration = ''
+    # =============================================================================
+    # Tool Integration (Direct)
+    # =============================================================================
+
+    # Starship Integration
+    try:
+        starship_path = $(which starship).strip()
+        if starship_path:
+            $STARSHIP_CONFIG = str(Path.home() / ".config" / "starship.toml")
+            # Initialize starship for xonsh
+            execx($(starship init xonsh))
+            print("✓ Starship prompt enabled")
+    except:
+        print("Warning: Starship not found")
+
+    # Zoxide Integration (manual, safer than xontrib)
+    try:
+        zoxide_path = $(which zoxide).strip()
+        if zoxide_path:
+            # Initialize zoxide for xonsh
+            execx($(zoxide init xonsh))
+            # Add cd alias that uses zoxide
+            aliases['cd'] = 'z'
+            print("✓ Zoxide navigation enabled")
+    except:
+        print("Warning: Zoxide not found")
+
+    # Atuin Integration
+    try:
+        import subprocess
+        atuin_check = subprocess.run(['which', 'atuin'], capture_output=True, text=True)
+        if atuin_check.returncode == 0:
+            atuin_path = atuin_check.stdout.strip()
+            if atuin_path:
+                # Initialize atuin for xonsh - atuin has experimental xonsh support
+                execx($(atuin init xonsh))
+                print("✓ Atuin history integration enabled")
+        else:
+            print("Warning: Atuin not found")
+    except Exception as e:
+        print(f"Warning: Atuin initialization failed: {e}")
+  '';
+
   generatedConfigParts =
     [baseXonshConfig]
     ++ lib.optionals (pathConfigXonsh != "") [pathConfigXonsh]
     ++ [envSetup]
+    ++ [toolIntegration]
     ++ [darwinAliases]
     ++ lib.optionals (cfg.extraConfig != "") [cfg.extraConfig];
 
@@ -135,18 +181,18 @@ in {
 
         # Tab completions
         "argcomplete" # Bash-style argument completion
-        "carapace-bin" # Multi-shell completion engine
+        # "carapace-bin" # Multi-shell completion engine - disabled due to loading issues
 
         # Directory navigation
-        "zoxide" # Smart directory jumping
+        # "zoxide" # Smart directory jumping - disabled due to permission issues
 
         # Prompts
-        "starship" # Cross-shell prompt
+        # "starship" # Cross-shell prompt - disabled, using manual init instead
 
         # Integration
-        "kitty" # Kitty terminal integration
+        # "kitty" # Kitty terminal integration - disabled due to loading issues
         "homebrew" # Homebrew integration
-        "1password" # 1Password CLI integration
+        # "1password" # 1Password CLI integration - disabled due to loading issues
 
         # Useful plugins
         "clp" # Clipboard integration

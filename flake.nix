@@ -56,6 +56,20 @@
       url = "github:nix-community/emacs-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    pyproject-nix = {
+      url = "github:pyproject-nix/pyproject.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    pyproject-build-systems = {
+      url = "github:pyproject-nix/build-system-pkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.uv2nix.follows = "uv2nix";
+    };
+    uv2nix = {
+      url = "github:pyproject-nix/uv2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs = {
     self,
@@ -75,6 +89,9 @@
     nixd-ls,
     secrets,
     emacs-overlay,
+    pyproject-nix,
+    pyproject-build-systems,
+    uv2nix,
   } @ inputs: let
     # Supported systems (Apple Silicon only)
     darwinSystems = ["aarch64-darwin"];
@@ -238,6 +255,10 @@
             hostSettings = hostConfig.hostSettings;
             defaultShell = hostConfig.defaultShell or "zsh"; # Default to zsh if not specified
             inherit darwinConfigPath;
+            pythonWorkspace = builtins.path {
+              path = ./python-env;
+              name = "darwin-config-python-env";
+            };
           };
         modules = [
           home-manager.darwinModules.home-manager
@@ -268,7 +289,7 @@
 
     darwinConfigurations = nixpkgs.lib.mapAttrs mkDarwinConfig hostConfigs;
 
-    # Expose configuredEmacs for each host so scripts can reference it
+    # Expose configuredEmacs and pinTools for each host so scripts can reference them
     packages = nixpkgs.lib.genAttrs darwinSystems (
       system:
         nixpkgs.lib.mapAttrs' (
@@ -289,6 +310,28 @@
             nixpkgs.lib.nameValuePair "${hostname}-configuredEmacs" emacsPinModule.configuredEmacs
         )
         hostConfigs
+        # Add pinTools to the package set
+        // nixpkgs.lib.listToAttrs (
+          map (tool: { name = tool.name; value = tool; }) (
+            let
+              # Use first host config to get the pinTools
+              firstHostname = builtins.head (builtins.attrNames hostConfigs);
+              firstHostConfig = hostConfigs.${firstHostname};
+              emacsPinModule = import ./modules/emacs-pinning.nix {
+                pkgs = nixpkgs.legacyPackages.${system};
+                user = firstHostConfig.user;
+                inputs = inputs;
+                hostname = firstHostname;
+                darwinConfigPath =
+                  if firstHostConfig ? configPath
+                  then firstHostConfig.configPath
+                  else if recordedConfigPath != null
+                  then recordedConfigPath
+                  else "/Users/${firstHostConfig.user}/darwin-config";
+              };
+            in emacsPinModule.pinTools
+          )
+        )
     );
   };
 }
