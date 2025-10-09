@@ -31,6 +31,7 @@ return {
   {
     "HiPhish/rainbow-delimiters.nvim",
     ft = { "clojure", "scheme", "fennel" },
+    submodules = false, -- upstream tests use a submodule we don't need
     config = function()
       local rainbow_delimiters = require("rainbow-delimiters")
       vim.g.rainbow_delimiters = {

@@ -58,14 +58,17 @@ return {
       pcall(vim.cmd.colorscheme, "catppuccin")
       
       -- Monkey-patch the old get() method to use the new get_theme() API
-      local bufferline_integration = require("catppuccin.groups.integrations.bufferline")
-      if not bufferline_integration.get and bufferline_integration.get_theme then
-        bufferline_integration.get = function()
-          local theme_func = bufferline_integration.get_theme()
-          if type(theme_func) == "function" then
-            return theme_func()
+      local ok, bufferline_integration = pcall(require, "catppuccin.groups.integrations.bufferline")
+      if not ok then
+        ok, bufferline_integration = pcall(require, "catppuccin.special.bufferline")
+      end
+      if ok and bufferline_integration and not bufferline_integration.get and bufferline_integration.get_theme then
+        bufferline_integration.get = function(user_config)
+          local theme = bufferline_integration.get_theme(user_config)
+          if type(theme) == "function" then
+            return theme()
           end
-          return theme_func
+          return theme
         end
       end
     end,
