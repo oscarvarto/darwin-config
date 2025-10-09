@@ -84,6 +84,7 @@ $env.CARGO_HOME = ($env.HOME | path join ".cargo")
 $env.EMACSDIR = "~/.emacs.d"
 $env.DOOMDIR  = "~/.doom.d"
 $env.DOOMLOCALDIR = "~/.emacs.d/.local"
+$env.BAT_THEME = "ansi"
 
 # Ghostty terminfo location for proper terminal support in Emacs
 $env.TERMINFO_DIRS = $"($env.HOME)/.terminfo:/usr/share/terminfo"

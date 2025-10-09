@@ -16,6 +16,7 @@ in {
       export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
       export CARGO_HOME="$HOME/.cargo"
       export EMACSDIR="~/.emacs.d"
+      export BAT_THEME="ansi"
 
       # Use centralized PATH configuration from modules/path-config.nix
       ${
