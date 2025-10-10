@@ -41,7 +41,7 @@
   workDirName = builtins.replaceStrings ["~/" "/**"] ["" ""] (workConfig.gitWorkDirPattern or "~/work/**");
 
   # Emacs pinning logic moved to separate module for modularity
-  emacsPinModule = import ./emacs-pinning.nix {inherit pkgs user inputs hostname darwinConfigPath;};
+  emacsPinModule = import ./emacs-pinning {inherit pkgs user inputs hostname darwinConfigPath;};
   configuredEmacs = emacsPinModule.configuredEmacs;
 
   # Wrapper to ensure we only launch the GUI daemon when not already running

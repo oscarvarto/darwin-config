@@ -1835,6 +1835,12 @@ This configuration is provided as-is. Feel free to use, modify, and distribute a
 - ✅ Restored `emacs-pin`, `emacs-pin-status`, `emacs-unpin`, `emacs-pin-diff` commands
 - 🔄 Auto-pinning during `ns` builds working correctly again
 
+**2025-10-09** - **Xonsh Scripting Guidelines Published**
+- 📚 Added comprehensive xonsh scripting guidelines to CLAUDE.md and AGENTS.md
+- 🛠️ Documented proper patterns for environment variables, subprocess calls, and module imports
+- ✅ Based on real troubleshooting from bash-to-xonsh migration of Emacs pinning tools
+- 🎯 Prevents common pitfalls: `${...}` vs `os.environ`, `!()` vs `subprocess.run()`, import patterns
+
 **2025-10-08** - **Xonsh Shell Support Stabilized**
 - ✅ Upgraded Xonsh from experimental to stable support status
 - 🐍 Added missing `prompt_toolkit` dependency for Atuin history sync

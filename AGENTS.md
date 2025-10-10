@@ -57,3 +57,33 @@ Impure vs Pure evaluation (nb/ns):
 - PATH edits belong in `modules/path-config.nix` (centralized precedence); apply with `ns`.
 - Prefer fast Rust tools (`rg`, `fd`) over legacy `grep/find` in examples and scripts.
 - Do not introduce NordVPN CLI dependencies (intentionally unsupported).
+
+## Xonsh Scripting Rules (Critical)
+
+When writing or modifying xonsh scripts (`.xsh` files):
+
+1. **Environment Variables:**
+   - ✅ Use `os.environ.get('VAR', '')` for Python code
+   - ❌ Never use `${...}` or `__xonsh__.env` in Python expressions (returns special objects, causes errors)
+
+2. **Subprocess Calls:**
+   - ✅ Use `subprocess.run(['cmd', 'arg'], capture_output=True, text=True, cwd=path)`
+   - ❌ Never use `!(cmd @(var))` syntax (causes parsing errors)
+   - ❌ Never use `&&` for command chaining (not supported)
+
+3. **Module Imports:**
+   - ✅ Use `exec(compile(f.read(), str(lib_path), 'exec'))` pattern
+   - ❌ Never use `importlib` or `source` command (doesn't work with xonsh files)
+
+4. **Required Imports:**
+   ```python
+   import sys
+   import os
+   import subprocess
+   from pathlib import Path
+   ```
+
+5. **Nix Wrappers:**
+   - Always use `--no-rc` flag: `${pkgs.xonsh}/bin/xonsh --no-rc script.xsh`
+
+See CLAUDE.md "Xonsh Shell Scripting Guidelines" for full details and examples.

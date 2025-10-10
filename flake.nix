@@ -294,7 +294,7 @@
       system:
         nixpkgs.lib.mapAttrs' (
           hostname: hostConfig: let
-            emacsPinModule = import ./modules/emacs-pinning.nix {
+            emacsPinModule = import ./modules/emacs-pinning {
               pkgs = nixpkgs.legacyPackages.${system};
               user = hostConfig.user;
               inputs = inputs;
@@ -312,12 +312,15 @@
         hostConfigs
         # Add pinTools to the package set
         // nixpkgs.lib.listToAttrs (
-          map (tool: { name = tool.name; value = tool; }) (
+          map (tool: {
+            name = tool.name;
+            value = tool;
+          }) (
             let
               # Use first host config to get the pinTools
               firstHostname = builtins.head (builtins.attrNames hostConfigs);
               firstHostConfig = hostConfigs.${firstHostname};
-              emacsPinModule = import ./modules/emacs-pinning.nix {
+              emacsPinModule = import ./modules/emacs-pinning {
                 pkgs = nixpkgs.legacyPackages.${system};
                 user = firstHostConfig.user;
                 inputs = inputs;
@@ -329,7 +332,8 @@
                   then recordedConfigPath
                   else "/Users/${firstHostConfig.user}/darwin-config";
               };
-            in emacsPinModule.pinTools
+            in
+              emacsPinModule.pinTools
           )
         )
     );

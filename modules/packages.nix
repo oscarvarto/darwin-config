@@ -77,32 +77,32 @@
   sitePackagesPath = "lib/python${pythonVersion}/site-packages";
 
   pythonEnv = pkgs.runCommand "darwin-config-env" {} ''
-    mkdir -p "$out"
-    cp -a ${pythonEnvBase}/. "$out/"
-    chmod -R u+w "$out"
+        mkdir -p "$out"
+        cp -a ${pythonEnvBase}/. "$out/"
+        chmod -R u+w "$out"
 
-    # Install local xontribs
-    install -Dm644 ${./xonsh/python/prompt_starship.py} "$out/${sitePackagesPath}/xontrib/prompt_starship.py"
-    install -Dm644 ${./xonsh/python/carapace_bin.py} "$out/${sitePackagesPath}/xontrib/carapace_bin.py"
-    install -Dm644 ${./xonsh/python/carapace_setup.py} "$out/${sitePackagesPath}/xontrib/carapace_setup.py"
+        # Install local xontribs
+        install -Dm644 ${./xonsh/python/prompt_starship.py} "$out/${sitePackagesPath}/xontrib/prompt_starship.py"
+        install -Dm644 ${./xonsh/python/carapace_bin.py} "$out/${sitePackagesPath}/xontrib/carapace_bin.py"
+        install -Dm644 ${./xonsh/python/carapace_setup.py} "$out/${sitePackagesPath}/xontrib/carapace_setup.py"
 
-    # Create placeholder xontribs for missing integrations
-    # (these can be expanded later with actual implementations)
-    mkdir -p "$out/${sitePackagesPath}/xontrib"
+        # Create placeholder xontribs for missing integrations
+        # (these can be expanded later with actual implementations)
+        mkdir -p "$out/${sitePackagesPath}/xontrib"
 
-    # Create minimal kitty xontrib
-    cat > "$out/${sitePackagesPath}/xontrib/kitty.py" << 'EOF'
-"""Minimal kitty terminal integration for xonsh."""
-# Placeholder - kitty integration can be expanded
-pass
-EOF
+        # Create minimal kitty xontrib
+        cat > "$out/${sitePackagesPath}/xontrib/kitty.py" << 'EOF'
+    """Minimal kitty terminal integration for xonsh."""
+    # Placeholder - kitty integration can be expanded
+    pass
+    EOF
 
-    # Create minimal 1password xontrib
-    cat > "$out/${sitePackagesPath}/xontrib/1password.py" << 'EOF'
-"""Minimal 1Password CLI integration for xonsh."""
-# Placeholder - 1Password integration can be expanded
-pass
-EOF
+        # Create minimal 1password xontrib
+        cat > "$out/${sitePackagesPath}/xontrib/1password.py" << 'EOF'
+    """Minimal 1Password CLI integration for xonsh."""
+    # Placeholder - 1Password integration can be expanded
+    pass
+    EOF
   '';
 in
   with pkgs; [
