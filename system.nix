@@ -91,10 +91,23 @@ in {
       # https://github.com/NixOS/nix/issues/7273
       auto-optimise-store = false;
 
+      # Sandbox configuration for better compatibility with Codex CLI and other tools
+      # "relaxed" allows fixed-output derivations to run without sandboxing
+      # This is particularly helpful for tools like Codex that interact with the broader system
+      sandbox = "relaxed";
+
       # Fix locale issues in nix builds - ensure consistent locale environment
       # These sandbox paths allow access to system locale files
+      # Additional paths for Codex CLI and other tools that need broader system access
       extra-sandbox-paths = [
         "/usr/share/locale"
+        "/System/Library"
+        "/usr/lib"
+        "/usr/bin"
+        "/bin"
+        "/opt/homebrew"
+        "/private/tmp"
+        "/private/var/tmp"
       ];
     };
 

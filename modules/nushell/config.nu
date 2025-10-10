@@ -1204,8 +1204,6 @@ def "ns" [--verbose(-v) ...args] {
                 }
                 print $"($GREEN)Switch to new generation complete!($NC)"
                 print $"($GREEN)✅ Nix build-switch completed successfully!($NC)"
-                print $"($BLUE)🔍 Press any key to continue...($NC)"
-                input
             } catch { |e|
                 print $"($RED)Build or switch failed: ($e.msg)($NC)"
                 dirs drop
