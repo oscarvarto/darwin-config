@@ -16,6 +16,7 @@ NC='\033[0m' # No Color
 SERVICE_NAME="org.nix-community.home.emacs"
 PLIST_PATH="$HOME/Library/LaunchAgents/${SERVICE_NAME}.plist"
 GUI_DOMAIN="gui/$(id -u)"
+LOG_PATH="/tmp/emacs-daemon.log"
 
 # Never allow emacsclient to auto-start a background daemon from this script
 export ALTERNATE_EDITOR="false"
@@ -102,6 +103,22 @@ stop_service() {
     print_msg "$GREEN" "✅ Emacs service stopped"
 }
 
+# Check whether the daemon log shows a ready signal
+log_indicates_ready() {
+    local log_file="$LOG_PATH"
+    if [[ ! -f "$log_file" ]]; then
+        return 1
+    fi
+
+    # Match readiness markers emitted by Emacs daemon/server code
+    local ready_regex='Emacs daemon is ready|^Starting server at|Server is already running|Server is up and running'
+    if grep -Eiq "$ready_regex" "$log_file"; then
+        return 0
+    fi
+
+    return 1
+}
+
 # Function to start the service
 start_service() {
     print_msg "$YELLOW" "🚀 Starting Emacs service..."
@@ -121,8 +138,13 @@ start_service() {
     # Fallback to legacy load if needed
     launchctl load -w "$PLIST_PATH" 2>/dev/null || launchctl load "$PLIST_PATH" 2>/dev/null || true
 
-    # Poll for daemon availability (up to ~30s)
-    for i in {1..30}; do
+    local max_wait="${EMACS_STARTUP_TIMEOUT:-180}"
+    local start_time warned_about_process
+    start_time=$(date +%s)
+    warned_about_process=false
+
+    # Poll for daemon availability (default: 180s) so native compilation can finish
+    while (( $(date +%s) - start_time < max_wait )); do
         # Primary check: emacsclient connectivity
         if command -v emacsclient >/dev/null 2>&1; then
             if emacsclient -e '(progn (require (quote server)) (server-running-p))' >/dev/null 2>&1; then
@@ -130,12 +152,13 @@ start_service() {
                 return 0
             fi
         fi
-        # Secondary check: Emacs app/process present (may be warming up)
-        if pgrep -f "Emacs\\.app|--fg-daemon" >/dev/null 2>&1; then
-            # keep waiting for server to come up
-            sleep 1
-            continue
+
+        # Secondary check: daemon log reports readiness
+        if log_indicates_ready; then
+            print_msg "$GREEN" "✅ Emacs daemon log reports server ready"
+            return 0
         fi
+
         # Tertiary check: server socket file exists
         for dir in "$HOME/.emacs.d/server" "$HOME/.config/emacs/server" "/tmp/emacs$(id -u)"; do
             if [[ -S "$dir/server" ]]; then
@@ -143,10 +166,21 @@ start_service() {
                 return 0
             fi
         done
+
+        # If we get here the daemon is still warming up; ensure the process is alive
+        if pgrep -f "Emacs\\.app|--fg-daemon" >/dev/null 2>&1; then
+            warned_about_process=false
+        else
+            if [[ "$warned_about_process" == false ]]; then
+                print_msg "$YELLOW" "⏳ Waiting for Emacs daemon process to appear..."
+                warned_about_process=true
+            fi
+        fi
+
         sleep 1
     done
 
-    print_msg "$RED" "⚠️  Service may not have started properly. Check logs with:"
+    print_msg "$RED" "⚠️  Service may not have started properly (timeout after ${max_wait}s). Check logs with:"
     print_msg "$BLUE" "   log show --predicate 'process == \"Emacs\" || process == \"emacs\"' --last 5m"
     print_msg "$BLUE" "   tail -n +1 /tmp/emacs-daemon.log 2>/dev/null | tail -n 200"
     return 1
