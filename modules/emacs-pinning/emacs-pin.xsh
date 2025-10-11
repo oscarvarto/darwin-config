@@ -93,7 +93,7 @@ def pin_to_current_overlay():
 
         # Extract hash for this commit
         print(f"{EMOJI_LIGHTBULB} Extracting hash for current commit...")
-        hash_sri = extract_current_emacs_hash_sri(config_path)
+        hash_sri = extract_current_emacs_hash_sri(config_path, system)
         print(f"{EMOJI_SUCCESS} Found current hash: {hash_sri}")
 
         # Try to capture the current configuredEmacs outPath BEFORE changing pin state

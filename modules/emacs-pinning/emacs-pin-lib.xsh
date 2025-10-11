@@ -184,35 +184,49 @@ def extract_current_emacs_src_outpath(config_path, system="aarch64-darwin"):
         raise RuntimeError(f"Failed to extract emacs src outPath: {e}")
 
 
-def extract_current_emacs_hash_sri(config_path):
+def extract_current_emacs_hash_sri(config_path, system="aarch64-darwin"):
     """
-    Compute the SRI hash of the current emacs-git source.
+    Extract the SRI hash of the current emacs-git source.
 
-    This uses `nix hash path` to compute the SHA256 hash of the source
-    in SRI (Subresource Integrity) format, which is what Nix's fetchFromGitHub
-    expects in modern configurations.
+    This extracts the hash directly from the source derivation's outputHash
+    attribute and converts it to SRI format. This approach doesn't require
+    the source to be built/fetched, avoiding issues with garbage-collected
+    store paths.
 
     Args:
         config_path (Path): Path to darwin-config repository
+        system (str): System architecture (default: aarch64-darwin)
 
     Returns:
         str: SRI hash (format: sha256-base64...)
 
     Raises:
-        RuntimeError: If hash computation fails
+        RuntimeError: If hash extraction fails
     """
+    nix_expr = f'''
+        let
+          flake = builtins.getFlake (toString ./.);
+          em = flake.inputs.emacs-overlay.packages."{system}".emacs-git;
+        in em.src.outputHash
+    '''
+
     try:
-        src_path = extract_current_emacs_src_outpath(config_path)
+        # Extract the base32 hash from the source derivation
         result = subprocess.run(
-            ['nix', 'hash', 'path', '--type', 'sha256', src_path],
+            ['nix', 'eval', '--raw', '--impure', '--expr', nix_expr],
+            cwd=str(config_path),
             capture_output=True,
             text=True
         )
         if result.returncode != 0:
-            raise RuntimeError(f"Hash computation failed: {result.stderr}")
-        return result.stdout.strip()
+            raise RuntimeError(f"Nix evaluation failed: {result.stderr}")
+
+        base32_hash = result.stdout.strip()
+
+        # Convert base32 to SRI format
+        return sri_from_base32(base32_hash)
     except Exception as e:
-        raise RuntimeError(f"Failed to compute emacs hash: {e}")
+        raise RuntimeError(f"Failed to extract emacs hash: {e}")
 
 
 def sri_from_base32(base32_hash):

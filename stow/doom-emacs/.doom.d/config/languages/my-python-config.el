@@ -26,4 +26,6 @@
 
 (lsp-consistency-check lsp-python-refly)
 
+(require 'xonsh-mode)
+
 (provide 'my-python-config)

@@ -130,6 +130,7 @@
            :repo "federicotdn/verb"))
 (package! vterm)
 (package! yasnippet-snippets)
+(package! xonsh-mode)
 (package! zoxide)
 
 ;; To install a package directly from a remote git repo, you must specify a
