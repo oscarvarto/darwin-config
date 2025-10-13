@@ -128,6 +128,7 @@ in
     lazyjj
     (ripgrep.override {withPCRE2 = true;})
     nurl
+    spotify-player
     tree
     unrar
     unzip
@@ -198,5 +199,5 @@ in
     zsh-autosuggestions
     zsh-syntax-highlighting
 
-    # super-productivity
+    super-productivity
   ]

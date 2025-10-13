@@ -153,8 +153,29 @@
           ; Close cond clause body
        ;; No specific requirement detected for Maven or other cases
     (t nil)) ; Close cond and outer let*
-  ;; Add hook for project switching to update JAVA_HOME
-  (add-hook 'projectile-after-switch-project-hook #'my-jdk-set-project-java-home))
+
+  ;; Helper function to detect if a project is Java/JVM-based
+  (defun my-jdk-is-jvm-project-p (&optional project-dir)
+    "Check if PROJECT-DIR is a Java/JVM project.
+  Returns t if the project contains Java/JVM build files."
+    (let ((project-dir (or project-dir (projectile-project-root))))
+      (when project-dir
+        (or (file-exists-p (expand-file-name "pom.xml" project-dir))
+            (file-exists-p (expand-file-name "build.gradle" project-dir))
+            (file-exists-p (expand-file-name "build.gradle.kts" project-dir))
+            (file-exists-p (expand-file-name "build.sc" project-dir))
+            (file-exists-p (expand-file-name "project.clj" project-dir))
+            (file-exists-p (expand-file-name "deps.edn" project-dir))
+            (file-exists-p (expand-file-name ".java-version" project-dir))))))
+
+  ;; Conditional wrapper for setting JAVA_HOME
+  (defun my-jdk-set-project-java-home-if-jvm ()
+    "Set JAVA_HOME only if the current project is a JVM project."
+    (when (my-jdk-is-jvm-project-p)
+      (my-jdk-set-project-java-home)))
+
+  ;; Add hook for project switching to update JAVA_HOME (only for JVM projects)
+  (add-hook 'projectile-after-switch-project-hook #'my-jdk-set-project-java-home-if-jvm))
 
 ;; Instructions for project-specific JDK configuration:
 ;; Option 1: Add JAVA_HOME to your project's .envrc file for direnv (preferred)

@@ -42,6 +42,7 @@ _: [
   "unnaturalscrollwheels"
 
   # Entertainment Tools
+  "spotify"
 
   # Productivity Tools
   "gimp"

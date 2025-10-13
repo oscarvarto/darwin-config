@@ -8,6 +8,7 @@
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
   "base_keymap": "VSCode",
+  "load_direnv": "shell_hook",
   "ssh_connections": [
     {
       "host": "github.com",
@@ -59,7 +60,7 @@
     "line_height": "standard",
     "shell": {
       "with_arguments": {
-        "program": "/Users/oscarvarto/.nix-profile/bin/nu",
+        "program": "/Users/oscarvarto/.nix-profile/bin/zsh",
         "args": ["--login", "--interactive"]
       }
     }

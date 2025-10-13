@@ -35,6 +35,8 @@
   (setq treesit-font-lock-level 3)
 
   ;; Auto-enable treesit modes for supported languages
+  ;; Note: rust-mode is NOT remapped here because rustic-mode (enabled via Doom's rust module)
+  ;; handles .rs files and has its own tree-sitter integration
   (setq major-mode-remap-alist
         (append '((c-mode . c-ts-mode)
                   (c++-mode . c++-ts-mode)
@@ -48,11 +50,12 @@
                   (sh-mode . bash-ts-mode)
                   (swift-mode . swift-ts-mode)
                   (typescript-mode . typescript-ts-mode)
-                  (rust-mode . rust-ts-mode)
+                  ;; (rust-mode . rust-ts-mode)  ; Commented out - conflicts with rustic-mode
                   (yaml-mode . yaml-ts-mode))
                 major-mode-remap-alist))
 
   ;; Install language grammars automatically
+  ;; Note: Rust grammar is handled by Doom's rust module, don't define it here
   (when (treesit-available-p)
     ;; Define language sources for automatic installation
     (dolist (lang-source '((bash "https://github.com/tree-sitter/tree-sitter-bash")
@@ -63,7 +66,7 @@
                            (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
                            (json "https://github.com/tree-sitter/tree-sitter-json")
                            (python "https://github.com/tree-sitter/tree-sitter-python")
-                           (rust "https://github.com/tree-sitter/tree-sitter-rust")
+                           ;; (rust "https://github.com/tree-sitter/tree-sitter-rust")  ; Managed by Doom's rust module
                            (toml "https://github.com/tree-sitter/tree-sitter-toml")
                            (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
                            (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")

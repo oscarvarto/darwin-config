@@ -43,8 +43,10 @@
   :hook ((clojure-ts-mode clojure-mode) . treesit-fold-indicators-mode)
   :hook ((java-ts-mode java-mode) . lsp)
   :hook ((java-ts-mode java-mode) . treesit-fold-indicators-mode)
-  :hook ((rust-mode rust-ts-mode rustic-mode) . lsp)
-  :hook ((rust-mode rust-ts-mode rustic-mode) . treesit-fold-indicators-mode)
+  ;; For Rust: Doom's rust module already sets up LSP via rustic-setup-lsp
+  ;; Don't add duplicate hooks here - only add treesit-fold-indicators
+  ;; :hook (rustic-mode . lsp)  ; DISABLED - Doom handles this
+  :hook (rustic-mode . treesit-fold-indicators-mode)
   :hook ((swift-ts-mode swift-mode) . lsp)
   :hook ((swift-ts-mode swift-mode) . treesit-fold-indicators-mode)
   :hook ((typescript-ts-mode typescript-mode) . lsp)
