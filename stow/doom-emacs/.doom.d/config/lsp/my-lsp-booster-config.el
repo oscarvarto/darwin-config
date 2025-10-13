@@ -29,11 +29,8 @@
              (not (functionp 'json-rpc-connection))  ;; native json-rpc
              (executable-find "emacs-lsp-booster"))
         (progn
-          (when-let* ((command (car orig-result))
-                      (resolved (if (file-name-absolute-p command)
-                                    (and (file-executable-p command) command)
-                                  (executable-find command))))  ;; resolve command from exec-path (in case not found in $PATH)
-            (setcar orig-result resolved))
+          (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+            (setcar orig-result command-from-exec-path))
           (message "Using emacs-lsp-booster for %s!" orig-result)
           (cons "emacs-lsp-booster" orig-result))
       orig-result)))

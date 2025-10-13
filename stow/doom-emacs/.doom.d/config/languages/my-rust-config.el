@@ -22,6 +22,7 @@
  '(rustic-compilation-column ((t (:inherit compilation-column-number))))
  '(rustic-compilation-line ((t (:foreground "fuchsia")))))
 
+(setq rust-mode-treesitter-derive t)
 (setq rustic-rustfmt-args "+nightly")
 (setq rustic-rustfmt-config-alist '((hard_tabs . t) (skip_children . nil)))
 

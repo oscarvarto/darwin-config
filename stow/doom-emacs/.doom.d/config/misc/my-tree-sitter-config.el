@@ -53,6 +53,12 @@
                   ;; (rust-mode . rust-ts-mode)  ; Commented out - conflicts with rustic-mode
                   (yaml-mode . yaml-ts-mode))
                 major-mode-remap-alist))
+  ;; Ensure Rust buffers stay on rustic-mode without tree-sitter remapping.
+  (when (boundp 'major-mode-remap-defaults)
+    (setq major-mode-remap-defaults
+          (assq-delete-all 'rust-mode major-mode-remap-defaults)))
+  (setq major-mode-remap-alist
+        (assq-delete-all 'rust-mode major-mode-remap-alist))
 
   ;; Install language grammars automatically
   ;; Note: Rust grammar is handled by Doom's rust module, don't define it here
