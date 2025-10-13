@@ -22,6 +22,32 @@
  '(rustic-compilation-column ((t (:inherit compilation-column-number))))
  '(rustic-compilation-line ((t (:foreground "fuchsia")))))
 
+
+;; Load rust-ts-mode early while filtering out cyclic parent declarations.
+(let ((orig-derived (symbol-function 'derived-mode-add-parents)))
+  (unwind-protect
+      (progn
+        (fset 'derived-mode-add-parents
+              (lambda (mode extra)
+                (when (and (eq mode 'rust-ts-mode)
+                           (memq 'rust-mode extra))
+                  (setq extra (cl-remove 'rust-mode extra)))
+                (funcall orig-derived mode extra)))
+        (require 'rust-ts-mode nil t))
+    (fset 'derived-mode-add-parents orig-derived)))
+
+;; Ensure rustic remains the primary mode for .rs files.
+(setq auto-mode-alist
+      (cons '("\\.rs\\'" . rustic-mode)
+            (cl-remove-if (lambda (entry)
+                            (memq (cdr entry) '(rust-ts-mode rust-ts-mode-maybe)))
+                          auto-mode-alist)))
+
+;; Avoid remapping rust-mode to rust-ts-mode; rustic handles tree-sitter itself.
+(when (boundp 'treesit-major-mode-remap-alist)
+  (setq treesit-major-mode-remap-alist
+        (assq-delete-all 'rust-mode treesit-major-mode-remap-alist)))
+
 (setq rust-mode-treesitter-derive t)
 (setq rustic-rustfmt-args "+nightly")
 (setq rustic-rustfmt-config-alist '((hard_tabs . t) (skip_children . nil)))
