@@ -70,6 +70,7 @@
       url = "github:pyproject-nix/uv2nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    crane.url = "github:ipetkov/crane";
   };
   outputs = {
     self,
@@ -92,6 +93,7 @@
     pyproject-nix,
     pyproject-build-systems,
     uv2nix,
+    crane,
   } @ inputs: let
     # Supported systems (Apple Silicon only)
     darwinSystems = ["aarch64-darwin"];
@@ -236,6 +238,38 @@
       };
     };
 
+    # Build the Rust emacs-pin package (aarch64-darwin only)
+    mkEmacsPinRust = system: let
+      pkgs = nixpkgs.legacyPackages.${system};
+      craneLib = crane.mkLib pkgs;
+
+      # Source for the Rust implementation
+      # Use path directly since these files are part of the repo
+      src = ./modules/emacs-pinning/rust;
+
+      # Common build arguments
+      commonArgs = {
+        inherit src;
+        strictDeps = true;
+
+        buildInputs = [
+          pkgs.libiconv
+        ];
+
+        # Only build for aarch64-apple-darwin to avoid cross-compilation dependencies
+        CARGO_BUILD_TARGET = "aarch64-apple-darwin";
+      };
+
+      # Build dependencies (cached separately for faster iteration)
+      cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+    in
+      # Build the actual package
+      craneLib.buildPackage (commonArgs
+        // {
+          inherit cargoArtifacts;
+          doCheck = false; # Skip tests in build to speed up compilation
+        });
+
     # Helper function to create darwin configurations with host-specific settings
     mkDarwinConfig = hostname: hostConfig: let
       darwinConfigPath =
@@ -259,6 +293,7 @@
               path = ./python-env;
               name = "darwin-config-python-env";
             };
+            emacsPinRust = mkEmacsPinRust hostConfig.system;
           };
         modules = [
           home-manager.darwinModules.home-manager
@@ -305,6 +340,8 @@
                 else if recordedConfigPath != null
                 then recordedConfigPath
                 else "/Users/${hostConfig.user}/darwin-config";
+              # Pass the prebuilt Rust package
+              emacsPinRust = mkEmacsPinRust system;
             };
           in
             nixpkgs.lib.nameValuePair "${hostname}-configuredEmacs" emacsPinModule.configuredEmacs
@@ -331,11 +368,17 @@
                   else if recordedConfigPath != null
                   then recordedConfigPath
                   else "/Users/${firstHostConfig.user}/darwin-config";
+                # Pass the prebuilt Rust package
+                emacsPinRust = mkEmacsPinRust system;
               };
             in
               emacsPinModule.pinTools
           )
         )
+        # Add the Rust emacs-pin binary itself
+        // {
+          emacs-pin-rs = mkEmacsPinRust system;
+        }
     );
   };
 }

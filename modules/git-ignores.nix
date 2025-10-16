@@ -219,6 +219,7 @@
     "*.key"
     "*.p12"
     "*.jks"
+    ".direnv"
 
     # Logs and temporary files
     "*.log"

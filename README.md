@@ -563,6 +563,8 @@ Tip: run `ns --help` or `nb --help` for all options.
 | `emacs-service-toggle`       | Toggle Emacs home-manager service              |
 | `emacsclient-gui`            | Launch Emacs GUI client with proper macOS integration |
 
+Rust equivalents (`emacs-pin-rs`, `emacs-pin-diff-rs`, `emacs-pin-status-rs`) mirror these commands via the compiled helper. System automation (`ns`, `nb`, and activation hooks) uses the Rust binaries by default, while the xonsh variants remain available for testing and fallback.
+
 ## ✨ Key Features
 
 - **🔄 Multi-User/Multi-Host**: Easily configure for different users and machines
@@ -886,6 +888,7 @@ This repo includes a robust Emacs pinning system to control when Emacs rebuilds,
   - `emacs-pin <commit>` — Pin to a specific emacs‑mirror commit (stores commit + hash). If that commit is not already built locally, the next `ns` will build the latest overlay commit (by design) and auto‑pin to that instead.
   - `emacs-unpin` — Remove pin and stored path; `ns` uses the latest overlay.
   - `emacs-pin-status` — Show current overlay commit, pinned commit, stored hash, and stored build path if present.
+  - Rust equivalents: `emacs-pin-rs`, `emacs-pin-diff-rs`, and `emacs-pin-status-rs` expose the same actions through the compiled CLI. These are what `ns`, `nb`, and the Home Manager activation hook invoke automatically for faster default behavior.
 
 - Typical workflows:
   - Lock current build after an update:
@@ -896,9 +899,10 @@ This repo includes a robust Emacs pinning system to control when Emacs rebuilds,
     - Just run `emacs-pin` after a successful `ns`; it will capture the already‑built Emacs and prevent further rebuilds on overlay updates.
 
 - Notes and caveats:
+  - Automation prefers the compiled helper. `ns`/`nb` (and the activation hook) call `emacs-pin-rs` under the hood; the xonsh scripts stay available for debugging or experimenting with new logic.
   - The stored path is the key to “no rebuilds”. Keep it alive or expect a one‑time rebuild to the latest overlay commit on the next `ns`.
   - Reuse is an impure-eval feature. Disable with `--pure` or `NS_IMPURE=0` to force a clean evaluation/build.
-  - Pinning to an older, specific commit only makes sense if that exact build already exists locally. If it doesn’t, the next `ns` will intentionally build the latest overlay and auto‑pin to it.
+  - Pinning to an older, specific commit only makes sense if that exact build already exists locally. If it doesn’t, the next `ns` will intentionally build the latest overlay and auto-pin to it.
   - Status output includes direct links to both current overlay and pinned commits for quick comparison.
 
 Contributors: see CLAUDE.md (Managing Emacs Versions → Emacs Pinning Behavior) for implementation details and contributor notes.

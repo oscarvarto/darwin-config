@@ -35,7 +35,13 @@
         if [[ -z "$STORED_PATH" || ! -e "$STORED_PATH" ]]; then
           echo "📌 Emacs pinned but stored build path missing; auto-pinning to current overlay build..."
           # Run emacs-pin without args to capture current overlay commit and built outPath
-          $DRY_RUN_CMD emacs-pin || true
+          if command -v emacs-pin-rs >/dev/null 2>&1; then
+            $DRY_RUN_CMD emacs-pin-rs || true
+          elif command -v emacs-pin >/dev/null 2>&1; then
+            $DRY_RUN_CMD emacs-pin || true
+          else
+            echo "⚠️  emacs-pin command not found; skipping auto-pin"
+          fi
         fi
       fi
     '';

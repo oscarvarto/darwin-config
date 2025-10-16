@@ -8,6 +8,7 @@
   defaultShell ? "zsh",
   pathConfig ? null,
   darwinConfigPath,
+  emacsPinRust,
   uv2nix,
   pyproject-nix,
   pyproject-build-systems,
@@ -41,7 +42,7 @@
   workDirName = builtins.replaceStrings ["~/" "/**"] ["" ""] (workConfig.gitWorkDirPattern or "~/work/**");
 
   # Emacs pinning logic moved to separate module for modularity
-  emacsPinModule = import ./emacs-pinning {inherit pkgs user inputs hostname darwinConfigPath;};
+  emacsPinModule = import ./emacs-pinning {inherit pkgs user inputs hostname darwinConfigPath emacsPinRust;};
   configuredEmacs = emacsPinModule.configuredEmacs;
 
   # Wrapper to ensure we only launch the GUI daemon when not already running
@@ -115,7 +116,7 @@ in {
   home-manager = {
     useGlobalPkgs = true;
     backupFileExtension = "bak";
-    extraSpecialArgs = {inherit inputs user pathConfig darwinConfigPath;};
+    extraSpecialArgs = {inherit inputs user pathConfig darwinConfigPath emacsPinRust;};
     users.${user} = {
       pkgs,
       config,

@@ -4,6 +4,7 @@
   inputs,
   hostname,
   darwinConfigPath,
+  emacsPinRust,
   ...
 }: let
   # Emacs pinning system with hash management
@@ -151,6 +152,29 @@
         '';
       });
 
+  # Rust implementation wrappers - primary option (fast, compiled)
+  # These wrap the Rust binary to provide individual commands matching xonsh interface
+  emacsPinRs = pkgs.writeScriptBin "emacs-pin-rs" ''
+    #!/usr/bin/env bash
+    exec ${emacsPinRust}/bin/emacs-pin pin "$@"
+  '';
+
+  emacsUnpinRs = pkgs.writeScriptBin "emacs-unpin-rs" ''
+    #!/usr/bin/env bash
+    exec ${emacsPinRust}/bin/emacs-pin unpin "$@"
+  '';
+
+  emacsPinDiffRs = pkgs.writeScriptBin "emacs-pin-diff-rs" ''
+    #!/usr/bin/env bash
+    exec ${emacsPinRust}/bin/emacs-pin diff "$@"
+  '';
+
+  emacsPinStatusRs = pkgs.writeScriptBin "emacs-pin-status-rs" ''
+    #!/usr/bin/env bash
+    exec ${emacsPinRust}/bin/emacs-pin status "$@"
+  '';
+
+  # Xonsh implementation wrappers - fallback/reference option
   emacsPin = pkgs.writeScriptBin "emacs-pin" ''
     #!/usr/bin/env bash
     # Wrapper script that calls the external xonsh implementation
@@ -180,5 +204,17 @@
   '';
 in {
   inherit configuredEmacs;
-  pinTools = [emacsPin emacsUnpin emacsPinDiff emacsPinStatus];
+  # Export both Rust (primary) and xonsh (fallback) tools
+  pinTools = [
+    # Rust tools (preferred - fast, no runtime dependencies)
+    emacsPinRs
+    emacsUnpinRs
+    emacsPinDiffRs
+    emacsPinStatusRs
+    # Xonsh tools (fallback - for reference/compatibility)
+    emacsPin
+    emacsUnpin
+    emacsPinDiff
+    emacsPinStatus
+  ];
 }
