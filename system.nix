@@ -388,18 +388,6 @@ in {
     };
   };
 
-  # Touch ID authorization settings for screen sharing compatibility
-  # This allows Touch ID to work with Duet Display and similar screen sharing apps
-  # IMPORTANT: This setting affects system authorization (sudo, etc.) only
-  # Apple Pay uses a separate security framework and should NOT be affected
-  #
-  # TO REVERT IF NEEDED:
-  # 1. Comment out or remove the "setTouchIdIgnoreArd" launchd agent below
-  # 2. Run: nb && ns
-  # 3. Manually run: defaults delete ~/Library/Preferences/com.apple.security.authorization.plist ignoreArd
-  #
-  # If you experience ANY issues with Apple Pay or other Touch ID features,
-  # immediately revert this setting using the steps above.
   launchd.user.agents.setTouchIdIgnoreArd = {
     serviceConfig = {
       Label = "org.nixos.setTouchIdIgnoreArd";
