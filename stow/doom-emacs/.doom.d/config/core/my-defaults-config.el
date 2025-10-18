@@ -8,6 +8,7 @@
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
 ;; Updated by update-doom-config.sh on Wed Aug 20 15:15:54 CST 2025
+;; Updated by update-doom-config.sh on Sat Oct 18 13:06:17 CST 2025
 (setq user-full-name "Oscar Vargas Torres"
       user-mail-address "contact@oscarvarto.mx")
 
@@ -122,7 +123,8 @@
 ;; Use zsh as default shell
 (setq shell-file-name (executable-find "zsh"))
 ;; Updated by update-doom-config.sh on Wed Aug 20 15:15:54 CST 2025
-(setq-default vterm-shell (executable-find "nu"))
+;; Updated by update-doom-config.sh on Sat Oct 18 13:06:17 CST 2025
+(setq-default vterm-shell (executable-find "zsh"))
 (setq-default explicit-shell-file-name (executable-find "zsh"))
 
 ;; Workaround for debugging Java tests

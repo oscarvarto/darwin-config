@@ -1,16 +1,17 @@
 _: [
   # Development Tools
-  # "homebrew/cask/docker"
   "chatgpt"
   "chromedriver"
   "claude"
   "claude-code"
+  "codex"
   "dotnet-sdk"
   "font-jetbrains-mono-nerd-font"
   "gg"
   "ghostty@tip"
   "jetbrains-toolbox"
   "kitty"
+  "mactex"
   "miniforge"
   "neo4j-desktop"
   "ollama"

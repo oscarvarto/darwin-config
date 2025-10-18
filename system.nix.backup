@@ -59,7 +59,7 @@ in {
       # Dynamic build performance settings based on hardware specs
       # Hardware-optimized settings applied on Sun Sep 14 13:10:00 CST 2025 for 16 cores, 128GB RAM
       # These settings are auto-detected and configured during setup
-      max-jobs = 64;        # Hardware-optimized: 16 cores detected
+      max-jobs = 64; # Hardware-optimized: 16 cores detected
       cores = 0; # Use all available logical cores for each job
       max-substitution-jobs = 64; # Hardware-optimized for network performance
 
@@ -71,8 +71,8 @@ in {
       build-cores = 0; # Use all cores for building (same as cores but explicit)
 
       # Memory and I/O optimizations (will be configured based on available RAM)
-      min-free = 6871947673;    # Hardware-optimized: 6.3GB minimum
-      max-free = 82463372083;    # Hardware-optimized: 76.7GB threshold
+      min-free = 6871947673; # Hardware-optimized: 6.3GB minimum
+      max-free = 82463372083; # Hardware-optimized: 76.7GB threshold
 
       # Network optimizations
       connect-timeout = 10; # 10 second connection timeout
@@ -112,7 +112,7 @@ in {
     };
 
     # Daemon performance settings for faster builds
-    daemonIOLowPriority = false;      # Hardware-optimized: high (plenty of resources)
+    daemonIOLowPriority = false; # Hardware-optimized: high (plenty of resources)
     # Don't set daemonProcessType to allow normal CPU scheduling priority
 
     gc = {
