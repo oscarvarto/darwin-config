@@ -18,6 +18,38 @@
       echo "✅ Backup file cleanup completed"
     '';
 
+    # Install terminfo for Ghostty and Kitty terminals
+    installTerminfo = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      echo "🖥️  Installing terminal terminfo definitions..."
+
+      # Create ~/.terminfo directory if it doesn't exist
+      $DRY_RUN_CMD mkdir -p ~/.terminfo
+
+      # Install Ghostty terminfo if app exists
+      if [[ -d /Applications/Ghostty.app ]]; then
+        GHOSTTY_TERMINFO="/Applications/Ghostty.app/Contents/Resources/terminfo"
+        if [[ -d "$GHOSTTY_TERMINFO" ]]; then
+          echo "  📦 Installing Ghostty terminfo from app bundle..."
+          # Copy the compiled terminfo directly (Ghostty ships pre-compiled terminfo)
+          $DRY_RUN_CMD ${pkgs.rsync}/bin/rsync -av "$GHOSTTY_TERMINFO/" ~/.terminfo/
+          echo "  ✅ Ghostty terminfo installed"
+        fi
+      fi
+
+      # Install Kitty terminfo if app exists and has source terminfo
+      if [[ -d /Applications/kitty.app ]]; then
+        KITTY_TERMINFO_SRC="/Applications/kitty.app/Contents/Resources/kitty/terminfo/kitty.terminfo"
+        if [[ -f "$KITTY_TERMINFO_SRC" ]]; then
+          echo "  📦 Installing Kitty terminfo from source..."
+          # Compile and install using tic
+          $DRY_RUN_CMD ${pkgs.ncurses}/bin/tic -x -o ~/.terminfo "$KITTY_TERMINFO_SRC"
+          echo "  ✅ Kitty terminfo installed"
+        fi
+      fi
+
+      echo "✅ Terminal terminfo installation completed"
+    '';
+
     # Auto-pin Emacs after a successful build if pinned store path was GC'd
     autoPinEmacsAfterBuild = lib.hm.dag.entryAfter ["writeBoundary"] ''
       PIN_FILE="$HOME/.cache/emacs-git-pin"
