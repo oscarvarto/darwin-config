@@ -22,6 +22,8 @@
   :recipe (:host github
            :repo "manzaltu/claude-code-ide.el"
            :depth 1))
+;; cond-let is required by transient 0.10.1+ (must be loaded before combobulate)
+(package! cond-let)
 (package! combobulate)
 (package! dash)
 (package! diminish)
@@ -48,10 +50,6 @@
 (package! flycheck-rust)
 (package! ffmpeg-player)
 (package! gnuplot)
-(package! gptel-autocomplete
-  :recipe (:host github
-           :repo "JDNdeveloper/gptel-autocomplete"
-           :depth 1))
 (package! hydra)
 (package! idle-highlight-mode
   :recipe (:host github

@@ -333,9 +333,9 @@ in {
           git = {
             enable = true;
             ignores = (import ./git-ignores.nix {inherit config pkgs lib;}).git.ignores;
-            userName = userConfig.name;
             lfs.enable = true;
-            extraConfig = {
+            settings = {
+              user.name = userConfig.name;
               init.defaultBranch = "main";
               core = {
                 editor = "emacsclient -t";

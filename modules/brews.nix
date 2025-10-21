@@ -60,7 +60,6 @@
       "ncurses"
       "neo4j"
       "ninja"
-      "pandoc"
       "pueue"
       "pass"
       "pkg-config"

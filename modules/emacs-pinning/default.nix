@@ -82,34 +82,55 @@
       withImageMagick = true;
       withXwidgets = true;
     }).overrideAttrs (oldAttrs: {
-      # Add custom icon integration
+      # Add custom icon integration for macOS 26 Tahoe Liquid Glass icons
       postInstall = ''
         ${oldAttrs.postInstall or ""}
 
-        # Integrate custom Emacs icon used across the repo (also used by Raycast)
-        # Keep a single source of truth under stow/ so Dock and Raycast match
-        CUSTOM_ICON_SOURCE="${../../stow/nix-scripts/.local/share/img/icons/Emacs.icns}"
-        if [[ -f "$CUSTOM_ICON_SOURCE" ]]; then
-          echo "🎨 Integrating custom curvy-blender Emacs icon..."
+        # Integrate Liquid Glass icons for macOS 26 Tahoe (and fallback for earlier versions)
+        # Source: https://github.com/jimeh/emacs-liquid-glass-icons
+        ASSETS_CAR_SOURCE="${./.}/assets/icons/Assets.car"
+        ICON_LG1_DEFAULT_SOURCE="${./.}/assets/icons/EmacsLG1-Default.icns"
+        ICON_LG1_DARK_SOURCE="${./.}/assets/icons/EmacsLG1-Dark.icns"
 
-          # Find the Emacs.app bundle in the output
-          EMACS_APP=$(find "$out" -name "Emacs.app" -type d | head -1)
-          if [[ -n "$EMACS_APP" && -d "$EMACS_APP/Contents/Resources" ]]; then
-            # Backup original icon
-            if [[ -f "$EMACS_APP/Contents/Resources/Emacs.icns" ]]; then
-              cp "$EMACS_APP/Contents/Resources/Emacs.icns" "$EMACS_APP/Contents/Resources/Emacs.icns.original"
-            fi
+        # Find the Emacs.app bundle in the output
+        EMACS_APP=$(find "$out" -name "Emacs.app" -type d | head -1)
+        if [[ -n "$EMACS_APP" && -d "$EMACS_APP/Contents/Resources" ]]; then
+          echo "🎨 Integrating Liquid Glass Emacs icons for macOS 26 Tahoe..."
 
-            # Install custom icon
-            cp "$CUSTOM_ICON_SOURCE" "$EMACS_APP/Contents/Resources/Emacs.icns"
-            echo "✅ Custom icon installed: $EMACS_APP/Contents/Resources/Emacs.icns"
-          else
-            echo "⚠️  Could not find Emacs.app bundle or Resources directory"
+          # Backup original icon (for pre-Tahoe compatibility)
+          if [[ -f "$EMACS_APP/Contents/Resources/Emacs.icns" ]]; then
+            cp "$EMACS_APP/Contents/Resources/Emacs.icns" "$EMACS_APP/Contents/Resources/Emacs.icns.original"
           fi
-        elif [[ ! -f "$CUSTOM_ICON_SOURCE" ]]; then
-          echo "ℹ️  Custom icon not found at: $CUSTOM_ICON_SOURCE"
+
+          # Install Assets.car for macOS 26 Tahoe (contains all three liquid glass icons)
+          if [[ -f "$ASSETS_CAR_SOURCE" ]]; then
+            cp "$ASSETS_CAR_SOURCE" "$EMACS_APP/Contents/Resources/Assets.car"
+            echo "✅ Assets.car installed for macOS 26 Tahoe support"
+          else
+            echo "⚠️  Assets.car not found at: $ASSETS_CAR_SOURCE"
+          fi
+
+          # Install EmacsLG1-Default.icns as fallback for pre-Tahoe macOS versions
+          if [[ -f "$ICON_LG1_DEFAULT_SOURCE" ]]; then
+            cp "$ICON_LG1_DEFAULT_SOURCE" "$EMACS_APP/Contents/Resources/Emacs.icns"
+            echo "✅ EmacsLG1-Default.icns installed as Emacs.icns (fallback for pre-Tahoe)"
+          else
+            echo "⚠️  EmacsLG1-Default.icns not found at: $ICON_LG1_DEFAULT_SOURCE"
+          fi
+
+          # Update Info.plist to reference EmacsLG1 in Assets.car (for macOS 26 Tahoe)
+          if [[ -f "$EMACS_APP/Contents/Info.plist" ]]; then
+            # Use PlistBuddy to add/update CFBundleIconName
+            /usr/libexec/PlistBuddy -c "Add :CFBundleIconName string 'EmacsLG1'" "$EMACS_APP/Contents/Info.plist" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :CFBundleIconName 'EmacsLG1'" "$EMACS_APP/Contents/Info.plist"
+            echo "✅ Info.plist updated: CFBundleIconName = EmacsLG1"
+          else
+            echo "⚠️  Info.plist not found in: $EMACS_APP/Contents/"
+          fi
+
+          echo "✅ Liquid Glass icon integration complete!"
         else
-          echo "ℹ️  Not a GUI Emacs build, skipping icon installation"
+          echo "⚠️  Could not find Emacs.app bundle or Resources directory"
         fi
       '';
 

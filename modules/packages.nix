@@ -127,7 +127,19 @@ in
     jq
     lazyjj
     (ripgrep.override {withPCRE2 = true;})
+    mermaid-cli
+    # mermaid-filter removed - Linux-only (depends on Chromium which doesn't support Darwin)
+    # Use mermaid-cli directly for diagram generation if needed
     nurl
+    pandoc
+    pandoc-acro
+    pandoc-eqnos
+    pandoc-fignos
+    pandoc-secnos
+    pandoc-tablenos
+    pandoc-imagine
+    pandoc-include
+    pandoc-lua-filters
     spotify-player
     tree
     unrar

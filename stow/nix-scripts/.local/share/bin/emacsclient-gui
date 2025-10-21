@@ -7,12 +7,13 @@
 #
 # Optional parameters:
 # @raycast.packageName Emacs
-# @raycast.icon ~/.local/share/img/icons/Emacs.icns
-# @raycast.iconDark ~/.local/share/img/icons/Emacs.icns
+# @raycast.icon ~/darwin-config/modules/assets/icons/EmacsLG1-Default.icns
+# @raycast.iconDark ~/darwin-config/modules/assets/icons/EmacsLG1-Dark.icns
 
 # Enhanced emacsclient wrapper for proper macOS window recognition
-# Note: the @raycast.icon only affects Raycast’s UI, not the Dock icon.
-# The Dock icon comes from the running Emacs application bundle.
+# Note: the @raycast.icon only affects Raycast's UI, not the Dock icon.
+# The Dock icon comes from the running Emacs application bundle, which now
+# uses the Liquid Glass icons for macOS 26 Tahoe (via Assets.car and Info.plist).
 
 EMACSCLIENT="${EMACSCLIENT:-}"
 if [[ -z "$EMACSCLIENT" ]]; then

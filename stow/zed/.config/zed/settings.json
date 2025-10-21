@@ -210,6 +210,8 @@
   },
   "languages": {
     "Python": {
+      "preferred_line_length": 100,
+      "soft_wrap": "editor_width",
       "language_servers": ["ty", "!basedpyright", "!pylsp"]
     },
     "Java": {
