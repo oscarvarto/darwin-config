@@ -27,6 +27,15 @@
       then try.value
       else null
     else null;
+  # Only reuse cached builds if they already include the Liquid Glass assets
+  storedPathHasLiquidGlassAssets =
+    if storedPathValue != null
+    then builtins.pathExists "${storedPathValue}/Applications/Emacs.app/Contents/Resources/Assets.car"
+    else false;
+  reusableStoredPath =
+    if storedPathHasLiquidGlassAssets
+    then storedPathValue
+    else null;
 
   # Path to external xonsh scripts for pinning tools
   # These scripts live in the same directory as this module (modules/emacs-pinning/)
@@ -88,9 +97,10 @@
 
         # Integrate Liquid Glass icons for macOS 26 Tahoe (and fallback for earlier versions)
         # Source: https://github.com/jimeh/emacs-liquid-glass-icons
-        ASSETS_CAR_SOURCE="${./.}/assets/icons/Assets.car"
-        ICON_LG1_DEFAULT_SOURCE="${./.}/assets/icons/EmacsLG1-Default.icns"
-        ICON_LG1_DARK_SOURCE="${./.}/assets/icons/EmacsLG1-Dark.icns"
+        ASSETS_DIR="${../assets/icons}"
+        ASSETS_CAR_SOURCE="$ASSETS_DIR/Assets.car"
+        ICON_LG1_DEFAULT_SOURCE="$ASSETS_DIR/EmacsLG1-Default.icns"
+        ICON_LG1_DARK_SOURCE="$ASSETS_DIR/EmacsLG1-Dark.icns"
 
         # Find the Emacs.app bundle in the output
         EMACS_APP=$(find "$out" -name "Emacs.app" -type d | head -1)
@@ -149,14 +159,14 @@
 
   # Build Emacs with prebuilt vterm (no runtime compilation) and keep .app bundle
   configuredEmacs =
-    if isPinned && storedPathValue != null
+    if isPinned && reusableStoredPath != null
     then
       # Fast path: reuse previously built configuredEmacs store path to avoid rebuilds
       pkgs.runCommand "emacs-git-with-packages-reuse-${builtins.substring 0 7 pinnedCommit}" {
         preferLocalBuild = true;
         allowSubstitutes = false;
       } ''
-        ln -s ${storedPathValue} "$out"
+        ln -s ${reusableStoredPath} "$out"
       ''
     else let
       epkgs = pkgs.emacsPackagesFor emacsBase;

@@ -74,6 +74,16 @@
           else
             echo "⚠️  emacs-pin command not found; skipping auto-pin"
           fi
+        # Detect legacy builds that predate the Liquid Glass Assets.car integration
+        elif [[ ! -e "$STORED_PATH/Applications/Emacs.app/Contents/Resources/Assets.car" ]]; then
+          echo "📌 Emacs pinned build missing Liquid Glass Assets.car; refreshing stored path..."
+          if command -v emacs-pin-rs >/dev/null 2>&1; then
+            $DRY_RUN_CMD emacs-pin-rs || true
+          elif command -v emacs-pin >/dev/null 2>&1; then
+            $DRY_RUN_CMD emacs-pin || true
+          else
+            echo "⚠️  emacs-pin command not found; skipping auto-pin"
+          fi
         fi
       fi
     '';
