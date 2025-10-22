@@ -106,7 +106,7 @@
 (my/load-config 'vterm 'misc)
 (my/load-config 'eat 'misc)
 
-(my/load-config 'tabnine-gui 'ai)
+;; (my/load-config 'tabnine-gui 'ai)
 (my/load-config 'gptel 'ai)
 
 (my/load-config 'db 'misc)
