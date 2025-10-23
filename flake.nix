@@ -2,6 +2,7 @@
   description = "macOS Configuration with nix-darwin and home-manager";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    flake-parts.url = "github:hercules-ci/flake-parts";
     agenix.url = "github:ryantm/agenix";
     catppuccin.url = "github:catppuccin/nix";
     darwin = {
@@ -33,6 +34,18 @@
       url = "github:homebrew/homebrew-core";
       flake = false;
     };
+    homebrew-borkdude = {
+      url = "github:borkdude/homebrew-brew";
+      flake = false;
+    };
+    homebrew-jank = {
+      url = "github:oscarvarto/homebrew-jank";
+      flake = false;
+    };
+    # jank-lang currently has Darwin build issues (gcc.libc.dev missing)
+    # See: https://github.com/jank-lang/jank/blob/main/llvm.nix#L69
+    # TODO: Re-enable when upstream fixes Darwin support
+    # jank-lang.url = "git+https://github.com/jank-lang/jank.git";
     homebrew-utils = {
       url = "github:JetBrains/homebrew-utils";
       flake = false;
@@ -75,6 +88,7 @@
   outputs = {
     self,
     nixpkgs,
+    flake-parts,
     agenix,
     bash-env-json,
     bash-env-nushell,
@@ -84,6 +98,9 @@
     homebrew-bundle,
     homebrew-cask,
     homebrew-core,
+    homebrew-borkdude,
+    homebrew-jank,
+    # jank-lang, # Disabled due to Darwin build issues
     homebrew-utils,
     neovim-nightly-overlay,
     nix-homebrew,
@@ -307,6 +324,8 @@
                 "homebrew/homebrew-cask" = homebrew-cask;
                 "homebrew/homebrew-bundle" = homebrew-bundle;
                 "jetbrains/utils" = homebrew-utils;
+                "borkdude/hombrew-brew" = homebrew-borkdude;
+                "oscarvarto/homebrew-jank" = homebrew-jank;
               };
               mutableTaps = true;
               autoMigrate = true;

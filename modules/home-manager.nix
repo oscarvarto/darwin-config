@@ -333,7 +333,7 @@ in {
           git = {
             enable = true;
             ignores = (import ./git-ignores.nix {inherit config pkgs lib;}).git.ignores;
-            lfs.enable = true;
+            lfs.enable = false;
             settings = {
               user.name = userConfig.name;
               init.defaultBranch = "main";

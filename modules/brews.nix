@@ -13,6 +13,11 @@
       upgrade = true;
     };
 
+    taps = [
+      "borkdude/brew"
+      "oscarvarto/jank"
+    ];
+
     brews = [
       "7-zip"
       "angular-cli"
@@ -23,18 +28,27 @@
       "bat"
       "bat-extras"
       "bfg"
+      "boot-clj"
+      "borkdude/brew/babashka"
       # Moved to Nix packages to avoid conflicts with xonsh xontrib
       # "carapace"
       "cargo-binstall"
       "ccache"
+      "cljfmt"
+      "clojure"
+      "clojure-lsp"
       "cmake"
       "cmake-language-server"
       "difftastic"
+      "zip"
+      "entr"
+      "double-conversion"
       "eza"
       "ffmpeg"
       "fontforge"
       "gcc"
       "gemini-cli"
+      "git-lfs"
       "gradle"
       "git-filter-repo"
       "gnu-tar"
@@ -42,12 +56,16 @@
       "helix"
       "hugo"
       "imagemagick"
+      "oscarvarto/jank/jank-git"
       "jq"
       "libedit"
       "libsql"
       "libtool"
       "libgccjit"
-      "llvm"
+      # {
+      #   name = "llvm";
+      #   args = ["HEAD"];
+      # }
       "lua"
       "markdown-oxide"
       "markdownlint-cli2"
@@ -60,6 +78,7 @@
       "ncurses"
       "neo4j"
       "ninja"
+      "ollama"
       "pueue"
       "pass"
       "pkg-config"
@@ -68,7 +87,6 @@
       "prettier"
       "resvg"
       "stow"
-      "swiftly"
       "swig"
       "trash-cli"
       "tree-sitter"

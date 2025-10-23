@@ -28,7 +28,7 @@ in {
         userName = name;
         # userEmail is handled by conditional includes based on directory
         lfs = {
-          enable = true;
+          enable = false;
         };
         extraConfig = {
           init.defaultBranch = "main";

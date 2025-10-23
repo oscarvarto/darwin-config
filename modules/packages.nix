@@ -107,6 +107,7 @@
 in
   with pkgs; [
     # Basic system packages
+    cachix
     coreutils
     curl
     alejandra
@@ -177,7 +178,7 @@ in
     # Media-related packages
     ffmpeg
 
-    # JVM (Java, ...)
+    # JVM (Java, Clojure, ...)
 
     # Node.js development tools
     nodejs

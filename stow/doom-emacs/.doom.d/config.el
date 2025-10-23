@@ -94,13 +94,13 @@
 (my/load-config 'jvm-build 'jvm)
 (my/load-config 'jvm-compile 'jvm)
 (my/load-config 'jvm-navigation 'jvm)
-(my/load-config 'lsp-java 'jvm)
+;; (my/load-config 'lsp-java 'jvm)
 (my/load-config 'clojure 'jvm)
 
 (my/load-config 'nix 'languages)
 (my/load-config 'rust 'languages)
-(my/load-config 'python 'languages)
-(my/load-config 'swift 'languages)
+;; (my/load-config 'python 'languages)
+;; (my/load-config 'swift 'languages)
 
 ;;; Tool-specific configurations
 (my/load-config 'vterm 'misc)
@@ -109,7 +109,7 @@
 ;; (my/load-config 'tabnine-gui 'ai)
 (my/load-config 'gptel 'ai)
 
-(my/load-config 'db 'misc)
+;; (my/load-config 'db 'misc)
 (my/load-config 'enhanced-auth 'misc)
 
 (my/load-config 'dap 'lsp)
