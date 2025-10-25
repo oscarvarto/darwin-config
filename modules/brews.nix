@@ -66,7 +66,6 @@
       #   name = "llvm";
       #   args = ["HEAD"];
       # }
-      "lua"
       "markdown-oxide"
       "markdownlint-cli2"
       "marksman"

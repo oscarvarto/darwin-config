@@ -127,6 +127,8 @@ in
     iftop
     jq
     lazyjj
+    lua51Packages.lua
+    lua51Packages.luarocks
     (ripgrep.override {withPCRE2 = true;})
     mermaid-cli
     # mermaid-filter removed - Linux-only (depends on Chromium which doesn't support Darwin)
