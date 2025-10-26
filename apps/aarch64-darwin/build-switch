@@ -12,7 +12,7 @@ FLAKE_SYSTEM="darwinConfigurations.${HOSTNAME}.system"
 
 # Parse arguments for verbose flag
 VERBOSE=false
-# Impure evaluation controls reuse of stored Emacs path (when pinned)
+# Impure evaluation remains available for workflows that need host-specific state.
 # Default to impure unless explicitly disabled via env or --pure
 EVAL_IMPURE=true
 if [[ "${NS_IMPURE:-1}" == "0" ]]; then
@@ -27,8 +27,8 @@ Build + switch the darwin configuration for host "${HOSTNAME}".
 
 Options:
   --verbose   Verbose build/switch output
-  --pure      Force pure evaluation (disables Emacs pin reuse)
-  --impure    Use impure evaluation (default; enables Emacs pin reuse)
+  --pure      Force pure evaluation (fully reproducible builds)
+  --impure    Use impure evaluation (default for legacy workflows)
   -h, --help  Show this help
 
 Environment:
@@ -103,25 +103,5 @@ fi
 
 echo "${YELLOW}Cleaning up...${NC}"
 unlink ./result || true
-
-# Auto-pin Emacs to current build after successful switch
-echo "${YELLOW}Auto-pinning Emacs to preserve current build...${NC}"
-AUTO_PIN_CMD=""
-if command -v emacs-pin-rs >/dev/null 2>&1; then
-    AUTO_PIN_CMD="emacs-pin-rs"
-elif command -v emacs-pin >/dev/null 2>&1; then
-    AUTO_PIN_CMD="emacs-pin"
-fi
-
-if [ -n "$AUTO_PIN_CMD" ]; then
-    echo "${YELLOW}Using ${AUTO_PIN_CMD} for auto-pin...${NC}"
-    if "$AUTO_PIN_CMD"; then
-        echo "${GREEN}✓ Emacs auto-pinned successfully${NC}"
-    else
-        echo "${RED}⚠ Warning: Emacs auto-pin failed, but switch completed${NC}"
-    fi
-else
-    echo "${RED}⚠ Warning: no emacs-pin command found in PATH${NC}"
-fi
 
 echo "${GREEN}Switch to new generation complete!${NC}"

@@ -83,7 +83,6 @@
       url = "github:pyproject-nix/uv2nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    crane.url = "github:ipetkov/crane";
   };
   outputs = {
     self,
@@ -110,7 +109,6 @@
     pyproject-nix,
     pyproject-build-systems,
     uv2nix,
-    crane,
   } @ inputs: let
     # Supported systems (Apple Silicon only)
     darwinSystems = ["aarch64-darwin"];
@@ -226,15 +224,6 @@
         '')}/bin/sanitize-repo";
         meta = {description = "sanitize-repo app for ${system}";};
       };
-      "update-doom-config" = {
-        type = "app";
-        program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "update-doom-config" ''
-          #!/usr/bin/env zsh
-          # Update Doom Emacs configuration with user details and shell settings
-          exec ${self}/scripts/update-doom-config.sh "$@"
-        '')}/bin/update-doom-config";
-        meta = {description = "update-doom-config app for ${system}";};
-      };
       "record-config-path" = {
         type = "app";
         program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin "record-config-path" ''
@@ -254,38 +243,6 @@
         meta = {description = "optimize-nix-performance app for ${system}";};
       };
     };
-
-    # Build the Rust emacs-pin package (aarch64-darwin only)
-    mkEmacsPinRust = system: let
-      pkgs = nixpkgs.legacyPackages.${system};
-      craneLib = crane.mkLib pkgs;
-
-      # Source for the Rust implementation
-      # Use path directly since these files are part of the repo
-      src = ./modules/emacs-pinning/rust;
-
-      # Common build arguments
-      commonArgs = {
-        inherit src;
-        strictDeps = true;
-
-        buildInputs = [
-          pkgs.libiconv
-        ];
-
-        # Only build for aarch64-apple-darwin to avoid cross-compilation dependencies
-        CARGO_BUILD_TARGET = "aarch64-apple-darwin";
-      };
-
-      # Build dependencies (cached separately for faster iteration)
-      cargoArtifacts = craneLib.buildDepsOnly commonArgs;
-    in
-      # Build the actual package
-      craneLib.buildPackage (commonArgs
-        // {
-          inherit cargoArtifacts;
-          doCheck = false; # Skip tests in build to speed up compilation
-        });
 
     # Helper function to create darwin configurations with host-specific settings
     mkDarwinConfig = hostname: hostConfig: let
@@ -310,7 +267,6 @@
               path = ./python-env;
               name = "darwin-config-python-env";
             };
-            emacsPinRust = mkEmacsPinRust hostConfig.system;
           };
         modules = [
           home-manager.darwinModules.home-manager
@@ -343,61 +299,15 @@
 
     darwinConfigurations = nixpkgs.lib.mapAttrs mkDarwinConfig hostConfigs;
 
-    # Expose configuredEmacs and pinTools for each host so scripts can reference them
+    # Expose configuredEmacs for each host so scripts can reference the overlay build
     packages = nixpkgs.lib.genAttrs darwinSystems (
-      system:
+      system: let
+        emacsOverlayPkgs = inputs.emacs-overlay.packages.${system};
+      in
         nixpkgs.lib.mapAttrs' (
-          hostname: hostConfig: let
-            emacsPinModule = import ./modules/emacs-pinning {
-              pkgs = nixpkgs.legacyPackages.${system};
-              user = hostConfig.user;
-              inputs = inputs;
-              inherit hostname;
-              darwinConfigPath =
-                if hostConfig ? configPath
-                then hostConfig.configPath
-                else if recordedConfigPath != null
-                then recordedConfigPath
-                else "/Users/${hostConfig.user}/darwin-config";
-              # Pass the prebuilt Rust package
-              emacsPinRust = mkEmacsPinRust system;
-            };
-          in
-            nixpkgs.lib.nameValuePair "${hostname}-configuredEmacs" emacsPinModule.configuredEmacs
+          hostname: _: nixpkgs.lib.nameValuePair "${hostname}-configuredEmacs" emacsOverlayPkgs.emacs-unstable
         )
         hostConfigs
-        # Add pinTools to the package set
-        // nixpkgs.lib.listToAttrs (
-          map (tool: {
-            name = tool.name;
-            value = tool;
-          }) (
-            let
-              # Use first host config to get the pinTools
-              firstHostname = builtins.head (builtins.attrNames hostConfigs);
-              firstHostConfig = hostConfigs.${firstHostname};
-              emacsPinModule = import ./modules/emacs-pinning {
-                pkgs = nixpkgs.legacyPackages.${system};
-                user = firstHostConfig.user;
-                inputs = inputs;
-                hostname = firstHostname;
-                darwinConfigPath =
-                  if firstHostConfig ? configPath
-                  then firstHostConfig.configPath
-                  else if recordedConfigPath != null
-                  then recordedConfigPath
-                  else "/Users/${firstHostConfig.user}/darwin-config";
-                # Pass the prebuilt Rust package
-                emacsPinRust = mkEmacsPinRust system;
-              };
-            in
-              emacsPinModule.pinTools
-          )
-        )
-        # Add the Rust emacs-pin binary itself
-        // {
-          emacs-pin-rs = mkEmacsPinRust system;
-        }
     );
   };
 }

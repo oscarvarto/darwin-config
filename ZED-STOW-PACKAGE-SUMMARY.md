@@ -138,7 +138,6 @@ $ rg "Xcode-beta" ~/.config/zed/settings.json
 ```bash
 $ manage-stow-packages help | tail -5
   • Scripts → ~/.local/share/bin/ (as symlinks)
-  • Doom Emacs → ~/.doom.d/ (as symlinks)
   • LazyVim → ~/.config/nvim/ (as symlinks)
   • Zed → ~/.config/zed/ (as symlinks)
 ```

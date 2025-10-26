@@ -150,7 +150,6 @@ if [[ "$TARGET_USER" == "$CURRENT_USER" && "$TARGET_HOSTNAME" == "$CURRENT_HOSTN
         
         echo ""
         echo "🔧 Updating Doom Emacs configuration for current user..."
-        nix run .#update-doom-config
     fi
     exit 0
 fi

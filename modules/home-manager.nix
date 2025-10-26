@@ -8,7 +8,6 @@
   defaultShell ? "zsh",
   pathConfig ? null,
   darwinConfigPath,
-  emacsPinRust,
   uv2nix,
   pyproject-nix,
   pyproject-build-systems,
@@ -19,6 +18,61 @@
   inherit (builtins) fromTOML;
 
   userHome = lib.attrByPath ["users" "users" user "home"] "/Users/${user}" config;
+
+  iconAssets = ./assets/icons;
+  # Use emacs-unstable from overlay - stable pre-release Emacs with faster builds
+  # The overlay should provide pre-built binaries for aarch64-darwin
+  baseEmacs = inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-unstable;
+  configuredEmacs =
+    pkgs.runCommand "emacs-unstable-liquid-glass" {
+      nativeBuildInputs = [
+        pkgs.bash
+        pkgs.coreutils
+        pkgs.findutils
+        pkgs.rsync
+      ];
+      EMACS_BASE = baseEmacs;
+      ASSETS_DIR = iconAssets;
+    } ''
+      ${pkgs.bash}/bin/bash -c '
+        set -euo pipefail
+
+        RSYNC=${pkgs.rsync}/bin/rsync
+        FIND=${pkgs.findutils}/bin/find
+        CP=${pkgs.coreutils}/bin/cp
+
+        mkdir -p "$out"
+        $RSYNC -a "$EMACS_BASE"/ "$out"/
+
+        EMACS_APP=$($FIND "$out" -name "Emacs.app" -type d | head -n1 || true)
+        if [[ -n "$EMACS_APP" && -d "$EMACS_APP/Contents/Resources" ]]; then
+          ASSETS_CAR_SOURCE="$ASSETS_DIR/Assets.car"
+          ICON_LG1_DEFAULT_SOURCE="$ASSETS_DIR/EmacsLG1-Default.icns"
+          ICON_LG1_DARK_SOURCE="$ASSETS_DIR/EmacsLG1-Dark.icns"
+
+          if [[ -f "$EMACS_APP/Contents/Resources/Emacs.icns" ]]; then
+            $CP "$EMACS_APP/Contents/Resources/Emacs.icns" "$EMACS_APP/Contents/Resources/Emacs.icns.original"
+          fi
+
+          if [[ -f "$ASSETS_CAR_SOURCE" ]]; then
+            $CP "$ASSETS_CAR_SOURCE" "$EMACS_APP/Contents/Resources/Assets.car"
+          fi
+
+          if [[ -f "$ICON_LG1_DEFAULT_SOURCE" ]]; then
+            $CP "$ICON_LG1_DEFAULT_SOURCE" "$EMACS_APP/Contents/Resources/Emacs.icns"
+          fi
+
+          if [[ -f "$ICON_LG1_DARK_SOURCE" ]]; then
+            $CP "$ICON_LG1_DARK_SOURCE" "$EMACS_APP/Contents/Resources/EmacsLG1-Dark.icns"
+          fi
+
+          if [[ -f "$EMACS_APP/Contents/Info.plist" ]]; then
+            /usr/libexec/PlistBuddy -c "Add :CFBundleIconName string EmacsLG1" "$EMACS_APP/Contents/Info.plist" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :CFBundleIconName EmacsLG1" "$EMACS_APP/Contents/Info.plist"
+          fi
+        fi
+      '
+    '';
 
   # User configuration based on hostSettings
   userConfig = {
@@ -40,10 +94,6 @@
   # Work configuration - extract pattern without '/**' suffix for directory name
   workConfig = hostSettings.workConfig or {};
   workDirName = builtins.replaceStrings ["~/" "/**"] ["" ""] (workConfig.gitWorkDirPattern or "~/work/**");
-
-  # Emacs pinning logic moved to separate module for modularity
-  emacsPinModule = import ./emacs-pinning {inherit pkgs user inputs hostname darwinConfigPath emacsPinRust;};
-  configuredEmacs = emacsPinModule.configuredEmacs;
 
   # Wrapper to ensure we only launch the GUI daemon when not already running
   emacsDaemonWrapper = pkgs.writeShellScript "emacs-fg-daemon-wrapper" ''
@@ -116,7 +166,7 @@ in {
   home-manager = {
     useGlobalPkgs = true;
     backupFileExtension = "bak";
-    extraSpecialArgs = {inherit inputs user pathConfig darwinConfigPath emacsPinRust;};
+    extraSpecialArgs = {inherit inputs user pathConfig darwinConfigPath;};
     users.${user} = {
       pkgs,
       config,
@@ -143,8 +193,7 @@ in {
             inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default
             inputs.nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
             configuredEmacs
-          ]
-          ++ emacsPinModule.pinTools;
+          ];
         file =
           sharedFiles
           // {
@@ -476,7 +525,6 @@ in {
             LC_ALL = "en_US.UTF-8";
             TERM = "xterm-256color"; # widely compatible terminal type
             COLORTERM = "truecolor";
-            # Note: PATH is managed by Doom Emacs via ~/.emacs.d/.local/env
           };
           StandardErrorPath = "/tmp/emacs-daemon.log";
           StandardOutPath = "/tmp/emacs-daemon.log";
@@ -485,8 +533,6 @@ in {
 
       # https://github.com/nix-community/home-manager/issues/3344
       manual.manpages.enable = false;
-
-      # vterm module is prebuilt via Nix (emacsWithPackages), no runtime compile needed
     };
   };
 }

@@ -44,17 +44,11 @@ These configuration values are automatically converted to environment variables 
 
 The following files have been updated to use configurable settings instead of hardcoded values:
 
-### 1. Database Configuration
-- **File**: `stow/doom-emacs/.doom.d/config/languages/my-sql-config.el`
-- **Change**: SQL connections now use `WORK_DB_NAME` and `WORK_DB_PORT` environment variables
-- **File**: `stow/doom-emacs/.doom.d/config/misc/my-db-config.el`
-- **Change**: Database connections use configurable settings from environment variables
-
-### 2. Git Configuration Scripts
+### 1. Git Configuration Scripts
 - **File**: `modules/scripts/nu/update-work-git-config.nu`
 - **Change**: Uses `WORK_COMPANY_NAME`, `WORK_OP_VAULT`, `WORK_OP_ITEM`, and `WORK_GIT_DIR_PATTERN`
 
-### 3. Git Directory Patterns
+### 2. Git Directory Patterns
 - **File**: `modules/home-manager.nix`
 - **Change**: Git `includeIf` configuration now uses the configurable work directory pattern
 

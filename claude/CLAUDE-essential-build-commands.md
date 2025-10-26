@@ -8,11 +8,8 @@
 - `./apps/aarch64-darwin/rollback` - Rollback to previous generation
 - `nix run .#apply` - Apply user/secrets repo placeholders into files
 
-### Emacs Management (NEW in feature/emacs)
-- `emacs-pin [commit]` - Pin Emacs to specific commit or current version (automatically called after `ns`)
-- `emacs-unpin` - Unpin Emacs to use latest from overlay
-- `emacs-pin-diff` - Show differences between pinned and latest Emacs
-- `emacs-pin-status` - Show current Emacs pinning status
+### Emacs Management
+- `build-emacs-priority [--continue-build]` - Build the emacs-overlay `emacs-git` derivation with dedicated resources
 - `emacs-service-toggle` - Toggle Emacs home-manager service on/off
 - `emacsclient-gui` - Launch Emacs GUI with proper macOS integration
 
@@ -26,7 +23,6 @@
 ### Configuration Management
 - `nix run .#add-host -- --hostname HOST --user USER` - Add new host to flake
 - `nix run .#configure-user -- --user USER --hostname HOST` - Configure for specific user/hostname
-- `nix run .#update-doom-config` - Update Doom Emacs configuration
 
 ### SSH Keys and Basic Secrets
 - `./apps/aarch64-darwin/check-keys` - Check if required SSH keys exist

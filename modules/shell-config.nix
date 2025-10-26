@@ -109,8 +109,6 @@ in {
 
         # Define variables for directories
         export EMACSDIR=$HOME/.emacs.d
-        export DOOMDIR=$HOME/.doom.d
-        export DOOMLOCALDIR=$HOME/.emacs.d/.local
 
         # PATH is centrally managed in modules/path-config.nix for all shells
         # Do not edit PATH here; zsh uses envExtra/initExtra from zsh-darwin.nix
@@ -239,9 +237,6 @@ in {
         alias nz="nvim ~/.zshrc"
         alias gd="ghostty +show-config --default --docs"
         alias gp="git fetch --all -p; git pull; git submodule update --recursive"
-        # Doom sync commands (if still using Doom configuration)
-        alias ds="doom sync --aot --gc -j \\$(nproc)"
-        alias dup="doom sync -u --aot --gc -j \\$(nproc)"
         alias diff="difft"
         nb() {
             local verbose=false

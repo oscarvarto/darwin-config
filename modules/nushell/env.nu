@@ -82,8 +82,6 @@ $env.STARSHIP_CONFIG = ($env.HOME | path join ".config" "starship.toml")
 $env.DOTNET_ROOT = "/usr/local/share/dotnet"
 $env.CARGO_HOME = ($env.HOME | path join ".cargo")
 $env.EMACSDIR = "~/.emacs.d"
-$env.DOOMDIR  = "~/.doom.d"
-$env.DOOMLOCALDIR = "~/.emacs.d/.local"
 $env.BAT_THEME = "ansi"
 
 # Ghostty terminfo location for proper terminal support in Emacs

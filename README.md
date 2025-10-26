@@ -33,7 +33,7 @@ A comprehensive macOS system configuration using Nix-Darwin and Home Manager wit
 - [🗂️ GNU Stow Package Management](#%EF%B8%8F-gnu-stow-package-management)
 - [🔤 Font Management & Fallback System](#-font-management--fallback-system)
 - [✏️ Editor Configurations](#%EF%B8%8F-editor-configurations)
-  - [🚀 Doom Emacs Configuration](#-doom-emacs-configuration)
+- [🚀 Emacs Configuration](#-emacs-configuration)
   - [🌟 Neovim (LazyVim) Configuration](#-neovim-lazyvim-configuration)
   - [🛠️ Editor Management with Stow](#%EF%B8%8F-editor-management-with-stow)
 - [🧠 IntelliJ IDEA Development Utilities](#-intellij-idea-development-utilities)
@@ -492,7 +492,7 @@ This approach ensures that while garbage collection won't remove pinned packages
 | `nix run .#rollback`     | Rollback to previous generation       |
 
 Note on evaluation mode for nb/ns:
-- Default: impure evaluation to allow Emacs pin reuse (reuses stored path when pinned).
+- Default: impure evaluation for compatibility with host-specific tooling that reads files from the working tree.
 - Force pure: add `--pure` or set `NS_IMPURE=0`.
 - Explicit impure: add `--impure` or set `NS_IMPURE=1`.
 
@@ -504,7 +504,6 @@ Tip: run `ns --help` or `nb --help` for all options.
 | -------------------------------- | -------------------------------------------------- |
 | `nix run .#add-host`             | Add new host configuration to flake.nix            |
 | `nix run .#configure-user`       | Configure for different user/hostname combinations |
-| `nix run .#update-doom-config`   | Update Doom Emacs configuration with user details  |
 | `nix run .#optimize-nix-performance` | Optimize build settings based on hardware specs |
 
 ### Security & Secrets
@@ -545,7 +544,7 @@ Tip: run `ns --help` or `nb --help` for all options.
 | ----------------------------- | ---------------------------------------------------------------- |
 | `manage-stow-packages deploy` | Deploy all stow-managed scripts and configurations               |
 | `manage-stow-packages remove` | Remove all stow-managed symlinks                                 |
-| `stow -t ~ PACKAGE`           | Deploy specific stow package (e.g., doom-emacs, raycast-scripts) |
+| `stow -t ~ PACKAGE`           | Deploy specific stow package (e.g., lazyvim, raycast-scripts) |
 | `stow -D -t ~ PACKAGE`        | Remove specific stow package                                     |
 | `manage-cargo-tools install`  | Install/update Rust/Cargo tools from configuration               |
 | `manage-nodejs-tools install` | Install/update Node.js tools and toolchain                       |
@@ -555,15 +554,10 @@ Tip: run `ns --help` or `nb --help` for all options.
 
 | Command                      | Description                                     |
 | ---------------------------- | ----------------------------------------------- |
-| `cleanup-intellij [project]` | Clean IntelliJ IDEA caches and fix broken state |
-| `emacs-pin [commit]`         | Pin Emacs to specific commit or current version |
-| `emacs-unpin`                | Unpin Emacs to use latest from overlay         |
-| `emacs-pin-diff`             | Show differences between pinned and latest Emacs |
-| `emacs-pin-status`           | Show current Emacs pinning status              |
-| `emacs-service-toggle`       | Toggle Emacs home-manager service              |
-| `emacsclient-gui`            | Launch Emacs GUI client with proper macOS integration |
-
-Rust equivalents (`emacs-pin-rs`, `emacs-pin-diff-rs`, `emacs-pin-status-rs`) mirror these commands via the compiled helper. System automation (`ns`, `nb`, and activation hooks) uses the Rust binaries by default, while the xonsh variants remain available for testing and fallback.
+| `cleanup-intellij [project]`     | Clean IntelliJ IDEA caches and fix broken state |
+| `build-emacs-priority [options]` | Build emacs-overlay `emacs-git` with dedicated CPU time |
+| `emacs-service-toggle`           | Toggle Emacs home-manager service              |
+| `emacsclient-gui`                | Launch Emacs GUI client with proper macOS integration |
 
 ## ✨ Key Features
 
@@ -576,9 +570,10 @@ Rust equivalents (`emacs-pin-rs`, `emacs-pin-diff-rs`, `emacs-pin-status-rs`) mi
   - **pass**: Backup credential store (offline, GPG-encrypted)
   - **Unified CLI**: Single `secret` command for all credential systems
 - **📦 Package Management**: Nix packages + Homebrew integration
-- **✨ Emacs Integration**: Advanced Emacs configuration with:
+- **✨ Emacs Integration**: Stock emacs-overlay build with niceties:
   - **Home-Manager Service**: Managed daemon with automatic startup
-  - **Version Pinning**: Pin Emacs to specific commits for stability
+  - **Liquid Glass Icons**: macOS 15/Tahoe icon pack copied into Emacs.app
+  - **Helper Commands**: `e`, `t`, `et`, `emacsclient-gui`, `emacs-service-toggle`
   - **macOS Integration**: Proper window management and GUI support
   - **Ghostty Terminal Support**: Full xterm-ghostty terminfo integration
   - **Catppuccin Theming**: Unified theme management across applications
@@ -597,16 +592,18 @@ This repository uses **GNU Stow** to manage auxiliary scripts, dotfiles, and too
 
 ### Available Stow Packages
 
-| Package             | Description                            | Target Location       |
-| ------------------- | -------------------------------------- | --------------------- |
-| **aux-scripts**     | Utility scripts and tools              | `~/.local/share/bin/` |
-| **doom-emacs**      | Complete Doom Emacs configuration      | `~/.doom.d/`          |
-| **lazyvim**         | Neovim LazyVim configuration           | `~/.config/nvim/`     |
-| **raycast-scripts** | Raycast automation scripts             | `~/.local/share/bin/` |
-| **nix-scripts**     | Nix-related utility scripts            | `~/.local/share/bin/` |
-| **cargo-tools**     | Rust/Cargo tools management            | `~/.local/share/bin/` |
-| **nodejs-tools**    | Node.js tools and toolchain management | `~/.local/share/bin/` |
-| **dotnet-tools**    | .NET SDK and global tools management   | `~/.local/share/bin/` |
+| Package                       | Description                            | Target Location       |
+| ----------------------------- | -------------------------------------- | --------------------- |
+| **aux-scripts**               | Utility scripts and tools              | `~/.local/share/bin/` |
+| **lazyvim**                   | Neovim LazyVim configuration           | `~/.config/nvim/`     |
+| **zed**                       | Zed editor configuration               | `~/.config/zed/`      |
+| **zellij-theme-management**   | Zellij theme switcher + helpers        | `~/.local/bin/`       |
+| **kitty**                     | Kitty terminal themes + scripts        | `~/.config/kitty/`    |
+| **raycast-scripts**           | Raycast automation scripts             | `~/.local/share/bin/` |
+| **nix-scripts**               | Nix-related utility scripts            | `~/.local/share/bin/` |
+| **cargo-tools**               | Rust/Cargo tools management            | `~/.local/share/bin/` |
+| **nodejs-tools**              | Node.js tools and toolchain management | `~/.local/share/bin/` |
+| **dotnet-tools**              | .NET SDK and global tools management   | `~/.local/share/bin/` |
 
 ### Quick Stow Commands
 
@@ -618,13 +615,13 @@ cd ~/darwin-config/stow
 manage-stow-packages deploy
 
 # Deploy specific packages
-stow -t ~ doom-emacs      # Deploy Doom Emacs config
-stow -t ~ raycast-scripts # Deploy Raycast scripts
-stow -t ~ aux-scripts     # Deploy utility scripts
+stow -t ~ lazyvim                # Deploy LazyVim config
+stow -t ~ zed                    # Deploy Zed config
+stow -t ~ aux-scripts            # Deploy utility scripts
 
 # Remove packages
-stow -D -t ~ doom-emacs   # Remove Doom Emacs config
-manage-stow-packages remove # Remove all packages
+stow -D -t ~ lazyvim            # Remove LazyVim config
+manage-stow-packages remove     # Remove all packages
 ```
 
 ### Tool Management Scripts
@@ -638,7 +635,7 @@ manage-nodejs-tools install   # Install Node.js toolchain from nodejs-tools.toml
 manage-dotnet-tools install   # Install .NET SDK from dotnet-tools.toml
 
 # Configuration management
-manage-doom-config            # Update Doom Emacs with user settings
+# (Bring your own Emacs config; no Doom helper script is provided)
 ```
 
 ### When to Use Stow vs. Nix
@@ -646,7 +643,7 @@ manage-doom-config            # Update Doom Emacs with user settings
 **Use Stow for:**
 
 - Complex shell scripts that are hard to escape in Nix
-- Editor configurations with many files (Doom Emacs, LazyVim)
+- Editor configurations with many files (LazyVim, Zed, custom Emacs setups)
 - Raycast scripts that need specific file locations
 - Development tool management scripts
 
@@ -779,193 +776,68 @@ If you're setting up on a system without commercial fonts:
 
 This repository includes comprehensive configurations for both Doom Emacs and Neovim (LazyVim), managed through the stow system for easy deployment and version control.
 
-### 🚀 Doom Emacs Configuration
+### 🚀 Emacs Configuration
 
-A complete, modular Doom Emacs configuration with advanced features, language support, and development tools.
+The repository now ships the exact `emacs-git` build from [`emacs-overlay`](https://github.com/nix-community/emacs-overlay).
+There is no Doom layer or stow-managed Emacs configuration anymore—bring whatever setup you prefer (`~/.emacs.d`,
+`~/.config/emacs`, straight-org tangles, etc.). The Nix build focuses on a fast, cache-friendly Emacs.app with
+native compilation, tree-sitter, ImageMagick, and Xwidgets enabled. During the build we copy in the Liquid Glass
+Tahoe icon pack stored in `modules/assets/icons`, so you still get the refreshed macOS 15 visuals without touching
+upstream sources.
 
 #### Quick Setup
 
 ```bash
-# 1. Emacs is now managed via Nix packages and home-manager service
-# No need to manually install Emacs - it's included in the system configuration
+# (Optional) Build Emacs with maximum resources before the full switch
+nix run .#build-emacs-priority
 
-# 2. Install Doom Emacs if not already installed
-if [[ ! -d ~/.emacs.d ]]; then
-  git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.emacs.d
-  ~/.emacs.d/bin/doom install
-fi
+# Build + switch the system (installs Emacs, LaunchAgent, and helper scripts)
+ns -v
 
-# 3. Deploy Doom configuration via stow
-manage-stow-packages deploy doom-emacs
-# OR deploy all packages: manage-stow-packages deploy
-
-# 4. Sync Doom with new configuration
-doom sync
-
-# 5. The Emacs daemon starts automatically via home-manager service
-# Check service status:
-emacs-service-toggle status
+# Deploy helper scripts if you have not already
+manage-stow-packages deploy
 ```
 
-#### Configuration Structure
+After `ns`, the Home Manager LaunchAgent keeps an Emacs daemon running via `--fg-daemon`, so GUI and terminal
+clients connect instantly.
 
-```
-~/.doom.d/  (symlinked from ~/darwin-config/stow/doom-emacs/.doom.d/)
-├── init.el          # Doom modules configuration
-├── packages.el      # Package declarations and configuration
-├── config.el        # Main configuration loader
-├── custom.el        # Emacs custom variables
-├── config/          # Modular configuration files
-│   ├── ai/          # AI tools (Tabnine, Copilot, etc.)
-│   ├── core/        # Core Emacs functionality
-│   ├── jvm/         # JVM languages (Java, Clojure, Kotlin)
-│   ├── languages/   # Programming language configurations
-│   ├── lsp/         # Language Server Protocol setup
-│   ├── misc/        # Miscellaneous configurations
-│   ├── ui/          # User interface customizations
-│   └── writing/     # Writing and documentation tools
-├── snippets/        # YASnippet templates
-└── docs/           # Configuration documentation
+#### Helper Commands
 
-Doom Emacs itself is installed at ~/.emacs.d/
-```
+These live under `stow/aux-scripts/.local/share/bin` and are installed to `~/.local/share/bin` by
+`manage-stow-packages deploy`:
 
-#### Key Features
+| Command | Description |
+| --- | --- |
+| `e [files...]` | Open files in GUI Emacs via `emacsclient -c` (starts daemon if needed) |
+| `t [files...]` | Open files in a terminal frame (`emacsclient -t`) |
+| `et` | Launch the daemon in the foreground and exit once ready |
+| `edd` | Force-start the GUI daemon via `/Applications/Emacs.app` |
+| `emacsclient-gui` | Open a GUI frame using the LaunchServices-aware wrapper |
+| `emacs-service-toggle` | Enable/disable the Home Manager LaunchAgent |
+| `build-emacs-priority [--continue-build]` | Build `emacs-git` first with maximum CPU before running `nb/ns` |
 
-- **🧠 AI Integration**: Tabnine, GitHub Copilot support
-- **🛠️ LSP Support**: Language servers for 15+ programming languages
-- **🎨 Advanced UI**: Custom themes, fonts, ligatures, modeline
-- **📁 Project Management**: Projectile, Treemacs, smart project detection
-- **🔍 Search & Navigation**: Vertico, Consult, advanced search capabilities
-- **📝 Writing Tools**: Org-mode, Markdown, LaTeX, presentations
-- **🚀 Performance**: Lazy loading, optimized startup
-- **🔧 Modular Design**: Easy to customize and extend
+#### Bring Your Own Configuration
 
-#### Available Commands & Aliases
-
-| Command                       | Description                           |
-| ----------------------------- | ------------------------------------- |
-| `e [files...]`                | Open files in GUI Emacs (with daemon) |
-| `t [files...]`                | Open files in terminal Emacs          |
-| `et`                          | Start Emacs in background             |
-| `edd`                         | Start Emacs daemon                    |
-| `emacsclient-gui`             | Launch Emacs GUI with macOS integration |
-| `emacs-service-toggle`        | Manage Emacs home-manager service     |
-| `emacs-pin [commit]`          | Pin Emacs to specific/current version |
-| `emacs-unpin`                 | Use latest Emacs from overlay         |
-| `emacs-pin-status`            | Show current Emacs pinning status     |
-| `manage-doom-config status`   | Check configuration deployment status |
-| `manage-doom-config validate` | Validate all elisp files for syntax   |
-| `manage-doom-config sync`     | Validate config and run `doom sync`   |
-| `manage-doom-config edit`     | Open configuration in Emacs           |
-| `manage-doom-config backup`   | Create timestamped backup             |
-| `doom sync`                   | Sync Doom with configuration changes  |
-| `doom upgrade`                | Update Doom Emacs itself              |
-| `doom doctor`                 | Diagnose configuration issues         |
-
-##### VTerm Included (No Runtime Compile)
-
-- Emacs is built with `vterm` via Nix (`emacsWithPackages` + `epkgs.vterm`).
-- No y/n prompts and no runtime compilation; vterm is ready after `ns`.
-- Uses Nix-provided libvterm automatically; no Homebrew dependency required.
-
-#### Emacs Version Pinning
-
-This repo includes a robust Emacs pinning system to control when Emacs rebuilds, even as the emacs-overlay advances.
-
-- Files used (in `~/.cache`):
-  - `emacs-git-pin` — the pinned emacs-mirror commit (SHA)
-  - `emacs-git-pin-hash` — the SRI hash for that commit (informational)
-  - `emacs-git-store-path` — the exact Nix store path of your built Emacs
-
-- Core behavior:
-  - Pinned + stored path present: `ns` reuses the exact stored build. Overlay updates do not rebuild Emacs. This reuse requires impure evaluation; `nb`/`ns` default to impure.
-  - Pinned + stored path missing (likely GC): `ns` builds the latest overlay commit instead, then auto‑pins to it after the switch. This replaces the previous pin.
-  - Unpinned: `ns` builds the latest overlay commit as usual.
-
-- Commands:
-  - `emacs-pin` — Pin to the current overlay commit and capture the already‑built store path (no rebuild). Use this right after a successful build to lock the exact version.
-  - `emacs-pin <commit>` — Pin to a specific emacs‑mirror commit (stores commit + hash). If that commit is not already built locally, the next `ns` will build the latest overlay commit (by design) and auto‑pin to that instead.
-  - `emacs-unpin` — Remove pin and stored path; `ns` uses the latest overlay.
-  - `emacs-pin-status` — Show current overlay commit, pinned commit, stored hash, and stored build path if present.
-  - Rust equivalents: `emacs-pin-rs`, `emacs-pin-diff-rs`, and `emacs-pin-status-rs` expose the same actions through the compiled CLI. These are what `ns`, `nb`, and the Home Manager activation hook invoke automatically for faster default behavior.
-
-- Typical workflows:
-  - Lock current build after an update:
-    1) `ns -v` (builds latest overlay), 2) `emacs-pin`, 3) `emacs-pin-status` (shows stored build path). Future `ns` runs won’t rebuild Emacs until you unpin or the path is GC’d.
-  - After GC removed the stored path:
-    - Run `ns -v`. Emacs builds at the latest overlay commit and, after switch, the system auto‑pins to it. Check with `emacs-pin-status`.
-  - Forget to pin before building:
-    - Just run `emacs-pin` after a successful `ns`; it will capture the already‑built Emacs and prevent further rebuilds on overlay updates.
-
-- Notes and caveats:
-  - Automation prefers the compiled helper. `ns`/`nb` (and the activation hook) call `emacs-pin-rs` under the hood; the xonsh scripts stay available for debugging or experimenting with new logic.
-  - The stored path is the key to “no rebuilds”. Keep it alive or expect a one‑time rebuild to the latest overlay commit on the next `ns`.
-  - Reuse is an impure-eval feature. Disable with `--pure` or `NS_IMPURE=0` to force a clean evaluation/build.
-  - Pinning to an older, specific commit only makes sense if that exact build already exists locally. If it doesn’t, the next `ns` will intentionally build the latest overlay and auto-pin to it.
-  - Status output includes direct links to both current overlay and pinned commits for quick comparison.
-
-Contributors: see CLAUDE.md (Managing Emacs Versions → Emacs Pinning Behavior) for implementation details and contributor notes.
-
-#### Font Integration
-
-- **Smart Font Detection**: Automatically uses best available programming font
-- **Font Cycling**: Press `F8` to cycle between MonoLisa → PragmataPro → JetBrains Mono
-- **Ligature Support**: Optimized ligatures for each font
-- **Size Optimization**: Each font uses its optimal size settings
-
-#### Configuration Management
+Because there is no longer a `stow/doom-emacs` package, manage your editor config directly in your preferred
+location:
 
 ```bash
-# Edit configuration (preserves version control)
-cd ~/darwin-config/stow/doom-emacs/.doom.d/
-# Make changes to files here
-
-# Validate changes before committing
-manage-doom-config validate
-
-# Sync changes to Doom
-manage-doom-config sync
-
-# Commit to version control
-git add . && git commit -m "Update Doom config"
+mkdir -p ~/.emacs.d
+cd ~/.emacs.d
+# Track your configuration however you like (git, org tangles, straight.el, etc.)
 ```
 
-#### Language Support
+If you still want to keep configuration files inside this repository, create your own stow package (for example
+`stow/emacs-config/.emacs.d/`) and deploy it with `stow -t ~ emacs-config`.
 
-**Actively Configured Languages:**
+#### Liquid Glass Icons & Binary Cache Behavior
 
-- **Systems**: Rust, Go, C/C++
-- **JVM**: Java, Clojure, Kotlin (Scala support removed)
-- **Web**: TypeScript, JavaScript, HTML, CSS
-- **Data**: Python, SQL, JSON, YAML
-- **Shell**: Bash, Fish, Nushell
-- **Markup**: Markdown, Org-mode
-- **Config**: Nix, TOML, YAML
-- **Mobile**: Swift
-- **Functional**: Emacs Lisp, Clojure
-
-#### Troubleshooting
-
-```bash
-# Check configuration status
-manage-doom-config status
-
-# Validate elisp syntax (uses elisp-formatter.js)
-manage-doom-config validate
-
-# Diagnose issues
-doom doctor
-
-# Re-deploy configuration
-manage-stow-packages remove doom-emacs
-manage-stow-packages deploy doom-emacs
-doom sync
-
-# If Doom commands are not found, add to PATH:
-export PATH="$HOME/.emacs.d/bin:$PATH"
-```
-
+- The build copies `modules/assets/icons/Assets.car` plus the `EmacsLG1-*.icns` files into the generated
+  `Emacs.app` bundle and sets `CFBundleIconName` to `EmacsLG1` via `PlistBuddy`.
+- This customization happens in a lightweight derivation that simply copies the cached `emacs-git` output, so you
+  still benefit from the emacs-overlay binary cache—no 45-minute native rebuilds.
+- There is no Emacs pinning logic anymore. `nb`/`ns` simply evaluate against the overlay you have pinned in
+  `flake.lock`. To try an older commit, update `flake.lock` or use `nix registry pin` as needed.
 ### 🌟 Neovim (LazyVim) Configuration
 
 A modern Neovim configuration based on LazyVim with sensible defaults, extensive plugin ecosystem, and enhanced Lisp/Elisp support.
@@ -1099,8 +971,8 @@ Both editor configurations use the stow system for deployment and management.
 manage-stow-packages deploy
 
 # Deploy specific editor
-stow -t ~ doom-emacs    # Deploy Doom Emacs config
 stow -t ~ lazyvim       # Deploy LazyVim config
+stow -t ~ zed           # Deploy Zed config
 
 # Check deployment status
 manage-stow-packages status
@@ -1110,8 +982,8 @@ manage-stow-packages status
 
 ```bash
 # Remove specific editor config (preserves files)
-stow -D -t ~ doom-emacs
 stow -D -t ~ lazyvim
+stow -D -t ~ zed
 
 # Remove all stow packages
 manage-stow-packages remove
@@ -1452,12 +1324,6 @@ hostConfigs = {
    nb && ns  # Build and switch
    ```
 
-3. **Update Emacs configuration (optional):**
-
-   ```bash
-   nix run .#update-doom-config
-   ```
-
 ### 🌟 Shell Features
 
 #### Primary Shells (Nushell & Zsh) - Full Features
@@ -1546,11 +1412,10 @@ lines = result.split('\n')
 | `gp`     | `git fetch --all -p; git pull; git submodule update --recursive` | Git pull with submodules              |
 | `search` | `rg -p --glob '!node_modules/*'`                                 | Ripgrep search excluding node_modules |
 | `diff`   | `difft`                                                          | Better diff tool                      |
-| `edd`    | `emacs --daemon=doom`                                            | Start Emacs daemon                    |
-| `ds`     | `doom sync --aot --gc`                                           | Doom sync with optimization           |
+| `edd`    | `emacs-service-toggle start`                                     | Start Emacs daemon via LaunchAgent    |
 
 Impure/pure switches for nb/ns:
-- Default: impure evaluation (reuses pinned Emacs store path when available).
+- Default: impure evaluation for compatibility with host-specific tooling that reads from the working tree.
 - Force pure: `ns --pure` or `NS_IMPURE=0 ns` (same for `nb`).
 - Explicit impure: `ns --impure` or `NS_IMPURE=1 ns`.
 
@@ -1756,10 +1621,14 @@ flake.nix              # Main flake with inputs, hostConfigs, and apps
 │   ├── add-host.sh        # Add new host to flake
 │   └── setup-*-secrets.sh # Secrets management scripts
 └── stow/              # GNU Stow packages for dotfiles
-    ├── raycast-scripts/   # Raycast automation scripts
-    ├── nix-scripts/       # Nix-related utilities
-    ├── doom-emacs/        # Doom Emacs configuration
-    └── .../               # Various tool configurations
+    ├── aux-scripts/        # Helper scripts deployed to ~/.local/share/bin
+    ├── lazyvim/            # LazyVim configuration (Neovim)
+    ├── zed/                # Zed editor configuration
+    ├── zellij-theme-management/ # Zellij theme switcher scripts
+    ├── kitty/              # Kitty terminal theme + helper scripts
+    ├── raycast-scripts/    # Raycast automation scripts
+    ├── nix-scripts/        # Nix-related utilities
+    └── .../                # Additional tool configurations
 ```
 
 ## 📖 Documentation
@@ -1834,10 +1703,10 @@ This configuration is provided as-is. Feel free to use, modify, and distribute a
 - ✅ Improved build security without impacting functionality
 - 🧹 Eliminated sandbox warning messages during builds
 
-**2025-10-08** - **Emacs Pinning System Restored**
-- 🔧 Fixed emacs-pin tools missing from PATH after uv2nix migration
-- ✅ Restored `emacs-pin`, `emacs-pin-status`, `emacs-unpin`, `emacs-pin-diff` commands
-- 🔄 Auto-pinning during `ns` builds working correctly again
+**2025-10-08** - **Simplified Emacs Build**
+- ✅ Removed the emacs-pinning module and associated helper commands
+- 🚀 Emacs now uses the cached emacs-overlay `emacs-git` build with Liquid Glass icons applied post-build
+- 📝 Updated documentation and stow helpers to reflect the bring-your-own-configuration workflow
 
 **2025-10-09** - **Xonsh Scripting Guidelines Published**
 - 📚 Added comprehensive xonsh scripting guidelines to CLAUDE.md and AGENTS.md

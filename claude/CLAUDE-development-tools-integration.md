@@ -1,7 +1,7 @@
 # Development Tools Integration
 
 ### Editor Configurations (via Stow)
-- **Doom Emacs**: `stow/doom-emacs/` - Complete modular configuration
+- **Emacs**: Provided via `emacs-overlay` with Liquid Glass icons applied during build
   - Now uses Emacs from Nix packages with home-manager service
   - Removed Scala support, focused on core languages
   - Enhanced terminal compatibility (Ghostty support)

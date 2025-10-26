@@ -179,21 +179,20 @@ echo "🚀 Phase 1: Building Emacs with dedicated resources..."
 
 if [[ "$DRY_RUN" == "true" ]]; then
   echo "🔍 DRY RUN - Would execute:"
-  echo "   # Building configured Emacs (emacs-git with pinning + custom build options)"
+  echo "   # Building configured Emacs (emacs-git directly from emacs-overlay)"
   echo "   nix build --max-jobs $EMACS_MAX_JOBS --cores $EMACS_CORES .#darwinConfigurations.$HOSTNAME.config.home-manager.users.$USER.services.emacs.package"
   echo ""
-  echo "   This builds the emacs-git version with:"
-  echo "   • Version pinning support (respects ~/.cache/emacs-git-pin)"
-  echo "   • Native compilation enabled"
-  echo "   • Custom build options (Tree-sitter, ImageMagick, Xwidgets, etc.)"
-  echo "   • Verbose build progress indicators"
+  echo "   This builds the emacs-git version shipped by emacs-overlay:"
+  echo "   • Uses the exact overlay derivation (cache-friendly)"
+  echo "   • Includes native compilation and upstream defaults"
+  echo "   • Shows verbose build progress indicators"
 else
   verbose_log "   Executing: nix build configured Emacs with max-jobs=$EMACS_MAX_JOBS"
 
   # Build the configured Emacs with dedicated resources
-  echo "📦 Building configured Emacs (emacs-git with custom options)..."
-  echo "   • Respects emacs-pinning.nix settings"
-  echo "   • Includes native compilation and enhanced features"
+  echo "📦 Building configured Emacs (emacs-git straight from emacs-overlay)..."
+  echo "   • Binary cache friendly (no local pinning logic)"
+  echo "   • Includes native compilation and upstream defaults"
   echo "   • Uses verbose build progress indicators"
   echo ""
 

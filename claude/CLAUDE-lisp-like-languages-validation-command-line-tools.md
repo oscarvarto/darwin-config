@@ -51,7 +51,7 @@ Commands: check <file> Check if S-expressions are balanced (validation only, no 
 
 🚀 RECOMMENDED WORKFLOWS:
 
-  For Doom Emacs configs: elisp-formatter batch ~/.doom.d/config --mode elisp
+  For custom Emacs configs: elisp-formatter batch ~/.emacs.d --mode elisp
 
   Quick validation: elisp-formatter batch . --check
 

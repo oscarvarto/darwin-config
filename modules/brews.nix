@@ -56,16 +56,16 @@
       "helix"
       "hugo"
       "imagemagick"
-      "oscarvarto/jank/jank-git"
+      # "oscarvarto/jank/jank-git"
       "jq"
       "libedit"
       "libsql"
       "libtool"
       "libgccjit"
-      # {
-      #   name = "llvm";
-      #   args = ["HEAD"];
-      # }
+      {
+        name = "llvm";
+        args = ["HEAD"];
+      }
       "markdown-oxide"
       "markdownlint-cli2"
       "marksman"

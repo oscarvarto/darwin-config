@@ -17,15 +17,15 @@
 - Maintenance: `smart-gc status|dry-run|clean` — inspect/clean generations.
 
 Impure vs Pure evaluation (nb/ns):
-- Default: nb/ns run with impure evaluation to enable Emacs pin reuse (reads `~/.cache/emacs-git-store-path`).
-- Force pure: add `--pure` or set `NS_IMPURE=0` to disable reuse and get a fully pure evaluation.
+- Default: nb/ns run with impure evaluation for compatibility with host-specific tooling that expects access to the working tree.
+- Force pure: add `--pure` or set `NS_IMPURE=0` for a fully pure evaluation.
 - Explicit impure: add `--impure` or set `NS_IMPURE=1`.
 
 ## Coding Style & Naming Conventions
 - Nix: 2‑space indent, no trailing whitespace, kebab‑case filenames (e.g., `packages.nix`).
 - Keep modules small, composable, and import via `modules/`.
 - Scripts: prefer portable Bash; Nushell/Zsh allowed where appropriate. Use `set -euo pipefail` for Bash.
-- Run `nix fmt .` before committing. Keep names descriptive: `emacs-pinning.nix`, `manage-*.nu`.
+- Run `nix fmt .` before committing. Keep names descriptive: `path-config.nix`, `manage-*.nu`.
 
 ## Testing Guidelines
 - Primary checks are functional builds:
@@ -50,10 +50,9 @@ Impure vs Pure evaluation (nb/ns):
 - Stow usage: always target home with `stow -t ~ PACKAGE`; prefer `manage-stow-packages deploy`. Symlinked executables should land in `~/.local/share/bin`.
 - Nix-embedded scripts: escape `${` and `$` correctly. Quick refs — double-quoted: `\"`, `\\`, `\${}`; indented strings: `''${}`, `''\n`.
 - Emacs/Elisp edits: validate with `elisp-formatter elisp FILE --check` (or `smart`), ensure balanced parens; rebuild with `nb && ns`.
-- Emacs pinning (contributors):
-  - Use `emacs-pin` after a successful build to capture the exact store path and prevent rebuilds on overlay updates.
-  - If pinned but the stored path was GC'd, the next `ns` builds the latest overlay commit and auto-pins to it after switch.
-  - `emacs-pin-status` shows overlay vs pinned commits and whether a stored path is present.
+- Emacs (contributors):
+  - We use the upstream `emacs-overlay` `emacs-git` derivation directly; no pinning logic is required.
+  - `build-emacs-priority` builds that derivation with dedicated resources when needed.
 - PATH edits belong in `modules/path-config.nix` (centralized precedence); apply with `ns`.
 - Prefer fast Rust tools (`rg`, `fd`) over legacy `grep/find` in examples and scripts.
 - Do not introduce NordVPN CLI dependencies (intentionally unsupported).

@@ -13,7 +13,7 @@ modules/                      # Modular configuration components
 ├── secrets.nix               # Age-encrypted secrets with agenix
 ├── enhanced-secrets.nix      # Unified secret management CLI
 ├── secure-credentials.nix    # 1Password/pass integration
-├── emacs-pinning.nix         # Emacs version pinning system (NEW)
+├── assets/icons/             # Liquid Glass icon pack for Emacs.app
 ├── terminal-support.nix      # Ghostty terminfo support (NEW)
 ├── biometric-auth.nix        # macOS biometric authentication (NEW)
 ├── starship.toml             # Starship prompt with Catppuccin theme

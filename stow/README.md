@@ -13,10 +13,6 @@ stow/
 ├── cargo-tools/          # Rust/Cargo tools management
 │   ├── cargo-tools.toml # Configuration for cargo packages
 │   └── .local/share/bin/# Management script
-├── doom-emacs/           # Doom Emacs configuration
-│   └── .doom.d/         # Doom configuration files
-├── doom-extra-files/     # Extra Doom Emacs resources
-│   └── doom-extra-files/# Templates, snippets, themes, etc.
 ├── nodejs-tools/         # Node.js tools management
 │   ├── nodejs-tools.toml# Configuration for Node.js packages
 │   └── .local/share/bin/# Management script
@@ -25,6 +21,12 @@ stow/
 │   └── .local/share/bin/# Management script
 ├── lazyvim/              # Neovim LazyVim configuration
 │   └── .config/nvim/    # LazyVim configuration files
+├── zed/                  # Zed editor configuration
+│   └── .config/zed/     # Zed configuration files
+├── zellij-theme-management/ # Zellij theme switcher
+│   └── .local/bin/      # Theme scripts
+├── kitty/                # Kitty terminal configuration
+│   └── .config/kitty/   # Kitty themes + helper scripts
 ├── nix-scripts/          # Nix-related utility scripts
 │   └── .local/share/bin/# Nix utilities and helpers
 ├── raycast-scripts/      # Raycast automation scripts
@@ -38,18 +40,19 @@ stow/
 To deploy all managed tools and scripts:
 ```bash
 cd ~/darwin-config/stow
-manage-aux-scripts deploy
+manage-stow-packages deploy
 ```
 
 Or deploy individual packages:
 ```bash
 stow -t ~ aux-scripts      # Deploy auxiliary scripts
 stow -t ~ cargo-tools      # Deploy cargo tools management
-stow -t ~ doom-emacs       # Deploy Doom Emacs configuration
-stow -t ~ doom-extra-files # Deploy extra Doom Emacs resources
 stow -t ~ nodejs-tools     # Deploy Node.js tools management
 stow -t ~ dotnet-tools     # Deploy .NET tools management
 stow -t ~ lazyvim          # Deploy LazyVim configuration
+stow -t ~ zed              # Deploy Zed configuration
+stow -t ~ zellij-theme-management # Deploy Zellij themes
+stow -t ~ kitty            # Deploy Kitty configuration
 stow -t ~ nix-scripts      # Deploy Nix utility scripts
 stow -t ~ raycast-scripts  # Deploy Raycast automation scripts
 ```
@@ -60,7 +63,7 @@ This will create symlinks from `~/.local/share/bin/` to the scripts in `stow/aux
 To remove all symlinks:
 ```bash
 cd ~/darwin-config/stow
-manage-aux-scripts remove
+manage-stow-packages remove
 ```
 
 ### Add New Scripts
@@ -80,7 +83,7 @@ After a system wipe:
 - `cleanup-intellij` - Comprehensive IntelliJ IDEA cache and project cleanup utility
 ;; Metals installer removed - Scala support discontinued
 - `lunar` - CLI wrapper for Lunar display control app
-- `manage-aux-scripts` - Management utility for this stow-based script system
+- `manage-stow-packages` - Management utility for this stow-based script system
 - `restore-jj-repo` - Restores a Jujutsu colocated repository after .jj directory deletion
 - `test-maven-classpath.sh` - Maven classpath testing utility
 - `testng-debug` - TestNG debugging wrapper with proper classpath setup
@@ -103,14 +106,6 @@ After a system wipe:
 - `manage-dotnet-tools` - Install, update, and manage .NET environment
 - `dotnet-tools.toml` - Declarative configuration for SDK version and tools
 - Integrates with .NET CLI global tool system
-
-### Doom Extra Files (`doom-extra-files`)
-- Additional Doom Emacs resources stored outside `.doom.d`
-- Templates for file creation and project scaffolding
-- Custom YASnippet snippets organized by mode
-- Custom themes and color schemes
-- Symlinked to `~/doom-extra-files/` when deployed
-- Version controlled alongside main Doom configuration
 
 ### LazyVim Configuration (`lazyvim`)
 - Neovim configuration based on LazyVim framework

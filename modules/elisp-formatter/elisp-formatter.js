@@ -64,8 +64,8 @@ structural issues like missing parentheses or unbalanced expressions.
 
 🚀 RECOMMENDED WORKFLOWS:
 
-  For Doom Emacs configs:
-    elisp-formatter batch ~/.doom.d/config --mode elisp
+  For custom Emacs configs:
+    elisp-formatter batch ~/.emacs.d --mode elisp
 
   Quick validation:
     elisp-formatter batch . --check
@@ -645,4 +645,3 @@ Examples:
   });
 
 program.parse();
-
