@@ -20,11 +20,10 @@
   userHome = lib.attrByPath ["users" "users" user "home"] "/Users/${user}" config;
 
   iconAssets = ./assets/icons;
-  # Use emacs-unstable from overlay - stable pre-release Emacs with faster builds
-  # The overlay should provide pre-built binaries for aarch64-darwin
-  baseEmacs = inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-unstable;
+  # Use standard Emacs from nixpkgs - pre-built with binary cache support
+  baseEmacs = pkgs.emacs;
   configuredEmacs =
-    pkgs.runCommand "emacs-unstable-liquid-glass" {
+    pkgs.runCommand "emacs-liquid-glass" {
       nativeBuildInputs = [
         pkgs.bash
         pkgs.coreutils
@@ -40,9 +39,13 @@
         RSYNC=${pkgs.rsync}/bin/rsync
         FIND=${pkgs.findutils}/bin/find
         CP=${pkgs.coreutils}/bin/cp
+        CHMOD=${pkgs.coreutils}/bin/chmod
 
         mkdir -p "$out"
         $RSYNC -a "$EMACS_BASE"/ "$out"/
+
+        # Make all files writable so we can modify them
+        $CHMOD -R u+w "$out"
 
         EMACS_APP=$($FIND "$out" -name "Emacs.app" -type d | head -n1 || true)
         if [[ -n "$EMACS_APP" && -d "$EMACS_APP/Contents/Resources" ]]; then
@@ -50,10 +53,12 @@
           ICON_LG1_DEFAULT_SOURCE="$ASSETS_DIR/EmacsLG1-Default.icns"
           ICON_LG1_DARK_SOURCE="$ASSETS_DIR/EmacsLG1-Dark.icns"
 
+          # Backup original icon
           if [[ -f "$EMACS_APP/Contents/Resources/Emacs.icns" ]]; then
             $CP "$EMACS_APP/Contents/Resources/Emacs.icns" "$EMACS_APP/Contents/Resources/Emacs.icns.original"
           fi
 
+          # Copy custom icon files
           if [[ -f "$ASSETS_CAR_SOURCE" ]]; then
             $CP "$ASSETS_CAR_SOURCE" "$EMACS_APP/Contents/Resources/Assets.car"
           fi
@@ -64,11 +69,6 @@
 
           if [[ -f "$ICON_LG1_DARK_SOURCE" ]]; then
             $CP "$ICON_LG1_DARK_SOURCE" "$EMACS_APP/Contents/Resources/EmacsLG1-Dark.icns"
-          fi
-
-          if [[ -f "$EMACS_APP/Contents/Info.plist" ]]; then
-            /usr/libexec/PlistBuddy -c "Add :CFBundleIconName string EmacsLG1" "$EMACS_APP/Contents/Info.plist" 2>/dev/null || \
-            /usr/libexec/PlistBuddy -c "Set :CFBundleIconName EmacsLG1" "$EMACS_APP/Contents/Info.plist"
           fi
         fi
       '

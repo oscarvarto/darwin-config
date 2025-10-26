@@ -62,10 +62,10 @@
       "libsql"
       "libtool"
       "libgccjit"
-      {
-        name = "llvm";
-        args = ["HEAD"];
-      }
+      # {
+      #   name = "llvm";
+      #   args = ["HEAD"];
+      # }
       "markdown-oxide"
       "markdownlint-cli2"
       "marksman"

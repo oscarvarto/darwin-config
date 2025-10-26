@@ -299,13 +299,13 @@
 
     darwinConfigurations = nixpkgs.lib.mapAttrs mkDarwinConfig hostConfigs;
 
-    # Expose configuredEmacs for each host so scripts can reference the overlay build
+    # Expose configuredEmacs for each host so scripts can reference the build
     packages = nixpkgs.lib.genAttrs darwinSystems (
       system: let
-        emacsOverlayPkgs = inputs.emacs-overlay.packages.${system};
+        pkgs = nixpkgs.legacyPackages.${system};
       in
         nixpkgs.lib.mapAttrs' (
-          hostname: _: nixpkgs.lib.nameValuePair "${hostname}-configuredEmacs" emacsOverlayPkgs.emacs-unstable
+          hostname: _: nixpkgs.lib.nameValuePair "${hostname}-configuredEmacs" pkgs.emacs
         )
         hostConfigs
     );
