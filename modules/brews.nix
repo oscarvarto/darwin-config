@@ -56,7 +56,7 @@
       "helix"
       "hugo"
       "imagemagick"
-      # "oscarvarto/jank/jank-git"
+      "oscarvarto/jank/jank-git"
       "jq"
       "libedit"
       "libsql"

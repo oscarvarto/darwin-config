@@ -107,6 +107,21 @@ in {
         # Based on https://github.com/d12frosted/homebrew-emacs-plus/issues/554#issuecomment-1564287827
         export LIBRARY_PATH="/opt/homebrew/opt/gcc/lib/gcc/15:/opt/homebrew/opt/libgccjit/lib/gcc/15:/opt/homebrew/opt/gcc/lib/gcc/15/gcc/aarch64-apple-darwin25/15"
 
+        # jank wrapper function to clear Nix SDK variables
+        # Fixes macOS 26 SDK header ordering issue (jank-lang/jank#560)
+        jank() {
+            local SDKROOT="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+            local DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
+
+            # Clear Nix-provided compiler flags that interfere with jank's PCH compilation
+            unset NIX_CFLAGS_COMPILE
+            unset NIX_LDFLAGS
+            unset NIX_APPLE_SDK_VERSION
+
+            # Run jank with clean SDK environment
+            env SDKROOT="$SDKROOT" DEVELOPER_DIR="$DEVELOPER_DIR" /opt/homebrew/bin/jank "$@"
+        }
+
         # Define variables for directories
         export EMACSDIR=$HOME/.emacs.d
 
