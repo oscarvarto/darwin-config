@@ -29,6 +29,7 @@
       "bat-extras"
       "bfg"
       "boot-clj"
+      "boost"
       "borkdude/brew/babashka"
       # Moved to Nix packages to avoid conflicts with xonsh xontrib
       # "carapace"
