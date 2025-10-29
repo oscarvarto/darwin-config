@@ -33,7 +33,7 @@ A comprehensive macOS system configuration using Nix-Darwin and Home Manager wit
 - [🗂️ GNU Stow Package Management](#%EF%B8%8F-gnu-stow-package-management)
 - [🔤 Font Management & Fallback System](#-font-management--fallback-system)
 - [✏️ Editor Configurations](#%EF%B8%8F-editor-configurations)
-- [🚀 Emacs Configuration](#-emacs-configuration)
+  - [🚀 Emacs Configuration](#-emacs-configuration)
   - [🌟 Neovim (LazyVim) Configuration](#-neovim-lazyvim-configuration)
   - [🛠️ Editor Management with Stow](#%EF%B8%8F-editor-management-with-stow)
 - [🧠 IntelliJ IDEA Development Utilities](#-intellij-idea-development-utilities)
