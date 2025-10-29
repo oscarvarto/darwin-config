@@ -84,6 +84,21 @@
         "type": "github"
       }
     },
+    "crane": {
+      "locked": {
+        "lastModified": 1760924934,
+        "narHash": "sha256-tuuqY5aU7cUkR71sO2TraVKK2boYrdW3gCSXUkF4i44=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "c6b4d5308293d0d04fcfeee92705017537cad02f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -284,11 +299,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1761666354,
-        "narHash": "sha256-fHr+tIYBJccNF8QWqgowfRmEAtAMSt1deZIRNKL8A7c=",
+        "lastModified": 1761750844,
+        "narHash": "sha256-ab6kNHAEP/oWz8qdblnDw7TIwetr4GnmnDyvya0aw/k=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "ca2ab1d877a24d5a437dad62f56b8b2c02e964e9",
+        "rev": "b8082c6803353456d45e6a8c0d4b36ad33fb7d6a",
         "type": "github"
       },
       "original": {
@@ -348,11 +363,11 @@
     "homebrew-cask": {
       "flake": false,
       "locked": {
-        "lastModified": 1761747976,
-        "narHash": "sha256-nJ7Ik/O+FRcS7BTu3ETVhuFm/1Cwv8LyoiRukZ6JjcQ=",
+        "lastModified": 1761748744,
+        "narHash": "sha256-lS5F+yer5AcVKcKmMt99UOdotEgF1i1nwNpkDXhOC4k=",
         "owner": "homebrew",
         "repo": "homebrew-cask",
-        "rev": "a73ddce5d91af21ae62b7cb451a82d03e276f9ab",
+        "rev": "537cc0af11de74b9172848d94c659fd08dc14e97",
         "type": "github"
       },
       "original": {
@@ -364,11 +379,11 @@
     "homebrew-core": {
       "flake": false,
       "locked": {
-        "lastModified": 1761748566,
-        "narHash": "sha256-++1NTtgjUjrvhn5utLj8Mjgw084p3WujpJfOVj0Rpr0=",
+        "lastModified": 1761752344,
+        "narHash": "sha256-prRhHytvyXI9S6eafrCJGC5j0IlabFa59w5gSgFqFHQ=",
         "owner": "homebrew",
         "repo": "homebrew-core",
-        "rev": "41db673f8d72443becad1671852f05af91324352",
+        "rev": "52210716792bcd475afdef29e7c0df5549f374a4",
         "type": "github"
       },
       "original": {
@@ -668,6 +683,7 @@
         "bash-env-json": "bash-env-json",
         "bash-env-nushell": "bash-env-nushell",
         "catppuccin": "catppuccin",
+        "crane": "crane",
         "darwin": "darwin_2",
         "emacs-overlay": "emacs-overlay",
         "flake-parts": "flake-parts",

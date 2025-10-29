@@ -8,6 +8,7 @@
   defaultShell ? "zsh",
   pathConfig ? null,
   darwinConfigPath,
+  emacsPinRust,
   uv2nix,
   pyproject-nix,
   pyproject-build-systems,
@@ -19,60 +20,9 @@
 
   userHome = lib.attrByPath ["users" "users" user "home"] "/Users/${user}" config;
 
-  iconAssets = ./assets/icons;
-  # Use standard Emacs from nixpkgs - pre-built with binary cache support
-  baseEmacs = pkgs.emacs;
-  configuredEmacs =
-    pkgs.runCommand "emacs-liquid-glass" {
-      nativeBuildInputs = [
-        pkgs.bash
-        pkgs.coreutils
-        pkgs.findutils
-        pkgs.rsync
-      ];
-      EMACS_BASE = baseEmacs;
-      ASSETS_DIR = iconAssets;
-    } ''
-      ${pkgs.bash}/bin/bash -c '
-        set -euo pipefail
-
-        RSYNC=${pkgs.rsync}/bin/rsync
-        FIND=${pkgs.findutils}/bin/find
-        CP=${pkgs.coreutils}/bin/cp
-        CHMOD=${pkgs.coreutils}/bin/chmod
-
-        mkdir -p "$out"
-        $RSYNC -a "$EMACS_BASE"/ "$out"/
-
-        # Make all files writable so we can modify them
-        $CHMOD -R u+w "$out"
-
-        EMACS_APP=$($FIND "$out" -name "Emacs.app" -type d | head -n1 || true)
-        if [[ -n "$EMACS_APP" && -d "$EMACS_APP/Contents/Resources" ]]; then
-          ASSETS_CAR_SOURCE="$ASSETS_DIR/Assets.car"
-          ICON_LG1_DEFAULT_SOURCE="$ASSETS_DIR/EmacsLG1-Default.icns"
-          ICON_LG1_DARK_SOURCE="$ASSETS_DIR/EmacsLG1-Dark.icns"
-
-          # Backup original icon
-          if [[ -f "$EMACS_APP/Contents/Resources/Emacs.icns" ]]; then
-            $CP "$EMACS_APP/Contents/Resources/Emacs.icns" "$EMACS_APP/Contents/Resources/Emacs.icns.original"
-          fi
-
-          # Copy custom icon files
-          if [[ -f "$ASSETS_CAR_SOURCE" ]]; then
-            $CP "$ASSETS_CAR_SOURCE" "$EMACS_APP/Contents/Resources/Assets.car"
-          fi
-
-          if [[ -f "$ICON_LG1_DEFAULT_SOURCE" ]]; then
-            $CP "$ICON_LG1_DEFAULT_SOURCE" "$EMACS_APP/Contents/Resources/Emacs.icns"
-          fi
-
-          if [[ -f "$ICON_LG1_DARK_SOURCE" ]]; then
-            $CP "$ICON_LG1_DARK_SOURCE" "$EMACS_APP/Contents/Resources/EmacsLG1-Dark.icns"
-          fi
-        fi
-      '
-    '';
+  # Emacs pinning logic moved to separate module for modularity
+  emacsPinModule = import ./emacs-pinning {inherit pkgs user inputs hostname darwinConfigPath emacsPinRust;};
+  configuredEmacs = emacsPinModule.configuredEmacs;
 
   # User configuration based on hostSettings
   userConfig = {
@@ -189,7 +139,8 @@ in {
             inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default
             inputs.nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
             configuredEmacs
-          ];
+          ]
+          ++ emacsPinModule.pinTools;
         file =
           sharedFiles
           // {
