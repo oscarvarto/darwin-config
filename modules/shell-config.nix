@@ -139,7 +139,7 @@ in {
         # source of truth for starting/stopping the daemon.
         export ALTERNATE_EDITOR="false"
         export EDITOR="emacsclient -t"
-        export VISUAL="emacsclient -c"
+        export VISUAL="zed -w"
         export DARWIN_CONFIG_PATH="${darwinConfigPath}"
 
         # Load theme from cache file set by catppuccin theme switcher

@@ -1031,7 +1031,7 @@ alias search = rg -p --glob '!node_modules/*'
 alias diff = difft
 
 $env.EDITOR = "emacsclient -t"
-$env.VISUAL = "emacsclient -c"
+$env.VISUAL = "zed -w"
 # Do not allow emacsclient to auto-start a background daemon
 $env.ALTERNATE_EDITOR = "false"
 

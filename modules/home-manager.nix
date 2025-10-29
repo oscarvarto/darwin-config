@@ -145,7 +145,7 @@ in {
     # daemon is managed by a LaunchAgent that starts the GUI app with --fg-daemon
     ALTERNATE_EDITOR = "false";
     EDITOR = "emacsclient -t";
-    VISUAL = "emacsclient -c";
+    VISUAL = "zed -w";
     GIT_EDITOR = "emacsclient -t";
     LANG = "en_US.UTF-8";
     LC_ALL = "en_US.UTF-8";
