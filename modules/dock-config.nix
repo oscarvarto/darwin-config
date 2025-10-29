@@ -15,10 +15,9 @@
         {path = "/Applications/Zed Preview.app/";}
         {path = "/Applications/Ghostty.app/";}
         {path = "/Applications/kitty.app/";}
+        {path = "/Applications/ChatGPT Atlas.app/";}
         {path = "/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app/";}
-        {path = "/Applications/Firefox.app/";}
         {path = "/Applications/Google Chrome.app/";}
-        {path = "/Applications/Microsoft Edge.app/";}
         {path = "/Applications/Microsoft Teams.app/";}
         {path = "/Applications/Microsoft Outlook.app/";}
         {path = "/Applications/Mail.app/";}

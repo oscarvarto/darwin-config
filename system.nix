@@ -104,6 +104,7 @@ in {
         "/System/Library"
         "/usr/lib"
         "/usr/bin"
+        "/usr/sbin"
         "/bin"
         "/opt/homebrew"
         "/private/tmp"
@@ -170,6 +171,19 @@ in {
         nativeBuildInputs =
           builtins.filter (pkg: pkg != prev.bats) (old.nativeBuildInputs or []);
       });
+      jujutsu =
+        if prev.stdenv.hostPlatform.isDarwin
+        then
+          prev.jujutsu.override {
+            rustPlatform =
+              prev.rustPlatform
+              // {
+                buildRustPackage = prev.rustPlatform.buildRustPackage.override {
+                  cargoNextestHook = null;
+                };
+              };
+          }
+        else prev.jujutsu;
     })
   ];
 

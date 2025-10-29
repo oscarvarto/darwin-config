@@ -118,7 +118,7 @@ in
     wget
     zip
     btop
-    # jujutsu # Temporarily disabled due to cargo-nextest build failure
+    jujutsu
     pixi
 
     # Text and terminal utilities
@@ -126,7 +126,7 @@ in
     htop
     iftop
     jq
-    # lazyjj # Temporarily disabled due to cargo-nextest build failure
+    lazyjj
     lua51Packages.lua
     lua51Packages.luarocks
     (ripgrep.override {withPCRE2 = true;})
