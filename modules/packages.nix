@@ -118,7 +118,7 @@ in
     wget
     zip
     btop
-    jujutsu
+    # jujutsu # Temporarily disabled due to cargo-nextest build failure
     pixi
 
     # Text and terminal utilities
@@ -126,7 +126,7 @@ in
     htop
     iftop
     jq
-    lazyjj
+    # lazyjj # Temporarily disabled due to cargo-nextest build failure
     lua51Packages.lua
     lua51Packages.luarocks
     (ripgrep.override {withPCRE2 = true;})
@@ -150,6 +150,7 @@ in
 
     # Nix development tools
     nix-prefetch-github # For emacs pinning system
+    statix
 
     # Table-like output tools (nushell-like experience)
     procs # Modern replacement for ps with table output

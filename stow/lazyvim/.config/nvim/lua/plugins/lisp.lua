@@ -78,20 +78,17 @@ return {
   {
     "Olical/conjure",
     ft = { "clojure", "fennel", "scheme" },
-    dependencies = {
-      "PaterJason/cmp-conjure",
-    },
     config = function()
       -- Conjure configuration for REPL interaction
       vim.g["conjure#mapping#doc_word"] = "K"
       vim.g["conjure#mapping#def_word"] = "gd"
       vim.g["conjure#client#clojure#nrepl#eval#auto_require"] = false
       vim.g["conjure#client#clojure#nrepl#connection#auto_repl#enabled"] = false
-      
+
       -- Explicitly disable Conjure for elisp and common lisp to avoid tree-sitter issues
       vim.g["conjure#filetype#elisp"] = false
       vim.g["conjure#filetype#lisp"] = false
-      
+
       -- Scheme support
       vim.g["conjure#client#scheme#stdio#command"] = "mit-scheme"
       vim.g["conjure#client#scheme#stdio#prompt_pattern"] = "=> "
@@ -109,7 +106,12 @@ return {
   -- Completion support for Conjure
   {
     "hrsh7th/nvim-cmp",
-    dependencies = { "PaterJason/cmp-conjure" },
+    dependencies = {
+      {
+        "PaterJason/cmp-conjure",
+        ft = { "clojure", "fennel", "scheme" },
+      },
+    },
     opts = function(_, opts)
       table.insert(opts.sources, { name = "conjure" })
       return opts

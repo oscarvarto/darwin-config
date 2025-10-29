@@ -51,6 +51,7 @@ _: [
   "raycast"
 
   # Browsers
+  "chatgpt-atlas"
   "firefox"
   "google-chrome"
   "microsoft-edge"

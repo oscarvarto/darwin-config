@@ -45,6 +45,7 @@
       "entr"
       "double-conversion"
       "eza"
+      # "fernflower"
       "ffmpeg"
       "fontforge"
       "gcc"
@@ -57,16 +58,16 @@
       "helix"
       "hugo"
       "imagemagick"
-      "oscarvarto/jank/jank-git"
       "jq"
       "libedit"
       "libsql"
       "libtool"
       "libgccjit"
-      # {
-      #   name = "llvm";
-      #   args = ["HEAD"];
-      # }
+      {
+        name = "llvm";
+        args = ["HEAD"];
+      }
+      "oscarvarto/jank/jank-git"
       "markdown-oxide"
       "markdownlint-cli2"
       "marksman"
@@ -79,6 +80,7 @@
       "neo4j"
       "ninja"
       "ollama"
+      "opencode"
       "pueue"
       "pass"
       "pkg-config"

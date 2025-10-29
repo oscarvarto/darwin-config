@@ -3,6 +3,9 @@ return {
   {
     "LazyVim/LazyVim",
     opts = function(_, opts)
+      -- Disable auto-formatting on save for Elisp files
+      vim.g.elisp_auto_format = false
+
       -- Helper function to format Elisp using elisp-formatter
       -- IMPORTANT: Operate on the current buffer contents (not on-disk file)
       -- to avoid losing unsaved edits when running on BufWritePre.

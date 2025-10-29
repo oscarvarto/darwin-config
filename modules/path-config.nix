@@ -20,12 +20,12 @@
     # "/path/to/your/priority/tools/bin"
     # "$HOME/my-custom-tools/bin"
     # "/usr/local/my-app/bin"
+    "$HOME/git-repos/fernflower/build/install/fernflower/bin"
 
     # -------------------------------------------------------------------------
     # DEVELOPMENT TOOLS (highest priority after custom)
     # -------------------------------------------------------------------------
     "$HOME/.local/share/mise/shims" # mise shims (preferred)
-    "$HOME/.swiftly/bin"
     "$HOME/.volta/bin" # Node.js version manager
     "$HOME/bin" # User binaries
     "$HOME/.emacs.d/bin" # Doom Emacs tools

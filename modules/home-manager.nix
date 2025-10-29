@@ -154,10 +154,6 @@ in {
     ENCHANT_ORDERING = "en:aspell,es:aspell,*:aspell";
     ASPELL_CONF = "dict-dir ${pkgs.aspellWithDicts (dicts: with dicts; [en en-computers en-science es])}/lib/aspell";
 
-    SWIFTLY_HOME_DIR = "${userHome}/.swiftly";
-    SWIFTLY_BIN_DIR = "${userHome}/.swiftly/bin";
-    SWIFTLY_TOOLCHAINS_DIR = "${userHome}/Library/Developer/Toolchains";
-
     # Xonsh configuration - suppress xontrib warnings during startup health checks
     XONSH_SUPPRESS_COMP_WARNINGS = "True";
   };
@@ -224,10 +220,6 @@ in {
           WORK_DB_PORT = workConfig.databasePort or "3306";
           WORK_OP_VAULT = workConfig.opVaultName or "Work";
           WORK_OP_ITEM = workConfig.opItemName or "CompanyName";
-
-          SWIFTLY_HOME_DIR = "${config.home.homeDirectory}/.swiftly";
-          SWIFTLY_BIN_DIR = "${config.home.homeDirectory}/.swiftly/bin";
-          SWIFTLY_TOOLCHAINS_DIR = "${config.home.homeDirectory}/Library/Developer/Toolchains";
         };
 
         stateVersion = "25.05";
@@ -320,62 +312,13 @@ in {
             };
           };
 
-          helix.enable = true;
-
-          jujutsu = {
-            enable = true;
-            settings = {
-              ui.editor = "emacsclient -t";
-              lazyjj.highlight-color = "#8839ef";
-              user = {
-                email = userConfig.email;
-                name = userConfig.name;
-              };
-            };
-          };
-
-          mise = {
-            enable = true;
-            enableZshIntegration = true;
-            enableNushellIntegration = true;
-          };
-
-          starship = {
-            enable = true;
-            enableZshIntegration = true;
-            enableNushellIntegration = true;
-            settings =
-              fromTOML (builtins.readFile ./starship.toml)
-              // {
-                # Dynamic palette selection based on catppuccin flavor
-                palette =
-                  if config.catppuccin.flavor == "mocha"
-                  then "catppuccin_mocha"
-                  else "catppuccin_latte";
-              };
-          };
-
-          yazi = {
-            enable = true;
-            enableNushellIntegration = true;
-            enableZshIntegration = true;
-            settings = {
-              mgr = {
-                ratio = [1 3 4];
-              };
-            };
-          };
-
-          # Zellij is configured via files.nix to avoid conflicts with custom KDL config
-          # programs.zellij.enable = true; (disabled - using manual config file)
-
           bash.enable = true;
 
-          zoxide = {
+          direnv = {
             enable = true;
-            enableBashIntegration = true;
-            enableNushellIntegration = true;
+            nix-direnv.enable = true;
             enableZshIntegration = true;
+            enableNushellIntegration = true;
           };
 
           # Git configuration
@@ -407,6 +350,41 @@ in {
               includeIf."gitdir:/Users/${user}/${workDirName}/**".path = "/Users/${user}/.config/git/config-work";
               include.path = "/Users/${user}/.config/git/config-personal";
             };
+          };
+
+          helix.enable = true;
+
+          # jujutsu = {
+          #   enable = true;
+          #   settings = {
+          #     ui.editor = "emacsclient -t";
+          #     lazyjj.highlight-color = "#8839ef";
+          #     user = {
+          #       email = userConfig.email;
+          #       name = userConfig.name;
+          #     };
+          #   };
+          # };
+
+          mise = {
+            enable = true;
+            enableZshIntegration = true;
+            enableNushellIntegration = true;
+          };
+
+          starship = {
+            enable = true;
+            enableZshIntegration = true;
+            enableNushellIntegration = true;
+            settings =
+              fromTOML (builtins.readFile ./starship.toml)
+              // {
+                # Dynamic palette selection based on catppuccin flavor
+                palette =
+                  if config.catppuccin.flavor == "mocha"
+                  then "catppuccin_mocha"
+                  else "catppuccin_latte";
+              };
           };
 
           # SSH configuration with 1Password SSH agent integration
@@ -466,12 +444,30 @@ in {
             };
           };
 
-          # direnv configuration
-          direnv = {
+          vscode = {
             enable = true;
-            nix-direnv.enable = true;
-            enableZshIntegration = true;
+            mutableExtensionsDir = true;
+          };
+
+          yazi = {
+            enable = true;
             enableNushellIntegration = true;
+            enableZshIntegration = true;
+            settings = {
+              mgr = {
+                ratio = [1 3 4];
+              };
+            };
+          };
+
+          # Zellij is configured via files.nix to avoid conflicts with custom KDL config
+          # programs.zellij.enable = true; (disabled - using manual config file)
+
+          zoxide = {
+            enable = true;
+            enableBashIntegration = true;
+            enableNushellIntegration = true;
+            enableZshIntegration = true;
           };
 
           # Zsh with enhanced Fish-like features

@@ -34,6 +34,10 @@
       url = "github:homebrew/homebrew-core";
       flake = false;
     };
+    homebrew-brew = {
+      url = "github:Homebrew/brew";
+      flake = false;
+    };
     homebrew-borkdude = {
       url = "github:borkdude/homebrew-brew";
       flake = false;
@@ -56,6 +60,7 @@
     };
     nix-homebrew = {
       url = "github:zhaofengli-wip/nix-homebrew";
+      inputs.brew-src.follows = "homebrew-brew";
     };
     nixd-ls = {
       url = "github:nix-community/nixd";
@@ -97,6 +102,7 @@
     homebrew-bundle,
     homebrew-cask,
     homebrew-core,
+    homebrew-brew,
     homebrew-borkdude,
     homebrew-jank,
     # jank-lang, # Disabled due to Darwin build issues
@@ -154,6 +160,7 @@
           nativeBuildInputs = with pkgs; [bashInteractive git];
           shellHook = with pkgs; ''
             export EDITOR=nvim
+            export VISUAL="zed -w"
           '';
         };
     };
