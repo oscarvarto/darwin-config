@@ -143,7 +143,6 @@ in
     pandoc-imagine
     pandoc-include
     pandoc-lua-filters
-    spotify-player
     tree
     unrar
     unzip
