@@ -20,7 +20,7 @@
         {path = "/Applications/Google Chrome.app/";}
         {path = "/Applications/Microsoft Teams.app/";}
         {path = "/Applications/Microsoft Outlook.app/";}
-        {path = "/Applications/Mail.app/";}
+        {path = "/Applications/Fastmail.app/";}
         {path = "/Applications/FaceTime.app/";}
         {path = "/Applications/Discord.app/";}
         {path = "/Applications/Preview.app/";}

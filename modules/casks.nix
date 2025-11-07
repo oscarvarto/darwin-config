@@ -25,6 +25,7 @@ _: [
   "anytype"
   "discord"
   "element"
+  "fastmail"
   "microsoft-outlook"
   "microsoft-teams"
   "slack"
@@ -39,12 +40,14 @@ _: [
   "dropbox"
   "figma"
   "obsidian"
+  "okta-advanced-server-access"
   "nordvpn"
   "snagit"
   "unnaturalscrollwheels"
 
   # Entertainment Tools
   # "spotify"
+  "tidal" 
 
   # Productivity Tools
   "gimp"

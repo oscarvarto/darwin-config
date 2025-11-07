@@ -15,7 +15,7 @@
 
     taps = [
       "borkdude/brew"
-      "oscarvarto/jank"
+      # "oscarvarto/jank"
     ];
 
     brews = [
@@ -25,6 +25,7 @@
       "autoconf"
       "autoconf-archive"
       "automake"
+      "awscli"
       "bat"
       "bat-extras"
       "bfg"
@@ -45,7 +46,7 @@
       "entr"
       "double-conversion"
       "eza"
-      # "fernflower"
+      "fernflower"
       "ffmpeg"
       "fontforge"
       "gcc"
@@ -67,7 +68,7 @@
         name = "llvm";
         args = ["HEAD"];
       }
-      "oscarvarto/jank/jank-git"
+      # "oscarvarto/jank/jank-git"
       "markdown-oxide"
       "markdownlint-cli2"
       "marksman"
@@ -79,6 +80,7 @@
       "ncurses"
       "neo4j"
       "ninja"
+      "okta-aws-cli"
       "ollama"
       "opencode"
       "pueue"
@@ -122,7 +124,7 @@
     masApps = {
       "1Password for Safari" = 1569813296;
       "Amazon Prime Video" = 545519333;
-      "neptunes" = 1006739057;
+      # "neptunes" = 1006739057;
       "Okta Verify" = 490179405;
       "Okta Extension App" = 1439967473;
       "rcmd" = 1596283165;

@@ -20,7 +20,8 @@
     # "/path/to/your/priority/tools/bin"
     # "$HOME/my-custom-tools/bin"
     # "/usr/local/my-app/bin"
-    "$HOME/git-repos/fernflower/build/install/fernflower/bin"
+    # "$HOME/git-repos/fernflower/build/install/fernflower/bin"
+    "$HOME/apache-maven-4.0.0-rc-4/bin"
 
     # -------------------------------------------------------------------------
     # DEVELOPMENT TOOLS (highest priority after custom)
