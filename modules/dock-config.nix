@@ -1,10 +1,4 @@
-{
-  config,
-  pkgs,
-  lib,
-  user,
-  ...
-}: {
+{user, ...}: {
   # Fully declarative dock using the latest from Nix Store
   local = {
     dock = {
@@ -17,14 +11,11 @@
         {path = "/Applications/kitty.app/";}
         {path = "/Applications/ChatGPT Atlas.app/";}
         {path = "/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app/";}
-        {path = "/Applications/Google Chrome.app/";}
-        {path = "/Applications/Microsoft Teams.app/";}
-        {path = "/Applications/Microsoft Outlook.app/";}
         {path = "/Applications/Fastmail.app/";}
         {path = "/Applications/FaceTime.app/";}
         {path = "/Applications/Discord.app/";}
         {path = "/Applications/Preview.app/";}
-        # {path = "/System/Applications/Music.app/";}
+        {path = "/Applications/TIDAL.app/";}
         {path = "/System/Applications/Calendar.app/";}
         {path = "/Applications/Xcode.app/";}
         {path = "/System/Applications/System Settings.app/";}

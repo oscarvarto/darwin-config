@@ -1,7 +1,6 @@
 _: [
   # Development Tools
   "chatgpt"
-  "chromedriver"
   "claude"
   "claude-code"
   "cljstyle"
@@ -45,8 +44,7 @@ _: [
   "unnaturalscrollwheels"
 
   # Entertainment Tools
-  # "spotify"
-  "tidal" 
+  "tidal"
 
   # Productivity Tools
   "gimp"
@@ -54,7 +52,5 @@ _: [
 
   # Browsers
   "chatgpt-atlas"
-  "firefox"
-  "google-chrome"
-  "microsoft-edge"
+  "safari-technology-preview"
 ]

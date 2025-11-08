@@ -61,14 +61,15 @@
       "imagemagick"
       "jq"
       "libedit"
+      "libgccjit"
       "libsql"
       "libtool"
-      "libgccjit"
       {
         name = "llvm";
         args = ["HEAD"];
       }
       # "oscarvarto/jank/jank-git"
+      "libvterm"
       "markdown-oxide"
       "markdownlint-cli2"
       "marksman"
@@ -89,6 +90,7 @@
       "poppler"
       "prettier"
       "resvg"
+      "sbcl"
       "stow"
       "swig"
       "trash-cli"
