@@ -40,7 +40,6 @@ _: [
   "dropbox"
   "figma"
   "obsidian"
-  "okta-advanced-server-access"
   "nordvpn"
   "snagit"
   "unnaturalscrollwheels"
