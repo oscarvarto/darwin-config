@@ -1384,6 +1384,44 @@ def "ke" [tag_to_kill?: string] {
     job list | where tag == ($tag_to_kill | default 'emacs') | each { job kill $in.id }
 }
 
+# lem 
+def "lt" [...args] {
+    let term_env = if ($env.TERM? | default "") == "xterm-ghostty" {
+        {
+            TERMINFO: $"($env.HOME)/.terminfo",
+            TERMINFO_DIRS: $"($env.HOME)/.terminfo:/usr/share/terminfo",
+            TERM: "xterm-256color"
+        }
+    } else { {} }
+
+    with-env $term_env {
+      ^lem -i ncurses ...$args
+    }
+
+    # THE FOLLOWING DOESN'T WORK
+    # Reset terminal state after lem exits
+    # This fixes color/prompt issues caused by ncurses terminal modifications
+    print -n (ansi reset)
+    ^tput reset
+}
+
+def "lg" [...args] {
+    let term_env = if ($env.TERM? | default "") == "xterm-ghostty" {
+        {
+            TERMINFO: $"($env.HOME)/.terminfo",
+            TERMINFO_DIRS: $"($env.HOME)/.terminfo:/usr/share/terminfo",
+            TERM: "xterm-256color"
+        }
+    } else { {} }
+
+    with-env $term_env {
+        ^lem ...$args
+    }
+   
+    print -n (ansi reset)
+    ^tput reset
+}
+
 def --env y [...args] {
 	let tmp = (mktemp -t "yazi-cwd.XXXXXX")
 	yazi ...$args --cwd-file $tmp

@@ -8,3 +8,7 @@ result
 
 # Zed editor sensitive data
 stow/zed/.config/zed/prompts
+datagrip
+fleet
+idea
+qlot

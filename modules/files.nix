@@ -69,16 +69,16 @@ in {
       # Shell configuration (default nushell, can be overridden)
       # Note: Default shell is set below, override with ghostty-config shell <shell-name>
       # Enable shell integration for proper cursor handling in Zellij/Nushell
-      shell-integration = none
+      shell-integration = detect
       shell-integration-features = cursor,sudo,title
 
       # Default font with fallbacks (can be overridden)
       # font-family = PragmataPro Mono Liga
-      font-family = MonoLisaVariable Nerd Font, JetBrains Mono, SF Mono, monospace
-      font-size = 18
+      font-family = MonoLisaVariable Nerd Font, PragmataPro Mono Liga, JetBrains Mono, SF Mono, monospace
+      font-size = 16
 
       # Default theme (can be overridden)
-      theme = dracula
+      theme = Catppuccin Latte
 
       # Default shell (can be overridden)
       command = /Users/${user}/.nix-profile/bin/nu --login --interactive

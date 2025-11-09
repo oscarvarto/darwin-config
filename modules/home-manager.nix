@@ -305,17 +305,17 @@ in {
 
           helix.enable = true;
 
-          # jujutsu = {
-          #   enable = true;
-          #   settings = {
-          #     ui.editor = "emacsclient -t";
-          #     lazyjj.highlight-color = "#8839ef";
-          #     user = {
-          #       email = userConfig.email;
-          #       name = userConfig.name;
-          #     };
-          #   };
-          # };
+          jujutsu = {
+            enable = true;
+            settings = {
+              ui.editor = "emacsclient -t";
+              lazyjj.highlight-color = "#8839ef";
+              user = {
+                email = userConfig.email;
+                name = userConfig.name;
+              };
+            };
+          };
 
           mise = {
             enable = true;
@@ -331,10 +331,10 @@ in {
               fromTOML (builtins.readFile ./starship.toml)
               // {
                 # Dynamic palette selection based on catppuccin flavor
-                palette =
-                  if config.catppuccin.flavor == "mocha"
-                  then "catppuccin_mocha"
-                  else "catppuccin_latte";
+                palette = "catppuccin_latte";
+                    # if config.catppuccin.flavor == "mocha"
+                    # then "catppuccin_mocha"
+                    # else "catppuccin_latte";
               };
           };
 

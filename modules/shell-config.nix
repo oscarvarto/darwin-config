@@ -183,7 +183,7 @@ in {
         # Using eza for better ls output with icons and colors
         alias lls='eza --icons --group-directories-first'
         alias ll='eza --icons --group-directories-first -la --grid --header --git'
-        alias lt='eza --icons --group-directories-first -la --tree --level=2'
+        alias ltt='eza --icons --group-directories-first -la --tree --level=2'
         alias llt='eza --icons --group-directories-first -la --tree'
         alias lx='eza --icons --group-directories-first -la --sort=extension'
         alias lk='eza --icons --group-directories-first -la --sort=size --reverse'
@@ -284,6 +284,10 @@ in {
                 ns-ghostty-safe "$@"
             fi
         }
+
+        # lem
+        alias lt="lem -i ncurses"
+        alias lg="lem &"
 
         # Atuin handles history search - removing conflicting bindings
         # Atuin uses Ctrl+R for interactive search and up/down arrows for history navigation
