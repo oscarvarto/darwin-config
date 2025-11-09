@@ -1,0 +1,55 @@
+--- a/compiler+runtime/CMakeLists.txt
++++ b/compiler+runtime/CMakeLists.txt
+@@ -150,6 +150,18 @@ separate_arguments(clang_system_include_dirs)
+
+ set(clang_system_include_flags "")
+
++# Platform-specific filtering of system include paths
++if(APPLE)
++  # On macOS, filter out SDK paths that should come from -isysroot
++  # This prevents baking absolute SDK paths into JIT flags
++  set(_filtered_dirs "")
++  foreach(dir ${clang_system_include_dirs})
++    if(NOT dir MATCHES "/SDKs/")
++      list(APPEND _filtered_dirs "${dir}")
++    endif()
++  endforeach()
++  set(clang_system_include_dirs "${_filtered_dirs}")
++endif()
+
+ foreach(dir ${clang_system_include_dirs})
+   list(APPEND clang_system_include_flags "-I${dir}")
+@@ -220,8 +232,19 @@ get_target_property(jank_lib_link_dirs_prop jank LINK_DIRECTORIES)
+ set(jank_lib_linker_flags_list "")
+
+ foreach(lib ${jank_lib_link_dirs_prop})
+-  list(APPEND jank_lib_linker_flags_list -L${lib})
++  # Platform-specific library path filtering
++  if(APPLE)
++    # Skip system defaults on macOS; they're found via SDK automatically
++    if(lib STREQUAL "/lib" OR lib STREQUAL "/usr/lib" OR lib STREQUAL "")
++      continue()
++    endif()
++  endif()
++
++  list(APPEND jank_lib_linker_flags_list "-L${lib}")
+ endforeach()
++
++# Add SDK-specific linker flags on macOS
++if(APPLE AND DEFINED ENV{SDKROOT})
++  list(APPEND jank_lib_linker_flags_list "-isysroot" "$ENV{SDKROOT}")
++  list(APPEND jank_lib_linker_flags_list "-L$ENV{SDKROOT}/usr/lib")
++endif()
+
+ list(JOIN jank_lib_linker_flags_list " " jank_lib_linker_flags)
+@@ -280,6 +303,14 @@ if (NOT jank_local_clang)
+   list(APPEND jank_linker_flags -L/opt/homebrew/opt/llvm/lib -L/opt/homebrew/opt/llvm/lib/c++ -L/opt/homebrew/opt/llvm/lib/unwind)
+ endif ()
+
++# Platform-specific: Remove -L/opt/homebrew/opt/llvm/lib/unwind on macOS
++# as it's not needed and can cause linking issues
++if(APPLE AND NOT jank_local_clang)
++  list(REMOVE_ITEM jank_linker_flags "-L/opt/homebrew/opt/llvm/lib/unwind")
++endif()
++
+ list(JOIN jank_linker_flags " " jank_linker_flags_str)

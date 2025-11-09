@@ -1,0 +1,62 @@
+--- a/compiler+runtime/CMakeLists.txt
++++ b/compiler+runtime/CMakeLists.txt
+@@ -50,6 +50,21 @@ set(JANK_AOT_PROCESSOR_CPP ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/jank/aot/process
+ # Later we'll configure this to generate the .cpp file with embedded flags
+ # For now, it's just a regular source file
+
++# Configure default linker libraries based on platform
++set(JANK_DEFAULT_LINKER_LIBS
++  "-ljank-standalone"
++  "-lm"
++  "-lLLVM"
++  "-lclang-cpp"
++  "-lcrypto"
++  "-lz"
++  "-lzstd"
++)
++
++# Only link libstdc++ explicitly on non-Apple platforms
++if(NOT APPLE)
++  list(APPEND JANK_DEFAULT_LINKER_LIBS "-lstdc++")
++endif()
++
++# Generate C++ array initializer from the list
++set(DEFAULT_LIBS_INITIALIZER "")
++foreach(lib ${JANK_DEFAULT_LINKER_LIBS})
++  string(APPEND DEFAULT_LIBS_INITIALIZER "    \"${lib}\",\n")
++endforeach()
++
++# Configure the processor.cpp file with platform-specific libraries
++configure_file(
++  "${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/jank/aot/processor.cpp.in"
++  "${CMAKE_CURRENT_BINARY_DIR}/src/cpp/jank/aot/processor.cpp"
++  @ONLY
++)
++
+ # Add jank executable
+ add_executable(jank
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/main.cpp
+-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/jank/aot/processor.cpp
++  ${CMAKE_CURRENT_BINARY_DIR}/src/cpp/jank/aot/processor.cpp
+   # ... other sources
+ )
+
+--- a/compiler+runtime/src/cpp/jank/aot/processor.cpp
++++ b/compiler+runtime/src/cpp/jank/aot/processor.cpp.in
+@@ -232,15 +232,7 @@ namespace jank::aot
+
+       /* Default libraries that jank depends on. */
+-      for(auto const &lib : { "-ljank-standalone",
+-        /* Default libraries that jank depends on. */
+-        "-lm",
+-        "-lstdc++",
+-        "-lLLVM",
+-        "-lclang-cpp",
+-        "-lcrypto",
+-        "-lz",
+-        "-lzstd" })
++      for(auto const &lib : {
++@DEFAULT_LIBS_INITIALIZER@      })
+       {
+         compiler_args.push_back(strdup(lib));
+       }
