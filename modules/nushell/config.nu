@@ -1639,5 +1639,41 @@ def "zt-status" [] {
     zellij-theme-manager status
 }
 
+# Launch lem-ncurses with proper TERM setting and terminal state cleanup
+def "lt" [...args] {
+    # Save terminal state before launching lem
+    let original_term = $env.TERM
+
+    # Launch lem with xterm-256color and ensure terminal cleanup on exit
+    with-env {TERM: "xterm-256color"} {
+        try {
+            ^lem ...$args
+        } catch { |e|
+            # If lem fails, still continue to cleanup
+            print $"Warning: lem exited with error: ($e.msg)"
+        }
+    }
+
+    # Reset terminal to clean state after lem exits
+    # This prevents terminal corruption that affects the prompt
+
+    # Restore cursor visibility (lem might hide it)
+    print -n (ansi cursor_on)
+
+    # Reset SGR attributes (colors, bold, etc)
+    print -n (ansi reset)
+
+    # Soft terminal reset - reinitialize without clearing screen
+    try {
+        ^tput init
+    } catch {
+        # Fallback to manual ANSI reset if tput unavailable
+        print -n "\e[m\e(B"
+    }
+
+    # Ensure TERM is restored (should happen automatically with with-env, but be explicit)
+    $env.TERM = $original_term
+}
+
 # Final PATH cleanup - remove duplicates after all integrations have loaded
 $env.PATH = ($env.PATH | uniq)
