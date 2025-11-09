@@ -93,24 +93,25 @@ in {
         export DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
 
         # Force homebrew to use gcc-15 for emacs-plus@31 compatibility on macOS 26
-        export HOMEBREW_CC="gcc-15"
-        export HOMEBREW_CXX="g++-15"
+        # export HOMEBREW_CC="gcc-15"
+        # export HOMEBREW_CXX="g++-15"
+        export HOMEBREW_VERBOSE=1
 
         # SDK path configuration for gcc-15 to find macOS frameworks and headers
-        export SDKROOT="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+        export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
         export MACOSX_DEPLOYMENT_TARGET="26.0"
         # Add framework search paths for gcc-15
-        export CPPFLAGS="-isysroot $SDKROOT -I$SDKROOT/usr/include -F$SDKROOT/System/Library/Frameworks"
-        export LDFLAGS="-isysroot $SDKROOT -L$SDKROOT/usr/lib -F$SDKROOT/System/Library/Frameworks"
+        # export CPPFLAGS="-isysroot $SDKROOT -I$SDKROOT/usr/include -F$SDKROOT/System/Library/Frameworks"
+        # export LDFLAGS="-isysroot $SDKROOT -L$SDKROOT/usr/lib -F$SDKROOT/System/Library/Frameworks"
 
         # LIBRARY_PATH for gcc-15 libgccjit compatibility (fixes "ld: library not found" errors)
         # Based on https://github.com/d12frosted/homebrew-emacs-plus/issues/554#issuecomment-1564287827
-        export LIBRARY_PATH="/opt/homebrew/opt/gcc/lib/gcc/15:/opt/homebrew/opt/libgccjit/lib/gcc/15:/opt/homebrew/opt/gcc/lib/gcc/15/gcc/aarch64-apple-darwin25/15"
+        # export LIBRARY_PATH="/opt/homebrew/opt/gcc/lib/gcc/15:/opt/homebrew/opt/libgccjit/lib/gcc/15:/opt/homebrew/opt/gcc/lib/gcc/15/gcc/aarch64-apple-darwin25/15"
 
         # jank wrapper function to clear Nix SDK variables
         # Fixes macOS 26 SDK header ordering issue (jank-lang/jank#560)
         jank() {
-            local SDKROOT="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+            local SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             local DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
 
             # Clear Nix-provided compiler flags that interfere with jank's PCH compilation

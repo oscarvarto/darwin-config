@@ -192,6 +192,8 @@ in {
   # Environment variables for 1Password integration with multiple vaults
   environment.variables = {
     DARWIN_CONFIG_PATH = darwinConfigPath;
+    HOMEBREW_VERBOSE = "1";
+    HOMEBREW_LOGS = "/Users/oscarvarto/Library/Logs/Homebrew";
     OP_BIOMETRIC_UNLOCK_ENABLED = "true";
     OP_VAULT_PERSONAL = "Personal";
     OP_VAULT_WORK = "Work";

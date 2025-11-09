@@ -182,7 +182,7 @@ in {
       # Enable Catppuccin theming for supported programs
       catppuccin = {
         enable = true;
-        flavor = "latte"; # Default light theme
+        flavor = "mocha"; # Default light theme
         accent = "mauve"; # Accent color
 
         # starship configuration moved to programs.starship section below
@@ -331,10 +331,10 @@ in {
               fromTOML (builtins.readFile ./starship.toml)
               // {
                 # Dynamic palette selection based on catppuccin flavor
-                palette = "catppuccin_latte";
-                    # if config.catppuccin.flavor == "mocha"
-                    # then "catppuccin_mocha"
-                    # else "catppuccin_latte";
+                palette =
+                    if config.catppuccin.flavor == "mocha"
+                    then "catppuccin_mocha"
+                    else "catppuccin_latte";
               };
           };
 

@@ -1386,9 +1386,6 @@ def "ke" [tag_to_kill?: string] {
 
 # lem 
 def "lt" [...args] {
-    # Save terminal state before launching lem
-    # let original_term = $env.TERM
-
     let term_env = if ($env.TERM? | default "") == "xterm-ghostty" {
         {
             TERMINFO: $"($env.HOME)/.terminfo",
@@ -1400,23 +1397,6 @@ def "lt" [...args] {
     with-env $term_env {
       ^lem -i ncurses ...$args
     }
- 
-    # None of the following works.
-    # Reset terminal to clean state after lem exits
-    # This prevents terminal corruption that affects the prompt
-    # Restore cursor visibility (lem might hide it)
-    # print -n (ansi cursor_on)
-    # Reset SGR attributes (colors, bold, etc)
-    # print -n (ansi reset)
-    # Soft terminal reset - reinitialize without clearing screen
-    # try {
-    #    ^tput init
-    # } catch {
-        # Fallback to manual ANSI reset if tput unavailable
-    #    print -n "\e[m\e(B"
-    #}
-    # Ensure TERM is restored (should happen automatically with with-env, but be explicit)
-    #$env.TERM = $original_term
 }
 
 def "lg" [...args] {

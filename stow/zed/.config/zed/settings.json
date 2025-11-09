@@ -69,7 +69,7 @@
   "theme": {
     "mode": "system",
     "light": "Catppuccin Latte",
-    "dark": "One Dark"
+    "dark": "Catppuccin Mocha"
   },
   "indent_guides": {
     "enabled": true,

@@ -68,7 +68,7 @@
         name = "llvm";
         args = ["HEAD"];
       }
-      # "oscarvarto/jank/jank-git"
+      "oscarvarto/jank/jank-git"
       "libvterm"
       "markdown-oxide"
       "markdownlint-cli2"

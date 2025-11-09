@@ -8,7 +8,7 @@ return {
     lazy = false,          -- load immediately so colors are ready
     priority = 1000,       -- load before other UI plugins
     opts = {
-      flavour = "latte", -- Add our preferred flavour
+      flavour = "mocha", -- Add our preferred flavour
       integrations = {
         aerial = true,
         alpha = true,
