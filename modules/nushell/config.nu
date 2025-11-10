@@ -1409,7 +1409,7 @@ def "lg" [...args] {
     } else { {} }
 
     with-env $term_env {
-        ^lem ...$args
+        ^lem -i sdl2 ...$args
     }
    
     print -n (ansi reset)

@@ -332,9 +332,9 @@ in {
               // {
                 # Dynamic palette selection based on catppuccin flavor
                 palette =
-                    if config.catppuccin.flavor == "mocha"
-                    then "catppuccin_mocha"
-                    else "catppuccin_latte";
+                  if config.catppuccin.flavor == "mocha"
+                  then "catppuccin_mocha"
+                  else "catppuccin_latte";
               };
           };
 

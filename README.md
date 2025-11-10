@@ -1,6 +1,9 @@
 # Darwin Configuration
 
-A comprehensive macOS system configuration using Nix-Darwin and Home Manager with flakes support. While designed as a single-user repository, it includes tools to easily adapt the configuration for different users, machines, and environments.
+A comprehensive macOS system configuration using Nix-Darwin and Home
+Manager with flakes support. While designed as a single-user
+repository, it includes tools to easily adapt the configuration for
+different users, machines, and environments.
 
 ## 📋 Table of Contents
 
@@ -56,7 +59,8 @@ A comprehensive macOS system configuration using Nix-Darwin and Home Manager wit
 
 ## 🚀 Installation Guide for macOS
 
-This configuration supports Apple Silicon Macs (M1/M2/M3) running macOS Monterey (12.0) or later.
+This configuration supports Apple Silicon Macs (M1/M2/M3) running
+macOS Monterey (12.0) or later.
 
 ### Prerequisites
 
@@ -80,16 +84,21 @@ We recommend using the Determinate Systems installer for the best macOS experien
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
 
-**After installation, open a new terminal session** to make the `nix` command available in your `$PATH`.
+**After installation, open a new terminal session** to make the `nix`
+command available in your `$PATH`.
 
 > **⚠️ Important Notes:**
 >
-> - The installer will ask if you want to install Determinate Nix. Answer **No** as it currently conflicts with `nix-darwin`.
-> - If you're on macOS Sequoia, read [Nix Support for macOS Sequoia](https://determinate.systems/posts/nix-support-for-macos-sequoia/) before installing.
+> - The installer will ask if you want to install Determinate
+>   Nix. Answer **No** as it currently conflicts with `nix-darwin`.  -
+>   If you're on macOS Sequoia, read [Nix Support for macOS
+>   Sequoia](https://determinate.systems/posts/nix-support-for-macos-sequoia/)
+>   before installing.
 >
 > **Alternative: Official Nix Installation**
 >
-> If using the [official Nix installer](https://nixos.org/download) instead, you'll need to enable flakes and nix-command:
+> If using the [official Nix installer](https://nixos.org/download)
+> instead, you'll need to enable flakes and nix-command:
 >
 > Add this line to `/etc/nix/nix.conf`:
 >
@@ -111,7 +120,10 @@ nix run .#record-config-path
 find apps/$(uname -m | sed 's/arm64/aarch64/')-darwin -type f -exec chmod +x {} \;
 ```
 
-> **Tip:** After recording the path, open a new shell so the `DARWIN_CONFIG_PATH` environment variable is loaded. Every helper script expects this variable to be defined and will error if it is missing.
+> **Tip:** After recording the path, open a new shell so the
+> `DARWIN_CONFIG_PATH` environment variable is loaded. Every helper
+> script expects this variable to be defined and will error if it is
+> missing.
 
 ### 4. Configure for Your Environment
 
@@ -144,7 +156,8 @@ nix run .#optimize-nix-performance -- --dry-run
 nix run .#optimize-nix-performance -- --verbose
 ```
 
-> **📝 Note**: If you're using a git repository, run `git add .` before building to ensure all files are included in the Nix store.
+> **📝 Note**: If you're using a git repository, run `git add .`
+> before building to ensure all files are included in the Nix store.
 
 ### 5. Review and Customize Packages
 
@@ -196,7 +209,8 @@ nix run .#check-keys
 
 ### 7. Test Build Configuration
 
-Before switching to the new configuration, test that it builds successfully:
+Before switching to the new configuration, test that it builds
+successfully:
 
 ```bash
 nix run .#build
@@ -298,7 +312,8 @@ nb && ns
 
 **What `nix flake update` does:**
 
-- Updates `flake.lock` with latest versions of nixpkgs, home-manager, and other inputs
+- Updates `flake.lock` with latest versions of nixpkgs, home-manager,
+  and other inputs
 - Gets security updates and new package versions
 - May introduce breaking changes, so test after updating
 - Equivalent to updating your "package manager" in other systems
@@ -341,7 +356,10 @@ smart-gc aggressive --force --optimize
 
 ### 📌 Package Pinning System
 
-The `smart-gc` utility includes a package pinning system to prevent accidental removal of essential packages during garbage collection. This system creates GC roots that keep specific packages and their dependencies in the Nix store.
+The `smart-gc` utility includes a package pinning system to prevent
+accidental removal of essential packages during garbage
+collection. This system creates GC roots that keep specific packages
+and their dependencies in the Nix store.
 
 #### Understanding Package Pinning
 
@@ -372,7 +390,8 @@ smart-gc clean   # Pinned packages and dependencies are preserved
 
 #### Customizing Essential Packages
 
-The essential packages list is defined in `smart-gc.nu`. Currently, most packages are commented out by default to avoid over-pinning:
+The essential packages list is defined in `smart-gc.nu`. Currently,
+most packages are commented out by default to avoid over-pinning:
 
 ```nushell
 # Edit the essential_packages list in smart-gc.nu
@@ -474,11 +493,16 @@ smart-gc pin
 
 The pinning system works by:
 
-1. **System Configuration**: Creates a GC root for the current system derivation
-2. **Essential Packages**: Uses `nix build --no-link --print-out-paths` to realize packages and create implicit GC roots
-3. **GC Root Storage**: Stores roots in `/nix/var/nix/gcroots/` where the garbage collector respects them
+1. **System Configuration**: Creates a GC root for the current system
+   derivation
+2. **Essential Packages**: Uses `nix build --no-link
+   --print-out-paths` to realize packages and create implicit GC roots
+3. **GC Root Storage**: Stores roots in `/nix/var/nix/gcroots/` where
+   the garbage collector respects them
 
-This approach ensures that while garbage collection won't remove pinned packages, the normal update and rebuild processes work exactly as expected.
+This approach ensures that while garbage collection won't remove
+pinned packages, the normal update and rebuild processes work exactly
+as expected.
 
 ## 🛠️ Available Nix Apps
 
@@ -492,7 +516,8 @@ This approach ensures that while garbage collection won't remove pinned packages
 | `nix run .#rollback`     | Rollback to previous generation       |
 
 Note on evaluation mode for nb/ns:
-- Default: impure evaluation for compatibility with host-specific tooling that reads files from the working tree.
+- Default: impure evaluation for compatibility with host-specific
+  tooling that reads files from the working tree.
 - Force pure: add `--pure` or set `NS_IMPURE=0`.
 - Explicit impure: add `--impure` or set `NS_IMPURE=1`.
 
@@ -500,11 +525,11 @@ Tip: run `ns --help` or `nb --help` for all options.
 
 ### Configuration Management
 
-| Command                          | Description                                        |
-| -------------------------------- | -------------------------------------------------- |
-| `nix run .#add-host`             | Add new host configuration to flake.nix            |
-| `nix run .#configure-user`       | Configure for different user/hostname combinations |
-| `nix run .#optimize-nix-performance` | Optimize build settings based on hardware specs |
+| Command                              | Description                                        |
+| ------------------------------------ | -------------------------------------------------- |
+| `nix run .#add-host`                 | Add new host configuration to flake.nix            |
+| `nix run .#configure-user`           | Configure for different user/hostname combinations |
+| `nix run .#optimize-nix-performance` | Optimize build settings based on hardware specs    |
 
 ### Security & Secrets
 
@@ -540,55 +565,76 @@ Tip: run `ns --help` or `nb --help` for all options.
 
 ### GNU Stow Package Management
 
-| Command                       | Description                                                      |
-| ----------------------------- | ---------------------------------------------------------------- |
-| `manage-stow-packages deploy` | Deploy all stow-managed scripts and configurations               |
-| `manage-stow-packages remove` | Remove all stow-managed symlinks                                 |
+| Command                       | Description                                                   |
+| ----------------------------- | ------------------------------------------------------------- |
+| `manage-stow-packages deploy` | Deploy all stow-managed scripts and configurations            |
+| `manage-stow-packages remove` | Remove all stow-managed symlinks                              |
 | `stow -t ~ PACKAGE`           | Deploy specific stow package (e.g., lazyvim, raycast-scripts) |
-| `stow -D -t ~ PACKAGE`        | Remove specific stow package                                     |
-| `manage-cargo-tools install`  | Install/update Rust/Cargo tools from configuration               |
-| `manage-nodejs-tools install` | Install/update Node.js tools and toolchain                       |
-| `manage-dotnet-tools install` | Install/update .NET SDK and global tools                         |
+| `stow -D -t ~ PACKAGE`        | Remove specific stow package                                  |
+| `manage-cargo-tools install`  | Install/update Rust/Cargo tools from configuration            |
+| `manage-nodejs-tools install` | Install/update Node.js tools and toolchain                    |
+| `manage-dotnet-tools install` | Install/update .NET SDK and global tools                      |
 
 ### Development Utilities
 
-| Command                      | Description                                     |
-| ---------------------------- | ----------------------------------------------- |
-| `cleanup-intellij [project]`     | Clean IntelliJ IDEA caches and fix broken state |
+| Command                          | Description                                             |
+| -------------------------------- | ------------------------------------------------------- |
+| `cleanup-intellij [project]`     | Clean IntelliJ IDEA caches and fix broken state         |
 | `build-emacs-priority [options]` | Build emacs-overlay `emacs-git` with dedicated CPU time |
-| `emacs-service-toggle`           | Toggle Emacs home-manager service              |
-| `emacsclient-gui`                | Launch Emacs GUI client with proper macOS integration |
+| `emacs-service-toggle`           | Toggle Emacs home-manager service                       |
+| `emacsclient-gui`                | Launch Emacs GUI client with proper macOS integration   |
 
 ## ✨ Key Features
 
-- **🔄 Multi-User/Multi-Host**: Easily configure for different users and machines
-- **⚙️ Dynamic Configuration**: User paths and settings automatically adapt
-- **🏢 Work/Personal Profiles**: Conditional configurations for different use cases
-- **🔐 Hybrid Secrets Management**: Multi-layered security with agenix, 1Password, and pass
-  - **agenix**: SSH keys, certificates, system secrets (encrypted with age)
-  - **1Password**: User credentials, API tokens (authenticated, enterprise-grade)
+- **🔄 Multi-User/Multi-Host**: Easily configure for different users
+  and machines
+- **⚙️ Dynamic Configuration**: User paths and settings automatically
+  adapt
+- **🏢 Work/Personal Profiles**: Conditional configurations for
+  different use cases
+- **🔐 Hybrid Secrets Management**: Multi-layered security with
+  agenix, 1Password, and pass
+  - **agenix**: SSH keys, certificates, system secrets (encrypted with
+    age)
+  - **1Password**: User credentials, API tokens (authenticated,
+    enterprise-grade)
   - **pass**: Backup credential store (offline, GPG-encrypted)
-  - **Unified CLI**: Single `secret` command for all credential systems
+  - **Unified CLI**: Single `secret` command for all credential
+    systems
 - **📦 Package Management**: Nix packages + Homebrew integration
 - **✨ Emacs Integration**: Stock emacs-overlay build with niceties:
   - **Home-Manager Service**: Managed daemon with automatic startup
-  - **Liquid Glass Icons**: macOS 15/Tahoe icon pack copied into Emacs.app
-  - **Helper Commands**: `e`, `t`, `et`, `emacsclient-gui`, `emacs-service-toggle`
+  - **Liquid Glass Icons**: macOS 26/Tahoe icon pack copied into
+    Emacs.app
+  - **Helper Commands**: `e`, `t`, `et`, `emacsclient-gui`,
+    `emacs-service-toggle`
   - **macOS Integration**: Proper window management and GUI support
-  - **Ghostty Terminal Support**: Full xterm-ghostty terminfo integration
-  - **Catppuccin Theming**: Unified theme management across applications
-- **🐚 Advanced Shell Configuration**: Full support for Nushell, Zsh, and Xonsh:
-  - **Consistent Experience**: Same aliases, PATH, and tools across all primary shells
-  - **Smart Switching**: Easy shell changes via simple configuration updates
-  - **Modern Features**: Starship prompts, Zoxide navigation, Atuin history (Nushell/Zsh/Xonsh)
+  - **Ghostty Terminal Support**: Full xterm-ghostty terminfo
+    integration
+  - **Catppuccin Theming**: Unified theme management across
+    applications
+- **🐚 Advanced Shell Configuration**: Full support for Nushell, Zsh,
+  and Xonsh:
+  - **Consistent Experience**: Same aliases, PATH, and tools across
+    all primary shells
+  - **Smart Switching**: Easy shell changes via simple configuration
+    updates
+  - **Modern Features**: Starship prompts, Zoxide navigation, Atuin
+    history (Nushell/Zsh/Xonsh)
   - **Python Integration**: Native Python scripting support with Xonsh
-  - **Limited Fish Support**: Basic functionality only, no integrations to optimize build times
-- **🔧 Development Tools**: Complete development environment with LSPs, formatters, etc.
-- **🔒 Security First**: Automated backups, key rotation, and credential synchronization
+  - **Limited Fish Support**: Basic functionality only, no
+    integrations to optimize build times
+- **🔧 Development Tools**: Complete development environment with
+  LSPs, formatters, etc.
+- **🔒 Security First**: Automated backups, key rotation, and
+  credential synchronization
 
 ## 🗂️ GNU Stow Package Management
 
-This repository uses **GNU Stow** to manage auxiliary scripts, dotfiles, and tools that are difficult to embed directly in Nix configuration. Stow creates symlinks from your home directory to files in the repository, providing version control and easy deployment.
+This repository uses **GNU Stow** to manage auxiliary scripts,
+dotfiles, and tools that are difficult to embed directly in Nix
+configuration. Stow creates symlinks from your home directory to files
+in the repository, providing version control and easy deployment.
 
 ### Available Stow Packages
 
@@ -626,7 +672,8 @@ manage-stow-packages remove     # Remove all packages
 
 ### Tool Management Scripts
 
-After deploying the appropriate stow packages, these management commands become available:
+After deploying the appropriate stow packages, these management
+commands become available:
 
 ```bash
 # Development toolchain management
@@ -643,7 +690,8 @@ manage-dotnet-tools install   # Install .NET SDK from dotnet-tools.toml
 **Use Stow for:**
 
 - Complex shell scripts that are hard to escape in Nix
-- Editor configurations with many files (LazyVim, Zed, custom Emacs setups)
+- Editor configurations with many files (LazyVim, Zed, custom Emacs
+  setups)
 - Raycast scripts that need specific file locations
 - Development tool management scripts
 
@@ -672,20 +720,27 @@ manage-dotnet-tools install   # Install .NET SDK from dotnet-tools.toml
 
 ## 🔤 Font Management & Fallback System
 
-This configuration includes an intelligent font fallback system that provides seamless support for both commercial and open-source programming fonts.
+This configuration includes an intelligent font fallback system that
+provides seamless support for both commercial and open-source
+programming fonts.
 
 ### 🎯 Font Hierarchy
 
-The system automatically detects available fonts and uses them in this priority order:
+The system automatically detects available fonts and uses them in this
+priority order:
 
-1. **MonoLisa Variable** (commercial) - Premium programming font with extensive ligature support
-2. **PragmataPro Liga** (commercial) - Compact, feature-rich programming font
-3. **JetBrains Mono** (open source) - High-quality fallback with excellent readability
+1. **MonoLisa Variable** (commercial) - Premium programming font with
+   extensive ligature support
+2. **PragmataPro Liga** (commercial) - Compact, feature-rich
+   programming font
+3. **JetBrains Mono** (open source) - High-quality fallback with
+   excellent readability
 4. **System fonts** (SF Mono, monospace) - Final fallback
 
 ### 🛠️ Font Detection Utility
 
-After deploying stow packages, the `detect-fonts` utility becomes available:
+After deploying stow packages, the `detect-fonts` utility becomes
+available:
 
 ```bash
 # Check font availability status
@@ -704,14 +759,19 @@ detect-fonts check "JetBrains Mono"
 #### Emacs/Doom Emacs
 
 - **Font cycling**: Press `F8` to cycle through all available fonts
-- **Automatic ligatures**: Each font includes optimized ligature configuration
-- **Size optimization**: Fonts use their optimal sizes (MonoLisa: 16pt, PragmataPro: 18pt, JetBrains: 14pt)
-- **PragmataPro ligatures**: Custom ligature engine with 200+ programming symbols
+- **Automatic ligatures**: Each font includes optimized ligature
+  configuration
+- **Size optimization**: Fonts use their optimal sizes (MonoLisa:
+  16pt, PragmataPro: 18pt, JetBrains: 14pt)
+- **PragmataPro ligatures**: Custom ligature engine with 200+
+  programming symbols
 
 #### Ghostty Terminal
 
-- **Base configuration**: Font fallback built into `~/.config/ghostty/config`
-- **Runtime switching**: Use `ghostty-config font "Font Name"` to switch fonts
+- **Base configuration**: Font fallback built into
+  `~/.config/ghostty/config`
+- **Runtime switching**: Use `ghostty-config font "Font Name"` to
+  switch fonts
 - **Automatic fallback**: Missing fonts don't break the configuration
 
 ### 📋 Available Font Commands
@@ -751,9 +811,11 @@ detect-fonts check "JetBrains Mono"
 ### 🔧 How It Works
 
 1. **Detection**: System scans available fonts using `fc-list`
-2. **Fallback Chain**: Applications automatically use the best available font
+2. **Fallback Chain**: Applications automatically use the best
+   available font
 3. **Configuration**: Each app includes font-specific optimizations
-4. **Runtime Switching**: Tools allow manual font switching when desired
+4. **Runtime Switching**: Tools allow manual font switching when
+   desired
 
 ### 💡 For New Installations
 
@@ -762,7 +824,8 @@ If you're setting up on a system without commercial fonts:
 1. The system automatically detects JetBrains Mono is available
 2. Emacs, Ghostty, and other apps default to JetBrains Mono
 3. All ligatures and features work seamlessly
-4. You can later add commercial fonts and switch to them using `F8` in Emacs
+4. You can later add commercial fonts and switch to them using `F8` in
+   Emacs
 
 ### 🎯 Benefits
 
@@ -774,16 +837,22 @@ If you're setting up on a system without commercial fonts:
 
 ## ✏️ Editor Configurations
 
-This repository includes comprehensive configurations for both Doom Emacs and Neovim (LazyVim), managed through the stow system for easy deployment and version control.
+This repository includes comprehensive configurations for both Doom
+Emacs and Neovim (LazyVim), managed through the stow system for easy
+deployment and version control.
 
 ### 🚀 Emacs Configuration
 
-The repository now ships the exact `emacs-git` build from [`emacs-overlay`](https://github.com/nix-community/emacs-overlay).
-There is no Doom layer or stow-managed Emacs configuration anymore—bring whatever setup you prefer (`~/.emacs.d`,
-`~/.config/emacs`, straight-org tangles, etc.). The Nix build focuses on a fast, cache-friendly Emacs.app with
-native compilation, tree-sitter, ImageMagick, and Xwidgets enabled. During the build we copy in the Liquid Glass
-Tahoe icon pack stored in `modules/assets/icons`, so you still get the refreshed macOS 15 visuals without touching
-upstream sources.
+The repository now ships the exact `emacs-git` build from
+[`emacs-overlay`](https://github.com/nix-community/emacs-overlay).
+There is no Doom layer or stow-managed Emacs configuration
+anymore—bring whatever setup you prefer (`~/.emacs.d`,
+`~/.config/emacs`, straight-org tangles, etc.). The Nix build focuses
+on a fast, cache-friendly Emacs.app with native compilation,
+tree-sitter, ImageMagick, and Xwidgets enabled. During the build we
+copy in the Liquid Glass Tahoe icon pack stored in
+`modules/assets/icons`, so you still get the refreshed macOS 15
+visuals without touching upstream sources.
 
 #### Quick Setup
 
@@ -798,28 +867,28 @@ ns -v
 manage-stow-packages deploy
 ```
 
-After `ns`, the Home Manager LaunchAgent keeps an Emacs daemon running via `--fg-daemon`, so GUI and terminal
-clients connect instantly.
+After `ns`, the Home Manager LaunchAgent keeps an Emacs daemon running
+via `--fg-daemon`, so GUI and terminal clients connect instantly.
 
 #### Helper Commands
 
-These live under `stow/aux-scripts/.local/share/bin` and are installed to `~/.local/share/bin` by
-`manage-stow-packages deploy`:
+These live under `stow/aux-scripts/.local/share/bin` and are installed
+to `~/.local/share/bin` by `manage-stow-packages deploy`:
 
-| Command | Description |
-| --- | --- |
-| `e [files...]` | Open files in GUI Emacs via `emacsclient -c` (starts daemon if needed) |
-| `t [files...]` | Open files in a terminal frame (`emacsclient -t`) |
-| `et` | Launch the daemon in the foreground and exit once ready |
-| `edd` | Force-start the GUI daemon via `/Applications/Emacs.app` |
-| `emacsclient-gui` | Open a GUI frame using the LaunchServices-aware wrapper |
-| `emacs-service-toggle` | Enable/disable the Home Manager LaunchAgent |
-| `build-emacs-priority [--continue-build]` | Build `emacs-git` first with maximum CPU before running `nb/ns` |
+| Command                                   | Description                                                            |
+| ----------------------------------------- | ---------------------------------------------------------------------- |
+| `e [files...]`                            | Open files in GUI Emacs via `emacsclient -c` (starts daemon if needed) |
+| `t [files...]`                            | Open files in a terminal frame (`emacsclient -t`)                      |
+| `et`                                      | Launch the daemon in the foreground and exit once ready                |
+| `edd`                                     | Force-start the GUI daemon via `/Applications/Emacs.app`               |
+| `emacsclient-gui`                         | Open a GUI frame using the LaunchServices-aware wrapper                |
+| `emacs-service-toggle`                    | Enable/disable the Home Manager LaunchAgent                            |
+| `build-emacs-priority [--continue-build]` | Build `emacs-git` first with maximum CPU before running `nb/ns`        |
 
 #### Bring Your Own Configuration
 
-Because there is no longer a `stow/doom-emacs` package, manage your editor config directly in your preferred
-location:
+Because there is no longer a `stow/doom-emacs` package, manage your
+editor config directly in your preferred location:
 
 ```bash
 mkdir -p ~/.emacs.d
@@ -827,20 +896,27 @@ cd ~/.emacs.d
 # Track your configuration however you like (git, org tangles, straight.el, etc.)
 ```
 
-If you still want to keep configuration files inside this repository, create your own stow package (for example
-`stow/emacs-config/.emacs.d/`) and deploy it with `stow -t ~ emacs-config`.
+If you still want to keep configuration files inside this repository,
+create your own stow package (for example
+`stow/emacs-config/.emacs.d/`) and deploy it with `stow -t ~
+emacs-config`.
 
 #### Liquid Glass Icons & Binary Cache Behavior
 
-- The build copies `modules/assets/icons/Assets.car` plus the `EmacsLG1-*.icns` files into the generated
-  `Emacs.app` bundle and sets `CFBundleIconName` to `EmacsLG1` via `PlistBuddy`.
-- This customization happens in a lightweight derivation that simply copies the cached `emacs-git` output, so you
-  still benefit from the emacs-overlay binary cache—no 45-minute native rebuilds.
-- There is no Emacs pinning logic anymore. `nb`/`ns` simply evaluate against the overlay you have pinned in
-  `flake.lock`. To try an older commit, update `flake.lock` or use `nix registry pin` as needed.
+- The build copies `modules/assets/icons/Assets.car` plus the
+  `EmacsLG1-*.icns` files into the generated `Emacs.app` bundle and
+  sets `CFBundleIconName` to `EmacsLG1` via `PlistBuddy`.
+- This customization happens in a lightweight derivation that simply
+  copies the cached `emacs-git` output, so you still benefit from the
+  emacs-overlay binary cache—no 45-minute native rebuilds.
+- There is no Emacs pinning logic anymore. `nb`/`ns` simply evaluate
+  against the overlay you have pinned in `flake.lock`. To try an older
+  commit, update `flake.lock` or use `nix registry pin` as needed.
+  
 ### 🌟 Neovim (LazyVim) Configuration
 
-A modern Neovim configuration based on LazyVim with sensible defaults, extensive plugin ecosystem, and enhanced Lisp/Elisp support.
+A modern Neovim configuration based on LazyVim with sensible defaults,
+extensive plugin ecosystem, and enhanced Lisp/Elisp support.
 
 #### Quick Setup
 
@@ -881,15 +957,18 @@ nvim
 
 #### Key Features
 
-- **📦 Plugin Management**: Lazy.nvim with automatic plugin installation
+- **📦 Plugin Management**: Lazy.nvim with automatic plugin
+  installation
 - **🛠️ LSP Integration**: Built-in language server support
 - **🔍 Fuzzy Finding**: Telescope for files, buffers, grep
 - **📁 File Explorer**: Neo-tree for project navigation
 - **🎨 Modern UI**: Beautiful statusline, bufferline, themes
 - **⚡ Performance**: Lazy loading, fast startup
 - **🔧 Extensible**: Easy to add custom plugins and configurations
-- **👾 Lisp Support**: Enhanced support for Lisp dialects including Emacs Lisp
-- **🎯 Structural Editing**: Parinfer for automatic parenthesis management
+- **👾 Lisp Support**: Enhanced support for Lisp dialects including
+  Emacs Lisp
+- **🎯 Structural Editing**: Parinfer for automatic parenthesis
+  management
 
 #### Available Commands
 
@@ -920,7 +999,8 @@ nvim
 - Behavior:
   - No auto-trim on save; all actions are on-demand
   - Respects EditorConfig indentation for each filetype
-  - Whitespace highlighting is disabled in dashboards/special buffers (alpha, lazy, mason, NvimTree, TelescopePrompt, etc.)
+  - Whitespace highlighting is disabled in dashboards/special buffers
+    (alpha, lazy, mason, NvimTree, TelescopePrompt, etc.)
 
 #### Markdown Fill (Emacs‑Like)
 
@@ -936,7 +1016,10 @@ nvim
 Tip — Adjust Markdown wrap width
 
 - One-off buffer: `:setlocal textwidth=88` then use `:FillParagraph`/`:FillRegion`/`:FillBuffer`.
-- Session/global: `:lua vim.g.markdown_fill_textwidth = 88` (put in any user Lua file loaded at startup, e.g., `~/.config/nvim/lua/config/options.lua` or a small plugin file). The fill commands use this value for `textwidth` when opening Markdown.
+- Session/global: `:lua vim.g.markdown_fill_textwidth = 88` (put in
+  any user Lua file loaded at startup, e.g.,
+  `~/.config/nvim/lua/config/options.lua` or a small plugin file). The
+  fill commands use this value for `textwidth` when opening Markdown.
 
 #### EditorConfig (Global)
 
@@ -962,7 +1045,8 @@ git add . && git commit -m "Update LazyVim config"
 
 ### 🛠️ Editor Management with Stow
 
-Both editor configurations use the stow system for deployment and management.
+Both editor configurations use the stow system for deployment and
+management.
 
 #### Deploying Editor Configurations
 
@@ -1043,7 +1127,10 @@ manage-stow-packages remove
 
 ### 🛠️ IntelliJ Cache Cleanup Tool
 
-The `cleanup-intellij` script is a powerful utility for fixing broken IntelliJ IDEA states that can interfere with development. IntelliJ often accumulates corrupt caches, project files, and configuration states that cause issues like:
+The `cleanup-intellij` script is a powerful utility for fixing broken
+IntelliJ IDEA states that can interfere with development. IntelliJ
+often accumulates corrupt caches, project files, and configuration
+states that cause issues like:
 
 - Folder structure not being recognized properly
 - IDE freezing or becoming unresponsive
@@ -1189,20 +1276,27 @@ git checkout feature-branch
 cleanup-intellij -s  # Clean system caches
 ```
 
-This tool is particularly useful in JVM development environments where IntelliJ's complex project models can become corrupted, especially when working with large codebases, multi-module projects, or frequently switching between branches with different project structures.
+This tool is particularly useful in JVM development environments where
+IntelliJ's complex project models can become corrupted, especially
+when working with large codebases, multi-module projects, or
+frequently switching between branches with different project
+structures.
 
 ## 🐚 Choosing Your Default Shell
 
-This configuration provides primary support for **Nushell** and **Zsh**, stable support for **Xonsh**, and limited support for **Fish**. The focus is on optimizing build times for Emacs development, so Fish shell support is minimal.
+This configuration provides primary support for **Nushell** and
+**Zsh**, stable support for **Xonsh**, and limited support for
+**Fish**. The focus is on optimizing build times for Emacs
+development, so Fish shell support is minimal.
 
 ### 🎯 Shell Support Levels
 
-| Shell       | Support Level | Description                                         | Best For                                             |
-| ----------- | ------------- | --------------------------------------------------- | ---------------------------------------------------- |
-| **Nushell** | ⭐ Primary    | Full integration with all features                  | Data manipulation, pipelines, modern workflows       |
-| **Zsh**     | ⭐ Primary    | Full integration, extensive plugin support          | Power users, legacy compatibility, extensive plugins |
-| **Xonsh**   | ✅ Stable    | Full tool integrations, Python scripting capabilities | Python developers, shell automation, advanced scripting |
-| **Fish**    | ⚠️ Limited    | Basic functionality only, no tool integrations      | Users who need Fish but accept minimal features      |
+| Shell       | Support Level | Description                                           | Best For                                             |
+| ----------- | --------------| ----------------------------------------------------- | ---------------------------------------------------- |
+| **Nushell** | ⭐ Primary    | Full integration with all features                    | Data manipulation, pipelines, modern workflows       |
+| **Zsh**     | ⭐ Primary    | Full integration, extensive plugin support            | Power users, legacy compatibility, extensive plugins |
+| **Xonsh**   | ✅ Stable     | Full tool integrations, Python scripting capabilities | Python developers, shell automation, advanced script |
+| **Fish**    | ⚠️ Limited    | Basic functionality only, no tool integrations        | Users who need Fish but accept minimal features      |
 
 ### ⚠️ Important: Fish Shell Limitations
 
@@ -1216,24 +1310,36 @@ This configuration provides primary support for **Nushell** and **Zsh**, stable 
 
 ### ✅ Stable: Xonsh Support
 
-**Xonsh is now fully supported** with the unique ability to execute Python code directly in the shell environment. This makes it particularly powerful for Python developers and automation tasks.
+**Xonsh is now fully supported** with the unique ability to execute
+Python code directly in the shell environment. This makes it
+particularly powerful for Python developers and automation tasks.
 
 #### ✅ Xonsh Advantages
 
-- **🐍 Native Python Integration**: Execute Python code directly in shell (e.g., `print(f"Hello {2+2}")`)
-- **📦 Full Tool Integration**: Starship, Zoxide, Atuin with complete functionality
-- **🎨 Dynamic Theming**: Automatically adapts colors based on system light/dark mode
-- **⚡ Complete Functionality**: All essential shell operations and modern CLI tools work correctly
-- **🔧 Robust Package Management**: Uses uv2nix for fast, reliable Python package management
+- **🐍 Native Python Integration**: Execute Python code directly in
+  shell (e.g., `print(f"Hello {2+2}")`)
+- **📦 Full Tool Integration**: Starship, Zoxide, Atuin with complete
+  functionality
+- **🎨 Dynamic Theming**: Automatically adapts colors based on system
+  light/dark mode
+- **⚡ Complete Functionality**: All essential shell operations and
+  modern CLI tools work correctly
+- **🔧 Robust Package Management**: Uses uv2nix for fast, reliable
+  Python package management
 
 #### 🛠️ What Works Perfectly
 
 **Core Integrations:**
-- ✅ **Starship**: Full prompt integration with Git status, themes, and customization
-- ✅ **Zoxide**: Smart directory jumping (`z` command) with full functionality
-- ✅ **Atuin**: Complete history search and sync (requires `prompt_toolkit` - now included)
-- ✅ **Modern Aliases**: Complete set including `eza`, `bat`, `fd`, `rg`, and other modern CLI tools
-- ✅ **PATH Management**: Full PATH configuration with all development tools
+- ✅ **Starship**: Full prompt integration with Git status, themes,
+  and customization
+- ✅ **Zoxide**: Smart directory jumping (`z` command) with full
+  functionality
+- ✅ **Atuin**: Complete history search and sync (requires
+  `prompt_toolkit` - now included)
+- ✅ **Modern Aliases**: Complete set including `eza`, `bat`, `fd`,
+  `rg`, and other modern CLI tools
+- ✅ **PATH Management**: Full PATH configuration with all development
+  tools
 
 **Advanced Features:**
 - ✅ **Python Environment**: Integrated with uv2nix for consistent package management
@@ -1263,18 +1369,25 @@ xonsh  # Launch xonsh - everything works immediately!
 **All integrations work out of the box:**
 - ✅ **Starship**: Beautiful prompts with Git integration
 - ✅ **Zoxide**: Smart directory jumping (`z` command)
-- ✅ **Atuin**: Enhanced history search and sync (fixed with `prompt_toolkit`)
-- ✅ **Modern aliases**: Complete set of `eza`, `bat`, `fd`, `rg` and other CLI tools
-- ✅ **Development tools**: Full PATH with all development environments
+- ✅ **Atuin**: Enhanced history search and sync (fixed with
+  `prompt_toolkit`)
+- ✅ **Modern aliases**: Complete set of `eza`, `bat`, `fd`, `rg` and
+  other CLI tools
+- ✅ **Development tools**: Full PATH with all development
+  environments
 
 #### 📝 Configuration
 
 Xonsh configuration is managed in `modules/xonsh/`:
-- **Main config**: `modules/xonsh/rc.xsh` - Shell behavior and tool integrations
-- **Xontribs**: `modules/xonsh/xontrib-packages.nix` - Plugin package definitions
-- **Theme logic**: Automatic light/dark mode detection with appropriate color schemes
+- **Main config**: `modules/xonsh/rc.xsh` - Shell behavior and tool
+  integrations
+- **Xontribs**: `modules/xonsh/xontrib-packages.nix` - Plugin package
+  definitions
+- **Theme logic**: Automatic light/dark mode detection with
+  appropriate color schemes
 
-**Note**: Xonsh is not available as a `defaultShell` option. Access it by running `xonsh` from your primary shell.
+**Note**: Xonsh is not available as a `defaultShell` option. Access it
+by running `xonsh` from your primary shell.
 
 ### 🔧 Setting Your Default Shell
 
@@ -1415,17 +1528,18 @@ lines = result.split('\n')
 | `edd`    | `emacs-service-toggle start`                                     | Start Emacs daemon via LaunchAgent    |
 
 Impure/pure switches for nb/ns:
-- Default: impure evaluation for compatibility with host-specific tooling that reads from the working tree.
+- Default: impure evaluation for compatibility with host-specific
+  tooling that reads from the working tree.
 - Force pure: `ns --pure` or `NS_IMPURE=0 ns` (same for `nb`).
 - Explicit impure: `ns --impure` or `NS_IMPURE=1 ns`.
 
 #### Shell Configuration Shortcuts
 
-| Command | Shell | Description                            |
-| ------- | ----- | -------------------------------------- |
-| `nnc`   | All   | Edit Nushell config.nu                 |
-| `nne`   | All   | Edit Nushell env.nu                    |
-| `tg`    | All   | Edit terminal config                   |
+| Command | Shell | Description            |
+| ------- | ----- | ---------------------- |
+| `nnc`   | All   | Edit Nushell config.nu |
+| `nne`   | All   | Edit Nushell env.nu    |
+| `tg`    | All   | Edit terminal config   |
 
 ### 🔄 Switching Between Shells
 
@@ -1518,18 +1632,22 @@ initContent = lib.mkAfter ''
 - Absolutely require Fish shell for specific workflows
 - Accept minimal features and no tool integrations
 - Prioritize Emacs build speed over shell features
-- Are willing to use scripts in ~/.local/share/bin/ instead of shell functions
+- Are willing to use scripts in ~/.local/share/bin/ instead of shell
+  functions
 
 ### ⚡ PATH and Environment Management
 
-All shells use the centralized PATH configuration from `modules/path-config.nix`. This ensures:
+All shells use the centralized PATH configuration from
+`modules/path-config.nix`. This ensures:
 
 - **Consistent PATH**: Same paths across all shells
 - **Priority Control**: Your tools take precedence
 - **Tool Integration**: Automatic integration with development tools
-- **Override Capability**: Your configuration overrides mise, homebrew, etc.
+- **Override Capability**: Your configuration overrides mise,
+  homebrew, etc.
 
-See [PATH Management Documentation](modules/PATH-MANAGEMENT.md) for detailed PATH customization.
+See [PATH Management Documentation](modules/PATH-MANAGEMENT.md) for
+detailed PATH customization.
 
 ### 🔍 Troubleshooting Shell Issues
 
@@ -1569,10 +1687,14 @@ nu --config modules/nushell/config.nu --commands "exit"
 
 ### 💡 Shell Integration Tips
 
-- **Emacs Integration**: The default shell setting automatically configures vterm and shell-mode
-- **Terminal Integration**: All shells work seamlessly with Ghostty and other terminals
-- **Script Compatibility**: Shell scripts in this repo use bash for maximum compatibility
-- **Interactive vs Script**: Your default shell affects interactive sessions, not system scripts
+- **Emacs Integration**: The default shell setting automatically
+  configures vterm and shell-mode
+- **Terminal Integration**: All shells work seamlessly with Ghostty
+  and other terminals
+- **Script Compatibility**: Shell scripts in this repo use bash for
+  maximum compatibility
+- **Interactive vs Script**: Your default shell affects interactive
+  sessions, not system scripts
 
 ## 📁 What's Included
 
@@ -1633,9 +1755,12 @@ flake.nix              # Main flake with inputs, hostConfigs, and apps
 
 ## 📖 Documentation
 
-- **[Multi-User Setup Guide](MULTI-USER-SETUP.md)** - Comprehensive guide for adapting to different users and machines
-- **[Secrets Management Guide](SECRETS-MANAGEMENT.md)** - Secure credential management with 1Password and pass
-- **[Scripts Documentation](scripts/)** - Details on the automation tools
+- **[Multi-User Setup Guide](MULTI-USER-SETUP.md)** - Comprehensive
+  guide for adapting to different users and machines
+- **[Secrets Management Guide](SECRETS-MANAGEMENT.md)** - Secure
+  credential management with 1Password and pass
+- **[Scripts Documentation](scripts/)** - Details on the automation
+  tools
 
 ## 🔧 Configuration Examples
 
@@ -1692,38 +1817,50 @@ This configuration is designed to be a starting point. Feel free to:
 
 ## 📝 License
 
-This configuration is provided as-is. Feel free to use, modify, and distribute according to your needs.
+This configuration is provided as-is. Feel free to use, modify, and
+distribute according to your needs.
 
 ## 🆕 Changelog
 
 ### October 2025
 
 **2025-10-08** - **Enhanced Security & Build Cleanup**
-- 🔒 Removed unnecessary relaxed sandbox settings from `flake.nix` and `system.nix`
+- 🔒 Removed unnecessary relaxed sandbox settings from `flake.nix` and
+  `system.nix`
 - ✅ Improved build security without impacting functionality
 - 🧹 Eliminated sandbox warning messages during builds
 
 **2025-10-08** - **Simplified Emacs Build**
 - ✅ Removed the emacs-pinning module and associated helper commands
-- 🚀 Emacs now uses the cached emacs-overlay `emacs-git` build with Liquid Glass icons applied post-build
-- 📝 Updated documentation and stow helpers to reflect the bring-your-own-configuration workflow
+- 🚀 Emacs now uses the cached emacs-overlay `emacs-git` build with
+  Liquid Glass icons applied post-build
+- 📝 Updated documentation and stow helpers to reflect the
+  bring-your-own-configuration workflow
 
 **2025-10-09** - **Xonsh Scripting Guidelines Published**
-- 📚 Added comprehensive xonsh scripting guidelines to CLAUDE.md and AGENTS.md
-- 🛠️ Documented proper patterns for environment variables, subprocess calls, and module imports
-- ✅ Based on real troubleshooting from bash-to-xonsh migration of Emacs pinning tools
-- 🎯 Prevents common pitfalls: `${...}` vs `os.environ`, `!()` vs `subprocess.run()`, import patterns
+- 📚 Added comprehensive xonsh scripting guidelines to CLAUDE.md and
+  AGENTS.md
+- 🛠️ Documented proper patterns for environment variables, subprocess
+  calls, and module imports
+- ✅ Based on real troubleshooting from bash-to-xonsh migration of
+  Emacs pinning tools
+- 🎯 Prevents common pitfalls: `${...}` vs `os.environ`, `!()` vs
+  `subprocess.run()`, import patterns
 
 **2025-10-08** - **Xonsh Shell Support Stabilized**
 - ✅ Upgraded Xonsh from experimental to stable support status
 - 🐍 Added missing `prompt_toolkit` dependency for Atuin history sync
-- 🎨 Complete tool integrations: Starship, Zoxide, Atuin all working perfectly
-- 📦 Integrated Xonsh with uv2nix Python environment for robust package management
-- 🚀 All modern CLI aliases (`eza`, `bat`, `fd`, `rg`) functioning correctly
+- 🎨 Complete tool integrations: Starship, Zoxide, Atuin all working
+  perfectly
+- 📦 Integrated Xonsh with uv2nix Python environment for robust
+  package management
+- 🚀 All modern CLI aliases (`eza`, `bat`, `fd`, `rg`) functioning
+  correctly
 
 ### September 2025
 
 **2025-09-xx** - **Python Environment Migration**
-- 📦 Migrated from individual Python packages to uv2nix-based environment
+- 📦 Migrated from individual Python packages to uv2nix-based
+  environment
 - ⚡ Faster Python package builds with better dependency resolution
 - 🔄 Consistent package management across all Python-based tools
