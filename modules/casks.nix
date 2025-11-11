@@ -27,6 +27,7 @@ _: [
   "fastmail"
   "microsoft-outlook"
   "microsoft-teams"
+  "signal"
   "slack"
   "teamviewer"
   "whatsapp"
