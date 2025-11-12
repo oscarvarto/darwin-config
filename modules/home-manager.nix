@@ -240,29 +240,6 @@ in {
           # Manual `op` CLI commands available when direct credential access needed
           # This eliminates the deprecated initExtra warning from upstream shell plugins
 
-          atuin = {
-            enable = true;
-            daemon.enable = true;
-            enableNushellIntegration = true;
-            enableZshIntegration = true;
-            settings = {
-              # General settings
-              auto_sync = true;
-              sync_frequency = "5m";
-              sync_address = "https://api.atuin.sh";
-
-              # Search settings
-              search_mode = "prefix";
-              filter_mode = "global";
-              style = "compact";
-
-              # History settings
-              inline_height = 40;
-              show_preview = true;
-              max_preview_height = 4;
-            };
-          };
-
           bash.enable = true;
 
           direnv = {

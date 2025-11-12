@@ -27,7 +27,6 @@ SUPPORTED APPLICATIONS:
     • Starship (shell prompt) - Fixed to Catppuccin Mocha (dark)
     • BAT (syntax highlighter) - Managed via Nix Catppuccin module
     • Zellij (terminal multiplexer) - Managed via Nix Catppuccin module
-    • Atuin (shell history)
     • Ghostty (terminal emulator) - Live config reload without restart
     • Nushell (shell syntax highlighting)
     • Fish (shell colors)
@@ -86,14 +85,14 @@ show_status() {
     # Application-specific themes
     echo ""
     echo "🎨 Application Themes:"
-    
+
     # Starship
     if [[ -f "$HOME/.config/starship.toml" ]]; then
         echo "   Starship: Catppuccin Mocha (fixed)"
     else
         echo "   Starship: not configured"
     fi
-    
+
     # BAT
     if [[ -f "$HOME/.config/bat/config" ]]; then
         bat_theme=$(grep '^--theme=' "$HOME/.config/bat/config" | sed "s/--theme='\(.*\)'/\1/" || echo "unknown")
@@ -101,15 +100,7 @@ show_status() {
     else
         echo "   BAT: not configured"
     fi
-    
-    # Atuin
-    if [[ -f "$HOME/.config/atuin/config.toml" ]]; then
-        atuin_theme=$(grep 'name = ' "$HOME/.config/atuin/config.toml" | sed 's/name = "\(.*\)"/\1/' || echo "unknown")
-        echo "   Atuin: $atuin_theme"
-    else
-        echo "   Atuin: not configured"
-    fi
-    
+
     # Zellij
     if [[ -f "$HOME/.config/zellij/config.kdl" ]]; then
         echo "   Zellij: Managed by Nix Catppuccin module"
@@ -220,34 +211,6 @@ log ""
 
 # Starship stays on the Catppuccin Mocha palette
 log "⭐ Starship prompt theme: Catppuccin Mocha (fixed dark palette)"
-
-# Update atuin theme via environment variables (Nix-managed configs are read-only)
-log "📖 Updating Atuin history theme..."
-ATUIN_OVERRIDE="$HOME/.config/atuin/overrides.toml"
-if [[ "$DRY_RUN" != "true" ]]; then
-    mkdir -p "$(dirname "$ATUIN_OVERRIDE")"
-    if [[ "$APPEARANCE" == "light" ]]; then
-        cat > "$ATUIN_OVERRIDE" << 'ATUIN_EOF'
-# Atuin theme overrides - managed by catppuccin-theme-switcher
-# This file overrides Nix-managed configuration
-
-[theme]
-name = "catppuccin-latte-mauve"
-ATUIN_EOF
-        log "   ✅ Created Atuin override for light theme (catppuccin-latte-mauve)"
-    else
-        cat > "$ATUIN_OVERRIDE" << 'ATUIN_EOF'
-# Atuin theme overrides - managed by catppuccin-theme-switcher
-# This file overrides Nix-managed configuration
-
-[theme]
-name = "catppuccin-mocha-mauve"
-ATUIN_EOF
-        log "   ✅ Created Atuin override for dark theme (catppuccin-mocha-mauve)"
-    fi
-else
-    log "   🔍 Would create Atuin override for $APPEARANCE theme"
-fi
 
 # Zellij theme is managed by the Nix Catppuccin module
 log "🖼️  Zellij multiplexer theme: Managed by Nix Catppuccin module"

@@ -25,5 +25,5 @@
 - Supports nushell and zsh with feature parity
 - Shared aliases, PATH, development tools across both shells
 - Shell-specific strengths preserved (nushell data processing, zsh compatibility)
-- Consistent Starship prompts, Zoxide navigation, Atuin history
+- Consistent Starship prompts, Zoxide navigation
 - Note: Fish shell binary is installed only as a completion engine for Nushell

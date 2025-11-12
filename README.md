@@ -619,8 +619,8 @@ Tip: run `ns --help` or `nb --help` for all options.
     all primary shells
   - **Smart Switching**: Easy shell changes via simple configuration
     updates
-  - **Modern Features**: Starship prompts, Zoxide navigation, Atuin
-    history (Nushell/Zsh/Xonsh)
+  - **Modern Features**: Starship prompts, Zoxide navigation
+    (Nushell/Zsh/Xonsh)
   - **Python Integration**: Native Python scripting support with Xonsh
   - **Limited Fish Support**: Basic functionality only, no
     integrations to optimize build times
@@ -1301,7 +1301,7 @@ development, so Fish shell support is minimal.
 ### ⚠️ Important: Fish Shell Limitations
 
 **Fish shell is a second-class citizen in this configuration:**
-- ❌ **No integrations**: Atuin, Starship, Mise, Yazi, and Zoxide integrations are disabled
+- ❌ **No integrations**: Starship, Mise, Yazi, and Zoxide integrations are disabled
 - ❌ **Minimal functions**: Most shell functions removed to reduce build overhead
 - ✅ **Basic functionality**: Shell works but with limited features
 - ✅ **Essential aliases**: Only the most basic aliases are configured
@@ -1318,7 +1318,7 @@ particularly powerful for Python developers and automation tasks.
 
 - **🐍 Native Python Integration**: Execute Python code directly in
   shell (e.g., `print(f"Hello {2+2}")`)
-- **📦 Full Tool Integration**: Starship, Zoxide, Atuin with complete
+- **📦 Full Tool Integration**: Starship, Zoxide with complete
   functionality
 - **🎨 Dynamic Theming**: Automatically adapts colors based on system
   light/dark mode
@@ -1334,8 +1334,6 @@ particularly powerful for Python developers and automation tasks.
   and customization
 - ✅ **Zoxide**: Smart directory jumping (`z` command) with full
   functionality
-- ✅ **Atuin**: Complete history search and sync (requires
-  `prompt_toolkit` - now included)
 - ✅ **Modern Aliases**: Complete set including `eza`, `bat`, `fd`,
   `rg`, and other modern CLI tools
 - ✅ **PATH Management**: Full PATH configuration with all development
@@ -1369,8 +1367,6 @@ xonsh  # Launch xonsh - everything works immediately!
 **All integrations work out of the box:**
 - ✅ **Starship**: Beautiful prompts with Git integration
 - ✅ **Zoxide**: Smart directory jumping (`z` command)
-- ✅ **Atuin**: Enhanced history search and sync (fixed with
-  `prompt_toolkit`)
 - ✅ **Modern aliases**: Complete set of `eza`, `bat`, `fd`, `rg` and
   other CLI tools
 - ✅ **Development tools**: Full PATH with all development
@@ -1443,7 +1439,6 @@ hostConfigs = {
 
 - **Starship Prompt**: Modern, fast prompt with git integration
 - **Zoxide**: Smart directory jumping with `z` command
-- **Atuin**: Improved history with search and sync
 - **Yazi**: File manager integration
 - **Consistent Aliases**: Complete set of shortcuts
 - **PATH Management**: Full PATH configuration with all integrations
@@ -1454,14 +1449,14 @@ hostConfigs = {
 - **Basic Prompt**: Default Fish prompt (no Starship)
 - **Minimal Aliases**: Only essential aliases (ls, ll, cat, grep)
 - **Basic Functions**: Only nb, ns, and yazi wrapper
-- **No Integrations**: No Atuin, Zoxide, Mise, or other tool integrations
+- **No Integrations**: No Zoxide, Mise, or other tool integrations
 - **PATH Management**: Basic PATH setup without tool integrations
 
 #### Xonsh Shell - Full Features
 
 - **Starship Prompt**: Complete prompt integration with Git status and themes
 - **Python Integration**: Native Python code execution in shell environment
-- **Full Tool Integrations**: Zoxide, Atuin, Starship working perfectly
+- **Full Tool Integrations**: Zoxide, Starship working perfectly
 - **Dynamic Theming**: Automatic light/dark color scheme adaptation
 - **Modern Aliases**: Complete set of shortcuts (`eza`, `bat`, `fd`, `rg`)
 - **PATH Management**: Full PATH configuration with all development tools
@@ -1849,8 +1844,7 @@ distribute according to your needs.
 
 **2025-10-08** - **Xonsh Shell Support Stabilized**
 - ✅ Upgraded Xonsh from experimental to stable support status
-- 🐍 Added missing `prompt_toolkit` dependency for Atuin history sync
-- 🎨 Complete tool integrations: Starship, Zoxide, Atuin all working
+- 🎨 Complete tool integrations: Starship, Zoxide all working
   perfectly
 - 📦 Integrated Xonsh with uv2nix Python environment for robust
   package management

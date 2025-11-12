@@ -290,11 +290,7 @@ in {
         alias lt="lem -i ncurses"
         alias lg="lem &"
 
-        # Atuin handles history search - removing conflicting bindings
-        # Atuin uses Ctrl+R for interactive search and up/down arrows for history navigation
-        # The Atuin integration from home-manager will set up the proper bindings
-
-        # Basic navigation that doesn't conflict with Atuin
+        # Basic navigation
         bindkey '^F' forward-char     # Ctrl+F forward one character
         bindkey '^B' backward-char    # Ctrl+B backward one character
         bindkey '^E' end-of-line      # Ctrl+E to end of line

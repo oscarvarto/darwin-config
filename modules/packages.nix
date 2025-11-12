@@ -51,7 +51,6 @@
     requests = [];
     pygments = [];
     pillow = [];
-    prompt-toolkit = []; # Required for Atuin xonsh support
 
     # Python development basics
     pip = [];

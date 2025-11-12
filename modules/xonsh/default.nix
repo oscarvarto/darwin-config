@@ -111,21 +111,6 @@
             print("✓ Zoxide navigation enabled")
     except:
         print("Warning: Zoxide not found")
-
-    # Atuin Integration
-    try:
-        import subprocess
-        atuin_check = subprocess.run(['which', 'atuin'], capture_output=True, text=True)
-        if atuin_check.returncode == 0:
-            atuin_path = atuin_check.stdout.strip()
-            if atuin_path:
-                # Initialize atuin for xonsh - atuin has experimental xonsh support
-                execx($(atuin init xonsh))
-                print("✓ Atuin history integration enabled")
-        else:
-            print("Warning: Atuin not found")
-    except Exception as e:
-        print(f"Warning: Atuin initialization failed: {e}")
   '';
 
   generatedConfigParts =

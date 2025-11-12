@@ -12,18 +12,9 @@
       echo "🧹 Cleaning up old backup files to prevent home-manager collisions..."
       $DRY_RUN_CMD rm -f ~/.config/starship.toml.bak
       $DRY_RUN_CMD rm -f ~/.config/zellij/config.kdl.bak
-      $DRY_RUN_CMD rm -f ~/.config/atuin/config.toml.bak
       # Also clean up any other .bak files in common config directories
       $DRY_RUN_CMD find ~/.config -name "*.bak" -type f -delete 2>/dev/null || true
       echo "✅ Backup file cleanup completed"
-    '';
-
-    # Clean up stale atuin socket to ensure daemon can start
-    cleanupAtuinSocket = lib.hm.dag.entryBefore ["checkLinkTargets"] ''
-      echo "🧹 Cleaning up atuin daemon socket..."
-      # Remove stale socket file if it exists (prevents "Address already in use" errors)
-      $DRY_RUN_CMD rm -f ~/.local/share/atuin/daemon.sock
-      echo "✅ Atuin socket cleanup completed"
     '';
 
     # Install terminfo for Ghostty and Kitty terminals

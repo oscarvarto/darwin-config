@@ -127,7 +127,7 @@
 
     masApps = {
       "1Password for Safari" = 1569813296;
-      "Amazon Prime Video" = 545519333;
+      # "Amazon Prime Video" = 545519333;
       "rcmd" = 1596283165;
       "Xcode" = 497799835;
     };
