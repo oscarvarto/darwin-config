@@ -372,11 +372,6 @@ in {
             };
           };
 
-          vscode = {
-            enable = true;
-            mutableExtensionsDir = true;
-          };
-
           yazi = {
             enable = true;
             enableNushellIntegration = true;

@@ -327,6 +327,11 @@ in {
         export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :500 {} 2>/dev/null || ls -la {}'"
         export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -200'"
 
+        # Initialize atuin (homebrew installation)
+        if command -v atuin &> /dev/null; then
+          eval "$(atuin init zsh)"
+        fi
+
         # Final centralized PATH override (post-plugins)
         ${
           if pathConfig != null

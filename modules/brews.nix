@@ -22,6 +22,7 @@
       "7-zip"
       "angular-cli"
       "aria2"
+      "atuin"
       "autoconf"
       "autoconf-archive"
       "automake"

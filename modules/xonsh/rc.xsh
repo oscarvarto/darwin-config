@@ -129,6 +129,23 @@ try:
 except:
     print("Warning: Direnv not found")
 
+# atuin integration (homebrew installation)
+try:
+    # Check if atuin is available in PATH
+    atuin_path = $(which atuin 2>/dev/null).strip()
+    if atuin_path:
+        atuin_init = $(atuin init xonsh)
+        execx(atuin_init)
+    else:
+        # Try homebrew path directly
+        import os
+        if os.path.exists('/opt/homebrew/bin/atuin'):
+            atuin_init = $(/opt/homebrew/bin/atuin init xonsh)
+            execx(atuin_init)
+except Exception as e:
+    # Silently ignore if atuin is not available
+    pass
+
 # =============================================================================
 # Mise Integration - Disabled due to recursion issues
 # =============================================================================

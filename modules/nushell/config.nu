@@ -1673,3 +1673,5 @@ def "zt-status" [] {
 
 # Final PATH cleanup - remove duplicates after all integrations have loaded
 $env.PATH = ($env.PATH | uniq)
+
+source ~/.local/share/atuin/init.nu

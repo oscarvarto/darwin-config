@@ -19,6 +19,7 @@ _: [
   "powershell"
   "qt-creator"
   "qt-design-studio"
+  "visual-studio-code@insiders"
 
   # Communication Tools
   "anytype"
