@@ -129,6 +129,8 @@
     masApps = {
       "1Password for Safari" = 1569813296;
       # "Amazon Prime Video" = 545519333;
+      # "Okta Verify" = 490179405;
+      # "Okta Extension App" = 1439967473;
       "rcmd" = 1596283165;
       "Xcode" = 497799835;
     };
