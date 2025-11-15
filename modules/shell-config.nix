@@ -13,6 +13,7 @@ in {
     # Shared shell utilities
     broot = {
       enable = true;
+      enableFishIntegration = true;
       enableNushellIntegration = true;
       enableZshIntegration = true;
     };
@@ -21,6 +22,7 @@ in {
 
     fzf = {
       enable = true;
+      enableFishIntegration = true;
       enableZshIntegration = true;
     };
 

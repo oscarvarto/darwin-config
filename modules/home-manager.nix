@@ -126,6 +126,7 @@ in {
           inputs.catppuccin.homeModules.catppuccin
           # inputs.op-shell-plugins.hmModules.default  # Removed - SSH agent integration sufficient
         ]
+        ++ [./fish-config.nix]
         ++ [./nushell]
         ++ [./xonsh/default.nix];
 
@@ -189,6 +190,9 @@ in {
         zellij.enable = true;
       };
 
+      # Enable the local fish module
+      local.fish.enable = true;
+
       # Enable the local nushell module
       local.nushell.enable = true; # Re-enabled to test if it causes fish config issue
 
@@ -246,6 +250,7 @@ in {
             enable = true;
             nix-direnv.enable = true;
             enableZshIntegration = true;
+            # enableFishIntegration = true; # Automatically enabled by fish module
             enableNushellIntegration = true;
           };
 
@@ -306,6 +311,7 @@ in {
           starship = {
             enable = true;
             enableZshIntegration = true;
+            enableFishIntegration = true;
             enableNushellIntegration = true;
             settings =
               fromTOML (builtins.readFile ./starship.toml)
@@ -377,6 +383,7 @@ in {
 
           yazi = {
             enable = true;
+            enableFishIntegration = true;
             enableNushellIntegration = true;
             enableZshIntegration = true;
             settings = {
@@ -392,6 +399,7 @@ in {
           zoxide = {
             enable = true;
             enableBashIntegration = true;
+            enableFishIntegration = true;
             enableNushellIntegration = true;
             enableZshIntegration = true;
           };
