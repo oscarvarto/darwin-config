@@ -59,9 +59,9 @@ in {
       # Dynamic build performance settings based on hardware specs
       # Hardware-optimized settings applied on Sun Sep 14 13:10:00 CST 2025 for 16 cores, 128GB RAM
       # These settings are auto-detected and configured during setup
-      max-jobs = 32; # Hardware-optimized: 16 cores detected
+      max-jobs = 64; # Hardware-optimized: 16 cores detected
       cores = 0; # Use all available logical cores for each job
-      max-substitution-jobs = 32; # Hardware-optimized for network performance
+      max-substitution-jobs = 64; # Hardware-optimized for network performance
 
       # Memory optimization - allow large builds with plenty of RAM
       max-silent-time = 3600; # 1 hour timeout for silent builds (Emacs compilation)
@@ -136,6 +136,22 @@ in {
       # Fix locale issues for Mexico-based systems
       # Force consistent en_US.UTF-8 locale in all build environments
     '';
+  };
+
+  # Increase file descriptor limits for Nix operations
+  # This prevents "Too many open files" errors during flake updates
+  launchd.daemons.limit-maxfiles = {
+    serviceConfig = {
+      Label = "limit.maxfiles";
+      ProgramArguments = [
+        "launchctl"
+        "limit"
+        "maxfiles"
+        "65536"
+        "200000"
+      ];
+      RunAtLoad = true;
+    };
   };
 
   # Global nixpkgs configuration to silence evaluation warnings

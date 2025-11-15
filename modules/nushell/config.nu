@@ -1671,6 +1671,24 @@ def "zt-status" [] {
     zellij-theme-manager status
 }
 
+# Override prompt for Claude Code terminal (which doesn't render truecolor properly)
+# This must run after starship init to override it
+if ($env.CLAUDECODE? | default "" | str length) > 0 {
+    # Use a simple prompt for Claude Code
+    # Shows: username@hostname current_dir >
+    $env.PROMPT_COMMAND = {||
+        let user = (whoami)
+        let host = (hostname | str trim)
+        let dir = ($env.PWD | str replace $env.HOME "~")
+        $"(ansi green)($user)(ansi reset)@(ansi blue)($host)(ansi reset) (ansi cyan)($dir)(ansi reset) > "
+    }
+    $env.PROMPT_COMMAND_RIGHT = {|| "" }
+    $env.PROMPT_INDICATOR = ""
+    $env.PROMPT_INDICATOR_VI_INSERT = ""
+    $env.PROMPT_INDICATOR_VI_NORMAL = ""
+    $env.PROMPT_MULTILINE_INDICATOR = ""
+}
+
 # Final PATH cleanup - remove duplicates after all integrations have loaded
 $env.PATH = ($env.PATH | uniq)
 

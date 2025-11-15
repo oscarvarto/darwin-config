@@ -54,6 +54,7 @@
     prompt-toolkit = []; # Required for Atuin xonsh support
 
     # Python development basics
+    pexpect = []; # Required for fish shell tests
     pip = [];
     setuptools = [];
     wheel = [];
@@ -205,7 +206,7 @@ in
     mas
 
     # Shell completion tools
-    fish # Required for Nushell's fish completer
+    fish # Required for Nushell's fish completer (fixed via overlay)
     nushell
     carapace
     zellij

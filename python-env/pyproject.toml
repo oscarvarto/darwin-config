@@ -2,7 +2,7 @@
 name = "darwin-config-env"
 version = "0.1.0"
 description = "Python environment for darwin-config tooling"
-requires-python = ">=3.13"
+requires-python = "~=3.13.0"
 dependencies = [
   "beautifulsoup4",
   "debugpy",
@@ -10,6 +10,7 @@ dependencies = [
   "requests",
   "sexpdata",
   "tld",
+  "pexpect",
   "pygments",
   "pysocks",
   "polars",

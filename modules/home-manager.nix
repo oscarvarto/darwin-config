@@ -294,10 +294,13 @@ in {
             };
           };
 
+          # Temporarily disable mise integrations to avoid build issues
+          # We'll use the existing mise from system profile instead
           mise = {
             enable = true;
-            enableZshIntegration = true;
-            enableNushellIntegration = true;
+            enableFishIntegration = true; 
+            enableZshIntegration = true; # Disable to avoid zshrc build issues
+            enableNushellIntegration = true; # Disable to avoid nushell config issues
           };
 
           starship = {

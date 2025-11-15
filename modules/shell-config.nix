@@ -332,6 +332,20 @@ in {
           eval "$(atuin init zsh)"
         fi
 
+        # Override prompt for Claude Code terminal (which doesn't render truecolor properly)
+        # This must run after starship init to override it
+        if [[ -n "$CLAUDECODE" ]]; then
+          # Use a simple prompt for Claude Code
+          # Shows: username@hostname current_dir git_branch >
+          autoload -Uz vcs_info
+          precmd_vcs_info() { vcs_info }
+          precmd_functions+=( precmd_vcs_info )
+          setopt prompt_subst
+          zstyle ':vcs_info:git:*' formats ' %F{yellow}(%b)%f'
+          zstyle ':vcs_info:*' enable git
+          PROMPT='%F{green}%n%f@%F{blue}%m%f %F{cyan}%~%f$vcs_info_msg_0_ > '
+        fi
+
         # Final centralized PATH override (post-plugins)
         ${
           if pathConfig != null

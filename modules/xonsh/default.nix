@@ -89,16 +89,23 @@
     # Tool Integration (Direct)
     # =============================================================================
 
-    # Starship Integration
-    try:
-        starship_path = $(which starship).strip()
-        if starship_path:
-            $STARSHIP_CONFIG = str(Path.home() / ".config" / "starship.toml")
-            # Initialize starship for xonsh
-            execx($(starship init xonsh))
-            print("✓ Starship prompt enabled")
-    except:
-        print("Warning: Starship not found")
+    # Starship Integration (disabled in Claude Code - doesn't render truecolor properly)
+    import os
+    if not os.getenv('CLAUDECODE'):
+        try:
+            starship_path = $(which starship).strip()
+            if starship_path:
+                $STARSHIP_CONFIG = str(Path.home() / ".config" / "starship.toml")
+                # Initialize starship for xonsh
+                execx($(starship init xonsh))
+                print("✓ Starship prompt enabled")
+        except:
+            print("Warning: Starship not found")
+    else:
+        # Use simple prompt for Claude Code
+        import socket
+        $PROMPT = lambda: f"{os.getenv('USER', 'user')}@{socket.gethostname().split('.')[0]} {os.getcwd().replace(os.path.expanduser('~'), '~')} > "
+        print("✓ Using simple prompt (Claude Code mode)")
 
     # Zoxide Integration (manual, safer than xontrib)
     try:
