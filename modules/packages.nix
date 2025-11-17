@@ -112,6 +112,7 @@ in
     coreutils
     curl
     alejandra
+    bashInteractive
     bash-completion
     killall
     openssh

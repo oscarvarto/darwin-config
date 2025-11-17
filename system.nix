@@ -263,6 +263,11 @@ in {
       if defaultShell != "nushell"
       then [shellPaths.nushell]
       else []
+    )
+    ++ (
+      if defaultShell != "bash"
+      then [shellPaths.bash]
+      else []
     );
   # fish shell removed - only kept as nushell multicompleter dependency
 

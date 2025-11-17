@@ -84,6 +84,9 @@
   # Generate zsh-compatible path array (leave $HOME/$USER for runtime expansion)
   zshPaths = lib.concatStringsSep "\n        " (map (path: "\"${path}\"") pathEntries);
 
+  # Bash uses the same quoting requirements as zsh for PATH bootstrapping
+  bashPaths = zshPaths;
+
   # Generate nushell-compatible path list
   nushellPaths = lib.concatStringsSep "\n    " (map (path: "\"${expandPath path}\"") pathEntries);
 
@@ -95,6 +98,103 @@ in {
     inherit pathEntries expandedPaths;
 
     # Shell-specific configurations with mise override capability
+    bash = {
+      pathSetup = ''
+        # ============================================================================
+        # CENTRALIZED PATH SETUP - CONTROLLED BY modules/path-config.nix
+        # ============================================================================
+        # This overrides mise, homebrew, and any other tool that tries to modify PATH
+
+        # Seed PATH from macOS path_helper (adds entries from /etc/paths and /etc/paths.d)
+        if [ -x /usr/libexec/path_helper ]; then
+          eval "$(/usr/libexec/path_helper -s)"
+        fi
+
+        desired_paths=(
+        ${bashPaths}
+        )
+
+        # Build authoritative PATH - only include paths that exist
+        new_path=""
+        for path in "''${desired_paths[@]}"; do
+          expanded_path="''${path//\$HOME/$HOME}"
+          expanded_path="''${expanded_path//\$USER/$USER}"
+          if [ -d "$expanded_path" ] || [ -L "$expanded_path" ]; then
+            if [ -z "$new_path" ]; then
+              new_path="$expanded_path"
+            else
+              new_path="$new_path:$expanded_path"
+            fi
+          fi
+        done
+
+        # Override any system or tool-set PATH with our authoritative version
+        if [ -n "$new_path" ]; then
+          export PATH="$new_path"
+        fi
+      '';
+
+      # This runs AFTER all integrations to enforce our PATH
+      pathOverride = ''
+        # ============================================================================
+        # AUTHORITATIVE PATH OVERRIDE - RUNS AFTER ALL INTEGRATIONS
+        # ============================================================================
+        # This ensures our PATH takes precedence over mise, homebrew, etc.
+
+        # Snapshot current PATH after all integrations
+        original_path="$PATH"
+
+        # Incorporate macOS path_helper (e.g., TeX from /etc/paths.d/TeX)
+        if [ -x /usr/libexec/path_helper ]; then
+          eval "$(/usr/libexec/path_helper -s)"
+          PATH="$PATH:$original_path"
+        fi
+
+        desired_paths=(
+        ${bashPaths}
+        )
+
+        # Rebuild our desired PATH
+        our_path=""
+        for path in "''${desired_paths[@]}"; do
+          expanded_path="''${path//\$HOME/$HOME}"
+          expanded_path="''${expanded_path//\$USER/$USER}"
+          if [ -d "$expanded_path" ] || [ -L "$expanded_path" ]; then
+            if [ -z "$our_path" ]; then
+              our_path="$expanded_path"
+            else
+              our_path="$our_path:$expanded_path"
+            fi
+          fi
+        done
+
+        # Start with our desired list (which includes mise shims at top)
+        final_path="$our_path"
+
+        # Preserve additional tool-added paths (after our desired list)
+        IFS=':' read -r -a original_path_array <<< "$original_path"
+        for p in "''${original_path_array[@]}"; do
+          if [ -n "$p" ] && [ -e "$p" ]; then
+            case ":$final_path:" in
+              *:"$p":*) ;;
+              *)
+                if [ -z "$final_path" ]; then
+                  final_path="$p"
+                else
+                  final_path="$final_path:$p"
+                fi
+                ;;
+            esac
+          fi
+        done
+
+        # Force final PATH to our computed value
+        if [ -n "$final_path" ]; then
+          export PATH="$final_path"
+        fi
+      '';
+    };
+
     zsh = {
       pathSetup = ''
         # ============================================================================

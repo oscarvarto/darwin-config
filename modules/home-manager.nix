@@ -249,6 +249,7 @@ in {
           direnv = {
             enable = true;
             nix-direnv.enable = true;
+            enableBashIntegration = true;
             enableZshIntegration = true;
             # enableFishIntegration = true; # Automatically enabled by fish module
             enableNushellIntegration = true;
@@ -304,13 +305,15 @@ in {
           # We'll use the existing mise from system profile instead
           mise = {
             enable = true;
-            enableFishIntegration = true; 
+            enableBashIntegration = true;
+            enableFishIntegration = true;
             enableZshIntegration = true; # Disable to avoid zshrc build issues
             enableNushellIntegration = true; # Disable to avoid nushell config issues
           };
 
           starship = {
             enable = true;
+            enableBashIntegration = true;
             enableZshIntegration = true;
             enableFishIntegration = true;
             enableNushellIntegration = true;
