@@ -15,7 +15,8 @@
 
     taps = [
       "borkdude/brew"
-      # "oscarvarto/jank"
+      "oscarvarto/jank"
+      "jetbrains/utils"
     ];
 
     brews = [
@@ -29,6 +30,7 @@
       "awscli"
       "bat"
       "bat-extras"
+      "bazelisk"
       "bfg"
       "boot-clj"
       "boost"
@@ -61,6 +63,7 @@
       "hugo"
       "imagemagick"
       "jq"
+      "kotlin-lsp"
       "libedit"
       "libgccjit"
       "libsql"

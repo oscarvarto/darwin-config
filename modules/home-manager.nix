@@ -273,6 +273,7 @@ in {
               fetch.prune = true;
               pull.rebase = true;
               push.autoSetupRemote = true;
+              push.default = "current";
               rebase.autoStash = true;
               safe.directory = [
                 "*"

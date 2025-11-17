@@ -68,11 +68,15 @@
       }
     }
   },
-  "icon_theme": "Catppuccin Latte",
-  "theme": {
+  "icon_theme": {
     "mode": "system",
     "light": "Catppuccin Latte",
-    "dark": "Catppuccin Mocha"
+    "dark": "Catppuccin Latte"
+  },
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "Catppuccin Latte"
   },
   "indent_guides": {
     "enabled": true,
@@ -115,9 +119,12 @@
       "initialization_options": {
         "bundles": [],
         // "workspaceFolders": ["file:///home/snjeza/Project"],
+        "extendedClientCapabilities": {
+          "classFileContentsSupport": true
+        },
         "settings": {
           "java": {
-            "home": "/Library/Java/JavaVirtualMachines/25.0.0.jdk/Contents/Home",
+            "home": "/Library/Java/JavaVirtualMachines/corretto-25.0.1.8.1.jdk/Contents/Home/",
             "errors": {
               "incompleteClasspath": {
                 "severity": "warning"
@@ -222,6 +229,7 @@
       "language_servers": ["ty", "!basedpyright", "!pylsp"]
     },
     "Java": {
+      "preferred_line_length": 100,
       "format_on_save": "off"
     },
     "Nix": {

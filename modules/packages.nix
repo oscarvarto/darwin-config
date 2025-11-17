@@ -54,7 +54,7 @@
     prompt-toolkit = []; # Required for Atuin xonsh support
 
     # Python development basics
-    pexpect = []; # Required for fish shell tests
+    pexpect = [];
     pip = [];
     setuptools = [];
     wheel = [];

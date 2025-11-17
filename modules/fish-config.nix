@@ -60,6 +60,11 @@ in {
 
       # Interactive shell initialization
       interactiveShellInit = ''
+        # Initialize carapace for enhanced completions (must be early)
+        if command -v carapace >/dev/null 2>&1
+          carapace _carapace | source
+        end
+
         # Load theme from cache file set by catppuccin theme switcher
         if test -f ~/.cache/fish_theme
           set -gx FISH_THEME (cat ~/.cache/fish_theme 2>/dev/null | string trim)
@@ -112,6 +117,10 @@ in {
 
         # History settings (matching other shells)
         set -g fish_history_max 50000
+
+        # Completion settings for better autocomplete experience
+        set -g fish_complete_path $fish_complete_path
+        set -g fish_autosuggestion_enabled 1
 
         # Ghostty terminal compatibility fallback (matching zsh)
         if test "$TERM" = "xterm-ghostty"
