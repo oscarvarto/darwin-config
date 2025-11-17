@@ -373,7 +373,14 @@ in {
     };
 
     bash = {
+      enable = true;
       enableCompletion = true;
+      profileExtra = ''
+        # Ensure login shells load the interactive configuration
+        if [ -f "$HOME/.bashrc" ]; then
+          . "$HOME/.bashrc"
+        fi
+      '';
       bashrcExtra = lib.mkAfter ''
         ${nixDaemonInit}
 
