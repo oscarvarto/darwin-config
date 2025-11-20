@@ -69,11 +69,11 @@
       "libgccjit"
       "libsql"
       "libtool"
-      {
-        name = "llvm";
-        args = ["HEAD"];
-      }
-      "oscarvarto/jank/jank-git"
+      # {
+      #   name = "llvm";
+      #   args = ["HEAD"];
+      # }
+      # "oscarvarto/jank/jank-git"
       "libvterm"
       "livekit"
       "markdown-oxide"
