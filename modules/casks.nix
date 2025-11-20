@@ -55,5 +55,5 @@ _: [
   # Browsers
   "chatgpt-atlas"
   "safari-technology-preview"
-  # "zen"
+  "zen"
 ]

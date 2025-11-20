@@ -85,18 +85,31 @@ else
 fi
 # See https://github.com/nix-darwin/nix-darwin/issues/1457 on why we need sudo
 # Filter out the repetitive toPlist deprecation warnings from darwin-rebuild switch as well
-# Use absolute path to darwin-rebuild to avoid PATH issues in sudo environment
+# Determine which darwin-rebuild to use:
+# - If /run/current-system exists, use the system one (already activated)
+# - Otherwise, use the one from the build result (first-time installation)
+if [ -e /run/current-system/sw/bin/darwin-rebuild ]; then
+    DARWIN_REBUILD="/run/current-system/sw/bin/darwin-rebuild"
+elif [ -e ./result/sw/bin/darwin-rebuild ]; then
+    DARWIN_REBUILD="./result/sw/bin/darwin-rebuild"
+else
+    echo "${RED}Error: darwin-rebuild not found in /run/current-system or ./result${NC}"
+    exit 1
+fi
+
+echo "${YELLOW}Using darwin-rebuild: ${DARWIN_REBUILD}${NC}"
+
 if $VERBOSE; then
     if $EVAL_IMPURE; then
-        sudo -u root /run/current-system/sw/bin/darwin-rebuild switch --impure --flake .#${HOSTNAME} --verbose --show-trace "${ARGS[@]}" 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true
+        sudo -u root "${DARWIN_REBUILD}" switch --impure --flake .#${HOSTNAME} --verbose --show-trace "${ARGS[@]}" 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true
     else
-        sudo -u root /run/current-system/sw/bin/darwin-rebuild switch --flake .#${HOSTNAME} --verbose --show-trace "${ARGS[@]}" 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true
+        sudo -u root "${DARWIN_REBUILD}" switch --flake .#${HOSTNAME} --verbose --show-trace "${ARGS[@]}" 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true
     fi
 else
     if $EVAL_IMPURE; then
-        sudo -u root /run/current-system/sw/bin/darwin-rebuild switch --impure --flake .#${HOSTNAME} "${ARGS[@]}" 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true
+        sudo -u root "${DARWIN_REBUILD}" switch --impure --flake .#${HOSTNAME} "${ARGS[@]}" 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true
     else
-        sudo -u root /run/current-system/sw/bin/darwin-rebuild switch --flake .#${HOSTNAME} "${ARGS[@]}" 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true
+        sudo -u root "${DARWIN_REBUILD}" switch --flake .#${HOSTNAME} "${ARGS[@]}" 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true
     fi
 fi
 
