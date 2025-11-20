@@ -46,6 +46,10 @@
       url = "github:oscarvarto/homebrew-jank";
       flake = false;
     };
+    homebrew-minio = {
+      url = "github:minio/homebrew-stable";
+      flake = false;
+    };
     # jank-lang currently has Darwin build issues (gcc.libc.dev missing)
     # See: https://github.com/jank-lang/jank/blob/main/llvm.nix#L69
     # TODO: Re-enable when upstream fixes Darwin support
@@ -108,6 +112,7 @@
     homebrew-borkdude,
     homebrew-jank,
     # jank-lang, # Disabled due to Darwin build issues
+    homebrew-minio,
     homebrew-utils,
     neovim-nightly-overlay,
     nix-homebrew,
@@ -321,8 +326,9 @@
                 "homebrew/homebrew-core" = homebrew-core;
                 "homebrew/homebrew-cask" = homebrew-cask;
                 "homebrew/homebrew-bundle" = homebrew-bundle;
+                "minio/stable" = homebrew-minio;
                 "jetbrains/utils" = homebrew-utils;
-                "borkdude/hombrew-brew" = homebrew-borkdude;
+                "borkdude/homebrew-brew" = homebrew-borkdude;
                 "oscarvarto/homebrew-jank" = homebrew-jank;
               };
               mutableTaps = true;

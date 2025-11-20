@@ -15,8 +15,8 @@
 
     taps = [
       "borkdude/brew"
-      "oscarvarto/jank"
       "jetbrains/utils"
+      "oscarvarto/jank"
     ];
 
     brews = [
@@ -45,20 +45,21 @@
       "cmake"
       "cmake-language-server"
       "difftastic"
-      "zip"
       "entr"
       "double-conversion"
       "eza"
       "fernflower"
       "ffmpeg"
       "fontforge"
+      "foreman"
       "gcc"
       "gemini-cli"
       "git-lfs"
-      "gradle"
       "git-filter-repo"
       "gnu-tar"
       "go"
+      "gradle"
+      "grep"
       "helix"
       "hugo"
       "imagemagick"
@@ -74,10 +75,12 @@
       }
       "oscarvarto/jank/jank-git"
       "libvterm"
+      "livekit"
       "markdown-oxide"
       "markdownlint-cli2"
       "marksman"
       "maven"
+      "minio"
       "mosh"
       "mysql@8.4"
       "multimarkdown"
@@ -92,6 +95,7 @@
       "pkg-config"
       "pinentry-mac"
       "poppler"
+      "postgresql@15"
       "prettier"
       "resvg"
       "sbcl"
@@ -111,6 +115,7 @@
       "xcode-build-server"
       "yq"
       "zig"
+      "zip"
     ];
 
     casks = pkgs.callPackage ./casks.nix {};

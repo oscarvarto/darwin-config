@@ -21,7 +21,10 @@
     # "$HOME/my-custom-tools/bin"
     # "/usr/local/my-app/bin"
     # "$HOME/git-repos/fernflower/build/install/fernflower/bin"
-    "$HOME/apache-maven-4.0.0-rc-4/bin"
+    "$HOME/apache-maven-4.0.0-rc-5/bin"
+    "/opt/homebrew/opt/grep/libexec/gnubin"
+    "/opt/homebrew/opt/postgresql@15/bin"
+    "/opt/podman/bin"
 
     # -------------------------------------------------------------------------
     # DEVELOPMENT TOOLS (highest priority after custom)

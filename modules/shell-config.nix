@@ -419,6 +419,19 @@ in {
           PROMPT_COMMAND="__darwin_config_auto_ls"
         fi
 
+        # Utility helpers for wrapping commands safely in bash
+        stripansi() {
+            sed -r "s/\x1B\[[0-9;]*[A-Za-z]//g"
+        }
+
+        safe() {
+            stdbuf -oL -eL script -q -c "$1" /dev/null
+        }
+
+        run() {
+            timeout 20s bash -lc "$1" | stripansi
+        }
+
         ${atuinInit "bash"}
 
         # Final centralized PATH override (post-integrations)
