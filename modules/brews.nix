@@ -90,6 +90,8 @@
       "ninja"
       "ollama"
       "opencode"
+      "podman"
+      "podman-tui"
       "pueue"
       "pass"
       "pkg-config"
@@ -135,12 +137,12 @@
     # This message is safe to ignore. (https://github.com/dustinlyons/darwin-config/issues/83)
 
     masApps = {
-      # "1Password for Safari" = 1569813296;
-      # "Amazon Prime Video" = 545519333;
-      # "Okta Verify" = 490179405;
-      # "Okta Extension App" = 1439967473;
-      # "rcmd" = 1596283165;
-      # "Xcode" = 497799835;
+      "1Password for Safari" = 1569813296;
+      "Amazon Prime Video" = 545519333;
+      "Okta Verify" = 490179405;
+      "Okta Extension App" = 1439967473;
+      "rcmd" = 1596283165;
+      "Xcode" = 497799835;
     };
   };
 }

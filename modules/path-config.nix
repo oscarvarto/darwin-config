@@ -24,7 +24,7 @@
     "$HOME/apache-maven-4.0.0-rc-5/bin"
     "/opt/homebrew/opt/grep/libexec/gnubin"
     "/opt/homebrew/opt/postgresql@15/bin"
-    "/opt/podman/bin"
+    "/Users/oscarvarto/Library/Application Support/JetBrains/Toolbox/scripts"
 
     # -------------------------------------------------------------------------
     # DEVELOPMENT TOOLS (highest priority after custom)

@@ -128,6 +128,7 @@ in
     htop
     iftop
     jq
+    krunkit
     lazyjj
     lua51Packages.lua
     lua51Packages.luarocks
@@ -145,6 +146,7 @@ in
     pandoc-imagine
     pandoc-include
     pandoc-lua-filters
+    podman-tui
     tree
     unrar
     unzip

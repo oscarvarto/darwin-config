@@ -58,7 +58,7 @@
   "buffer_font_size": 18.0,
   "buffer_line_height": "standard",
   "terminal": {
-    "font_family": "PragmataPro Liga",
+    "font_family": "PragmataPro Mono Liga",
     "font_size": 16,
     "line_height": "standard",
     "shell": {
@@ -71,12 +71,12 @@
   "icon_theme": {
     "mode": "system",
     "light": "Catppuccin Latte",
-    "dark": "Catppuccin Latte"
+    "dark": "Catppuccin Mocha"
   },
   "theme": {
-    "mode": "system",
-    "light": "One Light",
-    "dark": "Catppuccin Latte"
+    "mode": "light",
+    "light": "Catppuccin Latte",
+    "dark": "Catppuccin Mocha"
   },
   "indent_guides": {
     "enabled": true,

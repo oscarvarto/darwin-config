@@ -2,6 +2,8 @@
 
 This index routes Claude to focused guidance for this repository. Follow the git workflow documented in @docs/git-instructions.md.
 
+- Follow @CLAUDE2.md for claude-code (terminal) usage.
+- Follow @RUST_CLAUDE.md for rust development with claude-code (terminal).
 - General configuration: @claude/CLAUDE-repository-overview.md, @claude/CLAUDE-code-architecture.md, @claude/CLAUDE-key-architectural-patterns.md, @claude/CLAUDE-development-tools-integration.md, @claude/CLAUDE-important-implementation-notes.md, @claude/CLAUDE-common-patterns.md, @claude/CLAUDE-security-considerations.md.
 - Build & operations: @claude/CLAUDE-essential-build-commands.md, @claude/CLAUDE-testing-validation.md, @claude/CLAUDE-ns-and-nb-aliases-to-build-switch-and-build-respectively-my-darwin-configuration-nix-based.md.
 - Scripts & packaging: @claude/CLAUDE-nix-created-scripts.md, @claude/CLAUDE-location-for-external-bash-zsh-nushell-shellscripts-that-are-expected-to-be-triggered-by-raycast-hotkeys.md, @claude/CLAUDE-stow-should-put-resulting-script-targets-in-local-share-bin.md, @claude/CLAUDE-emojis-and-other-unicode-characters-in-nix-files.md.
