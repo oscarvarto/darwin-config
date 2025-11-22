@@ -74,8 +74,16 @@
       url = "git+ssh://git@github.com/oscarvarto/nix-secrets.git";
       flake = false;
     };
+    # TEMPORARY: Using fork with macOS C23 fix until upstream implements proper fix
+    # TODO: Switch back to official overlay once upstream fixes C23 issues on macOS
+    # Official overlay (commented out temporarily):
+    # emacs-overlay = {
+    #   url = "github:nix-community/emacs-overlay";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+    # Using fork with macOS C23 disable patch:
     emacs-overlay = {
-      url = "github:nix-community/emacs-overlay";
+      url = "github:oscarvarto/emacs-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     pyproject-nix = {
