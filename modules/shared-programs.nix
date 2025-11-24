@@ -25,8 +25,7 @@ in {
       git = {
         enable = true;
         ignores = gitIgnores.git.ignores;
-        userName = name;
-        # userEmail is handled by conditional includes based on directory
+        # userName and userEmail are handled by conditional includes based on directory
         lfs = {
           enable = false;
         };

@@ -3,6 +3,7 @@ PERSONAL-SETUP-NOTES.md
 example-sensitive-data.txt
 *sensitive*.txt
 secrets.txt
+ignored/
 
 result
 

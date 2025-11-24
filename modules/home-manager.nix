@@ -261,7 +261,7 @@ in {
             ignores = (import ./git-ignores.nix {inherit config pkgs lib;}).git.ignores;
             lfs.enable = false;
             settings = {
-              user.name = userConfig.name;
+              # user.name and user.email handled by conditional includes
               init.defaultBranch = "main";
               core = {
                 editor = "emacsclient -t";

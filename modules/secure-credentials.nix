@@ -10,7 +10,7 @@
   getCredentialScript = secretType:
     pkgs.writeShellScript "get-${secretType}" ''
       #!/usr/bin/env bash
-      set -euo pipefail
+      set -eo pipefail
 
       # Default values based on host settings
       DEFAULT_PERSONAL_EMAIL="''${USER}@users.noreply.github.com"
@@ -29,7 +29,8 @@
                   if [[ -n "$vault" ]]; then
                       vault_arg="--vault=$vault"
                   fi
-                  op item get "$item" --fields "$field" $vault_arg 2>/dev/null || return 1
+                  # Use timeout to prevent hanging, and ensure proper field access
+                  timeout 5 op item get "$item" --fields "label=$field" $vault_arg 2>/dev/null || return 1
               else
                   return 1
               fi
@@ -144,47 +145,72 @@
     CONFIG_DIR="$HOME/.config/git"
     mkdir -p "$CONFIG_DIR"
 
-    # Update personal git config
-    PERSONAL_NAME=$(${getCredentialScript "git-name-personal"})
-    PERSONAL_EMAIL=$(${getCredentialScript "git-email-personal"})
+    # Try to fetch credentials, but don't fail if unavailable
+    PERSONAL_NAME=$(${getCredentialScript "git-name-personal"} 2>/dev/null || echo "")
+    PERSONAL_EMAIL=$(${getCredentialScript "git-email-personal"} 2>/dev/null || echo "")
+    WORK_NAME=$(${getCredentialScript "git-name-work"} 2>/dev/null || echo "")
+    WORK_EMAIL=$(${getCredentialScript "git-email-work"} 2>/dev/null || echo "")
 
-    cat > "$CONFIG_DIR/config-personal" << EOF
-    [user]
-    	name = $PERSONAL_NAME
-    	email = $PERSONAL_EMAIL
-    [core]
-    	editor = nvim
-    [init]
-    	defaultBranch = main
-    [pull]
-    	rebase = true
-    [push]
-    	autoSetupRemote = true
-    EOF
+    # Function to check if config needs update (has placeholder or default values)
+    needs_update() {
+        local config_file="$1"
+        if [[ ! -f "$config_file" ]]; then
+            return 0  # File doesn't exist, needs creation
+        fi
+        # Check if config contains placeholder or default values
+        if grep -q "placeholder_name\|placeholder_email\|@users.noreply.github.com\|@company.com\|@example.com" "$config_file" 2>/dev/null; then
+            return 0  # Contains placeholders, needs update
+        fi
+        return 1  # Config looks good, don't update
+    }
 
-    # Update work git config
-    WORK_NAME=$(${getCredentialScript "git-name-work"})
-    WORK_EMAIL=$(${getCredentialScript "git-email-work"})
+    # Update personal git config only if needed and credentials are available
+    if [[ -n "$PERSONAL_NAME" ]] && [[ -n "$PERSONAL_EMAIL" ]]; then
+        cat > "$CONFIG_DIR/config-personal" << EOF
+[user]
+	name = $PERSONAL_NAME
+	email = $PERSONAL_EMAIL
+[core]
+	editor = nvim
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true
+[push]
+	autoSetupRemote = true
+EOF
+        echo "✅ Personal config updated: $PERSONAL_NAME <$PERSONAL_EMAIL>"
+    elif needs_update "$CONFIG_DIR/config-personal"; then
+        echo "⚠️  Personal config has placeholders but credentials unavailable"
+        echo "   Run 'secret status' to check 1Password/pass setup"
+    else
+        echo "✓ Personal config preserved (credentials unavailable, but config looks good)"
+    fi
 
-    cat > "$CONFIG_DIR/config-work" << EOF
-    [user]
-    	name = $WORK_NAME
-    	email = $WORK_EMAIL
-    [core]
-    	editor = nvim
-    [init]
-    	defaultBranch = main
-    [pull]
-    	rebase = true
-    [push]
-    	autoSetupRemote = true
-    [commit]
-    	gpgsign = false
-    EOF
-
-    echo "✅ Git configurations updated with secure credentials"
-    echo "📧 Personal: $PERSONAL_NAME <$PERSONAL_EMAIL>"
-    echo "🏢 Work: $WORK_NAME <$WORK_EMAIL>"
+    # Update work git config only if needed and credentials are available
+    if [[ -n "$WORK_NAME" ]] && [[ -n "$WORK_EMAIL" ]]; then
+        cat > "$CONFIG_DIR/config-work" << EOF
+[user]
+	name = $WORK_NAME
+	email = $WORK_EMAIL
+[core]
+	editor = nvim
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true
+[push]
+	autoSetupRemote = true
+[commit]
+	gpgsign = false
+EOF
+        echo "✅ Work config updated: $WORK_NAME <$WORK_EMAIL>"
+    elif needs_update "$CONFIG_DIR/config-work"; then
+        echo "⚠️  Work config has placeholders but credentials unavailable"
+        echo "   Run 'secret status' to check 1Password/pass setup"
+    else
+        echo "✓ Work config preserved (credentials unavailable, but config looks good)"
+    fi
   '';
 in {
   # Install credential management tools and helper scripts

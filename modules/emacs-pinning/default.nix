@@ -55,8 +55,11 @@
     then builtins.replaceStrings ["\n"] [""] (builtins.readFile hashFile)
     else null;
 
-  # Base emacs derivation: pinned (fixed src) or latest overlay
+  # Base emacs derivation from overlay
+  # Note: We force C17 on Darwin due to Apple SDK bug instead of patching the SDK
+  # to avoid massive rebuilds. See APPLE-SDK-C23-BUG-INVESTIGATION.md for details.
   baseOverlayEmacs = inputs.emacs-overlay.packages.${pkgs.stdenv.hostPlatform.system}.emacs-git;
+
   emacsPackage =
     if isPinned && pinnedCommit != null && pinnedHash != null
     then
@@ -70,9 +73,17 @@
           rev = pinnedCommit;
           hash = pinnedHash;
         };
+        # Force C17 on Darwin due to Apple SDK bug
+        # All Apple SDKs (14.4, 15.5, 26.0) incorrectly define static_assert as a macro in C23
+        # Emacs configure auto-detects C23, so we must force C17 via CFLAGS
+        CFLAGS = (old.CFLAGS or "") + pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isDarwin " -std=gnu17";
         __pinnedCommit = pinnedCommit;
       })
-    else baseOverlayEmacs;
+    else
+      # Also force C17 for unpinned builds on Darwin
+      baseOverlayEmacs.overrideAttrs (old: {
+        CFLAGS = (old.CFLAGS or "") + pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isDarwin " -std=gnu17";
+      });
 
   # Apply emacs configuration overrides with verbose build output
   emacsBase =
