@@ -1026,6 +1026,10 @@ def --env "home-manager-switch" [] {
 use std
 use std/dirs
 
+# Mise (rtx) integration - manual configuration
+# The mise module automatically initializes on load via export-env
+use ~/.config/nushell/mise.nu
+
 # Utility shortcuts/aliases
 alias search = rg -p --glob '!node_modules/*'
 alias diff = difft

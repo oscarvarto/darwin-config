@@ -308,7 +308,7 @@ in {
             enableBashIntegration = true;
             enableFishIntegration = true;
             enableZshIntegration = true; # Disable to avoid zshrc build issues
-            enableNushellIntegration = true; # Disable to avoid nushell config issues
+            enableNushellIntegration = false; # Disabled - generated config incompatible with current Nushell
           };
 
           starship = {
