@@ -27,10 +27,10 @@
     "enabled_in_text_threads": false
   },
   "agent": {
-    // "default_model": {
-    // "provider": "zed.dev",
-    // "model": "claude-sonnet-4"
-    // }
+    "default_model": {
+      "provider": "zed.dev",
+      "model": "claude-sonnet-4-5"
+    },
     "play_sound_when_agent_done": true
   },
   // "agent_servers": {
@@ -229,7 +229,8 @@
       "language_servers": ["ty", "!basedpyright", "!pylsp"]
     },
     "Java": {
-      "preferred_line_length": 100,
+      "tab_size": 2,
+      "preferred_line_length": 120,
       "format_on_save": "off"
     },
     "Nix": {
