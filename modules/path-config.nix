@@ -21,6 +21,7 @@
     # "$HOME/my-custom-tools/bin"
     # "/usr/local/my-app/bin"
     # "$HOME/apache-maven-4.0.0-rc-5/bin"
+    "$HOME/.opencode/bin"
     "/opt/homebrew/opt/grep/libexec/gnubin"
     "/opt/homebrew/opt/postgresql@15/bin"
     "/Users/oscarvarto/Library/Application Support/JetBrains/Toolbox/scripts"
@@ -58,7 +59,7 @@
     # -------------------------------------------------------------------------
     # SYSTEM AND FRAMEWORK PATHS
     # -------------------------------------------------------------------------
-    "/Library/TeX/texbin" # LaTeX tools (homebrew mactex)
+    "/Library/TeX/Distributions/.DefaultTeX/Contents/Programs/texbin" # LaTeX tools (MacTeX/TeXDist)
     "/run/current-system/sw/bin" # NixOS system tools
     "/usr/local/share/dotnet" # .NET Core
     "$HOME/.dotnet/tools" # .NET user tools

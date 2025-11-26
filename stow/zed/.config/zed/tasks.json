@@ -39,26 +39,27 @@
     //           "args": ["--login"]
     //         }
     //     }
-    "shell": "system"
+    "shell": {
+      "with_arguments": {
+        "program": "/Users/oscarvarto/.nix-profile/bin/zsh",
+        "args": ["--login", "interactive"]
+      }
+    }
   },
   {
     "label": "mvn spotless:apply test-compile",
-    "command": "mvn -f pom.xml -T 2.5C spotless:apply test-compile",
-    "working_directory": "${workspace_root}"
+    "command": "mvn -f pom.xml -T 2.5C spotless:apply test-compile"
   },
   {
     "label": "mvn test-compile",
-    "command": "mvn -f pom.xml -T 2.5C test-compile",
-    "working_directory": "${workspace_root}"
+    "command": "mvn -f pom.xml -T 2.5C test-compile"
   },
   {
     "label": "mvn test class",
-    "command": "mvn -f pom.xml -Dtest=${ZED_STEM} test",
-    "working_directory": "${workspace_root}"
+    "command": "mvn -f pom.xml -Dtest=${ZED_STEM} test"
   },
   {
     "label": "mvn test method",
-    "command": "mvn -f pom.xml -Dtest=${ZED_STEM}#${ZED_SYMBOL} test",
-    "working_directory": "${workspace_root}"
+    "command": "mvn -f pom.xml -Dtest=${ZED_STEM}#${ZED_SYMBOL} test"
   }
 ]

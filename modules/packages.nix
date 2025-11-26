@@ -125,6 +125,7 @@ in
 
     # Text and terminal utilities
     fd
+    marksman # Markdown LSP (via Nix to avoid Homebrew dotnet conflict)
     htop
     iftop
     jq
