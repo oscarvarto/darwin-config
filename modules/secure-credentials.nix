@@ -139,78 +139,78 @@
 
   # Script to update git configuration files with secrets
   updateGitConfigScript = pkgs.writeShellScript "update-git-configs" ''
-    #!/usr/bin/env bash
-    set -euo pipefail
+        #!/usr/bin/env bash
+        set -euo pipefail
 
-    CONFIG_DIR="$HOME/.config/git"
-    mkdir -p "$CONFIG_DIR"
+        CONFIG_DIR="$HOME/.config/git"
+        mkdir -p "$CONFIG_DIR"
 
-    # Try to fetch credentials, but don't fail if unavailable
-    PERSONAL_NAME=$(${getCredentialScript "git-name-personal"} 2>/dev/null || echo "")
-    PERSONAL_EMAIL=$(${getCredentialScript "git-email-personal"} 2>/dev/null || echo "")
-    WORK_NAME=$(${getCredentialScript "git-name-work"} 2>/dev/null || echo "")
-    WORK_EMAIL=$(${getCredentialScript "git-email-work"} 2>/dev/null || echo "")
+        # Try to fetch credentials, but don't fail if unavailable
+        PERSONAL_NAME=$(${getCredentialScript "git-name-personal"} 2>/dev/null || echo "")
+        PERSONAL_EMAIL=$(${getCredentialScript "git-email-personal"} 2>/dev/null || echo "")
+        WORK_NAME=$(${getCredentialScript "git-name-work"} 2>/dev/null || echo "")
+        WORK_EMAIL=$(${getCredentialScript "git-email-work"} 2>/dev/null || echo "")
 
-    # Function to check if config needs update (has placeholder or default values)
-    needs_update() {
-        local config_file="$1"
-        if [[ ! -f "$config_file" ]]; then
-            return 0  # File doesn't exist, needs creation
+        # Function to check if config needs update (has placeholder or default values)
+        needs_update() {
+            local config_file="$1"
+            if [[ ! -f "$config_file" ]]; then
+                return 0  # File doesn't exist, needs creation
+            fi
+            # Check if config contains placeholder or default values
+            if grep -q "placeholder_name\|placeholder_email\|@users.noreply.github.com\|@company.com\|@example.com" "$config_file" 2>/dev/null; then
+                return 0  # Contains placeholders, needs update
+            fi
+            return 1  # Config looks good, don't update
+        }
+
+        # Update personal git config only if needed and credentials are available
+        if [[ -n "$PERSONAL_NAME" ]] && [[ -n "$PERSONAL_EMAIL" ]]; then
+            cat > "$CONFIG_DIR/config-personal" << EOF
+    [user]
+    	name = $PERSONAL_NAME
+    	email = $PERSONAL_EMAIL
+    [core]
+    	editor = nvim
+    [init]
+    	defaultBranch = main
+    [pull]
+    	rebase = true
+    [push]
+    	autoSetupRemote = true
+    EOF
+            echo "✅ Personal config updated: $PERSONAL_NAME <$PERSONAL_EMAIL>"
+        elif needs_update "$CONFIG_DIR/config-personal"; then
+            echo "⚠️  Personal config has placeholders but credentials unavailable"
+            echo "   Run 'secret status' to check 1Password/pass setup"
+        else
+            echo "✓ Personal config preserved (credentials unavailable, but config looks good)"
         fi
-        # Check if config contains placeholder or default values
-        if grep -q "placeholder_name\|placeholder_email\|@users.noreply.github.com\|@company.com\|@example.com" "$config_file" 2>/dev/null; then
-            return 0  # Contains placeholders, needs update
+
+        # Update work git config only if needed and credentials are available
+        if [[ -n "$WORK_NAME" ]] && [[ -n "$WORK_EMAIL" ]]; then
+            cat > "$CONFIG_DIR/config-work" << EOF
+    [user]
+    	name = $WORK_NAME
+    	email = $WORK_EMAIL
+    [core]
+    	editor = nvim
+    [init]
+    	defaultBranch = main
+    [pull]
+    	rebase = true
+    [push]
+    	autoSetupRemote = true
+    [commit]
+    	gpgsign = false
+    EOF
+            echo "✅ Work config updated: $WORK_NAME <$WORK_EMAIL>"
+        elif needs_update "$CONFIG_DIR/config-work"; then
+            echo "⚠️  Work config has placeholders but credentials unavailable"
+            echo "   Run 'secret status' to check 1Password/pass setup"
+        else
+            echo "✓ Work config preserved (credentials unavailable, but config looks good)"
         fi
-        return 1  # Config looks good, don't update
-    }
-
-    # Update personal git config only if needed and credentials are available
-    if [[ -n "$PERSONAL_NAME" ]] && [[ -n "$PERSONAL_EMAIL" ]]; then
-        cat > "$CONFIG_DIR/config-personal" << EOF
-[user]
-	name = $PERSONAL_NAME
-	email = $PERSONAL_EMAIL
-[core]
-	editor = nvim
-[init]
-	defaultBranch = main
-[pull]
-	rebase = true
-[push]
-	autoSetupRemote = true
-EOF
-        echo "✅ Personal config updated: $PERSONAL_NAME <$PERSONAL_EMAIL>"
-    elif needs_update "$CONFIG_DIR/config-personal"; then
-        echo "⚠️  Personal config has placeholders but credentials unavailable"
-        echo "   Run 'secret status' to check 1Password/pass setup"
-    else
-        echo "✓ Personal config preserved (credentials unavailable, but config looks good)"
-    fi
-
-    # Update work git config only if needed and credentials are available
-    if [[ -n "$WORK_NAME" ]] && [[ -n "$WORK_EMAIL" ]]; then
-        cat > "$CONFIG_DIR/config-work" << EOF
-[user]
-	name = $WORK_NAME
-	email = $WORK_EMAIL
-[core]
-	editor = nvim
-[init]
-	defaultBranch = main
-[pull]
-	rebase = true
-[push]
-	autoSetupRemote = true
-[commit]
-	gpgsign = false
-EOF
-        echo "✅ Work config updated: $WORK_NAME <$WORK_EMAIL>"
-    elif needs_update "$CONFIG_DIR/config-work"; then
-        echo "⚠️  Work config has placeholders but credentials unavailable"
-        echo "   Run 'secret status' to check 1Password/pass setup"
-    else
-        echo "✓ Work config preserved (credentials unavailable, but config looks good)"
-    fi
   '';
 in {
   # Install credential management tools and helper scripts

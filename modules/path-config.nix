@@ -51,7 +51,7 @@
     # -------------------------------------------------------------------------
     "/opt/homebrew/bin" # Homebrew binaries
     "/opt/homebrew/sbin" # Homebrew system binaries
-    "/opt/homebrew/opt/llvm/bin" # LLVM tools
+    "/opt/homebrew/opt/llvm-head/bin" # LLVM tools
     "/opt/homebrew/opt/mysql@8.4/bin" # MySQL tools
     "/opt/homebrew/opt/gnu-tar/libexec/gnubin" # GNU tar
     "/opt/homebrew/opt/trash-cli/bin" # Trash CLI

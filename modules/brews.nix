@@ -4,8 +4,10 @@
   lib,
   ...
 }: {
+  # Homebrew management disabled - using native Homebrew to avoid nix-homebrew SDK conflicts
+  # Install brews/casks manually. See comments below for the list.
   homebrew = {
-    enable = true;
+    enable = false;
     onActivation = {
       autoUpdate = true;
       cleanup = "none";
@@ -54,7 +56,6 @@
       "foreman"
       "gcc"
       "gemini-cli"
-      "gh"
       "git-lfs"
       "git-filter-repo"
       "glab"
@@ -65,14 +66,19 @@
       "helix"
       "hugo"
       "imagemagick"
+      "jiratui"
       "jq"
       "kotlin-lsp"
       "libedit"
       "libgccjit"
       "libsql"
       "libtool"
+      # Custom LLVM HEAD formula that clears Nix SDK environment variables
+      # This is required for nix-darwin environments where nix-homebrew shims
+      # inherit NIX_* variables that conflict with the system Xcode SDK.
+      # includes lld as well
       {
-        name = "llvm";
+        name = "oscarvarto/jank/llvm-head";
         args = ["HEAD"];
       }
       "oscarvarto/jank/jank-git"
@@ -84,7 +90,6 @@
       # "marksman"
       "maven"
       "minio"
-      "mosh"
       "mysql@8.4"
       "multimarkdown"
       "nasm"

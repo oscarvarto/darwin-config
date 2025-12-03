@@ -318,24 +318,25 @@
           };
         modules = [
           home-manager.darwinModules.home-manager
-          nix-homebrew.darwinModules.nix-homebrew
-          {
-            nix-homebrew = {
-              user = hostConfig.user;
-              enable = true;
-              taps = {
-                "homebrew/homebrew-core" = homebrew-core;
-                "homebrew/homebrew-cask" = homebrew-cask;
-                "homebrew/homebrew-bundle" = homebrew-bundle;
-                "minio/stable" = homebrew-minio;
-                "jetbrains/utils" = homebrew-utils;
-                "borkdude/homebrew-brew" = homebrew-borkdude;
-                "oscarvarto/homebrew-jank" = homebrew-jank;
-              };
-              mutableTaps = true;
-              autoMigrate = true;
-            };
-          }
+          # nix-homebrew disabled - using native Homebrew instead to avoid SDK conflicts
+          # nix-homebrew.darwinModules.nix-homebrew
+          # {
+          #   nix-homebrew = {
+          #     user = hostConfig.user;
+          #     enable = true;
+          #     taps = {
+          #       "homebrew/homebrew-core" = homebrew-core;
+          #       "homebrew/homebrew-cask" = homebrew-cask;
+          #       "homebrew/homebrew-bundle" = homebrew-bundle;
+          #       "minio/stable" = homebrew-minio;
+          #       "jetbrains/utils" = homebrew-utils;
+          #       "borkdude/homebrew-brew" = homebrew-borkdude;
+          #       "oscarvarto/homebrew-jank" = homebrew-jank;
+          #     };
+          #     mutableTaps = true;
+          #     autoMigrate = true;
+          #   };
+          # }
           ./system.nix
         ];
       };

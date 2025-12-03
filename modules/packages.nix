@@ -123,12 +123,30 @@ in
     jujutsu
     pixi
 
-    # Text and terminal utilities
+    ## Text and terminal utilities
     fd
     marksman # Markdown LSP (via Nix to avoid Homebrew dotnet conflict)
+    # GitHub CLI and extensions
+    gh
+    gh-copilot
+    gh-dash
+    gh-i
+    gh-markdown-preview
+    gh-notify
+    gh-poi
+    gh-s
+    gh2md
+
     htop
     iftop
+
+    # Jira
+    super-productivity
+    jira-cli-go
+    # jiratui
+
     jq
+    mdq
     krunkit
     lazyjj
     lua51Packages.lua
@@ -171,6 +189,11 @@ in
     # Tools like cmake/pkg-config are no longer required for runtime
     # vterm compilation since vterm is prebuilt via Nix. Keep your
     # environment lean; add them back only if needed elsewhere.
+
+    # Matrix
+    element-desktop
+    matrix-hookshot
+    neo # lol
 
     # Encryption and security tools
     age
@@ -218,6 +241,4 @@ in
     # Zsh plugins for enhanced shell experience
     zsh-autosuggestions
     zsh-syntax-highlighting
-
-    super-productivity
   ]

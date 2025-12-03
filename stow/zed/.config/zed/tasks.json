@@ -48,11 +48,11 @@
   },
   {
     "label": "mvn spotless:apply test-compile",
-    "command": "mvn -f pom.xml -T 2.5C spotless:apply test-compile"
+    "command": "mvn -f pom.xml -T 3C spotless:apply test-compile"
   },
   {
     "label": "mvn test-compile",
-    "command": "mvn -f pom.xml -T 2.5C test-compile"
+    "command": "mvn -f pom.xml -T 3C test-compile"
   },
   {
     "label": "mvn test class",

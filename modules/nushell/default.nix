@@ -94,7 +94,7 @@ in {
         inputs.bash-env-nushell.packages.${pkgs.stdenv.hostPlatform.system}.default
         jc
       ];
-      
+
       # Deploy mise.nu configuration for manual mise integration
       file.".config/nushell/mise.nu".source = ./mise.nu;
     };

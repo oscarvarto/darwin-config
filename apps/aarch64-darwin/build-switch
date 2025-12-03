@@ -99,6 +99,13 @@ fi
 
 echo "${YELLOW}Using darwin-rebuild: ${DARWIN_REBUILD}${NC}"
 
+# Clear Nix SDK environment variables so Homebrew uses the system Xcode SDK
+# This fixes LLVM HEAD builds on macOS 26 which fail with Nix's older SDK
+unset SDKROOT
+unset DEVELOPER_DIR
+unset NIX_CFLAGS_COMPILE
+unset NIX_LDFLAGS
+
 if $VERBOSE; then
     if $EVAL_IMPURE; then
         sudo -u root "${DARWIN_REBUILD}" switch --impure --flake .#${HOSTNAME} --verbose --show-trace "${ARGS[@]}" 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true

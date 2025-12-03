@@ -24,7 +24,6 @@ _: [
   # Communication Tools
   "anytype"
   "discord"
-  "element"
   "fastmail"
   "microsoft-outlook"
   "microsoft-teams"
@@ -54,6 +53,8 @@ _: [
 
   # Browsers
   "chatgpt-atlas"
+  "google-chrome"
+  "chromedriver"
   "safari-technology-preview"
   "zen"
 ]
