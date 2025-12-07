@@ -25,16 +25,13 @@
   configuredEmacs = emacsPinModule.configuredEmacs;
 
   # User configuration based on hostSettings
+  # Personal identity - used for tools like jujutsu that need build-time values
   userConfig = {
-    # Use secure fallback names - actual credentials will be retrieved dynamically
-    name =
-      if hostSettings.enablePersonalConfig
-      then user
-      else user;
+    name = "Oscar Vargas Torres";
     email =
       if hostSettings.enablePersonalConfig
-      then "${user}@users.noreply.github.com"
-      else "${user}@company.com";
+      then "contact@oscarvarto.mx"
+      else "oscar.vargas@irhythmtech.com";
     workDir =
       if hostSettings.workProfile
       then "work"

@@ -12,10 +12,8 @@
       #!/usr/bin/env bash
       set -eo pipefail
 
-      # Default values based on host settings
-      DEFAULT_PERSONAL_EMAIL="''${USER}@users.noreply.github.com"
-      DEFAULT_WORK_EMAIL="''${USER}@company.com"
-      DEFAULT_NAME="''${USER}"
+      # No fallback defaults - credentials must come from 1Password or pass
+      # This prevents overwriting valid configs when credential stores are unavailable
 
       # Function to get secret from 1Password
       get_from_1password() {
@@ -59,7 +57,7 @@
       get_git_name() {
           local profile="$1"  # personal or work
 
-          # Try 1Password first
+          # Try 1Password first, then pass - return empty if neither has the data
           local name=""
           if [[ "$profile" == "personal" ]]; then
               name=$(get_from_1password "personal-git" "name" "Personal" 2>/dev/null || true)
@@ -73,31 +71,32 @@
               fi
           fi
 
-          # Fallback to default
-          echo "''${name:-$DEFAULT_NAME}"
+          # Return empty if credentials unavailable - NO fallback to defaults
+          # This allows the update script to preserve existing valid configs
+          echo "$name"
       }
 
       # Function to get git user email
       get_git_email() {
           local profile="$1"  # personal or work
 
-          # Try 1Password first
+          # Try 1Password first, then pass - return empty if neither has the data
           local email=""
           if [[ "$profile" == "personal" ]]; then
               email=$(get_from_1password "personal-git" "email" "Personal" 2>/dev/null || true)
               if [[ -z "$email" ]]; then
                   email=$(get_from_pass "git/personal" "email" 2>/dev/null || true)
               fi
-              # Fallback to default personal email
-              echo "''${email:-$DEFAULT_PERSONAL_EMAIL}"
           else
               email=$(get_from_1password "work-git" "email" "Work" 2>/dev/null || true)
               if [[ -z "$email" ]]; then
                   email=$(get_from_pass "git/work" "email" 2>/dev/null || true)
               fi
-              # Fallback to default work email
-              echo "''${email:-$DEFAULT_WORK_EMAIL}"
           fi
+
+          # Return empty if credentials unavailable - NO fallback to defaults
+          # This allows the update script to preserve existing valid configs
+          echo "$email"
       }
 
       # Main logic based on secret type
