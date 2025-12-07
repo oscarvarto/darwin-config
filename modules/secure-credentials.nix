@@ -287,8 +287,9 @@ in {
       Label = "org.nixos.updateGitSecrets";
       ProgramArguments = ["${updateGitConfigScript}"];
       RunAtLoad = true;
-      # Run every 6 hours to refresh credentials
-      StartInterval = 21600;
+      # Run once a week (credentials rarely change)
+      # You can manually run 'update-git-secrets' anytime if needed
+      StartInterval = 604800;
     };
   };
 }
