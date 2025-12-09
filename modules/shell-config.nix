@@ -66,9 +66,8 @@
         rg -p --glob '!node_modules/*' "$@"
     }
 
-    # Prevent emacsclient from auto-starting its own daemon; use the
-    # home-manager LaunchAgent (emacs-service-toggle) as the single
-    # source of truth for starting/stopping the daemon.
+    # Prevent emacsclient from auto-starting its own daemon
+    # Start Emacs daemon manually with: emacs --daemon
     export ALTERNATE_EDITOR="false"
     export EDITOR="emacsclient -t"
     export VISUAL="zed -w"

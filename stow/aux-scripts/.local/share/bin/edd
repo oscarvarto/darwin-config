@@ -1,7 +1,9 @@
 #!/usr/bin/env zsh
 
-# Start the home-manager Emacs service (replaces manual daemon management)
-# This prevents conflicts between named daemons and the service daemon
+# Start Emacs daemon
+# Use this to start the Emacs server for emacsclient connections
 
-echo "🚀 Starting Emacs service (home-manager managed daemon)..."
-exec emacs-service-toggle start
+EMACS="/opt/homebrew/bin/emacs"
+
+echo "🚀 Starting Emacs daemon..."
+exec "$EMACS" --daemon

@@ -1,7 +1,9 @@
 #!/usr/bin/env zsh
 
-# Terminal Emacs function
-# Now using home-manager managed Emacs service with default socket
+# Terminal Emacs client wrapper
+# Start daemon manually with: emacs --daemon
+
+EMACSCLIENT="/opt/homebrew/bin/emacsclient"
 
 # Ensure Emacs can find ghostty terminfo
 if [[ "$TERM" == "xterm-ghostty" ]]; then
@@ -9,10 +11,10 @@ if [[ "$TERM" == "xterm-ghostty" ]]; then
 fi
 
 # Verify daemon is running without triggering auto-start
-if ! ALTERNATE_EDITOR=false "$HOME/.nix-profile/bin/emacsclient" -e '(server-running-p)' >/dev/null 2>&1; then
+if ! ALTERNATE_EDITOR=false "$EMACSCLIENT" -e '(server-running-p)' >/dev/null 2>&1; then
     echo "❌ Emacs daemon not running"
-    echo "💡 Start it with: emacs-service-toggle start"
+    echo "💡 Start it with: emacs --daemon"
     exit 1
 fi
 
-exec "$HOME/.nix-profile/bin/emacsclient" -nw "$@"
+exec "$EMACSCLIENT" -nw "$@"

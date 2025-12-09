@@ -8,7 +8,6 @@
   defaultShell ? "zsh",
   pathConfig ? null,
   darwinConfigPath,
-  emacsPinRust,
   uv2nix,
   pyproject-nix,
   pyproject-build-systems,
@@ -19,10 +18,6 @@
   inherit (builtins) fromTOML;
 
   userHome = lib.attrByPath ["users" "users" user "home"] "/Users/${user}" config;
-
-  # Emacs pinning logic moved to separate module for modularity
-  emacsPinModule = import ./emacs-pinning {inherit pkgs user inputs hostname darwinConfigPath emacsPinRust;};
-  configuredEmacs = emacsPinModule.configuredEmacs;
 
   # User configuration based on hostSettings
   # Personal identity - used for tools like jujutsu that need build-time values
@@ -41,45 +36,9 @@
   # Work configuration - extract pattern without '/**' suffix for directory name
   workConfig = hostSettings.workConfig or {};
   workDirName = builtins.replaceStrings ["~/" "/**"] ["" ""] (workConfig.gitWorkDirPattern or "~/work/**");
-
-  # Wrapper to ensure we only launch the GUI daemon when not already running
-  emacsDaemonWrapper = pkgs.writeShellScript "emacs-fg-daemon-wrapper" ''
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    EMACSCLIENT="${configuredEmacs}/bin/emacsclient"
-    APP="${configuredEmacs}/Applications/Emacs.app"
-    DAEMON="${configuredEmacs}/Applications/Emacs.app/Contents/MacOS/Emacs"
-
-    log() {
-      printf '[%s] %s\n' "$(date -Iseconds)" "$*" >&2
-    }
-
-    # If daemon responds, do nothing (successful exit so launchd doesn't complain)
-    if ALTERNATE_EDITOR=false "$EMACSCLIENT" -e "(emacs-version)" >/dev/null 2>&1; then
-      exit 0
-    fi
-
-    # Launch via LaunchServices so we get the Dock icon when available
-    if /usr/bin/open -a "$APP" --args --fg-daemon; then
-      exit 0
-    fi
-
-    # Fall back to launching the binary directly (e.g. when LaunchServices refuses the bundle)
-    log "LaunchServices failed to start Emacs; falling back to direct daemon launch"
-    if [[ ! -x "$DAEMON" ]]; then
-      log "Emacs binary not found or not executable at $DAEMON"
-      exit 1
-    fi
-
-    # Start the daemon in the background so launchd can finish quickly
-    "$DAEMON" --fg-daemon &
-    exit 0
-  '';
 in {
   imports = [
     ./dock
-    ./brews.nix
     ./window-manager.nix
     ./zsh-darwin.nix
     ./dock-config.nix
@@ -88,8 +47,8 @@ in {
   # User configuration is now handled in system.nix based on defaultShell
 
   environment.variables = {
-    # Prevent emacsclient from auto-starting a background daemon; the Emacs
-    # daemon is managed by a LaunchAgent that starts the GUI app with --fg-daemon
+    # Prevent emacsclient from auto-starting a background daemon
+    # Start Emacs daemon manually with: emacs --daemon
     ALTERNATE_EDITOR = "false";
     EDITOR = "emacsclient -t";
     VISUAL = "zed -w";
@@ -136,9 +95,7 @@ in {
           ++ [
             inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default
             inputs.nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
-            configuredEmacs
-          ]
-          ++ emacsPinModule.pinTools;
+          ];
         file =
           sharedFiles
           // {
@@ -434,33 +391,6 @@ in {
           };
         }
         // (import ./shell-config.nix {inherit config pkgs lib pathConfig darwinConfigPath;}).programs;
-
-      # Custom Emacs launchd service with proper terminal environment
-      launchd.agents.emacs = {
-        enable = true;
-        config = {
-          Label = "org.nix-community.home.emacs";
-          # Use wrapper so we don't error when daemon already exists
-          ProgramArguments = ["${emacsDaemonWrapper}"];
-          # We don't need to keep a helper process alive
-          KeepAlive = false;
-          RunAtLoad = true;
-          # Ensure this runs only in the Aqua (GUI) session and behaves like an interactive app
-          LimitLoadToSessionType = "Aqua";
-          ProcessType = "Interactive";
-          WorkingDirectory = "/Users/${user}";
-          EnvironmentVariables = {
-            # Set proper terminal environment for emacsclient terminal mode
-            SHELL = "/bin/zsh";
-            LANG = "en_US.UTF-8";
-            LC_ALL = "en_US.UTF-8";
-            TERM = "xterm-256color"; # widely compatible terminal type
-            COLORTERM = "truecolor";
-          };
-          StandardErrorPath = "/tmp/emacs-daemon.log";
-          StandardOutPath = "/tmp/emacs-daemon.log";
-        };
-      };
 
       # https://github.com/nix-community/home-manager/issues/3344
       manual.manpages.enable = false;

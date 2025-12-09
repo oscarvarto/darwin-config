@@ -22,49 +22,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.bash-env-json.follows = "bash-env-json";
     };
-    homebrew-bundle = {
-      url = "github:homebrew/homebrew-bundle";
-      flake = false;
-    };
-    homebrew-cask = {
-      url = "github:homebrew/homebrew-cask";
-      flake = false;
-    };
-    homebrew-core = {
-      url = "github:homebrew/homebrew-core";
-      flake = false;
-    };
-    homebrew-brew = {
-      url = "github:Homebrew/brew";
-      flake = false;
-    };
-    homebrew-borkdude = {
-      url = "github:borkdude/homebrew-brew";
-      flake = false;
-    };
-    homebrew-jank = {
-      url = "github:oscarvarto/homebrew-jank";
-      flake = false;
-    };
-    homebrew-minio = {
-      url = "github:minio/homebrew-stable";
-      flake = false;
-    };
     # jank-lang currently has Darwin build issues (gcc.libc.dev missing)
     # See: https://github.com/jank-lang/jank/blob/main/llvm.nix#L69
     # TODO: Re-enable when upstream fixes Darwin support
     # jank-lang.url = "git+https://github.com/jank-lang/jank.git";
-    homebrew-utils = {
-      url = "github:JetBrains/homebrew-utils";
-      flake = false;
-    };
     neovim-nightly-overlay = {
       url = "github:nix-community/neovim-nightly-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nix-homebrew = {
-      url = "github:zhaofengli-wip/nix-homebrew";
-      inputs.brew-src.follows = "homebrew-brew";
     };
     nixd-ls = {
       url = "github:nix-community/nixd";
@@ -73,11 +37,6 @@
     secrets = {
       url = "git+ssh://git@github.com/oscarvarto/nix-secrets.git";
       flake = false;
-    };
-    # Official emacs-overlay with Apple SDK C23 patch applied locally
-    emacs-overlay = {
-      url = "github:nix-community/emacs-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     pyproject-nix = {
       url = "github:pyproject-nix/pyproject.nix";
@@ -106,20 +65,10 @@
     catppuccin,
     darwin,
     home-manager,
-    homebrew-bundle,
-    homebrew-cask,
-    homebrew-core,
-    homebrew-brew,
-    homebrew-borkdude,
-    homebrew-jank,
     # jank-lang, # Disabled due to Darwin build issues
-    homebrew-minio,
-    homebrew-utils,
     neovim-nightly-overlay,
-    nix-homebrew,
     nixd-ls,
     secrets,
-    emacs-overlay,
     pyproject-nix,
     pyproject-build-systems,
     uv2nix,
@@ -260,37 +209,6 @@
       };
     };
 
-    mkEmacsPinRust = system: let
-      pkgs = nixpkgs.legacyPackages.${system};
-      craneLib = crane.mkLib pkgs;
-
-      # Source for the Rust implementation
-      # Use path directly since these files are part of the repo
-      src = ./modules/emacs-pinning/rust;
-
-      # Common build arguments
-      commonArgs = {
-        inherit src;
-        strictDeps = true;
-
-        buildInputs = [
-          pkgs.libiconv
-        ];
-
-        # Only build for aarch64-apple-darwin to avoid cross-compilation dependencies
-        CARGO_BUILD_TARGET = "aarch64-apple-darwin";
-      };
-
-      # Build dependencies (cached separately for faster iteration)
-      cargoArtifacts = craneLib.buildDepsOnly commonArgs;
-    in
-      # Build the actual package
-      craneLib.buildPackage (commonArgs
-        // {
-          inherit cargoArtifacts;
-          doCheck = false; # Skip tests in build to speed up compilation
-        });
-
     # Helper function to create darwin configurations with host-specific settings
     mkDarwinConfig = hostname: hostConfig: let
       darwinConfigPath =
@@ -314,29 +232,9 @@
               path = ./python-env;
               name = "darwin-config-python-env";
             };
-            emacsPinRust = mkEmacsPinRust hostConfig.system;
           };
         modules = [
           home-manager.darwinModules.home-manager
-          # nix-homebrew disabled - using native Homebrew instead to avoid SDK conflicts
-          # nix-homebrew.darwinModules.nix-homebrew
-          # {
-          #   nix-homebrew = {
-          #     user = hostConfig.user;
-          #     enable = true;
-          #     taps = {
-          #       "homebrew/homebrew-core" = homebrew-core;
-          #       "homebrew/homebrew-cask" = homebrew-cask;
-          #       "homebrew/homebrew-bundle" = homebrew-bundle;
-          #       "minio/stable" = homebrew-minio;
-          #       "jetbrains/utils" = homebrew-utils;
-          #       "borkdude/homebrew-brew" = homebrew-borkdude;
-          #       "oscarvarto/homebrew-jank" = homebrew-jank;
-          #     };
-          #     mutableTaps = true;
-          #     autoMigrate = true;
-          #   };
-          # }
           ./system.nix
         ];
       };
@@ -348,62 +246,5 @@
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
     darwinConfigurations = nixpkgs.lib.mapAttrs mkDarwinConfig hostConfigs;
-
-    # Expose configuredEmacs and pinTools for each host so scripts can reference them
-    packages = nixpkgs.lib.genAttrs darwinSystems (
-      system:
-        nixpkgs.lib.mapAttrs' (
-          hostname: hostConfig: let
-            emacsPinModule = import ./modules/emacs-pinning {
-              pkgs = nixpkgs.legacyPackages.${system};
-              user = hostConfig.user;
-              inputs = inputs;
-              inherit hostname;
-              darwinConfigPath =
-                if hostConfig ? configPath
-                then hostConfig.configPath
-                else if recordedConfigPath != null
-                then recordedConfigPath
-                else "/Users/${hostConfig.user}/darwin-config";
-              # Pass the prebuilt Rust package
-              emacsPinRust = mkEmacsPinRust system;
-            };
-          in
-            nixpkgs.lib.nameValuePair "${hostname}-configuredEmacs" emacsPinModule.configuredEmacs
-        )
-        hostConfigs
-        # Add pinTools to the package set
-        // nixpkgs.lib.listToAttrs (
-          map (tool: {
-            name = tool.name;
-            value = tool;
-          }) (
-            let
-              # Use first host config to get the pinTools
-              firstHostname = builtins.head (builtins.attrNames hostConfigs);
-              firstHostConfig = hostConfigs.${firstHostname};
-              emacsPinModule = import ./modules/emacs-pinning {
-                pkgs = nixpkgs.legacyPackages.${system};
-                user = firstHostConfig.user;
-                inputs = inputs;
-                hostname = firstHostname;
-                darwinConfigPath =
-                  if firstHostConfig ? configPath
-                  then firstHostConfig.configPath
-                  else if recordedConfigPath != null
-                  then recordedConfigPath
-                  else "/Users/${firstHostConfig.user}/darwin-config";
-                # Pass the prebuilt Rust package
-                emacsPinRust = mkEmacsPinRust system;
-              };
-            in
-              emacsPinModule.pinTools
-          )
-        )
-        # Add the Rust emacs-pin binary itself
-        // {
-          emacs-pin-rs = mkEmacsPinRust system;
-        }
-    );
   };
 }

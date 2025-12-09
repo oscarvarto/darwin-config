@@ -171,7 +171,7 @@ in
     unzip
 
     # Nix development tools
-    nix-prefetch-github # For emacs pinning system
+    nix-prefetch-github
     statix
 
     # Table-like output tools (nushell-like experience)

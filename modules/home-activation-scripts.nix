@@ -48,38 +48,5 @@
 
       echo "✅ Terminal terminfo installation completed"
     '';
-
-    autoPinEmacsAfterBuild = lib.hm.dag.entryAfter ["linkGeneration"] ''
-      PIN_FILE="$HOME/.cache/emacs-git-pin"
-      HASH_FILE="$HOME/.cache/emacs-git-pin-hash"
-      STORE_FILE="$HOME/.cache/emacs-git-store-path"
-
-      # Only auto-refresh pin if already pinned
-      # Initial pinning must be done manually by running 'emacs-pin' after build
-      if [[ -f "$PIN_FILE" ]]; then
-        STORED_PATH=""
-        if [[ -f "$STORE_FILE" ]]; then
-          STORED_PATH="$(cat "$STORE_FILE" 2>/dev/null || true)"
-        fi
-
-        # If no stored path or path no longer exists, auto-pin to current build
-        if [[ -z "$STORED_PATH" || ! -e "$STORED_PATH" ]]; then
-          echo "📌 Emacs pinned but stored build path missing; auto-pinning to current overlay build..."
-          if command -v emacs-pin-rs >/dev/null 2>&1; then
-            $DRY_RUN_CMD emacs-pin-rs || true
-          elif command -v emacs-pin >/dev/null 2>&1; then
-            $DRY_RUN_CMD emacs-pin || true
-          fi
-        # Detect legacy builds that predate the Liquid Glass Assets.car integration
-        elif [[ ! -e "$STORED_PATH/Applications/Emacs.app/Contents/Resources/Assets.car" ]]; then
-          echo "📌 Emacs pinned build missing Liquid Glass Assets.car; refreshing stored path..."
-          if command -v emacs-pin-rs >/dev/null 2>&1; then
-            $DRY_RUN_CMD emacs-pin-rs || true
-          elif command -v emacs-pin >/dev/null 2>&1; then
-            $DRY_RUN_CMD emacs-pin || true
-          fi
-        fi
-      fi
-    '';
   };
 }

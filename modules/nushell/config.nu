@@ -1349,7 +1349,7 @@ def "ns-nushell" [] {
 # No need for manual daemon management
 alias pke = pkill -9 Emacs
 
-# Terminal Emacs function - uses default socket from managed service
+# Terminal Emacs function - start daemon with: emacs --daemon
 def "t" [...args] {
     # Launch emacsclient with zsh as SHELL for POSIX compatibility
     # Ensure Emacs can find ghostty terminfo
@@ -1362,25 +1362,25 @@ def "t" [...args] {
     } else {
         {SHELL: "/bin/zsh"}
     }
-    
+
     with-env $term_env {
-        ^/Users/oscarvarto/.nix-profile/bin/emacsclient -nw ...$args
+        ^/opt/homebrew/bin/emacsclient -nw ...$args
     }
 }
 
-# GUI Emacs client function - uses default socket from managed service
+# GUI Emacs client function - start daemon with: emacs --daemon
 def "e" [...args] {
     # Launch emacsclient with zsh as SHELL for POSIX compatibility
     with-env {SHELL: "/bin/zsh"} {
-        ^/Users/oscarvarto/.nix-profile/bin/emacsclient -nc ...$args
+        ^/opt/homebrew/bin/emacsclient -nc ...$args
     }
 }
 
-alias tt = with-env {SHELL: "/bin/zsh"} { emacs -nw }
+alias tt = with-env {SHELL: "/bin/zsh"} { ^/opt/homebrew/bin/emacs -nw }
 # Start Emacs in background
 def "et" [tag?: string] {
     job spawn -t ($tag | default 'emacs') {
-        with-env {SHELL: "/bin/zsh"} { emacs }
+        with-env {SHELL: "/bin/zsh"} { ^/opt/homebrew/bin/emacs }
     }
 }
 

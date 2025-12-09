@@ -34,11 +34,8 @@
     '';
   };
 
-  # Homebrew formulas that support biometric authentication
-  homebrew.brews = [
-    # pam-reattach helps with Touch ID in tmux and other terminal multiplexers
-    "pam-reattach"
-  ];
+  # Note: pam-reattach can be installed via Homebrew manually if needed
+  # for Touch ID support in tmux and other terminal multiplexers
 
   # System configuration for better biometric integration
   system.defaults = {

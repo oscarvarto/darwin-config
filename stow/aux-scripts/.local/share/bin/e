@@ -1,12 +1,14 @@
 #!/usr/bin/env zsh
 
 # GUI Emacs client wrapper
-# Single source of truth: home-manager LaunchAgent daemon.
+# Start daemon manually with: emacs --daemon
 
-if ! ALTERNATE_EDITOR=false "$HOME/.nix-profile/bin/emacsclient" -e '(server-running-p)' >/dev/null 2>&1; then
+EMACSCLIENT="/opt/homebrew/bin/emacsclient"
+
+if ! ALTERNATE_EDITOR=false "$EMACSCLIENT" -e '(server-running-p)' >/dev/null 2>&1; then
     echo "❌ Emacs daemon not running"
-    echo "💡 Start it with: emacs-service-toggle start"
+    echo "💡 Start it with: emacs --daemon"
     exit 1
 fi
 
-exec "$HOME/.nix-profile/bin/emacsclient" -nc "$@"
+exec "$EMACSCLIENT" -nc "$@"
