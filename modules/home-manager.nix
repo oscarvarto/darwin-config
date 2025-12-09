@@ -223,6 +223,8 @@ in {
                 eol = "lf";
                 ignorecase = false;
               };
+              # Force SSH instead of HTTPS for GitHub
+              url."git@github.com:".insteadOf = "https://github.com/";
               commit.gpgsign = false;
               diff.colorMoved = "zebra";
               fetch.prune = true;
