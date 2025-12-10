@@ -238,6 +238,7 @@ CASKS = [
     "gimp",
     "ollama-app",
     "tidal",
+    "zulip",
 
     # System utilities
     "balenaetcher",
