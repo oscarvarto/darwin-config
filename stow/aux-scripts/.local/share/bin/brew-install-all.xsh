@@ -76,6 +76,7 @@ FORMULAS = [
     "angular-cli",
     "awscli",
     "babashka",
+    "bash-language-server",
     "bazelisk",
     "bfg",
     "boot-clj",
@@ -181,7 +182,8 @@ FORMULAS = [
 # Formulas with special flags: list of (formula, flags) tuples
 # Use full tap/name for custom taps
 SPECIAL_FORMULAS = [
-    ("oscarvarto/jank/llvm-head", "--HEAD"),
+    ("llvm", "--HEAD"),
+    ("lld", "--HEAD"),
     ("oscarvarto/jank/jank-git", ""),
 ]
 

@@ -223,8 +223,9 @@ in {
                 eol = "lf";
                 ignorecase = false;
               };
-              # Force SSH instead of HTTPS for GitHub
-              url."git@github.com:".insteadOf = "https://github.com/";
+              # Use SSH for pushes but HTTPS for fetches/clones
+              # This keeps compatibility with tools like Zed that expect HTTPS URLs
+              url."git@github.com:".pushInsteadOf = "https://github.com/";
               commit.gpgsign = false;
               diff.colorMoved = "zebra";
               fetch.prune = true;
