@@ -48,7 +48,7 @@ in {
         # Editor configuration (matching zsh)
         set -gx ALTERNATE_EDITOR "false"
         set -gx EDITOR "emacsclient -t"
-        set -gx VISUAL "zed -w"
+        set -gx VISUAL "emacsclient -c"
 
         # Apply centralized PATH configuration if available
         ${

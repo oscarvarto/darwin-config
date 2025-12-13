@@ -51,7 +51,7 @@ in {
     # Start Emacs daemon manually with: emacs --daemon
     ALTERNATE_EDITOR = "false";
     EDITOR = "emacsclient -t";
-    VISUAL = "zed -w";
+    VISUAL = "emacsclient -c";
     GIT_EDITOR = "emacsclient -t";
     LANG = "en_US.UTF-8";
     LC_ALL = "en_US.UTF-8";

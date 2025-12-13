@@ -18,7 +18,7 @@ $COLORTERM = "truecolor"
 
 # Development tools
 $EDITOR = "emacsclient -t"
-$VISUAL = "zed -w"
+$VISUAL = "emacsclient -c"
 $GIT_EDITOR = "emacsclient -t"
 $BAT_THEME = "ansi"
 

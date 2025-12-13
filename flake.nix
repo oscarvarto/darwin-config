@@ -116,9 +116,9 @@
       default = with pkgs;
         mkShell {
           nativeBuildInputs = with pkgs; [bashInteractive git];
-          shellHook = with pkgs; ''
+          shellHook = ''
             export EDITOR=nvim
-            export VISUAL="zed -w"
+            export VISUAL="emacsclient -c"
           '';
         };
     };
