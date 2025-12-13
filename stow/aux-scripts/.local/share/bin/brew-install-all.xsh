@@ -91,7 +91,6 @@ FORMULAS = [
     "difftastic",
     "entr",
     "fernflower",
-    "foreman",
     "gcc",
     "gemini-cli",
     "gh",
@@ -108,7 +107,6 @@ FORMULAS = [
     "markdown-oxide",
     "markdownlint-cli2",
     "maven",
-    "minio",
     "ninja",
     "node",
     "ollama",
@@ -120,7 +118,6 @@ FORMULAS = [
     "prettier",
     "pueue",
     "ripgrep",
-    "sbcl",
     "stow",
     "tesseract",
     "tombi",
@@ -159,7 +156,6 @@ FORMULAS = [
     "grep",
     "gzip",
     "jq",
-    "livekit",
     "mas",
     "pinentry-mac",
     "rlwrap",
@@ -174,7 +170,9 @@ FORMULAS = [
     "libgccjit",
     "libsql",
     "libvterm",
+    "lld"
     "llvm@20",
+    "llvm",
     "lld@20",
     "zeromq",
 ]
@@ -182,9 +180,8 @@ FORMULAS = [
 # Formulas with special flags: list of (formula, flags) tuples
 # Use full tap/name for custom taps
 SPECIAL_FORMULAS = [
-    ("llvm", "--HEAD"),
-    ("lld", "--HEAD"),
-    ("oscarvarto/jank/jank-git", ""),
+    # ("llvm", "--HEAD"),
+    # ("lld", "--HEAD"),
 ]
 
 # Casks (GUI applications)
@@ -195,12 +192,9 @@ CASKS = [
     "anytype",
     "chatgpt",
     "chatgpt-atlas",
-    "claude",
-    "claude-code",
     "codex",
     "dropbox",
     "fastmail",
-    "figma",
     "microsoft-outlook",
     "microsoft-teams",
     "obsidian",
@@ -218,25 +212,20 @@ CASKS = [
     "cljstyle",
     "dotnet-sdk",
     "emacs-app-nightly",
-    "gg",
     "ghostty@tip",
     "jetbrains-toolbox",
     "kitty",
     "miniforge",
     "neo4j-desktop",
-    "qt-creator",
-    "qt-design-studio",
     "visual-studio-code@insiders",
 
     # Browsers
     "google-chrome",
     "safari-technology-preview",
-    "zen",
 
     # Media
     "discord",
     "gimp",
-    "ollama-app",
     "tidal",
     "zulip",
 

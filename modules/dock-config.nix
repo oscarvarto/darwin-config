@@ -6,11 +6,9 @@
       username = user;
       entries = [
         {path = "/Applications/Obsidian.app/";}
-        {path = "/Applications/Zed Preview.app/";}
         {path = "/Applications/Ghostty.app/";}
         {path = "/Applications/kitty.app/";}
         {path = "/Applications/ChatGPT Atlas.app/";}
-        {path = "/Applications/Zen.app/";}
         # {path = "/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app/";}
         {path = "/Applications/Safari Technology Preview.app/";}
         {path = "/Applications/Microsoft Teams.app/";}
