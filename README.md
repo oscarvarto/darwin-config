@@ -5,9 +5,12 @@ as a single-user repository, it includes tools to easily adapt the configuration
 environments.
 
 > **Note:** This is a **pragmatic, hybrid configuration** that combines the best of **Nix**, **GNU Stow**, and
-> **Homebrew**. It is not a "pure" Nix setup — instead, it leverages each tool for what it does best: Nix for
-> reproducible system configuration and packages, GNU Stow for managing (some) dotfiles and editor configs, and Homebrew
-> for GUI applications and tools that work better outside Nix.
+> **Homebrew**.
+>
+> Rather than a “pure” Nix setup, this approach pragmatically uses each tool for what it does best:
+> - Nix for reproducible system configuration and packages,
+> - GNU Stow for managing selected dotfiles and editor configs,
+> - and Homebrew for applications and tools that are easier to handle outside Nix.
 
 ## Table of Contents
 

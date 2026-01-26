@@ -396,7 +396,7 @@ in {
                 }
                 {
                   name = "markdown";
-                  language-servers = ["marksman" "markdown-oxide" "harper-ls"];
+                  language-servers = ["marksman" "harper-ls"];
                 }
                 {
                   name = "nix";
@@ -457,6 +457,14 @@ in {
                   config.harper-ls.linters = {
                     SpellCheck = false;
                     SentenceCapitalization = false;
+                    UseTitleCase = false;
+                    SplitWords = false;
+                    ExpandMinimum = false;
+                    ExpandMemoryShorthands = false;
+                    OrthographicConsistency = false;
+                    DisjointPrefixes = false;
+                    PhrasalVerbAsCompoundNoun = false;
+                    NeedToNoun = false;
                   };
                 };
                 jdtls = {
