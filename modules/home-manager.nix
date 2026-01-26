@@ -301,6 +301,7 @@ in {
                   insert = "bar";
                   select = "underline";
                 };
+                indent-guides.render = true;
                 rainbow-brackets = true;
                 text-width = 120;
               };

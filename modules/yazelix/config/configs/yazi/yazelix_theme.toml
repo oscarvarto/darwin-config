@@ -1,5 +1,22 @@
 
+[mode]
+# Teal/cyan theme inspired by yazelix v8.5 example for high contrast
+normal_main = { fg = "#1e1e2e", bg = "#94e2d5", bold = true }
+normal_alt  = { fg = "#89dceb", bg = "#313244" }
+
+select_main = { fg = "#1e1e2e", bg = "#a6e3a1", bold = true }
+select_alt  = { fg = "#a6e3a1", bg = "#313244" }
+
+unset_main  = { fg = "#1e1e2e", bg = "#f2cdcd", bold = true }
+unset_alt   = { fg = "#f2cdcd", bg = "#313244" }
+
 [status]
-overall = { bg = "black" }
 sep_left = { open = "", close = "" }
 sep_right = { open = "", close = "" }
+
+# Bright permission colors for visibility
+perm_sep   = { fg = "#89dceb" }
+perm_type  = { fg = "#94e2d5" }
+perm_read  = { fg = "#f9e2af" }
+perm_write = { fg = "#f38ba8" }
+perm_exec  = { fg = "#a6e3a1" }

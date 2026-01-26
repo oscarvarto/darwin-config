@@ -62,8 +62,8 @@ unset_alt  = { fg = "#f2cdcd", bg = "#313244" }
 # : Status bar {{{
 
 [status]
-# Permissions
-perm_sep   = { fg = "#7f849c" }
+# Permissions - using brighter colors for better contrast against dark background
+perm_sep   = { fg = "#bac2de" }
 perm_type  = { fg = "#89b4fa" }
 perm_read  = { fg = "#f9e2af" }
 perm_write = { fg = "#f38ba8" }
