@@ -1,0 +1,227 @@
+#!/usr/bin/env bash
+
+# Simple Zellij Theme Manager
+# Handles manual theme switching only
+
+set -euo pipefail
+
+VERSION="2.0.0"
+SCRIPT_NAME="zellij-theme-manager"
+
+# Configuration paths
+ZELLIJ_CONFIG_FILE="${HOME}/.config/zellij/config.kdl"
+CURRENT_THEME_FILE="${HOME}/.cache/zellij_current_theme"
+
+# Log function
+log() {
+    if [[ "${QUIET:-false}" != "true" ]]; then
+        echo "[${SCRIPT_NAME}] $*" >&2
+    fi
+}
+
+# Help function
+show_help() {
+    cat << 'EOF'
+Simple Zellij Theme Manager
+
+USAGE:
+    zellij-theme-manager [OPTIONS] [COMMAND]
+
+COMMANDS:
+    set <theme>            Set specific theme
+    get                    Get current theme
+    list                   List available themes
+    status                 Show current theme status
+
+OPTIONS:
+    -q, --quiet            Run silently
+    -h, --help             Show this help
+    -v, --version          Show version
+
+EXAMPLES:
+    zellij-theme-manager set catppuccin-latte   # Set light theme
+    zellij-theme-manager set catppuccin-macchiato # Set dark theme
+    zellij-theme-manager get                     # Show current theme
+EOF
+}
+
+# Version function
+show_version() {
+    echo "${SCRIPT_NAME} v${VERSION}"
+}
+
+# Get current theme from config file
+get_current_theme() {
+    if [[ -f "$ZELLIJ_CONFIG_FILE" ]]; then
+        grep 'theme "' "$ZELLIJ_CONFIG_FILE" | sed 's/theme "\([^"]*\)"/\1/' | tr -d ' ' || echo "unknown"
+    else
+        echo "unknown"
+    fi
+}
+
+# Update zellij configuration file
+update_zellij_config() {
+    local theme="$1"
+    local temp_file
+    
+    if [[ ! -f "$ZELLIJ_CONFIG_FILE" ]]; then
+        log "Error: Zellij config file not found: $ZELLIJ_CONFIG_FILE"
+        return 1
+    fi
+    
+    # Create temporary file for atomic update
+    temp_file=$(mktemp)
+    
+    # Use sed to replace the theme line
+    if sed "s/theme \"[^\"]*\"/theme \"$theme\"/" "$ZELLIJ_CONFIG_FILE" > "$temp_file"; then
+        # Verify the change was made
+        if grep -q "theme \"$theme\"" "$temp_file"; then
+            # Atomic move
+            mv "$temp_file" "$ZELLIJ_CONFIG_FILE"
+            # Store current theme
+            mkdir -p "$(dirname "$CURRENT_THEME_FILE")"
+            echo "$theme" > "$CURRENT_THEME_FILE"
+            log "Updated zellij theme to: $theme"
+            return 0
+        else
+            log "Error: Failed to update theme in config file"
+            rm -f "$temp_file"
+            return 1
+        fi
+    else
+        log "Error: Failed to process config file"
+        rm -f "$temp_file"
+        return 1
+    fi
+}
+
+# Set theme
+set_theme() {
+    local theme="$1"
+    
+    # Validate theme name (basic check)
+    if [[ ! "$theme" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+        log "Error: Invalid theme name: $theme"
+        return 1
+    fi
+    
+    # Update config immediately
+    update_zellij_config "$theme"
+}
+
+# List common themes
+list_themes() {
+    echo "Common Zellij Themes:"
+    echo "  catppuccin-latte      (light)"
+    echo "  catppuccin-frappe     (medium)"
+    echo "  catppuccin-macchiato  (dark)"
+    echo "  catppuccin-mocha      (darkest)"
+    echo "  tokyo-night"
+    echo "  tokyo-night-light"
+    echo "  gruvbox-dark"
+    echo "  gruvbox-light"
+    echo "  nord"
+    echo "  dracula"
+    echo "  one-half-dark"
+    echo "  one-half-light"
+}
+
+# Show status
+show_status() {
+    echo "📋 Zellij Theme Status:"
+    echo ""
+    
+    # Current theme from config file
+    local current_theme
+    current_theme=$(get_current_theme)
+    echo "🎨 Current Theme: $current_theme"
+    
+    # Config file location
+    echo "📄 Config File: $ZELLIJ_CONFIG_FILE"
+    
+    # Cache file location  
+    if [[ -f "$CURRENT_THEME_FILE" ]]; then
+        local cached_theme
+        cached_theme=$(cat "$CURRENT_THEME_FILE" 2>/dev/null || echo "unknown")
+        echo "💾 Cached Theme: $cached_theme"
+    else
+        echo "💾 Cached Theme: none"
+    fi
+    
+    echo ""
+}
+
+# Main execution
+main() {
+    # Parse arguments
+    QUIET=false
+    COMMAND=""
+    THEME=""
+    
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -q|--quiet)
+                QUIET=true
+                shift
+                ;;
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            -v|--version)
+                show_version
+                exit 0
+                ;;
+            set|get|list|status)
+                COMMAND="$1"
+                shift
+                if [[ "$COMMAND" == "set" && $# -gt 0 ]]; then
+                    THEME="$1"
+                    shift
+                fi
+                ;;
+            *)
+                echo "Error: Unknown argument: $1" >&2
+                show_help >&2
+                exit 1
+                ;;
+        esac
+    done
+    
+    # Require a command
+    if [[ -z "$COMMAND" ]]; then
+        echo "Error: Command required" >&2
+        show_help >&2
+        exit 1
+    fi
+    
+    # Execute command
+    case "$COMMAND" in
+        set)
+            if [[ -z "$THEME" ]]; then
+                echo "Error: Theme name required for 'set' command" >&2
+                exit 1
+            fi
+            set_theme "$THEME"
+            ;;
+        get)
+            get_current_theme
+            ;;
+        list)
+            list_themes
+            ;;
+        status)
+            show_status
+            ;;
+        *)
+            echo "Error: Unknown command: $COMMAND" >&2
+            exit 1
+            ;;
+    esac
+}
+
+# Export QUIET for log function
+export QUIET
+
+# Run main function
+main "$@"

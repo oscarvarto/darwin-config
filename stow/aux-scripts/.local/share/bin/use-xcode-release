@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Script to switch xcode-select back to regular Xcode release
+# This ensures that command line tools use the stable version
+
+set -euo pipefail
+
+XCODE_RELEASE_PATH="/Applications/Xcode.app"
+XCODE_RELEASE_DEVELOPER_PATH="${XCODE_RELEASE_PATH}/Contents/Developer"
+
+if [[ ! -d "$XCODE_RELEASE_PATH" ]]; then
+    echo "❌ Error: Xcode release not found at $XCODE_RELEASE_PATH"
+    echo "Please install Xcode from the Mac App Store"
+    exit 1
+fi
+
+echo "🔄 Switching xcode-select to Xcode release..."
+sudo xcode-select -s "$XCODE_RELEASE_DEVELOPER_PATH"
+
+# Verify the switch
+CURRENT_PATH=$(xcode-select -p)
+if [[ "$CURRENT_PATH" == "$XCODE_RELEASE_DEVELOPER_PATH" ]]; then
+    echo "✅ Successfully switched to Xcode release"
+    echo "   Developer directory: $CURRENT_PATH"
+    
+    # Show Xcode version
+    if command -v xcodebuild &> /dev/null; then
+        echo "   Xcode version: $(xcodebuild -version | head -n1)"
+    fi
+else
+    echo "❌ Failed to switch to Xcode release"
+    echo "   Current path: $CURRENT_PATH"
+    echo "   Expected: $XCODE_RELEASE_DEVELOPER_PATH"
+    exit 1
+fi
+
+echo ""
+echo "✅ Note: Your shell config now correctly sets DEVELOPER_DIR to Xcode release"
+echo "   Configuration has been updated to use /Applications/Xcode.app as default."

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Kitty Theme Switcher - Automatically switch between Catppuccin Latte and Mocha
+# Based on macOS system appearance
+
+# Get current macOS appearance
+appearance=$(defaults read -g AppleInterfaceStyle 2>/dev/null || echo "Light")
+
+# Set theme based on system appearance
+if [[ "$appearance" == "Dark" ]]; then
+    # Dark mode - use Catppuccin Mocha
+    echo "Switching to dark theme (Catppuccin Mocha)..."
+    kitty +kitten themes --reload-in=all Catppuccin-Mocha
+else
+    # Light mode - use Catppuccin Latte
+    echo "Switching to light theme (Catppuccin Latte)..."
+    kitty +kitten themes --reload-in=all Catppuccin-Latte
+fi

@@ -1,0 +1,40 @@
+#!/usr/bin/env zsh
+
+# Kill Emacs jobs by tag
+tag_to_kill="${1:-emacs}"
+
+if [[ ! -f ~/.emacs_jobs ]]; then
+    echo "No Emacs jobs file found"
+    exit 0
+fi
+
+# Read jobs file and kill matching processes
+killed_count=0
+temp_file=$(mktemp)
+
+while IFS=':' read -r pid tag; do
+    if [[ "$tag" == "$tag_to_kill" ]]; then
+        if kill -0 "$pid" 2>/dev/null; then
+            if kill "$pid" 2>/dev/null; then
+                echo "Killed Emacs process $pid (tag: $tag)"
+                ((killed_count++))
+            else
+                echo "Failed to kill process $pid (tag: $tag)"
+            fi
+        else
+            echo "Process $pid (tag: $tag) already dead"
+        fi
+    else
+        # Keep jobs that don't match
+        echo "$pid:$tag" >> "$temp_file"
+    fi
+done < ~/.emacs_jobs
+
+# Update jobs file
+mv "$temp_file" ~/.emacs_jobs
+
+if [[ $killed_count -eq 0 ]]; then
+    echo "No Emacs processes found with tag '$tag_to_kill'"
+else
+    echo "Killed $killed_count Emacs process(es) with tag '$tag_to_kill'"
+fi

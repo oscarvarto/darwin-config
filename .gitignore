@@ -1,0 +1,26 @@
+# Python bytecode cache
+__pycache__/
+*.pyc
+*.pyo
+
+*.bak
+PERSONAL-SETUP-NOTES.md
+example-sensitive-data.txt
+*sensitive*.txt
+secrets.txt
+ignored/
+
+result
+
+# Zed editor sensitive data
+stow/zed/.config/zed/prompts
+datagrip
+fleet
+idea
+qlot
+stow/zed/.config/zed/development_credentials
+
+# JIRA API tokens and other work credentials
+*api-token*
+*jira*token*
+*atlassian*token*

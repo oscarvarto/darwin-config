@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Wrapper for nix build-switch that filters out 1password warnings
+# This script suppresses the specific "_1password has been renamed" warnings
+
+set -euo pipefail
+
+# Colors for output
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+RED='\033[1;31m'
+NC='\033[0m'
+
+# Assume Apple Silicon only
+SYSTEM_TYPE="aarch64-darwin"
+
+FLAKE_SYSTEM="darwinConfigurations.${SYSTEM_TYPE}.system"
+
+export NIXPKGS_ALLOW_UNFREE=1
+
+# Build command with warning filtering
+echo -e "${YELLOW}Building system configuration (filtered warnings)...${NC}"
+
+# Capture both stdout and stderr, filter out the specific warning, then output
+nix --extra-experimental-features 'nix-command flakes' build ".#$FLAKE_SYSTEM" "$@" 2>&1 | \
+grep -v "evaluation warning: _1password has been renamed to _1password-cli to better follow upstream name usage" || true
+
+echo -e "${YELLOW}Switching to new generation...${NC}"
+# See https://github.com/nix-darwin/nix-darwin/issues/1457 on why we need sudo
+sudo -u root ./result/sw/bin/darwin-rebuild switch --flake ".#${SYSTEM_TYPE}" "$@" 2>&1 | \
+grep -v "evaluation warning: _1password has been renamed to _1password-cli to better follow upstream name usage" || true
+
+echo -e "${YELLOW}Cleaning up...${NC}"
+unlink ./result
+
+echo -e "${GREEN}Switch to new generation complete!${NC}"

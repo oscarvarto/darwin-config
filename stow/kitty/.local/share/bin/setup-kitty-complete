@@ -1,0 +1,128 @@
+#!/bin/bash
+
+# Complete Kitty Setup - Full automation of kitty configuration
+# This script automates all the manual setup we did for kitty
+
+set -e
+
+echo "🐱 Starting complete Kitty setup..."
+echo "This will configure fonts, terminfo, themes, and all kitty settings"
+echo ""
+
+# Check if kitty is installed
+if ! command -v kitty &> /dev/null; then
+    echo "❌ Error: kitty is not installed"
+    echo ""
+    echo "Please install kitty first:"
+    echo "  brew install --cask kitty"
+    echo ""
+    echo "Or add 'kitty' to your homebrew casks in modules/casks.nix and rebuild"
+    exit 1
+fi
+
+echo "✅ Kitty is installed"
+
+# Check if MonoLisa Variable font is available
+echo ""
+echo "🔤 Checking font availability..."
+if fc-list | grep -q "MonoLisaVariable Nerd Font"; then
+    echo "✅ MonoLisaVariable Nerd Font is available"
+    font_status="available"
+else
+    echo "⚠️  MonoLisaVariable Nerd Font not found"
+    echo "   The configuration will fall back to system fonts"
+    font_status="missing"
+fi
+
+# Setup terminfo
+echo ""
+echo "📋 Setting up terminfo..."
+terminfo_output=$(setup-kitty-terminfo 2>&1)
+terminfo_status=$?
+echo "$terminfo_output"
+
+if [[ $terminfo_status -eq 0 ]]; then
+    if echo "$terminfo_output" | grep -q "already complete"; then
+        echo "⏭️  Terminfo setup skipped (already working)"
+    else
+        echo "✅ Terminfo setup completed"
+    fi
+else
+    echo "❌ Terminfo setup failed"
+    exit 1
+fi
+
+# Setup themes
+echo ""
+echo "🎨 Setting up themes..."
+theme_output=$(setup-kitty-themes 2>&1)
+theme_status=$?
+echo "$theme_output"
+
+if [[ $theme_status -eq 0 ]]; then
+    if echo "$theme_output" | grep -q "already complete"; then
+        echo "⏭️  Theme setup skipped (already configured)"
+    else
+        echo "✅ Theme setup completed"
+    fi
+else
+    echo "⚠️  Theme setup completed with warnings"
+fi
+
+# Verify configuration
+echo ""
+echo "🔍 Verifying configuration..."
+
+config_file="$HOME/.config/kitty/kitty.conf"
+if [[ -f "$config_file" ]]; then
+    echo "✅ Configuration file exists: $config_file"
+
+    # Check key settings
+    if grep -q "MonoLisaVariable Nerd Font" "$config_file"; then
+        echo "✅ Font configuration found"
+    fi
+
+    if grep -q "font_size 18" "$config_file"; then
+        echo "✅ Font size configured"
+    fi
+
+    if grep -q "disable_ligatures never" "$config_file"; then
+        echo "✅ Ligatures enabled"
+    fi
+
+    if grep -q "current-theme.conf" "$config_file"; then
+        echo "✅ Theme configuration found"
+    fi
+else
+    echo "❌ Configuration file missing"
+    exit 1
+fi
+
+# Summary
+echo ""
+echo "🎉 Kitty setup complete!"
+echo ""
+echo "📋 Summary:"
+echo "  • Configuration: ~/.config/kitty/kitty.conf"
+echo "  • Font: MonoLisaVariable Nerd Font, size 18 ($font_status)"
+echo "  • Terminfo: xterm-kitty installed"
+echo "  • Default theme: Catppuccin Latte"
+echo "  • Ligatures: Enabled"
+echo ""
+echo "🛠️  Available commands:"
+echo "  • test-kitty-font      - Test font rendering"
+echo "  • kitty-light          - Switch to light theme"
+echo "  • kitty-dark           - Switch to dark theme"
+echo "  • kitty-theme-switcher - Auto theme switching"
+echo ""
+echo "📝 Next steps:"
+echo "  1. Open a new kitty terminal window"
+echo "  2. Run 'test-kitty-font' to verify everything works"
+echo "  3. Use 'kitty +kitten themes' for interactive theme selection"
+
+if [[ "$font_status" == "missing" ]]; then
+    echo ""
+    echo "⚠️  To get the best experience, install MonoLisaVariable Nerd Font:"
+    echo "   Download from: https://www.monolisa.dev/"
+    echo "   Or install a Nerd Font variant and update the config"
+fi

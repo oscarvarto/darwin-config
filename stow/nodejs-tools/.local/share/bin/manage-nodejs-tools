@@ -1,0 +1,182 @@
+#!/usr/bin/env nu
+
+# Script to manage Node.js tools using stow-tracked configuration
+# Usage: manage-nodejs-tools <command>
+
+def main [command: string = "help"] {
+    let nodejs_tools_dir = $"($env.HOME)/darwin-config/stow/nodejs-tools"
+    let config_file = $"($nodejs_tools_dir)/nodejs-tools.toml"
+    
+    if not ($config_file | path exists) {
+        print "❌ Error: Node.js tools config file not found at ~/darwin-config/stow/nodejs-tools/nodejs-tools.toml"
+        exit 1
+    }
+    
+    match $command {
+        "install" | "sync" => {
+            print "🚀 Installing/syncing Node.js tools from configuration..."
+            
+            let config = (open $config_file)
+            let toolchain = $config.toolchain
+            let packages = $config.global_packages
+            
+            print "🔧 Ensuring Node.js toolchain is set up with Volta..."
+            if ($config.settings.use_volta? | default true) {
+                for tool_name in ($toolchain | columns) {
+                    let tool_info = ($toolchain | get $tool_name)
+                    let version = ($tool_info | get version? | default "latest")
+                    
+                    print $"  • Setting Volta ($tool_name) version to ($version)"
+                    volta install $"($tool_name)@($version)"
+                }
+            }
+            
+            print "📦 Installing global packages..."
+            let pm = ($config.settings.package_manager | default "npm")
+            for package_name in ($packages | columns) {
+                let package_info = ($packages | get $package_name)
+                let description = ($package_info | get description? | default "No description")
+                let version = ($package_info | get version? | default "*")
+                
+                print $"  • ($package_name): ($description)"
+                if $pm == "npm" {
+                    npm install -g $"($package_name)@($version)"
+                } else if $pm == "yarn" {
+                    yarn global add $"($package_name)@($version)"
+                } else if $pm == "pnpm" {
+                    pnpm add -g $"($package_name)@($version)"
+                }
+                
+                if $env.LAST_EXIT_CODE != 0 {
+                    print $"⚠️  Warning: Failed to install ($package_name)"
+                } else {
+                    print $"✅ Successfully installed ($package_name)"
+                }
+            }
+            
+            print "🎉 Node.js tools installation completed!"
+        }
+        
+        "list" => {
+            print "📋 Configured Node.js packages:"
+            let config = (open $config_file)
+            let packages = $config.global_packages
+            
+            for package_name in ($packages | columns) {
+                let package_info = ($packages | get $package_name)
+                let description = ($package_info | get description? | default "No description")
+                let version = ($package_info | get version? | default "*")
+                
+                print $"  • ($package_name) (($version)): ($description)"
+            }
+        }
+        
+        "status" => {
+            print "📊 Node.js tools status:"
+            let config = (open $config_file)
+            let packages = $config.global_packages
+            
+            let pkg_count = ($packages | columns | length)
+            print $"\n📂 Configured packages: ($pkg_count)"
+            print "🔍 Checking installation status..."
+            
+            for package_name in ($packages | columns) {
+                let package_info = ($packages | get $package_name)
+                let description = ($package_info | get description? | default "No description")
+                let npm_bin_path = $"($env.HOME)/.volta/bin/($package_name)"
+                
+                if ($npm_bin_path | path exists) {
+                    print $"  ✅ ($package_name) -> installed"
+                } else {
+                    print $"  ❌ ($package_name) -> not installed"
+                }
+            }
+        }
+        
+        "update" => {
+            print "🔄 Updating all Node.js global packages..."
+            let config = (open $config_file)
+            let auto_update = ($config.settings.auto_update? | default true)
+            
+            if not $auto_update {
+                print "⚠️  Auto-update is disabled in configuration"
+                let response = (input "Do you want to update anyway? (y/N): ")
+                if $response != "y" and $response != "Y" {
+                    print "Update cancelled."
+                    exit 0
+                }
+            }
+            
+            let pm = ($config.settings.package_manager | default "npm")
+            if $pm == "npm" {
+                npm update -g
+            } else if $pm == "yarn" {
+                yarn global upgrade
+            } else if $pm == "pnpm" {
+                pnpm update -g
+            }
+            
+            if $env.LAST_EXIT_CODE == 0 {
+                print "✅ All packages updated successfully!"
+            } else {
+                print "❌ Some packages failed to update"
+            }
+        }
+        
+        "clean" => {
+            print "🧹 Cleaning Node.js installation cache..."
+            let config = (open $config_file)
+            let pm = ($config.settings.package_manager | default "npm")
+            if $pm == "npm" {
+                npm cache clean --force
+            } else if $pm == "yarn" {
+                yarn cache clean
+            } else if $pm == "pnpm" {
+                pnpm store prune
+            }
+        }
+        
+        "add" => {
+            print "➕ Add a new package to nodejs-tools.toml"
+            let package_name = (input "Package name: ")
+            let description = (input "Description (optional): ")
+            let version = (input "Version (or * for latest): ")
+            
+            if ($package_name | str length) == 0 {
+                print "❌ Package name is required"
+                exit 1
+            }
+            
+            let final_version = if ($version | str length) == 0 { "*" } else { $version }
+            let final_description = if ($description | str length) == 0 { "No description" } else { $description }
+            
+            print $"📝 Adding ($package_name) to configuration..."
+            print $"   Version: ($final_version)"
+            print $"   Description: ($final_description)"
+            print ""
+            print "⚠️  You'll need to manually edit ~/darwin-config/stow/nodejs-tools/nodejs-tools.toml"
+            print $"   Add this under [global_packages]:"
+            print $"   ($package_name) = {{ version = \"($final_version)\", description = \"($final_description)\" }}"
+        }
+        
+        "help" | _ => {
+            print "🛠️  Node.js Tools Manager"
+            print ""
+            print "Usage: manage-nodejs-tools <command>"
+            print ""
+            print "Commands:"
+            print "  install, sync     Install all packages from configuration"
+            print "  list              List configured packages"
+            print "  status            Check installation status of configured packages"
+            print "  update            Update all installed packages"
+            print "  clean             Clean cache"
+            print "  add               Interactive tool to add new package to config"
+            print "  help              Show this help message"
+            print ""
+            print "Configuration file: ~/darwin-config/stow/nodejs-tools/nodejs-tools.toml"
+            print "Managed packages will be installed globally via npm/yarn/pnpm"
+            print "Node.js version is managed via volta"
+        }
+    }
+}
+

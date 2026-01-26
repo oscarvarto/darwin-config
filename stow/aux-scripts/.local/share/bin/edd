@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+
+# Start Emacs daemon
+# Use this to start the Emacs server for emacsclient connections
+
+EMACS="/opt/homebrew/bin/emacs"
+
+echo "🚀 Starting Emacs daemon..."
+exec "$EMACS" --daemon

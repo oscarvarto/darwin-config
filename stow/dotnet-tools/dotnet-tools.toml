@@ -1,0 +1,51 @@
+# .NET Tools Configuration
+# This file tracks the .NET global tools you want to install system-wide
+# Run 'manage-dotnet-tools install' to install all listed tools
+
+[sdk]
+# .NET SDK version (managed by system package manager or official installer)
+version = "9.0.301"
+description = ".NET SDK for building applications"
+
+[global_tools]
+# Language servers and development tools
+fsautocomplete = { version = "*", description = "F# Language Server Protocol implementation" }
+
+# Code analysis and formatting
+# fantomas = { version = "*", description = "F# code formatter" }
+# dotnet-format = { version = "*", description = "Code style analysis and formatting" }
+
+# Testing tools
+# coverlet.console = { version = "*", description = "Code coverage tool" }
+# dotnet-reportgenerator-globaltool = { version = "*", description = "Coverage report generator" }
+
+# Build and deployment tools
+# dotnet-ef = { version = "*", description = "Entity Framework Core tools" }
+# dotnet-outdated-tool = { version = "*", description = "Check for outdated NuGet packages" }
+
+# Templates and scaffolding
+# dotnet-new = { version = "*", description = "Template engine for .NET" }
+
+# Performance and debugging
+# dotnet-trace = { version = "*", description = "Performance trace collection" }
+# dotnet-counters = { version = "*", description = "Performance counter monitoring" }
+# dotnet-dump = { version = "*", description = "Dump collection and analysis" }
+
+# Example of version-pinned tool:
+# paket = { version = "7.2.1", description = "Package dependency manager" }
+
+# Example of prerelease tool:
+# some-preview-tool = { version = "1.0.0-preview", description = "Preview tool example" }
+
+[settings]
+# Whether to auto-update tools on install
+auto_update = true
+
+# Whether to install exact versions
+use_exact = false
+
+# Whether to install prerelease versions when using "*"
+include_prerelease = false
+
+# Timeout for tool installation (in seconds)
+install_timeout = 300

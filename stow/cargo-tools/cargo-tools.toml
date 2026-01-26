@@ -1,0 +1,21 @@
+# Cargo Tools Configuration
+# This file tracks the cargo packages you want to install system-wide
+# Run 'manage-cargo-tools install' to install all listed packages
+
+[packages]
+# Core development tools
+emacs-lsp-booster = { version = "*", description = "Emacs LSP performance booster" }
+lazyjj = { version = "*", description = "TUI for Jujutsu VCS" }
+
+# Example of version-pinned package:
+# ripgrep = { version = "13.0.0", description = "Fast grep alternative" }
+
+# Example of git-based package:
+# some-tool = { git = "https://github.com/user/repo", description = "Tool from git" }
+
+[settings]
+# Whether to auto-update packages on install
+auto_update = true
+
+# Whether to install locked versions (--locked flag)
+use_locked = false

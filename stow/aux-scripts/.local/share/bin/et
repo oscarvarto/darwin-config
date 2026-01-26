@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+
+# Terminal Emacs client wrapper
+# Start daemon manually with: emacs --daemon
+
+EMACSCLIENT="/opt/homebrew/bin/emacsclient"
+
+if ! ALTERNATE_EDITOR=false "$EMACSCLIENT" -e '(server-running-p)' >/dev/null 2>&1; then
+    echo "❌ Emacs daemon not running"
+    echo "💡 Start it with: emacs --daemon"
+    exit 1
+fi
+
+exec "$EMACSCLIENT" -t "$@"

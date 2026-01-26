@@ -1,0 +1,189 @@
+#!/usr/bin/env nu
+
+# Script to manage cargo-installed tools using stow-tracked configuration
+# Usage: manage-cargo-tools <command>
+
+def main [command: string = "help"] {
+    let cargo_tools_dir = $"($env.HOME)/darwin-config/stow/cargo-tools"
+    let config_file = $"($cargo_tools_dir)/cargo-tools.toml"
+    
+    if not ($config_file | path exists) {
+        print "❌ Error: Cargo tools config file not found at ~/darwin-config/stow/cargo-tools/cargo-tools.toml"
+        exit 1
+    }
+    
+    match $command {
+        "install" | "sync" => {
+            print "🚀 Installing/syncing cargo tools from configuration..."
+            
+            let config = (open $config_file)
+            let packages = $config.packages
+            
+            let pkg_count = ($packages | columns | length)
+            print $"\n📦 Found ($pkg_count) packages to install:"
+            
+            for package_name in ($packages | columns) {
+                let package_info = ($packages | get $package_name)
+                let description = ($package_info | get description? | default "No description")
+                
+                print $"  • ($package_name): ($description)"
+                
+                # Determine install command based on package specification
+                if ($package_info | get git? | default false) != false {
+                    let git_url = ($package_info | get git)
+                    print $"    Installing from git: ($git_url)"
+                    cargo install --git $git_url $package_name
+                } else {
+                    let version = ($package_info | get version? | default "*")
+                    if $version == "*" {
+                        print $"    Installing latest version..."
+                        cargo install $package_name
+                    } else {
+                        print $"    Installing version ($version)..."
+                        cargo install $package_name --version $version
+                    }
+                }
+                
+                if $env.LAST_EXIT_CODE != 0 {
+                    print $"⚠️  Warning: Failed to install ($package_name)"
+                } else {
+                    print $"✅ Successfully installed ($package_name)"
+                }
+            }
+            
+            print "\n🎉 Cargo tools installation completed!"
+        }
+        
+        "list" => {
+            print "📋 Configured cargo tools:"
+            let config = (open $config_file)
+            let packages = $config.packages
+            
+            for package_name in ($packages | columns) {
+                let package_info = ($packages | get $package_name)
+                let description = ($package_info | get description? | default "No description")
+                let version = ($package_info | get version? | default "*")
+                
+                print $"  • ($package_name) (($version)): ($description)"
+            }
+        }
+        
+        "status" => {
+            print "📊 Cargo tools status:"
+            let config = (open $config_file)
+            let packages = $config.packages
+            
+            let pkg_count = ($packages | columns | length)
+            print $"\n📂 Configured packages: ($pkg_count)"
+            print "🔍 Checking installation status..."
+            
+            for package_name in ($packages | columns) {
+                let package_info = ($packages | get $package_name)
+                let description = ($package_info | get description? | default "No description")
+                let cargo_bin_path = $"($env.HOME)/.cargo/bin/($package_name)"
+                
+                if ($cargo_bin_path | path exists) {
+                    print $"  ✅ ($package_name) -> installed"
+                } else {
+                    print $"  ❌ ($package_name) -> not installed"
+                }
+            }
+        }
+        
+        "installed" => {
+            print "📦 All cargo-installed packages:"
+            
+            # List all packages installed via cargo
+            let result = (cargo install --list | lines)
+            
+            for line in $result {
+                if ($line | str contains ":") {
+                    let parts = ($line | str trim | split column ":" package_name_version)
+                    let package_info = ($parts | get package_name_version.0 | str trim)
+                    print $"  • ($package_info)"
+                }
+            }
+        }
+        
+        "update" => {
+            print "🔄 Updating all cargo-installed packages..."
+            
+            let config = (open $config_file)
+            let auto_update = ($config.settings.auto_update? | default true)
+            
+            if not $auto_update {
+                print "⚠️  Auto-update is disabled in configuration"
+                let response = (input "Do you want to update anyway? (y/N): ")
+                if $response != "y" and $response != "Y" {
+                    print "Update cancelled."
+                    exit 0
+                }
+            }
+            
+            cargo install-update --all
+            
+            if $env.LAST_EXIT_CODE == 0 {
+                print "✅ All packages updated successfully!"
+            } else {
+                print "❌ Some packages failed to update"
+                print "💡 Note: You may need to install cargo-update first: cargo install cargo-update"
+            }
+        }
+        
+        "clean" => {
+            print "🧹 Cleaning cargo installation cache..."
+            cargo cache --autoclean
+            
+            if $env.LAST_EXIT_CODE != 0 {
+                print "💡 Note: You may need to install cargo-cache first: cargo install cargo-cache"
+            }
+        }
+        
+        "add" => {
+            print "➕ Add a new package to cargo-tools.toml"
+            let package_name = (input "Package name: ")
+            let description = (input "Description (optional): ")
+            let version = (input "Version (or * for latest): ")
+            
+            if ($package_name | str length) == 0 {
+                print "❌ Package name is required"
+                exit 1
+            }
+            
+            let final_version = if ($version | str length) == 0 { "*" } else { $version }
+            let final_description = if ($description | str length) == 0 { "No description" } else { $description }
+            
+            print $"📝 Adding ($package_name) to configuration..."
+            print $"   Version: ($final_version)"
+            print $"   Description: ($final_description)"
+            print ""
+            print "⚠️  You'll need to manually edit ~/darwin-config/stow/cargo-tools/cargo-tools.toml"
+            print $"   Add this under [packages]:"
+            print $"   ($package_name) = {{ version = \"($final_version)\", description = \"($final_description)\" }}"
+        }
+        
+        "help" | _ => {
+            print "🛠️  Cargo Tools Manager"
+            print ""
+            print "Usage: manage-cargo-tools <command>"
+            print ""
+            print "Commands:"
+            print "  install, sync     Install all packages from configuration"
+            print "  list              List configured packages"
+            print "  status            Check installation status of configured packages"
+            print "  installed         List all cargo-installed packages"
+            print "  update            Update all installed packages"
+            print "  clean             Clean cargo cache"
+            print "  add               Interactive tool to add new package to config"
+            print "  help              Show this help message"
+            print ""
+            print "Configuration file: ~/darwin-config/stow/cargo-tools/cargo-tools.toml"
+            print "Packages are installed to: ~/.cargo/bin/"
+            print ""
+            print "💡 Tips:"
+            print "  - After system restore: run 'manage-cargo-tools install'"
+            print "  - To update tools: run 'manage-cargo-tools update'"
+            print "  - Configuration is version-controlled with your darwin-config"
+        }
+    }
+}

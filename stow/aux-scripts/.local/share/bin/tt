@@ -1,0 +1,4 @@
+#!/usr/bin/env zsh
+
+# Start Emacs in terminal mode without daemon
+exec /opt/homebrew/bin/emacs -nw "$@"

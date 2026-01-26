@@ -1,0 +1,706 @@
+#!/usr/bin/env bash
+#
+# brew-install-all - Declarative Homebrew package management (Bash version)
+#
+# This script manages your Homebrew installation declaratively. Define your
+# desired packages in the arrays below, and the script will ensure your
+# system matches that state.
+#
+# USAGE:
+#   brew-install-all [OPTIONS]
+#
+# OPTIONS:
+#   --help, -h      Show this help message and exit
+#   --dry-run       Preview changes without executing them
+#   --sync          Install missing packages AND remove unlisted ones
+#   --cascade       Like --sync, but force-remove packages with dependents
+#   --list          List all packages defined in this script
+#   --diff          Show difference between defined and installed packages
+#
+# EXAMPLES:
+#   # Install all missing packages (safe, won't remove anything)
+#   brew-install-all
+#
+#   # Preview what would be installed
+#   brew-install-all --dry-run
+#
+#   # Sync system to match this file (install missing, remove unlisted)
+#   brew-install-all --sync
+#
+#   # Preview sync changes before applying
+#   brew-install-all --sync --dry-run
+#
+#   # Force sync even if packages have dependents
+#   brew-install-all --cascade
+#
+#   # List all packages defined in this script
+#   brew-install-all --list
+#
+#   # Show what's different between this file and your system
+#   brew-install-all --diff
+#
+# WORKFLOW:
+#   1. Edit this script to add/remove packages from the arrays
+#   2. Run 'brew-install-all --diff' to see what would change
+#   3. Run 'brew-install-all --sync --dry-run' to preview
+#   4. Run 'brew-install-all --sync' to apply changes
+#
+# ADDING PACKAGES:
+#   - Regular formulas: Add to FORMULAS array
+#   - Formulas with flags: Add to SPECIAL_FORMULAS as "name|--flags"
+#   - GUI apps (casks): Add to CASKS array
+#   - Third-party repos: Add to TAPS array
+#
+# Generated from: brew list --installed-on-request (2025-01-25)
+# Location: ~/darwin-config/stow/aux-scripts/.local/share/bin/brew-install-all
+
+set -euo pipefail
+
+# Prefer the xonsh implementation when available (falls back to bash).
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+XONSH_SCRIPT="${SCRIPT_DIR}/brew-install-all.xsh"
+
+try_exec_xonsh() {
+    local script_path="$1"
+    shift
+    local pixi_manifest="${HOME}/darwin-config/python-env/pixi.toml"
+    local pixi_xonsh="${HOME}/darwin-config/python-env/.pixi/envs/default/bin/xonsh"
+
+    if [[ -n "${XONSH_EXE:-}" && -x "${XONSH_EXE}" ]]; then
+        exec "${XONSH_EXE}" --no-rc "${script_path}" "$@"
+    fi
+    if [[ -n "${XONSH_BIN:-}" && -x "${XONSH_BIN}" ]]; then
+        exec "${XONSH_BIN}" --no-rc "${script_path}" "$@"
+    fi
+    if [[ -x "${pixi_xonsh}" ]]; then
+        exec "${pixi_xonsh}" --no-rc "${script_path}" "$@"
+    fi
+    if command -v xonsh >/dev/null 2>&1; then
+        exec xonsh --no-rc "${script_path}" "$@"
+    fi
+    if command -v pixi >/dev/null 2>&1 && [[ -f "${pixi_manifest}" ]]; then
+        exec pixi run --manifest-path "${pixi_manifest}" xonsh --no-rc "${script_path}" "$@"
+    fi
+
+    return 1
+}
+
+if [[ -z "${BREW_INSTALL_ALL_FORCE_BASH:-}" && -f "${XONSH_SCRIPT}" ]]; then
+    try_exec_xonsh "${XONSH_SCRIPT}" "$@" || true
+fi
+
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+
+DRY_RUN=false
+SYNC_MODE=false
+CASCADE=false
+LIST_MODE=false
+DIFF_MODE=false
+SHOW_HELP=false
+
+# =============================================================================
+# PACKAGE DEFINITIONS
+# =============================================================================
+
+# Taps (third-party repositories)
+TAPS=(
+    "homebrew-ffmpeg/ffmpeg"
+    "jimeh/emacs-builds"
+)
+
+# Standard formulas (explicitly requested, not dependencies)
+FORMULAS=(
+    # Development tools & languages
+    "autoconf"
+    "bash-language-server"
+    "boot-clj"
+    "bun"
+    "cargo-binstall"
+    "cljfmt"
+    "clojure"
+    "clojure-lsp"
+    "cmake"
+    "cmake-language-server"
+    "gcc"
+    "go"
+    "jdtls"
+    "jdtls-wrapper"
+    "kotlin"
+    "kotlin-language-server"
+    "kotlin-lsp"
+    "lazygit"
+    "libtool"
+    "make"
+    "ncurses"
+    "ninja"
+    "opam"
+    "pixi"
+    "protobuf"
+    "tree-sitter-cli"
+    "volta"
+    "xcode-build-server"
+    "z3"
+    "zig"
+
+    # CLI tools
+    "aria2"
+    "atuin"
+    "bat"
+    "bat-extras"
+    "difftastic"
+    "dockutil"
+    "eza"
+    "gemini-cli"
+    "gh"
+    "git-filter-repo"
+    "git-lfs"
+    "gnu-tar"
+    "grep"
+    "jq"
+    "markdown-oxide"
+    "markdownlint-cli2"
+    "marksman"
+    "mas"
+    "pass"
+    "pinentry-mac"
+    "pngpaste"
+    "prettier"
+    "pueue"
+    "sevenzip"
+    "stow"
+    "swig"
+    "tombi"
+    "trash-cli"
+    "turso"
+    "yq"
+    "zip"
+
+    # Media & documents
+    "ffmpeg-full"
+    "fontforge"
+    "ghostscript"
+    "imagemagick"
+    "multimarkdown"
+    "resvg"
+
+    # Libraries (explicitly needed for builds)
+    "boost"
+    "libgccjit"
+    "libsql"
+    "libvterm"
+    # "lld"
+    # "llvm"
+
+    # Containers
+    "podman"
+    "podman-tui"
+)
+
+# Formulas with special flags (name|flags)
+SPECIAL_FORMULAS=(
+    "local/llvm/llvm|--HEAD"
+    "lld|--HEAD"
+)
+
+# Casks (GUI applications)
+CASKS=(
+    # Productivity & communication
+    "1password-cli"
+    "1password@nightly"
+    "chatgpt"
+    "chatgpt-atlas"
+    "claude"
+    "claude-code"
+    "codex"
+    "comet"
+    "discord"
+    "dropbox"
+    "element"
+    "espanso"
+    "fastmail"
+    "microsoft-teams"
+    "obsidian"
+    "raycast"
+    "slack"
+    "snagit"
+    "super-productivity"
+    "whatsapp"
+    "zoom"
+
+    # Development
+    "aerospace"
+    "cljstyle"
+    "dotnet-sdk"
+    "emacs-app-nightly"
+    "ghostty@tip"
+    "jetbrains-toolbox"
+    "kitty"
+    "ollama-app"
+    "orbstack"
+    "podman-desktop"
+    "visual-studio-code@insiders"
+    "wezterm@nightly"
+
+    # Browsers
+    "google-chrome"
+    "safari-technology-preview"
+
+    # Media
+    "spotify"
+    "tidal"
+
+    # System utilities
+    "nordvpn"
+
+    # Fonts
+    "font-jetbrains-mono-nerd-font"
+
+    # Other
+    "mactex"
+)
+
+# =============================================================================
+# ARGUMENT PARSING
+# =============================================================================
+
+for arg in "$@"; do
+    case "$arg" in
+        --help|-h)  SHOW_HELP=true ;;
+        --dry-run)  DRY_RUN=true ;;
+        --sync)     SYNC_MODE=true ;;
+        --cascade)  SYNC_MODE=true; CASCADE=true ;;
+        --list)     LIST_MODE=true ;;
+        --diff)     DIFF_MODE=true ;;
+        *)
+            echo "Unknown option: $arg"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
+# =============================================================================
+# HELP
+# =============================================================================
+
+if $SHOW_HELP; then
+    # Extract and display the header comment as help
+    sed -n '2,/^set -euo pipefail$/p' "$0" | head -n -1 | sed 's/^# \?//'
+    exit 0
+fi
+
+# =============================================================================
+# HELPER FUNCTIONS
+# =============================================================================
+
+run_cmd() {
+    if $DRY_RUN; then
+        echo "    $*"
+        return 0
+    fi
+    "$@"
+}
+
+normalize_formula_name() {
+    local formula="$1"
+    echo "${formula##*/}"
+}
+
+get_formula_basename() {
+    local formula="$1"
+    echo "${formula##*/}"
+}
+
+build_special_basenames() {
+    local entry formula
+    declare -gA SPECIAL_BASENAMES=()
+    for entry in "${SPECIAL_FORMULAS[@]}"; do
+        formula="${entry%%|*}"
+        SPECIAL_BASENAMES["$(get_formula_basename "$formula")"]=1
+    done
+}
+
+build_wanted_normalized() {
+    declare -gA WANTED_NORMALIZED=()
+    local f
+    for f in "${FORMULAS[@]}"; do
+        WANTED_NORMALIZED["$(normalize_formula_name "$f")"]=1
+    done
+    local entry formula
+    for entry in "${SPECIAL_FORMULAS[@]}"; do
+        formula="${entry%%|*}"
+        WANTED_NORMALIZED["$(normalize_formula_name "$formula")"]=1
+    done
+}
+
+get_installed_formulas() {
+    brew list --formula 2>/dev/null || true
+}
+
+get_installed_formula_leaves() {
+    brew leaves 2>/dev/null || true
+}
+
+get_installed_casks() {
+    brew list --cask 2>/dev/null || true
+}
+
+get_tapped_repos() {
+    brew tap 2>/dev/null || true
+}
+
+is_formula_installed() {
+    local formula="$1"
+    brew list --formula "$formula" &>/dev/null
+}
+
+is_cask_installed() {
+    local cask="$1"
+    brew list --cask "$cask" &>/dev/null
+}
+
+# =============================================================================
+# LIST MODE
+# =============================================================================
+
+if $LIST_MODE; then
+    build_special_basenames
+
+    echo "📦 Taps (${#TAPS[@]}):"
+    printf '  %s\n' "${TAPS[@]}"
+    echo
+
+    # Skip regular formulas that are overridden by SPECIAL_FORMULAS
+    regular_formulas=()
+    for f in "${FORMULAS[@]}"; do
+        base="$(normalize_formula_name "$f")"
+        if [[ -z "${SPECIAL_BASENAMES[$base]+x}" ]]; then
+            regular_formulas+=("$f")
+        fi
+    done
+
+    total_formulas=$((${#regular_formulas[@]} + ${#SPECIAL_FORMULAS[@]}))
+    echo "🔧 Formulas ($total_formulas):"
+    printf '  %s\n' "${regular_formulas[@]}"
+    for entry in "${SPECIAL_FORMULAS[@]}"; do
+        formula="${entry%%|*}"
+        flags="${entry#*|}"
+        if [[ -n "$flags" ]]; then
+            echo "  $formula $flags (special)"
+        else
+            echo "  $formula (special)"
+        fi
+    done
+    echo
+
+    echo "🖥️  Casks (${#CASKS[@]}):"
+    printf '  %s\n' "${CASKS[@]}"
+    echo
+
+    echo "Total: ${#TAPS[@]} taps, $total_formulas formulas, ${#CASKS[@]} casks"
+    exit 0
+fi
+
+# =============================================================================
+# DIFF MODE
+# =============================================================================
+
+if $DIFF_MODE; then
+    echo "📊 Comparing defined packages vs installed packages..."
+    echo
+
+    build_special_basenames
+    build_wanted_normalized
+
+    mapfile -t INSTALLED_LEAVES < <(get_installed_formula_leaves)
+    mapfile -t INSTALLED_CASKS < <(get_installed_casks)
+
+    echo "🔧 Formulas:"
+    missing_formulas=()
+
+    # Regular formulas (skip if overridden by special)
+    for f in "${FORMULAS[@]}"; do
+        base="$(normalize_formula_name "$f")"
+        if [[ -n "${SPECIAL_BASENAMES[$base]+x}" ]]; then
+            continue
+        fi
+        if ! is_formula_installed "$f"; then
+            missing_formulas+=("$f")
+        fi
+    done
+
+    # Special formulas
+    for entry in "${SPECIAL_FORMULAS[@]}"; do
+        formula="${entry%%|*}"
+        flags="${entry#*|}"
+        base="$(get_formula_basename "$formula")"
+        if ! is_formula_installed "$base"; then
+            if [[ -n "$flags" ]]; then
+                missing_formulas+=("$formula $flags")
+            else
+                missing_formulas+=("$formula")
+            fi
+        fi
+    done
+
+    if [[ ${#missing_formulas[@]} -gt 0 ]]; then
+        echo "  ➕ To install: ${missing_formulas[*]}"
+    else
+        echo "  ✅ All defined formulas are installed"
+    fi
+
+    extra_formulas=()
+    for f in "${INSTALLED_LEAVES[@]}"; do
+        base="$(normalize_formula_name "$f")"
+        if [[ -z "${WANTED_NORMALIZED[$base]+x}" ]]; then
+            extra_formulas+=("$f")
+        fi
+    done
+    if [[ ${#extra_formulas[@]} -gt 0 ]]; then
+        echo "  ➖ To remove (with --sync): ${extra_formulas[*]}"
+    else
+        echo "  ✅ No extra formulas installed"
+    fi
+    echo
+
+    echo "🖥️  Casks:"
+    missing_casks=()
+    for c in "${CASKS[@]}"; do
+        if ! is_cask_installed "$c"; then
+            missing_casks+=("$c")
+        fi
+    done
+    if [[ ${#missing_casks[@]} -gt 0 ]]; then
+        echo "  ➕ To install: ${missing_casks[*]}"
+    else
+        echo "  ✅ All defined casks are installed"
+    fi
+
+    extra_casks=()
+    for c in "${INSTALLED_CASKS[@]}"; do
+        if ! printf '%s\n' "${CASKS[@]}" | grep -qx "$c"; then
+            extra_casks+=("$c")
+        fi
+    done
+    if [[ ${#extra_casks[@]} -gt 0 ]]; then
+        echo "  ➖ To remove (with --sync): ${extra_casks[*]}"
+    else
+        echo "  ✅ No extra casks installed"
+    fi
+    echo
+
+    exit 0
+fi
+
+# =============================================================================
+# MAIN EXECUTION
+# =============================================================================
+
+echo "🍺 Homebrew Package Manager (Bash)"
+echo "=================================="
+if $DRY_RUN; then
+    echo "🔍 Dry run mode - commands will be printed but not executed"
+fi
+if $SYNC_MODE; then
+    echo "🔄 Sync mode - will remove unlisted packages"
+    if $CASCADE; then
+        echo "⚠️  Cascade mode - will force-remove packages with dependents"
+    fi
+fi
+echo
+
+# =============================================================================
+# CACHE INSTALLED PACKAGES (performance optimization)
+# =============================================================================
+
+echo "📋 Caching installed packages..."
+declare -A INSTALLED_FORMULAS_CACHE=()
+declare -A INSTALLED_CASKS_CACHE=()
+
+while IFS= read -r f; do
+    [[ -n "$f" ]] && INSTALLED_FORMULAS_CACHE["$f"]=1
+done < <(brew list --formula 2>/dev/null)
+
+while IFS= read -r c; do
+    [[ -n "$c" ]] && INSTALLED_CASKS_CACHE["$c"]=1
+done < <(brew list --cask 2>/dev/null)
+
+echo "  Found ${#INSTALLED_FORMULAS_CACHE[@]} formulas, ${#INSTALLED_CASKS_CACHE[@]} casks"
+echo
+
+# Fast lookup functions using cache
+is_formula_installed_cached() {
+    local formula="$1"
+    [[ -n "${INSTALLED_FORMULAS_CACHE[$formula]+x}" ]]
+}
+
+is_cask_installed_cached() {
+    local cask="$1"
+    [[ -n "${INSTALLED_CASKS_CACHE[$cask]+x}" ]]
+}
+
+# =============================================================================
+# SYNC MODE: REMOVE UNLISTED PACKAGES
+# =============================================================================
+
+if $SYNC_MODE; then
+    echo "🔄 Checking for packages to remove..."
+    echo
+
+    build_wanted_normalized
+    mapfile -t INSTALLED_LEAVES < <(get_installed_formula_leaves)
+    mapfile -t INSTALLED_CASKS < <(get_installed_casks)
+
+    echo "  Checking installed formulas..."
+    formulas_to_remove=()
+    for installed in "${INSTALLED_LEAVES[@]}"; do
+        base="$(normalize_formula_name "$installed")"
+        if [[ -z "${WANTED_NORMALIZED[$base]+x}" ]]; then
+            formulas_to_remove+=("$installed")
+        fi
+    done
+
+    if [[ ${#formulas_to_remove[@]} -gt 0 ]]; then
+        echo "  📦 Formulas to remove: ${formulas_to_remove[*]}"
+        for formula in "${formulas_to_remove[@]}"; do
+            echo "    Removing $formula..."
+            if $CASCADE; then
+                run_cmd brew uninstall --force --ignore-dependencies "$formula" || true
+            else
+                if ! run_cmd brew uninstall "$formula"; then
+                    echo "      ⚠️  Skipped (has dependents, use --cascade to force)"
+                fi
+            fi
+        done
+    else
+        echo "  ✅ No formulas to remove"
+    fi
+    echo
+
+    echo "  Checking installed casks..."
+    casks_to_remove=()
+    for installed in "${INSTALLED_CASKS[@]}"; do
+        if ! printf '%s\n' "${CASKS[@]}" | grep -qx "$installed"; then
+            casks_to_remove+=("$installed")
+        fi
+    done
+
+    if [[ ${#casks_to_remove[@]} -gt 0 ]]; then
+        echo "  📦 Casks to remove: ${casks_to_remove[*]}"
+        for cask in "${casks_to_remove[@]}"; do
+            echo "    Removing $cask..."
+            run_cmd brew uninstall --cask "$cask" || true
+        done
+    else
+        echo "  ✅ No casks to remove"
+    fi
+    echo
+fi
+
+# =============================================================================
+# INSTALL PACKAGES
+# =============================================================================
+
+echo "📦 Adding taps..."
+taps_added=0
+tapped="$(get_tapped_repos)"
+for tap in "${TAPS[@]}"; do
+    if ! printf '%s\n' "$tapped" | grep -qx "$tap"; then
+        echo "  Tapping $tap..."
+        run_cmd brew tap "$tap" || true
+        ((taps_added++))
+    fi
+done
+if [[ $taps_added -eq 0 ]]; then
+    echo "  ✅ All taps already added"
+fi
+echo
+
+build_special_basenames
+
+# Collect missing standard formulas for batch install
+echo "🔧 Installing formulas..."
+missing_formulas=()
+for formula in "${FORMULAS[@]}"; do
+    base="$(normalize_formula_name "$formula")"
+    if [[ -n "${SPECIAL_BASENAMES[$base]+x}" ]]; then
+        continue
+    fi
+    if ! is_formula_installed_cached "$formula"; then
+        missing_formulas+=("$formula")
+    fi
+done
+
+if [[ ${#missing_formulas[@]} -gt 0 ]]; then
+    echo "  Installing ${#missing_formulas[@]} formulas: ${missing_formulas[*]}"
+    run_cmd brew install "${missing_formulas[@]}" || true
+    standard_installed=${#missing_formulas[@]}
+else
+    standard_installed=0
+    echo "  ✅ All standard formulas already installed"
+fi
+echo
+
+# Special formulas with flags (must be installed individually due to different flags)
+echo "🔧 Installing formulas with special flags..."
+special_installed=0
+for entry in "${SPECIAL_FORMULAS[@]}"; do
+    formula="${entry%%|*}"
+    flags="${entry#*|}"
+    base="$(get_formula_basename "$formula")"
+    if ! is_formula_installed_cached "$base"; then
+        if [[ -n "$flags" ]]; then
+            echo "  Installing $formula $flags..."
+            run_cmd brew install "$formula" $flags || true
+        else
+            echo "  Installing $formula..."
+            run_cmd brew install "$formula" || true
+        fi
+        ((special_installed++))
+    fi
+done
+if [[ $special_installed -eq 0 ]]; then
+    echo "  ✅ All special formulas already installed"
+fi
+echo
+
+# Collect missing casks for batch install
+echo "🖥️  Installing casks..."
+missing_casks=()
+for cask in "${CASKS[@]}"; do
+    if ! is_cask_installed_cached "$cask"; then
+        missing_casks+=("$cask")
+    fi
+done
+
+if [[ ${#missing_casks[@]} -gt 0 ]]; then
+    echo "  Installing ${#missing_casks[@]} casks: ${missing_casks[*]}"
+    run_cmd brew install --cask "${missing_casks[@]}" || true
+    casks_installed=${#missing_casks[@]}
+else
+    casks_installed=0
+    echo "  ✅ All casks already installed"
+fi
+echo
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+
+echo "✅ Complete!"
+echo
+echo "Summary:"
+echo "  - Taps added: $taps_added"
+echo "  - Formulas installed: $((standard_installed + special_installed))"
+echo "  - Casks installed: $casks_installed"
+echo
+echo "Tips:"
+echo "  - Run 'brew upgrade' to update all packages"
+echo "  - Run 'brew cleanup' to remove old versions"
+echo "  - Run 'brew-install-all --diff' to check for drift"
+if $DRY_RUN; then
+    echo
+    echo "🔍 This was a dry run. Run without --dry-run to apply changes."
+fi

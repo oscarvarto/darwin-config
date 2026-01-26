@@ -1,0 +1,115 @@
+#!/bin/bash
+
+# Simple Kitty Stow Deployment - Direct approach without path calculation
+# This script uses explicit paths and is easier to run from anywhere
+
+set -e
+
+echo "📦 Deploying Kitty stow package (simple method)..."
+
+# Explicit paths
+STOW_DIR="$HOME/darwin-config/stow"
+KITTY_PACKAGE="$STOW_DIR/kitty"
+
+echo "📁 Stow directory: $STOW_DIR"
+echo "📁 Kitty package: $KITTY_PACKAGE"
+
+# Check if kitty package exists
+if [[ ! -d "$KITTY_PACKAGE" ]]; then
+    echo "❌ Error: Kitty stow package not found at $KITTY_PACKAGE"
+    echo "   Please ensure the kitty stow package is properly created"
+    exit 1
+fi
+
+# Files that will conflict
+CONFLICT_FILES=(
+    "$HOME/.config/kitty/kitty.conf"
+    "$HOME/.config/kitty/current-theme.conf"
+    "$HOME/.local/share/bin/kitty-dark"
+    "$HOME/.local/share/bin/kitty-light"
+    "$HOME/.local/share/bin/kitty-theme-switcher"
+    "$HOME/.local/share/bin/test-kitty-font"
+)
+
+echo ""
+echo "🔍 Checking for conflicting files..."
+
+conflicts_found=false
+for file in "${CONFLICT_FILES[@]}"; do
+    filename=$(basename "$file")
+    if [[ -f "$file" && ! -L "$file" ]]; then
+        echo "⚠️  Conflict: $filename (regular file, not symlink)"
+        conflicts_found=true
+    elif [[ -L "$file" ]]; then
+        echo "✅ Already managed: $filename (symlink)"
+    else
+        echo "➕ New file: $filename"
+    fi
+done
+
+if [[ "$conflicts_found" == "true" ]]; then
+    echo ""
+    echo "❓ How would you like to resolve conflicts?"
+    echo "   1) Use stow --adopt (recommended - keeps your changes)"
+    echo "   2) Backup existing files and use stow versions"
+    echo "   3) Abort and handle manually"
+    echo ""
+    read -p "Choose option (1-3): " choice
+
+    case $choice in
+        1)
+            echo "📥 Using stow --adopt to merge existing files..."
+            cd "$STOW_DIR"
+            stow --adopt -t ~ kitty
+            echo "✅ Files adopted successfully"
+            echo "💡 Tip: Check 'git status' in $STOW_DIR to see any differences"
+            ;;
+        2)
+            echo "💾 Backing up existing files..."
+            backup_dir="$HOME/.kitty-config-backup-$(date +%Y%m%d-%H%M%S)"
+            mkdir -p "$backup_dir/.config/kitty"
+            mkdir -p "$backup_dir/.local/share/bin"
+
+            for file in "${CONFLICT_FILES[@]}"; do
+                if [[ -f "$file" && ! -L "$file" ]]; then
+                    echo "   Backing up $(basename "$file")"
+                    cp "$file" "$backup_dir${file#$HOME}"
+                    rm "$file"
+                fi
+            done
+
+            echo "📁 Backup created at: $backup_dir"
+
+            cd "$STOW_DIR"
+            stow -t ~ kitty
+            echo "✅ Stow package deployed successfully"
+            ;;
+        3)
+            echo "❌ Deployment aborted"
+            echo ""
+            echo "💡 To resolve manually:"
+            echo "   cd $STOW_DIR"
+            echo "   stow --adopt -t ~ kitty  # or"
+            echo "   stow -t ~ kitty  # after removing/backing up conflicts"
+            exit 0
+            ;;
+        *)
+            echo "❌ Invalid choice"
+            exit 1
+            ;;
+    esac
+else
+    echo ""
+    echo "✅ No conflicts found, deploying stow package..."
+    cd "$STOW_DIR"
+    stow -t ~ kitty
+    echo "✅ Stow package deployed successfully"
+fi
+
+echo ""
+echo "🎉 Kitty stow package deployment complete!"
+echo ""
+echo "📋 Next steps:"
+echo "  • Run 'setup-kitty-complete' to verify everything works"
+echo "  • Use 'stow -D -t ~ kitty' from $STOW_DIR to remove if needed"
+echo "  • Files are now managed by stow (symlinks to darwin-config/stow/kitty/)"

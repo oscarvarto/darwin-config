@@ -1,0 +1,312 @@
+#!/bin/bash
+
+# IntelliJ IDEA Cache and Project Files Cleanup Script
+# Usage: cleanup-intellij [project-path]
+#
+# This script cleans up IntelliJ IDEA caches and project files that can cause
+# folder structure recognition issues or other IDE problems.
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Function to print colored output
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Function to safely remove files/directories
+safe_remove() {
+    local path="$1"
+    local description="$2"
+    
+    if [ -e "$path" ]; then
+        print_status "Removing $description: $path"
+        rm -rf "$path"
+        print_success "Removed $description"
+    else
+        print_status "Skipping $description (not found): $path"
+    fi
+}
+
+# Function to clean project-specific files
+clean_project_files() {
+    local project_path="$1"
+    
+    if [ -z "$project_path" ]; then
+        print_warning "No project path provided, skipping project-specific cleanup"
+        return
+    fi
+    
+    if [ ! -d "$project_path" ]; then
+        print_error "Project path does not exist: $project_path"
+        return 1
+    fi
+    
+    print_status "Cleaning project-specific files in: $project_path"
+    
+    # Remove .idea directory
+    safe_remove "$project_path/.idea" ".idea directory"
+    
+    # Remove .iml files
+    print_status "Removing .iml files..."
+    find "$project_path" -name "*.iml" -type f -delete 2>/dev/null || true
+    
+    # Remove other IntelliJ-related files
+    safe_remove "$project_path/.ipr" ".ipr file"
+    safe_remove "$project_path/.iws" ".iws file"
+    
+    print_success "Project-specific cleanup completed"
+}
+
+# Function to clean IntelliJ system caches
+clean_system_caches() {
+    print_status "Cleaning IntelliJ system caches..."
+    
+    # Clean caches
+    safe_remove "$HOME/Library/Caches/JetBrains/IntelliJIdea*" "IntelliJ caches"
+    
+    # Clean logs
+    safe_remove "$HOME/Library/Logs/JetBrains/IntelliJIdea*" "IntelliJ logs"
+    
+    print_success "System cache cleanup completed"
+}
+
+# Function to clean IntelliJ application data
+clean_application_data() {
+    print_status "Cleaning IntelliJ application data..."
+    
+    # Find IntelliJ directories
+    local intellij_dirs
+    intellij_dirs=$(find "$HOME/Library/Application Support/JetBrains" -maxdepth 1 -name "IntelliJIdea*" -type d 2>/dev/null || true)
+    
+    if [ -z "$intellij_dirs" ]; then
+        print_warning "No IntelliJ application directories found"
+        return
+    fi
+    
+    while IFS= read -r intellij_dir; do
+        if [ -n "$intellij_dir" ]; then
+            print_status "Cleaning IntelliJ directory: $(basename "$intellij_dir")"
+            
+            # Clean workspace
+            safe_remove "$intellij_dir/workspace" "workspace data"
+            
+            # Clean scratches and consoles
+            safe_remove "$intellij_dir/scratches_and_consoles" "scratches and consoles"
+            
+            # Clean system data
+            safe_remove "$intellij_dir/system" "system data"
+            
+            # Clean recent projects
+            safe_remove "$intellij_dir/options/recentProjects.xml" "recent projects configuration"
+        fi
+    done <<< "$intellij_dirs"
+    
+    print_success "Application data cleanup completed"
+}
+
+# Function to clean project references from trusted paths
+clean_project_references() {
+    local project_path="$1"
+    
+    if [ -z "$project_path" ]; then
+        return
+    fi
+    
+    print_status "Cleaning project references from IntelliJ configuration..."
+    
+    # Get the project name from the path
+    local project_name
+    project_name=$(basename "$project_path")
+    
+    # Find and clean trusted-paths.xml files
+    local trusted_paths_files
+    trusted_paths_files=$(find "$HOME/Library/Application Support/JetBrains" -name "trusted-paths.xml" 2>/dev/null || true)
+    
+    while IFS= read -r file; do
+        if [ -n "$file" ] && [ -f "$file" ]; then
+            print_status "Cleaning project references from: $file"
+            # Remove lines containing the project name or path
+            sed -i "" "/$project_name/d" "$file" 2>/dev/null || true
+            if [ -n "$project_path" ]; then
+                sed -i "" "\|$project_path|d" "$file" 2>/dev/null || true
+            fi
+        fi
+    done <<< "$trusted_paths_files"
+    
+    print_success "Project references cleanup completed"
+}
+
+# Function to find and clean all IntelliJ project files system-wide
+clean_all_project_files() {
+    print_status "Searching for all IntelliJ project files system-wide..."
+    
+    # Find all .idea directories (excluding system directories)
+    local idea_dirs
+    idea_dirs=$(find "$HOME" -name ".idea" -type d -not -path "*/Library/*" -not -path "*/.Trash/*" -not -path "*/node_modules/*" 2>/dev/null || true)
+    
+    if [ -n "$idea_dirs" ]; then
+        print_status "Found .idea directories to clean:"
+        while IFS= read -r idea_dir; do
+            if [ -n "$idea_dir" ]; then
+                echo "  - $idea_dir"
+                safe_remove "$idea_dir" ".idea directory"
+            fi
+        done <<< "$idea_dirs"
+    else
+        print_status "No .idea directories found"
+    fi
+    
+    # Find all .iml files (excluding system directories)
+    print_status "Searching for .iml files..."
+    local iml_count
+    iml_count=$(find "$HOME" -name "*.iml" -type f -not -path "*/Library/*" -not -path "*/.Trash/*" -not -path "*/node_modules/*" -delete -print 2>/dev/null | wc -l || echo "0")
+    print_status "Removed $iml_count .iml files"
+    
+    # Find all .ipr and .iws files
+    print_status "Searching for .ipr and .iws files..."
+    local ipr_count
+    ipr_count=$(find "$HOME" -name "*.ipr" -o -name "*.iws" -type f -not -path "*/Library/*" -not -path "*/.Trash/*" -not -path "*/node_modules/*" -delete -print 2>/dev/null | wc -l || echo "0")
+    print_status "Removed $ipr_count .ipr/.iws files"
+    
+    print_success "All project files cleanup completed"
+}
+
+# Function to show usage
+show_usage() {
+    echo "Usage: $(basename "$0") [OPTIONS] [PROJECT_PATH]"
+    echo ""
+    echo "Clean up IntelliJ IDEA caches and project files."
+    echo ""
+    echo "OPTIONS:"
+    echo "  -h, --help        Show this help message"
+    echo "  -p, --project-only Clean only project-specific files"
+    echo "  -s, --system-only  Clean only system caches"
+    echo "  -a, --all         Clean everything (default)"
+    echo "  -g, --aggressive  Complete removal of ALL caches and project files (system-wide)"
+    echo ""
+    echo "ARGUMENTS:"
+    echo "  PROJECT_PATH      Path to the project directory (optional)"
+    echo ""
+    echo "Examples:"
+    echo "  $(basename "$0")                           # Clean all IntelliJ caches"
+    echo "  $(basename "$0") ~/my-project              # Clean all + project-specific files"
+    echo "  $(basename "$0") -p ~/my-project           # Clean only project files"
+    echo "  $(basename "$0") -s                        # Clean only system caches"
+    echo "  $(basename "$0") -g                        # Clean ALL caches and project files (aggressive)"
+}
+
+# Main function
+main() {
+    local project_path=""
+    local clean_mode="all"
+    
+    # Parse command line arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_usage
+                exit 0
+                ;;
+            -p|--project-only)
+                clean_mode="project"
+                shift
+                ;;
+            -s|--system-only)
+                clean_mode="system"
+                shift
+                ;;
+            -a|--all)
+                clean_mode="all"
+                shift
+                ;;
+            -g|--aggressive)
+                clean_mode="aggressive"
+                shift
+                ;;
+            -*)
+                print_error "Unknown option: $1"
+                show_usage
+                exit 1
+                ;;
+            *)
+                if [ -z "$project_path" ]; then
+                    project_path="$1"
+                else
+                    print_error "Multiple project paths provided"
+                    exit 1
+                fi
+                shift
+                ;;
+        esac
+    done
+    
+    # Convert relative path to absolute path
+    if [ -n "$project_path" ]; then
+        project_path=$(cd "$project_path" 2>/dev/null && pwd) || {
+            print_error "Invalid project path: $project_path"
+            exit 1
+        }
+    fi
+    
+    print_status "Starting IntelliJ IDEA cleanup..."
+    
+    case $clean_mode in
+        "project")
+            if [ -z "$project_path" ]; then
+                print_error "Project path required for project-only cleanup"
+                exit 1
+            fi
+            clean_project_files "$project_path"
+            clean_project_references "$project_path"
+            ;;
+        "system")
+            clean_system_caches
+            clean_application_data
+            ;;
+        "all")
+            clean_system_caches
+            clean_application_data
+            if [ -n "$project_path" ]; then
+                clean_project_files "$project_path"
+                clean_project_references "$project_path"
+            fi
+            ;;
+        "aggressive")
+            print_warning "AGGRESSIVE MODE: This will remove ALL IntelliJ project files system-wide!"
+            print_status "This includes .idea directories, .iml files, and .ipr/.iws files from ALL projects."
+            read -p "Are you sure you want to continue? (yes/no): " confirmation
+            if [ "$confirmation" != "yes" ]; then
+                print_status "Aggressive cleanup cancelled."
+                exit 0
+            fi
+            clean_system_caches
+            clean_application_data
+            clean_all_project_files
+            ;;
+    esac
+    
+    print_success "IntelliJ IDEA cleanup completed!"
+    print_status "Restart IntelliJ IDEA to see the changes take effect."
+}
+
+# Run main function with all arguments
+main "$@"

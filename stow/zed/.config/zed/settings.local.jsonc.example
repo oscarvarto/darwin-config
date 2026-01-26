@@ -1,0 +1,263 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "helix_mode": true,
+  "context_servers": {
+    "mcp-server-context7": {
+      "enabled": true,
+      "settings": {
+      },
+    },
+    // Usage with Codex CLI
+    // codex mcp add sequential-thinking npx -y @modelcontextprotocol/server-sequential-thinking
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+    },
+  },
+  "agent_buffer_font_size": 20.0,
+  "agent_ui_font_size": 20.0,
+  "session": {
+    "trust_all_worktrees": true,
+  },
+  "show_edit_predictions": true,
+  "colorize_brackets": true,
+  "preview_tabs": {
+    "enable_preview_from_file_finder": true,
+  },
+  "base_keymap": "JetBrains",
+  "load_direnv": "shell_hook",
+  "ssh_connections": [
+    {
+      "host": "github.com",
+      "projects": [],
+    },
+  ],
+  "edit_predictions": {
+    "mode": "subtle",
+    "enabled_in_text_threads": false,
+  },
+  "agent": {
+    "always_allow_tool_actions": true,
+    "default_model": {
+      "provider": "zed.dev",
+      "model": "claude-opus-4-5",
+    },
+    "play_sound_when_agent_done": true,
+  },
+  "features": {
+    "edit_prediction_provider": "zed",
+  },
+  "language_models": {
+    "ollama": {
+      "api_url": "http://localhost:11434",
+    },
+  },
+  "telemetry": {
+    "diagnostics": true,
+    "metrics": true,
+  },
+  "vim_mode": false,
+  "ui_font_family": "PragmataPro Liga",
+  "ui_font_size": 18,
+  "buffer_font_family": "MonoLisaVariable Nerd Font",
+  "buffer_font_size": 20.0,
+  "buffer_font_features": { "calt": true },
+  "buffer_line_height": "standard",
+  "terminal": {
+    "font_family": "MonoLisaVariable Nerd Font",
+    "font_size": 18.0,
+    "line_height": "standard",
+    "shell": {
+      "with_arguments": {
+        "program": "/Users/oscarvarto/.nix-profile/bin/fish",
+        "args": ["--interactive", "--login"],
+      },
+    },
+  },
+  "icon_theme": {
+    "mode": "system",
+    "light": "Catppuccin Latte",
+    "dark": "Catppuccin Mocha",
+  },
+  "theme": {
+    "mode": "dark",
+    "light": "Dracula Light (Alucard)",
+    "dark": "Indigo",
+  },
+  "indent_guides": {
+    "enabled": true,
+    "coloring": "indent_aware",
+  },
+  "inlay_hints": {
+    "enabled": true,
+    "show_type_hints": true,
+    "show_parameter_hints": true,
+    "show_other_hints": true,
+    "show_background": false,
+    "edit_debounce_ms": 700,
+    "scroll_debounce_ms": 50,
+  },
+  "lsp": {
+    "clangd": {
+      "binary": {
+        "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clangd",
+        "arguments": ["-background-index", "-compile-commands-dir=build"],
+      },
+    },
+    "jdtls": {
+      "initialization_options": {
+        "bundles": [],
+        // "workspaceFolders": ["file:///home/snjeza/Project"],
+        "extendedClientCapabilities": {
+          "classFileContentsSupport": true,
+        },
+        "settings": {
+          "java": {
+            "home": "/Library/Java/JavaVirtualMachines/corretto-25.0.2.10.1.jdk/Contents/Home/",
+            "errors": {
+              "incompleteClasspath": {
+                "severity": "warning",
+              },
+            },
+            "configuration": {
+              "updateBuildConfiguration": "interactive",
+              "maven": {
+                "userSettings": null,
+              },
+            },
+            "trace": {
+              "server": "verbose",
+            },
+            "import": {
+              "gradle": {
+                "enabled": true,
+              },
+              "maven": {
+                "enabled": true,
+              },
+              "exclusions": [
+                "**/node_modules/**",
+                "**/.metadata/**",
+                "**/archetype-resources/**",
+                "**/META-INF/maven/**",
+                "/**/test/**",
+              ],
+            },
+            "jdt": {
+              "ls": {
+                "lombokSupport": {
+                  "enabled": true, // Set this to true to enable lombok support
+                },
+              },
+            },
+            "referencesCodeLens": {
+              "enabled": true,
+            },
+            "signatureHelp": {
+              "enabled": true,
+            },
+            "implementationsCodeLens": {
+              "enabled": true,
+            },
+            "format": {
+              "enabled": false,
+            },
+            "saveActions": {
+              "format": false,
+              "organizeImports": false,
+            },
+            "contentProvider": {
+              "preferred": null,
+            },
+            "autobuild": {
+              "enabled": true,
+            },
+            "completion": {
+              "favoriteStaticMembers": ["org.assertj.core.api.Assertions.*"],
+              // "importOrder": ["java", "javax", "com", "org"]
+            },
+          },
+        },
+      },
+    },
+    "kotlin-lsp": {
+      "binary": {
+        "path": "kotlin-lsp",
+        "arguments": ["--stdio"],
+      },
+      "settings": {
+        "compiler": {
+          "jvm": {
+            "target": "25",
+          },
+        },
+      },
+    },
+    "nixd": {
+      "settings": {
+        "diagnostic": {
+          "suppress": ["sema-extra-with"],
+        },
+      },
+    },
+    "sourcekit-lsp": {
+      "binary": {
+        "path": "/usr/bin/sourcekit-lsp",
+        "arguments": [
+          "--scratch-path=/Users/oscarvarto/Library/Caches/sourcekit-lsp/scratch",
+          "--generated-files-path=/Users/oscarvarto/Library/Caches/sourcekit-lsp/generated",
+        ],
+      },
+      "initialization_options": {
+        "defaultWorkspaceType": "swiftPM",
+        "backgroundIndexing": true,
+        "backgroundPreparationMode": "enabled",
+        "swiftPM": {
+          "configuration": "debug",
+          "scratchPath": "/Users/oscarvarto/Library/Caches/sourcekit-lsp/scratch",
+        },
+        "generatedFilesPath": "/Users/oscarvarto/Library/Caches/sourcekit-lsp/generated",
+      },
+    },
+  },
+  "languages": {
+    "Markdown": {
+      "show_edit_predictions": false,
+      "preferred_line_length": 100,
+      "soft_wrap": "editor_width",
+    },
+    "Python": {
+      "preferred_line_length": 100,
+      "soft_wrap": "editor_width",
+      "language_servers": ["ty", "!basedpyright", "!pylsp"],
+    },
+    "Java": {
+      "show_edit_predictions": true,
+      "tab_size": 2,
+      "preferred_line_length": 120,
+      "format_on_save": "off",
+    },
+    "Nix": {
+      "language_servers": ["nixd", "!nil"],
+      "formatter": {
+        "external": {
+          "command": "alejandra",
+          "arguments": ["--quiet", "--"],
+        },
+      },
+    },
+    "Kotlin": {
+      "language_servers": ["kotlin-lsp"],
+    },
+    "Swift": {
+      "language_servers": ["sourcekit-lsp"],
+    },
+  },
+}

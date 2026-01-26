@@ -1,0 +1,13 @@
+{
+  "name": "elisp-formatter",
+  "version": "1.0.0",
+  "description": "Check and format Elisp S-expressions using Parinfer",
+  "main": "elisp-formatter.js",
+  "bin": {
+    "elisp-formatter.js": "./elisp-formatter.js"
+  },
+  "dependencies": {
+    "commander": "^9.5.0",
+    "parinfer": "^3.13.1"
+  }
+}

@@ -1,0 +1,62 @@
+// Default 3-column layout: sidebar | editor | aux (terminal/preview)
+swap_tiled_layout name="three_column" {
+    ui min_panes=3 {
+        pane split_direction="vertical" {
+            pane name="sidebar" size="15%" {
+                command "env"
+                args "ZELLIJ_PANE_NAME=sidebar" "yazi"
+            }
+            pane name="editor" size="42%" focus=true {
+            }
+            pane name="aux" size="43%" {
+            }
+        }
+    }
+}
+
+// Stacked layout for many editor panes
+swap_tiled_layout name="stacked" {
+    ui min_panes=4 {
+        pane split_direction="vertical" {
+            pane name="sidebar" size="15%" {
+                command "env"
+                args "ZELLIJ_PANE_NAME=sidebar" "yazi"
+            }
+            pane stacked=true size="55%" { 
+                children; 
+            }
+            pane name="aux" size="30%" {
+            }
+        }
+    }
+}
+
+// Two column layout (no aux pane)
+swap_tiled_layout name="two_column" {
+    ui exact_panes=2 {
+        pane split_direction="vertical" {
+            pane name="sidebar" size="20%" {
+                command "env"
+                args "ZELLIJ_PANE_NAME=sidebar" "yazi"
+            }
+            pane name="editor" size="80%" focus=true {
+            }
+        }
+    }
+}
+
+// Sidebar minimized layout
+swap_tiled_layout name="sidebar_minimized" {
+    ui min_panes=3 {
+        pane split_direction="vertical" {
+            pane name="sidebar" size="1" {
+                command "env"
+                args "ZELLIJ_PANE_NAME=sidebar" "yazi"
+            }
+            pane name="editor" size="60%" focus=true {
+            }
+            pane name="aux" size="40%" {
+            }
+        }
+    }
+}

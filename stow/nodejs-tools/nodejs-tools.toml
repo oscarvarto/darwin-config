@@ -1,0 +1,45 @@
+# Node.js Tools Configuration
+# This file tracks the Node.js packages and toolchain you want to install system-wide
+# Run 'manage-nodejs-tools install' to install all listed packages
+
+[toolchain]
+# Node.js version (managed by Volta)
+node = { version = "22.16.0", description = "Node.js runtime" }
+
+# Package managers (managed by Volta)
+# volta automatically installs npm with node
+# yarn = { version = "latest", description = "Fast package manager" }
+# pnpm = { version = "latest", description = "Efficient package manager" }
+
+[global_packages]
+# Development tools
+# typescript = { version = "*", description = "TypeScript compiler" }
+# tsx = { version = "*", description = "TypeScript execution engine" }
+# eslint = { version = "*", description = "JavaScript/TypeScript linter" }
+# prettier = { version = "*", description = "Code formatter" }
+
+# Build tools
+# vite = { version = "*", description = "Fast build tool" }
+# webpack-cli = { version = "*", description = "Webpack command line interface" }
+
+# Utilities
+# nodemon = { version = "*", description = "File watcher for development" }
+# pm2 = { version = "*", description = "Process manager" }
+# serve = { version = "*", description = "Static file server" }
+# http-server = { version = "*", description = "Simple HTTP server" }
+
+# Example of version-pinned package:
+# react-scripts = { version = "5.0.1", description = "Create React App scripts" }
+
+[settings]
+# Package manager to use for global installs
+package_manager = "npm"  # Options: npm, yarn, pnpm
+
+# Whether to auto-update packages on install
+auto_update = true
+
+# Whether to install exact versions (--save-exact flag)
+use_exact = false
+
+# Whether to manage Node.js versions with Volta (recommended)
+use_volta = true

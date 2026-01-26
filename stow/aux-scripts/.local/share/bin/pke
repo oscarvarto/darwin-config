@@ -1,0 +1,4 @@
+#!/usr/bin/env zsh
+
+# Kill all Emacs processes (equivalent to alias pke = pkill -9 Emacs)
+exec pkill -9 Emacs

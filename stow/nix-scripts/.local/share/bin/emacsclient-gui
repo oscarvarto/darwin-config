@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+#
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Launch Emacs GUI
+# @raycast.mode silent
+#
+# Optional parameters:
+# @raycast.packageName Emacs
+# @raycast.icon /opt/homebrew/Caskroom/emacs-app-nightly/latest/Emacs.app/Contents/Resources/Emacs.icns
+
+# Enhanced emacsclient wrapper for proper macOS window recognition
+
+EMACSCLIENT="${EMACSCLIENT:-$(command -v emacsclient 2>/dev/null || true)}"
+if [[ -z "${EMACSCLIENT:-}" ]]; then
+    for candidate in \
+        "/Applications/Emacs.app/Contents/MacOS/bin/emacsclient" \
+        "/opt/homebrew/bin/emacsclient"; do
+        if [[ -x "$candidate" ]]; then
+            EMACSCLIENT="$candidate"
+            break
+        fi
+    done
+fi
+
+if [[ -z "${HOME:-}" && -n "${USER:-}" ]]; then
+    HOME="$(eval echo "~${USER}")"
+fi
+
+if [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then
+    XDG_RUNTIME_DIR="$(launchctl getenv XDG_RUNTIME_DIR 2>/dev/null || true)"
+fi
+RUNTIME_DIR="${XDG_RUNTIME_DIR:-$HOME/.local/run}"
+SERVER_FILE="${EMACS_SERVER_FILE:-$RUNTIME_DIR/emacs/server}"
+LOCAL_SOCKET="$HOME/.local/run/emacs/server"
+if [[ -S "$LOCAL_SOCKET" ]]; then
+    SERVER_FILE="$LOCAL_SOCKET"
+fi
+if [[ -S "$SERVER_FILE" ]]; then
+    SERVER_FLAG=(--socket-name "$SERVER_FILE")
+else
+    SERVER_FLAG=(--server-file "$SERVER_FILE")
+fi
+
+# Check if server is running (do not auto-start background daemon)
+if ! ALTERNATE_EDITOR=false "$EMACSCLIENT" "${SERVER_FLAG[@]}" -e "(emacs-version)" >/dev/null 2>&1; then
+    echo "❌ Emacs daemon not running" >&2
+    echo "💡 Start it with: emacs --daemon" >&2
+    exit 1
+fi
+
+# Emacs app path from Homebrew cask
+EMACS_APP_PATH="/opt/homebrew/Caskroom/emacs-app-nightly/latest/Emacs.app"
+if [[ ! -e "$EMACS_APP_PATH" ]]; then
+    EMACS_APP_PATH="/Applications/Emacs.app"
+fi
+
+# Try to determine bundle identifier for activation (defaults to org.gnu.Emacs)
+EMACS_BUNDLE_ID="org.gnu.Emacs"
+if [[ -e "$EMACS_APP_PATH/Contents/Info.plist" ]]; then
+    BID=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$EMACS_APP_PATH/Contents/Info.plist" 2>/dev/null || true)
+    if [[ -n "${BID:-}" ]]; then
+        EMACS_BUNDLE_ID="$BID"
+    fi
+fi
+
+# Create a new frame with proper focus and raise it
+# The -c flag creates a new frame (window)
+# The -n flag means don't wait for the server to return
+"$EMACSCLIENT" \
+    "${SERVER_FLAG[@]}" \
+    --create-frame \
+    --no-wait \
+    "$@"
+
+# Use only Emacs built-in frame management to avoid multiple Accessibility entries
+# This method works reliably without requiring external AppleScript calls
+"$EMACSCLIENT" "${SERVER_FLAG[@]}" --eval '(progn
+  (select-frame-set-input-focus (selected-frame))
+  (raise-frame)
+  t)' >/dev/null 2>&1 || true
+
+# Ensure macOS focuses the existing Emacs app so the Dock icon is shown
+if command -v osascript >/dev/null 2>&1; then
+    # Only focus if an Emacs process is already running; do NOT launch a new one
+    osascript >/dev/null 2>&1 <<EOF || true
+tell application "System Events"
+  set emProcs to (application processes whose bundle identifier is "$EMACS_BUNDLE_ID")
+  if (count of emProcs) > 0 then
+    set frontmost of item 1 of emProcs to true
+  end if
+end tell
+EOF
+fi

@@ -1,0 +1,13 @@
+[manager]
+append_keymap = [
+  { on = ["<C-y>"], run = "quit", desc = "Quit Yazi (toggle with Helix)" },
+  { on = ["<A-y>"], run = "shell 'nu $HOME/.config/yazelix/nushell/scripts/integrations/focus_helix.nu'", desc = "Focus Helix pane" },
+  { on = ["<A-p>"], run = "shell 'nu $HOME/.config/yazelix/nushell/scripts/integrations/open_dir_in_pane.nu \"$0\"'", desc = "Open directory in new pane" },
+  { on = ["<C-g>"], run = "toggle --preview", desc = "Toggle preview pane (piper/glow for .md)" },
+  { on = ["T"], run = "plugin auto-layout --args=toggle", desc = "Toggle layout mode (sidebar/browse with preview)" },
+  { on = ["<C-t>"], run = 'shell "$SHELL" --block', desc = "Open $SHELL here", for = "unix" },
+]
+
+prepend_keymap = [
+  { on = ["g", "l"], run = "plugin lazygit", desc = "Open lazygit" },
+]

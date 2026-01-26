@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# prepare-jira - Set JIRA_API_TOKEN for the current shell
+#
+# Usage:
+#   eval "$(prepare-jira)"        # bash/zsh
+#   eval (prepare-jira)           # fish
+#   # For nushell, use: $env.JIRA_API_TOKEN = (get-jira-api-token work)
+#
+# This script detects the parent shell and outputs the appropriate
+# command to set the JIRA_API_TOKEN environment variable.
+
+set -euo pipefail
+
+# Determine the parent shell
+detect_shell() {
+    # Try to get the parent process name
+    local parent_pid="${PPID:-$$}"
+    local shell_name=""
+    
+    # macOS: use ps to get parent process name
+    if command -v ps >/dev/null 2>&1; then
+        shell_name=$(ps -p "$parent_pid" -o comm= 2>/dev/null | xargs basename 2>/dev/null || true)
+    fi
+    
+    # Fallback: check SHELL environment variable
+    if [[ -z "$shell_name" ]] || [[ "$shell_name" == "bash" && -n "${FISH_VERSION:-}" ]]; then
+        shell_name=$(basename "${SHELL:-bash}")
+    fi
+    
+    # Check for specific shell indicators
+    if [[ -n "${FISH_VERSION:-}" ]]; then
+        echo "fish"
+    elif [[ -n "${NU_VERSION:-}" ]]; then
+        echo "nu"
+    elif [[ -n "${XONSH_VERSION:-}" ]]; then
+        echo "xonsh"
+    elif [[ "$shell_name" == "fish" ]]; then
+        echo "fish"
+    elif [[ "$shell_name" == "nu" ]]; then
+        echo "nu"
+    elif [[ "$shell_name" == "xonsh" ]]; then
+        echo "xonsh"
+    elif [[ "$shell_name" == "zsh" ]]; then
+        echo "zsh"
+    elif [[ "$shell_name" == "bash" ]]; then
+        echo "bash"
+    else
+        # Default to bash-compatible syntax
+        echo "bash"
+    fi
+}
+
+# Get the JIRA API token
+get_token() {
+    local profile="${1:-work}"
+    local token=""
+    if command -v get-jira-api-token >/dev/null 2>&1; then
+        token=$(get-jira-api-token "$profile" 2>/dev/null)
+    fi
+    echo "$token"
+}
+
+# Main
+main() {
+    local profile="${1:-work}"
+    local shell_type
+    shell_type=$(detect_shell)
+    
+    local token
+    token=$(get_token "$profile")
+    
+    if [[ -z "$token" ]]; then
+        echo "# Error: Could not retrieve JIRA API token for profile '$profile'" >&2
+        echo "# Make sure 1Password CLI is authenticated: op signin" >&2
+        exit 1
+    fi
+    
+    # Output the appropriate command for the detected shell
+    # Sets both JIRA_API_TOKEN (general use) and JIRA_TUI_JIRA_API_TOKEN (for jiratui)
+    case "$shell_type" in
+        fish)
+            echo "set -gx JIRA_API_TOKEN '$token'"
+            echo "set -gx JIRA_TUI_JIRA_API_TOKEN '$token'"
+            ;;
+        nu)
+            # Nushell can't eval external commands easily, so provide instructions
+            echo "# Run this in nushell:"
+            echo "# \$env.JIRA_API_TOKEN = '$token'"
+            echo "# \$env.JIRA_TUI_JIRA_API_TOKEN = '$token'"
+            echo ""
+            echo "# Or use:"
+            echo "# \$env.JIRA_API_TOKEN = (get-jira-api-token $profile)"
+            echo "# \$env.JIRA_TUI_JIRA_API_TOKEN = \$env.JIRA_API_TOKEN"
+            ;;
+        xonsh)
+            echo "\$JIRA_API_TOKEN = '$token'"
+            echo "\$JIRA_TUI_JIRA_API_TOKEN = '$token'"
+            ;;
+        bash|zsh|*)
+            echo "export JIRA_API_TOKEN='$token'"
+            echo "export JIRA_TUI_JIRA_API_TOKEN='$token'"
+            ;;
+    esac
+}
+
+main "$@"

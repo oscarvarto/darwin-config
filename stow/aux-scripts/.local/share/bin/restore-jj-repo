@@ -1,0 +1,134 @@
+#!/usr/bin/env nu
+
+# Script to restore a jujutsu colocated repository after .jj directory deletion
+# Usage: restore-jj-repo <branch-name>
+
+def main [branch_name: string] {
+    print $"🔧 Restoring jujutsu repository on branch: ($branch_name)"
+    
+    # Check if we're in a git repository
+    if not ((".git" | path exists) or (".jj" | path exists)) {
+        print "❌ Error: Not in a git repository directory"
+        exit 1
+    }
+    
+    # Check if .jj directory already exists
+    if (".jj" | path exists) {
+        print "⚠️  Warning: .jj directory already exists. Repository might already be initialized."
+        let response = (input "Do you want to continue anyway? (y/N): ")
+        if $response != "y" and $response != "Y" {
+            print "Aborted."
+            exit 0
+        }
+    }
+    
+    # Step 1: Check git status and commit any pending changes
+    print "📋 Checking for uncommitted changes..."
+    let git_status = (git status --porcelain | str trim)
+    
+    if ($git_status | str length) > 0 {
+        print "💾 Found uncommitted changes. Committing them..."
+        git add .
+        git commit -m $"Save current changes before restoring jujutsu setup on ($branch_name)"
+        
+        if $env.LAST_EXIT_CODE != 0 {
+            print "❌ Error: Failed to commit changes"
+            exit 1
+        }
+        
+        print "✅ Changes committed successfully"
+        let commit_hash = (git rev-parse HEAD | str trim)
+        print $"📌 Commit hash: ($commit_hash)"
+    } else {
+        print "✅ No uncommitted changes found"
+    }
+    
+    # Step 2: Check if the branch exists
+    let branches = (git branch -a | lines | each { |line| $line | str trim | str replace "* " "" | str replace "remotes/" "" })
+    let branch_exists = ($branches | any { |b| $b == $branch_name })
+    let remote_branch_exists = ($branches | any { |b| $b == $"origin/($branch_name)" })
+    
+    if not $branch_exists and not $remote_branch_exists {
+        print $"❌ Error: Branch '($branch_name)' does not exist locally or remotely"
+        print "Available branches:"
+        git branch -a
+        exit 1
+    }
+    
+    # Step 3: Switch to the target branch
+    print $"🔄 Switching to branch: ($branch_name)"
+    let current_branch = (git branch --show-current | str trim)
+    
+    if $current_branch != $branch_name {
+        # Check if we're in detached HEAD state
+        let git_status_result = (git status | str trim)
+        if ($git_status_result | str contains "HEAD detached") {
+            print "🔗 Currently in detached HEAD state"
+            
+            # If we have a commit to preserve, we need to handle it
+            if ($git_status | str length) == 0 and (git log --oneline -1 | str contains "Save current changes before restoring jujutsu setup") {
+                print "📦 Preserving committed changes..."
+                let commit_to_merge = (git rev-parse HEAD | str trim)
+                
+                git checkout $branch_name
+                if $env.LAST_EXIT_CODE != 0 {
+                    print $"❌ Error: Failed to checkout branch ($branch_name)"
+                    exit 1
+                }
+                
+                print $"🔀 Merging preserved changes: ($commit_to_merge)"
+                git merge $commit_to_merge
+                if $env.LAST_EXIT_CODE != 0 {
+                    print "❌ Error: Failed to merge preserved changes"
+                    exit 1
+                }
+            } else {
+                git checkout $branch_name
+                if $env.LAST_EXIT_CODE != 0 {
+                    print $"❌ Error: Failed to checkout branch ($branch_name)"
+                    exit 1
+                }
+            }
+        } else {
+            git checkout $branch_name
+            if $env.LAST_EXIT_CODE != 0 {
+                print $"❌ Error: Failed to checkout branch ($branch_name)"
+                exit 1
+            }
+        }
+    }
+    
+    print $"✅ Now on branch: ($branch_name)"
+    
+    # Step 4: Initialize jujutsu in colocated mode
+    print "🚀 Initializing jujutsu in colocated mode..."
+    jj git init --colocate
+    
+    if $env.LAST_EXIT_CODE != 0 {
+        print "❌ Error: Failed to initialize jujutsu"
+        exit 1
+    }
+    
+    print "✅ Jujutsu initialized successfully"
+    
+    # Step 5: Track the remote bookmark
+    print $"📌 Setting up bookmark tracking for ($branch_name)@origin..."
+    jj bookmark track $"($branch_name)@origin"
+    
+    if $env.LAST_EXIT_CODE != 0 {
+        print $"⚠️  Warning: Failed to track remote bookmark ($branch_name)@origin"
+        print "This might be normal if the remote bookmark doesn't exist yet"
+    } else {
+        print "✅ Remote bookmark tracking set up successfully"
+    }
+    
+    # Step 6: Show final status
+    print "\n🎉 Repository restoration complete!"
+    print "\n📊 Current status:"
+    print "Git status:"
+    git status --short
+    print "\nJujutsu status:"
+    jj status
+    
+    print $"\n✨ Your jujutsu repository on branch '($branch_name)' has been successfully restored!"
+}

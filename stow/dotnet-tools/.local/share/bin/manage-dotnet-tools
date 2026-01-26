@@ -1,0 +1,267 @@
+#!/usr/bin/env nu
+
+# Script to manage .NET global tools using stow-tracked configuration
+# Usage: manage-dotnet-tools <command>
+
+def main [command: string = "help"] {
+    let dotnet_tools_dir = $"($env.HOME)/darwin-config/stow/dotnet-tools"
+    let config_file = $"($dotnet_tools_dir)/dotnet-tools.toml"
+    
+    if not ($config_file | path exists) {
+        print "❌ Error: .NET tools config file not found at ~/darwin-config/stow/dotnet-tools/dotnet-tools.toml"
+        exit 1
+    }
+    
+    match $command {
+        "install" | "sync" => {
+            print "🚀 Installing/syncing .NET tools from configuration..."
+            
+            let config = (open $config_file)
+            let tools = $config.global_tools
+            
+            print "🔧 Checking .NET SDK..."
+            let sdk_info = $config.sdk
+            let expected_version = ($sdk_info | get version? | default "latest")
+            
+            try {
+                let current_version = (dotnet --version | str trim)
+                print $"  • Current .NET SDK: ($current_version)"
+                if $current_version != $expected_version {
+                    print $"  ⚠️  Expected: ($expected_version), Current: ($current_version)"
+                    print "  💡 Consider updating your .NET SDK via system package manager"
+                }
+            } catch {
+                print "  ❌ .NET SDK not found. Please install .NET SDK first."
+                exit 1
+            }
+            
+            let pkg_count = ($tools | columns | length)
+            print $"\n📦 Installing ($pkg_count) global tools..."
+            
+            for tool_name in ($tools | columns) {
+                let tool_info = ($tools | get $tool_name)
+                let description = ($tool_info | get description? | default "No description")
+                let version = ($tool_info | get version? | default "*")
+                
+                print $"  • ($tool_name): ($description)"
+                
+                # Build install command
+                let include_prerelease = ($config.settings.include_prerelease? | default false)
+                let prerelease_flag = if $include_prerelease { "--prerelease" } else { "" }
+                
+                if $version == "*" {
+                    if $include_prerelease {
+                        dotnet tool install --global $tool_name --prerelease
+                    } else {
+                        dotnet tool install --global $tool_name
+                    }
+                } else {
+                    dotnet tool install --global $tool_name --version $version
+                }
+                
+                if $env.LAST_EXIT_CODE != 0 {
+                    print $"⚠️  Warning: Failed to install ($tool_name)"
+                } else {
+                    print $"✅ Successfully installed ($tool_name)"
+                }
+            }
+            
+            print "\n🎉 .NET tools installation completed!"
+        }
+        
+        "list" => {
+            print "📋 Configured .NET tools:"
+            let config = (open $config_file)
+            let tools = $config.global_tools
+            
+            for tool_name in ($tools | columns) {
+                let tool_info = ($tools | get $tool_name)
+                let description = ($tool_info | get description? | default "No description")
+                let version = ($tool_info | get version? | default "*")
+                
+                print $"  • ($tool_name) (($version)): ($description)"
+            }
+        }
+        
+        "status" => {
+            print "📊 .NET tools status:"
+            let config = (open $config_file)
+            let tools = $config.global_tools
+            
+            # Check .NET SDK
+            print "\n🔧 .NET SDK:"
+            let sdk_info = $config.sdk
+            let expected_version = ($sdk_info | get version? | default "latest")
+            
+            try {
+                let current_version = (dotnet --version | str trim)
+                if $current_version == $expected_version {
+                    print $"  ✅ .NET SDK ($current_version) -> matches expected"
+                } else {
+                    print $"  ⚠️  .NET SDK ($current_version) -> expected ($expected_version)"
+                }
+            } catch {
+                print "  ❌ .NET SDK -> not installed"
+            }
+            
+            let pkg_count = ($tools | columns | length)
+            print $"\n📂 Configured tools: ($pkg_count)"
+            print "🔍 Checking installation status..."
+            
+            # Get installed tools
+            let installed_tools = try {
+                dotnet tool list -g 
+                | lines 
+                | skip 2  # Skip header lines
+                | each { |line| 
+                    if ($line | str trim | str length) > 0 {
+                        $line | str trim | split row -r '\s+' | get 0
+                    } else {
+                        null
+                    }
+                }
+                | compact
+            } catch {
+                []
+            }
+            
+            for tool_name in ($tools | columns) {
+                let tool_info = ($tools | get $tool_name)
+                let description = ($tool_info | get description? | default "No description")
+                
+                if ($tool_name in $installed_tools) {
+                    print $"  ✅ ($tool_name) -> installed"
+                } else {
+                    print $"  ❌ ($tool_name) -> not installed"
+                }
+            }
+        }
+        
+        "installed" => {
+            print "📦 All installed .NET global tools:"
+            
+            try {
+                dotnet tool list -g
+            } catch {
+                print "❌ Failed to list installed tools. Is .NET SDK installed?"
+            }
+        }
+        
+        "update" => {
+            print "🔄 Updating all .NET global tools..."
+            let config = (open $config_file)
+            let auto_update = ($config.settings.auto_update? | default true)
+            
+            if not $auto_update {
+                print "⚠️  Auto-update is disabled in configuration"
+                let response = (input "Do you want to update anyway? (y/N): ")
+                if $response != "y" and $response != "Y" {
+                    print "Update cancelled."
+                    exit 0
+                }
+            }
+            
+            # Update all installed tools
+            try {
+                let installed_tools = (dotnet tool list -g 
+                    | lines 
+                    | skip 2
+                    | each { |line| 
+                        if ($line | str trim | str length) > 0 {
+                            $line | str trim | split row -r '\s+' | get 0
+                        } else {
+                            null
+                        }
+                    }
+                    | compact)
+                
+                for tool in $installed_tools {
+                    print $"  🔄 Updating ($tool)..."
+                    dotnet tool update --global $tool
+                }
+                
+                print "✅ All tools updated successfully!"
+            } catch {
+                print "❌ Failed to update tools"
+            }
+        }
+        
+        "clean" => {
+            print "🧹 No specific cache cleaning for .NET tools..."
+            print "💡 You can use 'dotnet nuget locals all --clear' to clear NuGet caches"
+            
+            let response = (input "Do you want to clear NuGet caches? (y/N): ")
+            if $response == "y" or $response == "Y" {
+                dotnet nuget locals all --clear
+                print "✅ NuGet caches cleared"
+            }
+        }
+        
+        "uninstall" => {
+            print "🗑️ Uninstall a .NET global tool"
+            let tool_name = (input "Tool name to uninstall: ")
+            
+            if ($tool_name | str length) == 0 {
+                print "❌ Tool name is required"
+                exit 1
+            }
+            
+            print $"🗑️ Uninstalling ($tool_name)..."
+            dotnet tool uninstall --global $tool_name
+            
+            if $env.LAST_EXIT_CODE == 0 {
+                print $"✅ Successfully uninstalled ($tool_name)"
+            } else {
+                print $"❌ Failed to uninstall ($tool_name)"
+            }
+        }
+        
+        "add" => {
+            print "➕ Add a new tool to dotnet-tools.toml"
+            let tool_name = (input "Tool name: ")
+            let description = (input "Description (optional): ")
+            let version = (input "Version (or * for latest): ")
+            
+            if ($tool_name | str length) == 0 {
+                print "❌ Tool name is required"
+                exit 1
+            }
+            
+            let final_version = if ($version | str length) == 0 { "*" } else { $version }
+            let final_description = if ($description | str length) == 0 { "No description" } else { $description }
+            
+            print $"📝 Adding ($tool_name) to configuration..."
+            print $"   Version: ($final_version)"
+            print $"   Description: ($final_description)"
+            print ""
+            print "⚠️  You'll need to manually edit ~/darwin-config/stow/dotnet-tools/dotnet-tools.toml"
+            print $"   Add this under [global_tools]:"
+            print $"   ($tool_name) = {{ version = \"($final_version)\", description = \"($final_description)\" }}"
+        }
+        
+        "help" | _ => {
+            print "🛠️  .NET Tools Manager"
+            print ""
+            print "Usage: manage-dotnet-tools <command>"
+            print ""
+            print "Commands:"
+            print "  install, sync     Install all tools from configuration"
+            print "  list              List configured tools"
+            print "  status            Check installation status of configured tools"
+            print "  installed         List all installed global tools"
+            print "  update            Update all installed tools"
+            print "  clean             Clear NuGet caches"
+            print "  uninstall         Uninstall a specific tool"
+            print "  add               Interactive tool to add new tool to config"
+            print "  help              Show this help message"
+            print ""
+            print "Configuration file: ~/darwin-config/stow/dotnet-tools/dotnet-tools.toml"
+            print "Tools are installed globally via 'dotnet tool install --global'"
+            print ""
+            print "💡 Tips:"
+            print "  - After system restore: run 'manage-dotnet-tools install'"
+            print "  - To update tools: run 'manage-dotnet-tools update'"
+            print "  - Configuration is version-controlled with your darwin-config"
+        }
+    }
+}

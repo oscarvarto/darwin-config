@@ -1,0 +1,38 @@
+# Managed packages and build artifacts
+elpaca/
+eln-cache/
+tree-sitter/
+*.elc
+*.eln
+*.eln.tmp
+*.dylib
+*.so
+.DS_Store
+
+# XDG-style caches
+.cache/
+
+# Ephemeral editor state
+auto-save-list/
+recentf
+history
+.tramp_history
+projectile-bookmarks.eld
+transient/
+dape-breakpoints
+eglot-java-eclipse-jdt-cache/
+persp-confs/
+share/
+cache/
+.dap-breakpoints
+.lsp-session-v1
+workspace/
+*backup*
+recentf.eld
+
+# Credentials and other sensitive data
+authinfo
+authinfo.gpg
+authinfo.*
+netrc
+secrets/

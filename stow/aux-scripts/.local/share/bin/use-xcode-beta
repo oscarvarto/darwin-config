@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Script to switch xcode-select to use Xcode beta (if available)
+# This ensures that command line tools use the beta version
+# NOTE: As of macOS Tahoe 26, Xcode.app is the current release version
+
+set -euo pipefail
+
+XCODE_BETA_PATH="/Applications/Xcode-beta.app"
+XCODE_BETA_DEVELOPER_PATH="${XCODE_BETA_PATH}/Contents/Developer"
+
+if [[ ! -d "$XCODE_BETA_PATH" ]]; then
+    echo "❌ Error: Xcode beta not found at $XCODE_BETA_PATH"
+    echo "Please install Xcode beta from the Apple Developer Portal"
+    echo "⚠️  Note: As of macOS Tahoe 26, /Applications/Xcode.app is the current release"
+    exit 1
+fi
+
+echo "🔄 Switching xcode-select to Xcode beta..."
+sudo xcode-select -s "$XCODE_BETA_DEVELOPER_PATH"
+
+# Verify the switch
+CURRENT_PATH=$(xcode-select -p)
+if [[ "$CURRENT_PATH" == "$XCODE_BETA_DEVELOPER_PATH" ]]; then
+    echo "✅ Successfully switched to Xcode beta"
+    echo "   Developer directory: $CURRENT_PATH"
+    
+    # Show Xcode version
+    if command -v xcodebuild &> /dev/null; then
+        echo "   Xcode version: $(xcodebuild -version | head -n1)"
+    fi
+else
+    echo "❌ Failed to switch to Xcode beta"
+    echo "   Current path: $CURRENT_PATH"
+    echo "   Expected: $XCODE_BETA_DEVELOPER_PATH"
+    exit 1
+fi
+
+echo ""
+echo "💡 Note: The DEVELOPER_DIR environment variable in your shell config"
+echo "   currently points to /Applications/Xcode.app (the current release)."
+echo "   You may need to update your nix configuration if you want beta as default."

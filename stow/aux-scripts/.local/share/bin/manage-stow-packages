@@ -1,0 +1,265 @@
+#!/usr/bin/env nu
+
+# Stow Package Manager - Deploy and manage dotfiles and scripts using GNU Stow
+#
+# Manages deployment of scripts, editor configs, and development tools via GNU Stow.
+# Supports deployment, removal, and complete restow operations.
+
+def main [
+    command?: string = "help"  # Command: deploy/install, remove/uninstall, restow, status, list, help
+    --force (-f)               # Force deployment with --adopt (imports existing files)
+] {
+    let stow_dir = $"($env.HOME)/darwin-config/stow"
+    
+    if not ($stow_dir | path exists) {
+        print "❌ Error: Stow directory not found at ~/darwin-config/stow"
+        exit 1
+    }
+    
+    # Determine stow options based on force flag
+    let stow_options = if $force {
+        ["--restow", "--adopt"]
+    } else {
+        []
+    }
+    
+    let cmd = if ($command | is-empty) { "help" } else { $command }
+
+    match $cmd {
+        "deploy" | "install" => {
+            if $force {
+                print "🚀 Force deploying stow packages (will overwrite existing files)..."
+                print "⚠️  Warning: Using --adopt mode - existing files will be imported into stow packages"
+            } else {
+                print "🚀 Deploying stow packages..."
+            }
+
+            cd $stow_dir
+
+            # Define all packages to deploy
+            let packages = [
+                "aux-scripts",
+                "nix-scripts",
+                "raycast-scripts",
+                "cargo-tools",
+                "nodejs-tools",
+                "dotnet-tools",
+                "jira-tools",
+                "lazyvim",
+                "emacs",
+                "zed",
+                "zellij-theme-management",
+                "kitty",
+                "ghostty",
+                "aerospace"
+            ]
+            
+            # Preflight: auto-adopt any package with existing non-symlink targets
+            if not $force {
+                for package in $packages {
+                    let dry = (do -i { ^stow "-n" "-v" "-t" $env.HOME $package } | complete)
+                    let output = ($dry.stdout + $dry.stderr)
+                    if ($output | str contains "existing target") or ($output | str contains "cannot stow") {
+                        print $"🔧 Auto-adopting ($package) due to existing targets"
+                        run-external "stow" "-t" $env.HOME "--adopt" $package
+                    }
+                }
+            }
+            
+            # Deploy each package and collect results
+            let results = $packages | each { |package|
+                print $"📦 Processing ($package)..."
+                
+                let result = try {
+                    if ($stow_options | length) > 0 {
+                        # With force options
+                        run-external "stow" "-t" $env.HOME "--restow" "--adopt" $package
+                    } else {
+                        # Normal deployment
+                        run-external "stow" "-t" $env.HOME $package
+                    }
+                    print $"  ✅ ($package) deployed successfully"
+                    {package: $package, success: true, error: null}
+                } catch { |e|
+                    print $"  ❌ Failed to deploy ($package): ($e.msg)"
+                    {package: $package, success: false, error: $e.msg}
+                }
+                $result
+            }
+            
+            let failed_packages = $results | where success == false | get package
+            let success_count = $results | where success == true | length
+            
+            # Report results
+            if ($failed_packages | length) == 0 {
+                print "\n✅ All stow packages deployed successfully!"
+                print $"📂 Scripts are now available in ($env.HOME)/.local/share/bin/"
+                print $"🎨 Editor configs deployed to ~/.config/nvim/ and ~/.config/zed/"
+                print $"🖼️  Theme management tools deployed to ~/.local/bin/"
+            } else {
+                print $"\n⚠️  Deployment completed with ($failed_packages | length) failures:"
+                for failed in $failed_packages {
+                    print $"  • ($failed)"
+                }
+                print "\n💡 Try running with --force flag to overwrite existing files:"
+                print $"   manage-stow-packages deploy --force"
+                if not $force {
+                    exit 1
+                }
+            }
+        }
+        
+        "remove" | "uninstall" => {
+            print "🗑️  Removing stow packages..."
+
+            cd $stow_dir
+
+            # Remove all packages (simple approach)
+            let packages = [
+                "aerospace",
+                "ghostty",
+                "kitty",
+                "zellij-theme-management",
+                "lazyvim",
+                "emacs",
+                "zed",
+                "cargo-tools",
+                "nodejs-tools",
+                "dotnet-tools",
+                "nix-scripts",
+                "raycast-scripts",
+                "aux-scripts"  # This will remove this script too
+            ]
+
+            for package in $packages {
+                print $"📦 Removing ($package)..."
+                stow -D -t ~ $package
+            }
+
+            print "✅ All stow packages removed successfully!"
+            print "📝 Note: This script was also removed"
+            print "💡 To re-deploy: run 'stow -t ~ aux-scripts' from ~/darwin-config/stow/, then 'manage-stow-packages deploy'"
+        }
+
+        "restow" => {
+            print "🔄 Complete restow: removing all packages and re-deploying..."
+
+            # Step 1: Remove all packages (this will remove this script)
+            cd $stow_dir
+
+            let packages = [
+                "aerospace",
+                "ghostty",
+                "kitty",
+                "zellij-theme-management",
+                "lazyvim",
+                "emacs",
+                "zed",
+                "cargo-tools",
+                "nodejs-tools",
+                "dotnet-tools",
+                "nix-scripts",
+                "raycast-scripts",
+                "aux-scripts"
+            ]
+
+            print "🗑️  Step 1: Removing all packages..."
+            for package in $packages {
+                print $"📦 Removing ($package)..."
+                stow -D -t ~ $package
+            }
+
+            # Step 2: Re-deploy aux-scripts first to get this script back
+            print "📦 Step 2: Re-deploying aux-scripts..."
+            stow -t ~ aux-scripts
+
+            # Step 3: Call deploy to handle the rest
+            print "🚀 Step 3: Deploying all packages..."
+            nu $"($env.HOME)/.local/share/bin/manage-stow-packages" deploy
+        }
+        
+        "status" => {
+            print "📊 Checking status of auxiliary scripts..."
+            
+            let scripts = (ls $"($stow_dir)/aux-scripts/.local/share/bin" | get name | path basename)
+            
+            print $"\n📂 Available scripts in stow package: ($scripts | length)"
+            for script in $scripts {
+                print $"  • ($script)"
+            }
+            
+            print $"\n🔗 Deployed scripts:"
+            for script in $scripts {
+                let target_path = $"($env.HOME)/.local/share/bin/($script)"
+                if ($target_path | path exists) {
+                    let link_info = (ls -la $target_path | get 0)
+                    if ($link_info.type == "symlink") {
+                        print $"  ✅ ($script) -> correctly symlinked"
+                    } else {
+                        print $"  ⚠️  ($script) -> exists but not a symlink"
+                    }
+                } else {
+                    print $"  ❌ ($script) -> not deployed"
+                }
+            }
+        }
+        
+        "list" => {
+            print "📋 Available scripts in stow package:"
+            let scripts = (ls $"($stow_dir)/aux-scripts/.local/share/bin" | get name | path basename)
+            for script in $scripts {
+                print $"  • ($script)"
+            }
+        }
+        
+        "help" | "detailed-help" | _ => {
+            print "🛠️  Stow Package Manager"
+            print ""
+            print "Usage: manage-stow-packages <command> [--force]"
+            print ""
+            print "Commands:"
+            print "  deploy, install    Deploy all stow packages using stow"
+            print "  remove, uninstall  Remove all stow packages (unstow)"
+            print "  restow             Complete restow: remove all, then re-deploy"
+            print "  status             Check deployment status of scripts"
+            print "  list               List available scripts in aux-scripts"
+            print "  help               Show this help message"
+            print ""
+            print "Options:"
+            print "  --force, -f        Force deployment, overwriting existing files"
+            print "                     Uses --restow and --adopt stow options"
+            print "                     WARNING: --adopt imports existing files into stow packages"
+            print ""
+            print "Examples:"
+            print "  manage-stow-packages deploy          # Safe deployment (fails on conflicts)"
+            print "  manage-stow-packages deploy --force  # Force deployment (imports conflicting files)"
+            print "  manage-stow-packages restow          # Complete clean restow (remove + deploy)"
+            print "  manage-stow-packages remove          # Remove all packages"
+            print ""
+            print "💡 Tip: Use 'manage-stow-packages --help' for quick parameter reference"
+            print ""
+            print "📁 Available Stow Packages:"
+            print "  • aux-scripts      - Core utility scripts"
+            print "  • nix-scripts      - Nix-related utilities (smart-gc, etc.)"
+            print "  • raycast-scripts  - Raycast automation scripts"
+            print "  • cargo-tools      - Rust/Cargo tools management"
+            print "  • nodejs-tools     - Node.js tools and toolchain"
+            print "  • dotnet-tools     - .NET SDK and global tools"
+            print "  • lazyvim          - Neovim LazyVim configuration"
+            print "  • emacs            - Emacs configuration (~/.emacs.d)"
+            print "  • zed              - Zed editor configuration"
+            print "  • zellij-theme-management - Zellij theme switching tools"
+            print "  • kitty            - Kitty terminal configuration and automation"
+            print "  • ghostty          - Ghostty terminal configuration overrides"
+            print "  • aerospace        - AeroSpace tiling window manager configuration"
+            print ""
+            print "📂 Deployment Targets:"
+            print "  • Scripts → ~/.local/share/bin/ (as symlinks)"
+            print "  • LazyVim → ~/.config/nvim/ (as symlinks)"
+            print "  • Zed → ~/.config/zed/ (as symlinks)"
+            print "  • Kitty → ~/.config/kitty/ + ~/.local/share/bin/ (as symlinks)"
+            print "  • AeroSpace → ~/.aerospace.toml (as symlink)"
+            print "  • Theme Tools → ~/.local/bin/ (as symlinks)"
+        }
+    }
+}

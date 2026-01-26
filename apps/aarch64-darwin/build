@@ -1,0 +1,85 @@
+#!/bin/sh -e
+
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+RED='\033[1;31m'
+NC='\033[0m'
+
+SYSTEM_TYPE="aarch64-darwin"
+# Try to get the hostname, fall back to predator if not found
+HOSTNAME="$(hostname -s 2>/dev/null || echo 'predator')"
+FLAKE_SYSTEM="darwinConfigurations.${HOSTNAME}.system"
+
+# Parse arguments for verbose flag
+VERBOSE=false
+
+# Impure evaluation controls reuse of stored Emacs path (when pinned)
+# Default to impure unless explicitly disabled via env or --pure
+EVAL_IMPURE=true
+if [[ "${NS_IMPURE:-1}" == "0" ]]; then
+    EVAL_IMPURE=false
+fi
+ARGS=()
+usage() {
+    cat <<USAGE
+Usage: nb [--verbose] [--pure|--impure] [extra nix args...]
+
+Build (only) the darwin configuration for host "${HOSTNAME}".
+
+Options:
+  --verbose   Verbose build output
+  --pure      Force pure evaluation (disables Emacs pin reuse)
+  --impure    Use impure evaluation (default; enables Emacs pin reuse)
+  -h, --help  Show this help
+
+Environment:
+  NS_IMPURE=1 (default)  Use impure evaluation
+  NS_IMPURE=0            Force pure evaluation
+USAGE
+}
+for arg in "$@"; do
+    case "$arg" in
+        --verbose)
+            VERBOSE=true ;;
+        --pure)
+            EVAL_IMPURE=false ;;
+        --impure)
+            EVAL_IMPURE=true ;;
+        -h|--help)
+            usage; exit 0 ;;
+        *)
+            ARGS+=("$arg") ;;
+    esac
+done
+
+export NIXPKGS_ALLOW_UNFREE=1
+
+if $VERBOSE; then
+    echo "${YELLOW}Starting build with verbose output...${NC}"
+else
+    echo "${YELLOW}Running build for ${SYSTEM_TYPE}${NC}"
+fi
+echo "${YELLOW}System configuration: $FLAKE_SYSTEM${NC}"
+echo "${YELLOW}Using all available CPU cores for maximum build speed${NC}"
+
+# Build with or without verbose flags based on user preference
+# Filter out the repetitive toPlist deprecation warnings from nix-darwin
+if $VERBOSE; then
+    if $EVAL_IMPURE; then
+        nix --extra-experimental-features 'nix-command flakes' build --impure .#$FLAKE_SYSTEM --verbose --print-build-logs --show-trace "${ARGS[@]}" 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true
+    else
+        nix --extra-experimental-features 'nix-command flakes' build .#$FLAKE_SYSTEM --verbose --print-build-logs --show-trace "${ARGS[@]}" 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true
+    fi
+else
+    if $EVAL_IMPURE; then
+        nix --extra-experimental-features 'nix-command flakes' build --impure .#$FLAKE_SYSTEM "${ARGS[@]}" 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true
+    else
+        nix --extra-experimental-features 'nix-command flakes' build .#$FLAKE_SYSTEM "${ARGS[@]}" 2>&1 | grep -v "evaluation warning: Using.*lib.generators.toPlist.*without.*escape = true.*is deprecated" || true
+    fi
+fi
+
+
+echo "${YELLOW}Cleaning up...${NC}"
+unlink ./result || true
+
+echo "${GREEN}Build complete!${NC}"

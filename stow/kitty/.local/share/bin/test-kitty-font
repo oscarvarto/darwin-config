@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Test script to verify kitty font configuration
+
+echo "=== Kitty Font Test ==="
+echo
+
+echo "1. Current kitty configuration:"
+echo "Font family setting:"
+grep "font_family" ~/.config/kitty/kitty.conf
+
+echo
+echo "2. Testing font availability:"
+echo "MonoLisa Variable font match:"
+fc-match "MonoLisaVariable Nerd Font"
+
+echo
+echo "3. Font test characters:"
+echo "Testing zero character (should have dot in center for MonoLisa Variable):"
+echo "0123456789"
+echo "O0Oo (Capital O, zero, lowercase o)"
+
+echo
+echo "4. Sample text for visual verification:"
+echo "The quick brown fox jumps over the lazy dog"
+echo "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+echo "abcdefghijklmnopqrstuvwxyz"
+echo "!@#$%^&*()_+-={}[]|\\:;\"'<>?,./"
+
+echo
+echo "5. Ligature test (if enabled):"
+echo "== != <= >= -> <- => <="
+echo "www *** /// ::: &&& |||"
+
+echo
+echo "6. Programming symbols:"
+echo "() [] {} <> /* */ // ## == != <= >= -> <-"
+
+echo
+echo "=== End Font Test ==="
+echo
+echo "Instructions:"
+echo "1. Run this script in kitty terminal"
+echo "2. Check if the zero (0) has a dot in the center (MonoLisa Variable style)"
+echo "3. Verify ligatures are working if enabled"
+echo "4. Compare with the same text in another terminal to see differences"
