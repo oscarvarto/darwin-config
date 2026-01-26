@@ -18,7 +18,6 @@ with pkgs; [
 
   ## Text and terminal utilities
   fd
-  harper
   # marksman # Disabled - dotnet pulls in Swift which fails to build. Use: brew install marksman
   # GitHub CLI and extensions
   gh

@@ -215,7 +215,7 @@ nix run .#create-keys
 
 #### Option B: Copy Existing Keys
 
-If you already have existing SSH keys on an USB drive:
+If you already have existing SSH keys on a USB drive:
 
 ```bash
 nix run .#copy-keys
@@ -862,8 +862,9 @@ For the Emacs configuration itself, see under [emacs-config](./stow/emacs/.emacs
 integration, and multiple cursors. This configuration uses a **bleeding-edge build** of Helix for the latest features
 and fixes. The fork that is being used is at [gj1118/helix](https://github.com/gj1118/helix).
 
-[Zellij](https://github.com/zellij-org/zellij) is
-> a workspace aimed at developers, ops-oriented people and anyone who loves the terminal. Similar programs are sometimes called "Terminal Multiplexers"
+From [Zellij](https://github.com/zellij-org/zellij):
+> Zellij a workspace aimed at developers, ops-oriented people and anyone who loves the terminal.
+> Similar programs are sometimes called "Terminal Multiplexers"
 
 I use [this nix-friendly repo](https://github.com/oscarvarto/zellij-nix) to point to a recent commit of Zellij (it's
 built from source, but gives you a bleeding-edge build of Zellij).

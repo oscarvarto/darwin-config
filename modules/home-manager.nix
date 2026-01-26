@@ -453,7 +453,7 @@ in {
               ];
               language-server = {
                 harper-ls = {
-                  command = lib.getExe pkgs.harper;
+                  command = "harper-ls"; # Installed from source: cargo install --path harper-ls
                   args = ["--stdio"];
                   config.harper-ls.linters = {
                     SpellCheck = false;
@@ -466,6 +466,7 @@ in {
                     DisjointPrefixes = false;
                     PhrasalVerbAsCompoundNoun = false;
                     NeedToNoun = false;
+                    MissingTo = false;
                   };
                 };
                 jdtls = {
