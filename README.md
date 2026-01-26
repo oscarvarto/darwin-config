@@ -43,8 +43,8 @@ environments.
 - [Font Management & Fallback System](#font-management-fallback-system)
 - [Editor Configurations](#editor-configurations)
   - [Emacs Configuration](#emacs-configuration)
-  - [Helix + Yazelix](#helix-yazelix)
-  - [Neovim (LazyVim) Configuration](#neovim-lazyvim-configuration)
+  - [Helix + Yazelix](#helix-and-yazelix)
+  - [Neovim (LazyVim) Configuration](#neovim-configuration)
   - [Editor Management with Stow](#editor-management-with-stow)
 - [IntelliJ IDEA Development Utilities](#intellij-idea-development-utilities)
 - [Choosing Your Default Shell](#choosing-your-default-shell)
@@ -743,7 +743,7 @@ manage-dotnet-tools install   # Install .NET SDK from dotnet-tools.toml
 This configuration includes an intelligent font fallback system that provides seamless support for both commercial and
 open-source programming fonts.
 
-### 🎯 Font Hierarchy
+### Font Hierarchy
 
 The system automatically detects available fonts and uses them in this priority order:
 
@@ -752,7 +752,7 @@ The system automatically detects available fonts and uses them in this priority 
 3. **JetBrains Mono** (open source) - High-quality fallback with excellent readability
 4. **System fonts** (SF Mono, monospace) - Final fallback
 
-### 🛠️ Font Detection Utility
+### Font Detection Utility
 
 After deploying stow packages, the `detect-fonts` utility becomes available:
 
@@ -768,7 +768,7 @@ detect-fonts ghostty-font  # Returns: actual font name for terminal
 detect-fonts check "JetBrains Mono"
 ```
 
-### 📱 Application Integration
+### Application Integration
 
 #### Emacs
 
@@ -781,7 +781,7 @@ See [Emacs font config](./stow/emacs/.emacs.d/my/my-fonts.el) for font configura
 - **Runtime switching**: Use `ghostty-config font "Font Name"` to switch fonts
 - **Automatic fallback**: Missing fonts don't break the configuration
 
-### 📋 Available Font Commands
+### Available Font Commands
 
 | Command                           | Description                                |
 |-----------------------------------|--------------------------------------------|
@@ -791,7 +791,7 @@ See [Emacs font config](./stow/emacs/.emacs.d/my/my-fonts.el) for font configura
 | `ghostty-config font "Font Name"` | Switch terminal font (with restart)        |
 | `ghostty-config list`             | Show all available font options            |
 
-### 🎨 Font Features
+### Font Features
 
 **MonoLisa Variable:**
 
@@ -815,14 +815,14 @@ See [Emacs font config](./stow/emacs/.emacs.d/my/my-fonts.el) for font configura
 - Optimal at 14pt
 - Available via Nix packages
 
-### 🔧 How It Works
+### How It Works
 
 1. **Detection**: System scans available fonts using `fc-list`
 2. **Fallback Chain**: Applications automatically use the best available font
 3. **Configuration**: Each app includes font-specific optimizations
 4. **Runtime Switching**: Tools allow manual font switching when desired
 
-### 💡 For New Installations
+### For New Installations
 
 If you're setting up on a system without commercial fonts:
 
@@ -831,7 +831,7 @@ If you're setting up on a system without commercial fonts:
 3. All ligatures and features work seamlessly
 4. You can later add commercial fonts and switch to them using `F8` in Emacs
 
-### 🎯 Benefits
+### Benefits
 
 - **Zero Configuration**: Works out of the box on any system
 - **Graceful Degradation**: Missing fonts don't break anything
@@ -853,7 +853,7 @@ brew install --cask jimeh/emacs-builds/emacs-app-nightly
 
 For the Emacs configuration itself, see under [emacs-config](./stow/emacs/.emacs.d/).
 
-### ⚡ Helix + Yazelix
+### Helix and Yazelix
 
 [Helix](https://helix-editor.com/) is a post-modern modal text editor with built-in LSP support, tree-sitter
 integration, and multiple cursors. This configuration uses a **bleeding-edge build** of Helix for the latest features
@@ -916,7 +916,7 @@ hx --health           # Check LSP and feature status
 zellij                # Start with default layout
 ```
 
-### 🌟 Neovim (LazyVim) Configuration
+### Neovim Configuration
 
 A modern Neovim configuration based on LazyVim with sensible defaults, extensive plugin ecosystem, and enhanced
 Lisp/Elisp support.
@@ -1044,7 +1044,7 @@ nvim +checkhealth
 git add . && git commit -m "Update LazyVim config"
 ```
 
-### 🛠️ Editor Management with Stow
+### Editor Management with Stow
 
 Both editor configurations use the stow system for deployment and management.
 
@@ -1101,7 +1101,7 @@ manage-stow-packages remove
    - Update `manage-stow-packages` to include new package
    - Add documentation to package README.md
 
-### 🎯 Editor Notes
+### Editor Notes
 
 - **Emacs**: Extensive customization, org-mode, magit, Elisp ecosystem
 - **Helix + Yazelix**: Modern modal editing, built-in LSP, minimal configuration, IDE-like workflow with
@@ -1110,7 +1110,7 @@ manage-stow-packages remove
 
 ## IntelliJ IDEA Development Utilities
 
-### 🛠️ IntelliJ Cache Cleanup Tool
+### IntelliJ Cache Cleanup Tool
 
 The `cleanup-intellij` script is a powerful utility for fixing broken IntelliJ IDEA states that can interfere with
 development. IntelliJ often accumulates corrupt caches, project files, and configuration states that cause issues like:
@@ -1268,7 +1268,7 @@ with different project structures.
 To keep things easy, choose Zsh as your system/user shell. You could configure your terminal to use one of the supported
 shells by default. This configuration provides support for **Nushell**, **Zsh**, **Fish**, and **Xonsh**.
 
-### 🎯 Shell Support Levels
+### Shell Support Levels
 
 | Shell       | Support Level | Description                                           | Best For                                             |
 |-------------|---------------|-------------------------------------------------------|------------------------------------------------------|
@@ -1282,7 +1282,7 @@ shells by default. This configuration provides support for **Nushell**, **Zsh**,
 **Xonsh is fully supported** with the unique ability to execute Python code directly in the shell environment. This
 makes it particularly powerful for Python developers and automation tasks.
 
-#### 🚀 Setting Up Xonsh
+#### Setting Up Xonsh
 
 To use Xonsh, you first need to install the Python environment using `pixi`:
 
@@ -1295,7 +1295,7 @@ cd ~/darwin-config/python-env
 pixi install
 ```
 
-#### 🚀 Starting Xonsh
+#### Starting Xonsh
 
 After the environment is installed, use the `xsh` alias from any supported shell (Nushell, Zsh, or Fish):
 
@@ -1307,7 +1307,7 @@ xsh
 > **Note:** The `xsh` alias runs `pixi run xonsh` with the correct manifest path. This is the recommended way to start
 > xonsh as it automatically uses the pixi environment without needing to manually activate it.
 
-#### ✅ Xonsh Advantages
+#### Xonsh Advantages
 
 - **🐍 Native Python Integration**: Execute Python code directly in shell (e.g., `print(f"Hello {2+2}")`)
 - **📦 Full Tool Integration**: Starship, Zoxide with complete functionality
@@ -1315,7 +1315,7 @@ xsh
 - **⚡ Complete Functionality**: All essential shell operations and modern CLI tools work correctly
 - **🔧 Robust Package Management**: Uses pixi for fast, reliable Python package management (conda-forge + PyPI)
 
-#### 🛠️ What Works
+#### What Works
 
 **Core Integrations:**
 - ✅ **Starship**: Full prompt integration with Git status, themes, and customization
@@ -1328,7 +1328,7 @@ xsh
 - ✅ **Error Handling**: Graceful degradation when tools are unavailable
 - ✅ **Theme Support**: Automatic light/dark mode detection and color scheme adaptation
 
-#### 🚀 Using Xonsh
+#### Using Xonsh
 
 **Starting Xonsh:**
 ```bash
@@ -1359,7 +1359,7 @@ xonsh  # Launch xonsh - everything works immediately!
 - ✅ **Modern aliases**: Complete set of `eza`, `bat`, `fd`, `rg` and other CLI tools
 - ✅ **Development tools**: Full PATH with all development environments
 
-#### 📝 Configuration
+#### Configuration
 
 Xonsh configuration is managed in `modules/xonsh/`:
 - **Main config**: `modules/xonsh/rc.xsh` - Shell behavior and tool integrations
@@ -1367,7 +1367,7 @@ Xonsh configuration is managed in `modules/xonsh/`:
 
 **Note**: Xonsh is not available as a `defaultShell` option. Access it by running `xsh` from your primary shell.
 
-### 🔧 Setting Your Default Shell
+### Setting Your Default Shell
 
 #### For New Installations
 
@@ -1409,7 +1409,7 @@ hostConfigs = {
    ns
    ```
 
-### 🌟 Shell Features
+### Shell Features
 
 #### All Shells - Full Features
 
@@ -1482,7 +1482,7 @@ set myvar "hello"
 # Configuration managed declaratively via Nix
 ```
 
-### 📋 Available Shell Commands
+### Available Shell Commands
 
 #### Common Aliases (All Shells)
 
@@ -1539,7 +1539,7 @@ exit    # Return to default shell
    # Should show new shell path
    ```
 
-### 🛠️ Advanced Shell Configuration
+### Advanced Shell Configuration
 
 #### Customizing Shell Behavior
 
@@ -1567,7 +1567,7 @@ initContent = lib.mkAfter ''
 '';
 ```
 
-### 🎯 Shell Recommendations
+### Shell Recommendations
 
 **Choose Nushell if you:**
 
@@ -1600,7 +1600,7 @@ initContent = lib.mkAfter ''
 - Prefer simple, readable syntax
 - Shell configuration is managed by Nix (declarative and reproducible)
 
-### ⚡ PATH and Environment Management
+### PATH and Environment Management
 
 All shells use the centralized PATH configuration from `modules/path-config.nix`. This ensures:
 
@@ -1649,7 +1649,7 @@ ls -la ~/.config/nushell/
 nu --config modules/nushell/config.nu --commands "exit"
 ```
 
-### 💡 Shell Integration Tips
+### Shell Integration Tips
 
 - **Emacs Integration**: The default shell setting automatically configures vterm and shell-mode
 - **Terminal Integration**: All shells work seamlessly with Ghostty and other terminals
