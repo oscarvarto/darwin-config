@@ -397,7 +397,7 @@
     ;; Defer font initialization to avoid dashboard redraw issues
     (run-with-idle-timer 0.1 nil
       (lambda ()
-        ;; Load initial font configuration (default to monolisa)
+        ;; Load initial font configuration (default to pragmatapro)
         (my/load-font-config 'pragmatapro)
         ;; Apply fonts to current frame
         (my/apply-fonts-to-frame)))

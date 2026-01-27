@@ -162,6 +162,7 @@ FORMULAS = [
     "sevenzip",
     "stow",
     "swig",
+    "television",
     "tombi",
     "trash-cli",
     "turso",
@@ -245,7 +246,6 @@ CASKS = [
 
     # Media
     "spotify",
-    "tidal",
 
     # System utilities
     "nordvpn",

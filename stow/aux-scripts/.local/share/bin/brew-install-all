@@ -106,8 +106,13 @@ SHOW_HELP=false
 
 # Taps (third-party repositories)
 TAPS=(
+    "coursier/formulas"
     "homebrew-ffmpeg/ffmpeg"
+    "jetbrains/utils"
     "jimeh/emacs-builds"
+    "nikitabobko/tap"
+    "oven-sh/bun"
+    "quantonganh/tap"
 )
 
 # Standard formulas (explicitly requested, not dependencies)
@@ -123,6 +128,7 @@ FORMULAS=(
     "clojure-lsp"
     "cmake"
     "cmake-language-server"
+    "coursier"
     "gcc"
     "go"
     "jdtls"
@@ -171,6 +177,7 @@ FORMULAS=(
     "sevenzip"
     "stow"
     "swig"
+    "television"
     "tombi"
     "trash-cli"
     "turso"
@@ -249,7 +256,6 @@ CASKS=(
 
     # Media
     "spotify"
-    "tidal"
 
     # System utilities
     "nordvpn"

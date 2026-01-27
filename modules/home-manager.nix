@@ -151,7 +151,7 @@ in {
         enable = true;
         flavor = "mocha"; # Default dark theme
         accent = "mauve"; # Accent color
-        helix.useItalics = false;
+        helix.useItalics = true;
 
         # starship configuration moved to programs.starship section below
         zellij.enable = true;
@@ -363,7 +363,7 @@ in {
                     c = ":config-open";
 
                     # AI assist (helix-assist on-demand)
-                    a = ":pipe-to helix-assist --handler anthropic --debug-query -";
+                    # a = ":pipe-to helix-assist --handler anthropic --debug-query -";
                   };
                 };
               };
@@ -379,7 +379,7 @@ in {
                     tab-width = 4;
                     unit = "    ";
                   };
-                  language-servers = ["jdtls" "tabby"];
+                  language-servers = ["jdtls" "tabby" "helix-assist"];
                 }
                 {
                   name = "kotlin";
@@ -395,7 +395,7 @@ in {
                     tab-width = 4;
                     unit = "    ";
                   };
-                  language-servers = ["kotlin-lsp" "tabby"];
+                  language-servers = ["kotlin-lsp" "tabby" "helix-assist"];
                 }
                 {
                   name = "markdown";
@@ -405,7 +405,7 @@ in {
                   name = "nix";
                   auto-format = true;
                   formatter.command = lib.getExe pkgs.alejandra;
-                  language-servers = ["nixd" "tabby"];
+                  language-servers = ["nixd" "tabby" "helix-assist"];
                 }
                 {
                   name = "ocaml";
@@ -414,7 +414,7 @@ in {
                   file-types = ["ml" "mli"];
                   # TODO: Refine for other useful settings
                   roots = [".git"];
-                  language-servers = ["ocamllsp" "tabby"];
+                  language-servers = ["ocamllsp" "tabby" "helix-assist"];
                 }
                 {
                   name = "python";
@@ -423,7 +423,7 @@ in {
                   roots = ["pyproject.toml" ".git" ".jj" ".venv/"];
                   comment-token = "#";
                   shebangs = ["python"];
-                  language-servers = ["ty" "ruff" "tabby"];
+                  language-servers = ["ty" "ruff" "tabby" "helix-assist"];
                 }
                 {
                   name = "xonsh";
@@ -441,7 +441,7 @@ in {
                     "'" = "'";
                     "`" = "`";
                   };
-                  language-servers = ["ty" "ruff" "tabby"];
+                  language-servers = ["ty" "ruff" "tabby" "helix-assist"];
                 }
                 {
                   name = "rust";
@@ -450,11 +450,11 @@ in {
                     command = "cargo";
                     args = ["fmt" "--" "--emit=stdout"];
                   };
-                  language-servers = ["rust-analyzer" "tabby"];
+                  language-servers = ["rust-analyzer" "tabby" "helix-assist"];
                 }
                 {
                   name = "scala";
-                  language-servers = ["metals"];
+                  language-servers = ["metals" "tabby" "helix-assist"];
                 }
               ];
               language-server = {
