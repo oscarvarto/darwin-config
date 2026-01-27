@@ -512,11 +512,11 @@
     },
     "nixpkgs_5": {
       "locked": {
-        "lastModified": 1769421245,
-        "narHash": "sha256-m5QLKjpdhbDrhyrUbEm5Haq3lqE5Z6xh2tab5vTHUTo=",
+        "lastModified": 1769433173,
+        "narHash": "sha256-Gf1dFYgD344WZ3q0LPlRoWaNdNQq8kSBDLEWulRQSEs=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "5b265bda51b42a2a85af0a543c3e57b778b01b7d",
+        "rev": "13b0f9e6ac78abbbb736c635d87845c4f4bee51b",
         "type": "github"
       },
       "original": {
@@ -574,11 +574,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1769396217,
-        "narHash": "sha256-YNzh46h8fby49yOIB40lNoQ9ucVoXe1bHVwkZ4AwGe0=",
+        "lastModified": 1769482338,
+        "narHash": "sha256-SVwjMqR981PEdEdRvYj5Mefnd61GLinWmIr7GMu7LW8=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "e9bcd12156a577ac4e47d131c14dc0293cc9c8c2",
+        "rev": "dc9c76a75a6d382613cdcb1a3f95640e9cedcdea",
         "type": "github"
       },
       "original": {
@@ -703,17 +703,17 @@
     "zellij": {
       "flake": false,
       "locked": {
-        "lastModified": 1769450751,
-        "narHash": "sha256-ZSrcfJnutNLxagwGq2SihABzwMNVcCCs+G5oMQ62JWQ=",
+        "lastModified": 1769506124,
+        "narHash": "sha256-+/GB4lOnImy05AeAR2hMp+XppD76/ERAyy1Dp5rlrgw=",
         "owner": "zellij-org",
         "repo": "zellij",
-        "rev": "bdf20eef50f2d68501be708ec5ee38dbe9366a91",
+        "rev": "e1f673ec465fe0fad41fd51bb466b7fc36c4dfe3",
         "type": "github"
       },
       "original": {
         "owner": "zellij-org",
         "repo": "zellij",
-        "rev": "bdf20eef50f2d68501be708ec5ee38dbe9366a91",
+        "rev": "e1f673ec465fe0fad41fd51bb466b7fc36c4dfe3",
         "type": "github"
       }
     },
@@ -729,11 +729,11 @@
         "zellij": "zellij"
       },
       "locked": {
-        "lastModified": 1769475039,
-        "narHash": "sha256-LCGNbbaSGLB0BgDAN2fhJME7YMEaIpMi30Pv2LMmqSc=",
+        "lastModified": 1769522865,
+        "narHash": "sha256-f6Oks+kmJ8l6dvZOZT0FzH+LYM22P5en6oU4Y2OPKTI=",
         "owner": "oscarvarto",
         "repo": "zellij-nix",
-        "rev": "30572c666d4768b733751ea74ba1c1466b0ca63c",
+        "rev": "3ac09c026062617993f99021016a73aecdfa29bb",
         "type": "github"
       },
       "original": {
