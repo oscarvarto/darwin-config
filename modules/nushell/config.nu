@@ -1044,6 +1044,11 @@ def "pixi-gt" [cmd: string, ...args] {
     pixi $cmd --manifest-path ~/darwin-config/python-env/pixi.toml ...$args
 }
 
+def reload_config [] {
+    print "Restarting Nushell to reload configuration...";
+    exec nu
+}
+
 # Quick access to xonsh shell via pixi environment
 alias xsh = pixi-gt run xonsh
 

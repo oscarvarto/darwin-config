@@ -90,8 +90,13 @@ from argparse import ArgumentParser
 
 # Taps (third-party repositories)
 TAPS = [
+    "coursier/formulas",
     "homebrew-ffmpeg/ffmpeg",  # For ffmpeg-full
+    "jetbrains/utils",
     "jimeh/emacs-builds",      # For emacs-app-nightly
+    "nikitabobko/tap",
+    "oven-sh/bun",
+    "quantonganh/tap",
 ]
 
 # Standard formulas (explicitly requested, not dependencies)
@@ -108,6 +113,7 @@ FORMULAS = [
     "clojure-lsp",
     "cmake",
     "cmake-language-server",
+    "coursier",
     "gcc",
     "go",
     "jdtls",

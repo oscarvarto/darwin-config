@@ -296,6 +296,7 @@ in {
             package = helixPackage;
             settings = {
               editor = {
+                color-modes = true;
                 cursor-shape = {
                   normal = "block";
                   insert = "bar";
@@ -304,6 +305,7 @@ in {
                 indent-guides.render = true;
                 rainbow-brackets = true;
                 text-width = 120;
+                true-color = true;
               };
               keys = {
                 normal = {
@@ -406,6 +408,15 @@ in {
                   language-servers = ["nixd" "tabby"];
                 }
                 {
+                  name = "ocaml";
+                  auto-format = true;
+                  formatter = {command = "ocamlformat";};
+                  file-types = ["ml" "mli"];
+                  # TODO: Refine for other useful settings
+                  roots = [".git"];
+                  language-servers = ["ocamllsp" "tabby"];
+                }
+                {
                   name = "python";
                   file-types = ["py"];
                   auto-format = true;
@@ -442,13 +453,8 @@ in {
                   language-servers = ["rust-analyzer" "tabby"];
                 }
                 {
-                  name = "ocaml";
-                  auto-format = true;
-                  formatter = {command = "ocamlformat";};
-                  file-types = ["ml" "mli"];
-                  # TODO: Refine for other useful settings
-                  roots = [".git"];
-                  language-servers = ["ocamllsp" "tabby"];
+                  name = "scala";
+                  language-servers = ["metals"];
                 }
               ];
               language-server = {
@@ -488,6 +494,7 @@ in {
                   # Use system marksman (install via: brew install marksman)
                   command = "marksman";
                 };
+                metals = {command = "metals";};
                 nixd = {command = "nixd";};
                 ocamllsp = {command = "ocamllsp";};
                 ruff = {

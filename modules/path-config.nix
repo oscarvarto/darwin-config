@@ -25,7 +25,8 @@
     "$HOME/.opencode/bin"
     "/opt/homebrew/opt/grep/libexec/gnubin"
     "/opt/homebrew/opt/postgresql@15/bin"
-    "/Users/oscarvarto/Library/Application Support/JetBrains/Toolbox/scripts"
+    "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
+    "$HOME/Library/Application Support/Coursier/bin"
 
     # -------------------------------------------------------------------------
     # DEVELOPMENT TOOLS (highest priority after custom)
