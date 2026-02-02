@@ -964,7 +964,7 @@ nvim
         ├── python.lua
         ├── terminal.lua
         ├── treesitter.lua
-        └── whitespace.lua          # Emacs-like fill for Markdown
+        └── whitespace.lua          # Trailing whitespace tools
 ```
 
 #### Key Features
@@ -1431,7 +1431,6 @@ All supported shells (Nushell, Zsh, Fish, Xonsh) include:
 - **Starship Prompt**: Complete prompt integration with Git status and themes
 - **Python Integration**: Native Python code execution in shell environment
 - **Full Tool Integrations**: Zoxide, Starship working perfectly
-- **Dynamic Theming**: Automatic light/dark color scheme adaptation
 - **Modern Aliases**: Complete set of shortcuts (`eza`, `bat`, `fd`, `rg`)
 - **PATH Management**: Full PATH configuration with all development tools
 
