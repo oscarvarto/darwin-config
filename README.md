@@ -951,20 +951,20 @@ nvim
     │   ├── lazy.lua                # Plugin manager setup
     │   └── options.lua
     └── plugins/
-        ├── colorscheme.lua
-        ├── elisp.lua
-        ├── kotlin.lua
-        ├── lazyextras-command.lua
-        ├── lint.lua
-        ├── lisp.lua
-        ├── markdown_fill.lua       # Emacs-like fill for Markdown
-        ├── nixd.lua
-        ├── obsidian.lua
-        ├── orgmode.lua
-        ├── python.lua
-        ├── terminal.lua
-        ├── treesitter.lua
-        └── whitespace.lua          # Emacs-like fill for Markdown
+        ├── colorscheme.lua
+        ├── elisp.lua
+        ├── kotlin.lua
+        ├── lazyextras-command.lua
+        ├── lint.lua
+        ├── lisp.lua
+        ├── markdown_fill.lua       # Emacs-like fill for Markdown
+        ├── nixd.lua
+        ├── obsidian.lua
+        ├── orgmode.lua
+        ├── python.lua
+        ├── terminal.lua
+        ├── treesitter.lua
+        └── whitespace.lua          # Emacs-like fill for Markdown
 ```
 
 #### Key Features

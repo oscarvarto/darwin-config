@@ -104,10 +104,13 @@ TAPS = [
 FORMULAS = [
     # Development tools & languages
     "autoconf",
+    "autoconf-archive",
+    "automake",
     "bash-language-server",
     "boot-clj",
     "bun",
     "cargo-binstall",
+    "ccache",
     "cljfmt",
     "clojure",
     "clojure-lsp",
@@ -124,11 +127,14 @@ FORMULAS = [
     "lazygit",
     "libtool",
     "make",
+    "nasm",
     "ncurses",
     "ninja",
     "opam",
     "pixi",
+    "pkg-config",
     "protobuf",
+    "qt",
     "tree-sitter-cli",
     "volta",
     "xcode-build-server",
@@ -206,6 +212,7 @@ CASKS = [
     # Productivity & communication
     "1password-cli",
     "1password@nightly",
+    "amethyst",
     "chatgpt",
     "chatgpt-atlas",
     "claude",
@@ -227,7 +234,7 @@ CASKS = [
     "zoom",
 
     # Development
-    "aerospace",
+    # "aerospace",
     "cljstyle",
     "dotnet-sdk",
     "emacs-app-nightly",

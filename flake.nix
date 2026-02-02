@@ -42,7 +42,8 @@
     # jank-lang.url = "github:jank-lang/jank";
     neovim-nightly-overlay = {
       url = "github:nix-community/neovim-nightly-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # Don't follow nixpkgs - overlay needs its own tested version
+      # See: nixpkgs removed 'lua' override from neovim-unwrapped
     };
     nixd-ls = {
       url = "github:nix-community/nixd";

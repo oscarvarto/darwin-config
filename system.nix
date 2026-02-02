@@ -215,6 +215,12 @@ in {
               };
           }
         else prev.jujutsu;
+      # Nushell test fails on Darwin with "Operation not permitted" in sandbox
+      # See: https://github.com/NixOS/nixpkgs/pull/486233
+      nushell =
+        if prev.stdenv.hostPlatform.isDarwin
+        then prev.nushell.overrideAttrs (old: {doCheck = false;})
+        else prev.nushell;
     })
   ];
 
