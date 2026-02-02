@@ -917,7 +917,7 @@ hx .                  # Open current directory
 hx --health           # Check LSP and feature status
 
 # Yazelix (Zellij + Helix + Yazi)
-zellij                # Start with default layout
+yzh                   # Start with default layout (alias for `yzx launch --here`)
 ```
 
 ### Neovim Configuration
