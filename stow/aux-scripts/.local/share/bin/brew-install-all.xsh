@@ -109,6 +109,7 @@ FORMULAS = [
     "bash-language-server",
     "boot-clj",
     "bun",
+    "codex-app",
     "cargo-binstall",
     "ccache",
     "cljfmt",

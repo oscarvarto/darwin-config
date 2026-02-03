@@ -40,11 +40,6 @@
     # See: https://github.com/jank-lang/jank/blob/main/llvm.nix#L69
     # TODO: Re-enable when upstream fixes Darwin support
     # jank-lang.url = "github:jank-lang/jank";
-    neovim-nightly-overlay = {
-      url = "github:nix-community/neovim-nightly-overlay";
-      # Don't follow nixpkgs - overlay needs its own tested version
-      # See: nixpkgs removed 'lua' override from neovim-unwrapped
-    };
     nixd-ls = {
       url = "github:nix-community/nixd";
       flake = true;
@@ -68,7 +63,6 @@
     helix,
     tree-sitter-xonsh,
     zellij-nix,
-    neovim-nightly-overlay,
     nixd-ls,
     secrets,
     crane,
