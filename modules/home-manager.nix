@@ -36,6 +36,7 @@
   workConfig = hostSettings.workConfig or {};
   workDirName = builtins.replaceStrings ["~/" "/**"] ["" ""] (workConfig.gitWorkDirPattern or "~/work/**");
 
+  neovimNightly = inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default;
 in {
   imports = [
     ./dock
@@ -102,7 +103,7 @@ in {
         packages =
           (import ./packages.nix {inherit pkgs;})
           ++ [
-            pkgs.neovim
+            neovimNightly
             inputs.nixd-ls.packages.${pkgs.stdenv.hostPlatform.system}.default
           ];
         file =
