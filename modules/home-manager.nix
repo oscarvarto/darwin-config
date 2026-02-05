@@ -264,7 +264,7 @@ in {
               # user.name and user.email handled by conditional includes
               init.defaultBranch = "main";
               core = {
-                editor = "emacsclient -t";
+                editor = "zed --wait";
                 autocrlf = false;
                 eol = "lf";
                 ignorecase = false;

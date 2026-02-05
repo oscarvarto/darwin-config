@@ -54,6 +54,7 @@ in {
         set -gx EMACSDIR "$HOME/.emacs.d"
         set -gx CARGO_HOME "$HOME/.cargo"
         set -gx DARWIN_CONFIG_PATH "${darwinConfigPath}"
+        set -gx VCPKG_ROOT "$HOME/git-repos/vcpkg"
 
         # Set Xcode developer directory to release version (matching zsh)
         set -gx DEVELOPER_DIR "/Applications/Xcode.app/Contents/Developer"

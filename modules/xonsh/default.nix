@@ -98,6 +98,9 @@
     $DYLD_LIBRARY_PATH = '${pkgs.openssl.out}/lib'
 
     $XONTRIBS_TO_LOAD = ${xontribsJson}
+
+    # vcpkg package manager
+    $VCPKG_ROOT = $HOME + "/git-repos/vcpkg"
   '';
 
   # Direct tool integration

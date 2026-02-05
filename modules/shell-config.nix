@@ -55,7 +55,7 @@
 
     # SDK path configuration for gcc-15 to find macOS frameworks and headers
     export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
-    export MACOSX_DEPLOYMENT_TARGET="26.0"
+    export MACOSX_DEPLOYMENT_TARGET="26.2"
     # Add framework search paths for gcc-15
     # export CPPFLAGS="-isysroot $SDKROOT -I$SDKROOT/usr/include -F$SDKROOT/System/Library/Frameworks"
     # export LDFLAGS="-isysroot $SDKROOT -L$SDKROOT/usr/lib -F$SDKROOT/System/Library/Frameworks"

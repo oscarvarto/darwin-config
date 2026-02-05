@@ -17,6 +17,7 @@ in {
       export CARGO_HOME="$HOME/.cargo"
       export EMACSDIR="~/.emacs.d"
       export BAT_THEME="ansi"
+      export VCPKG_ROOT="$HOME/git-repos/vcpkg"
 
       # Use centralized PATH configuration from modules/path-config.nix
       ${

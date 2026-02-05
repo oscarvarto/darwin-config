@@ -83,6 +83,7 @@ $env.DOTNET_ROOT = "/usr/local/share/dotnet"
 $env.CARGO_HOME = ($env.HOME | path join ".cargo")
 $env.EMACSDIR = "~/.emacs.d"
 $env.BAT_THEME = "ansi"
+$env.VCPKG_ROOT = ($env.HOME | path join "git-repos" "vcpkg")
 
 # Ghostty terminfo location for proper terminal support in Emacs
 $env.TERMINFO_DIRS = $"($env.HOME)/.terminfo:/usr/share/terminfo"
