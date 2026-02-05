@@ -717,17 +717,17 @@
     "zellij": {
       "flake": false,
       "locked": {
-        "lastModified": 1770202761,
-        "narHash": "sha256-x/ZHiZGThKcrUd5iXCH6sNjCMiYb3oNzn/+jjbYzENw=",
+        "lastModified": 1770285759,
+        "narHash": "sha256-UmTmKfwkO+9/mUwZRzCJ2pQ8EcB7HGM9YYqgDH5rFbE=",
         "owner": "zellij-org",
         "repo": "zellij",
-        "rev": "690a1e4506854c1e7637cf4c27f75e39b923972d",
+        "rev": "a5f6ac81f477a7dbfb3c0398c562016e24c09ba9",
         "type": "github"
       },
       "original": {
         "owner": "zellij-org",
         "repo": "zellij",
-        "rev": "690a1e4506854c1e7637cf4c27f75e39b923972d",
+        "rev": "a5f6ac81f477a7dbfb3c0398c562016e24c09ba9",
         "type": "github"
       }
     },
@@ -743,11 +743,11 @@
         "zellij": "zellij"
       },
       "locked": {
-        "lastModified": 1770265241,
-        "narHash": "sha256-YmLtrIHDem3P1C5llTlPWDU9R4jUwjKD2klR57gj9fw=",
+        "lastModified": 1770296698,
+        "narHash": "sha256-7AN+evD3aiGG79r9xvUHL3akwjexT36OK/It4cwX8bE=",
         "owner": "oscarvarto",
         "repo": "zellij-nix",
-        "rev": "3c946061b219e7f67dc9408c299f987700f23abc",
+        "rev": "295af1ef5a6de8cdaf837f05dee35078629797ff",
         "type": "github"
       },
       "original": {
