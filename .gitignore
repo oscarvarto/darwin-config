@@ -12,13 +12,10 @@ ignored/
 
 result
 
-# Zed editor sensitive data
-stow/zed/.config/zed/prompts
 datagrip
 fleet
 idea
 qlot
-stow/zed/.config/zed/development_credentials
 
 # JIRA API tokens and other work credentials
 *api-token*

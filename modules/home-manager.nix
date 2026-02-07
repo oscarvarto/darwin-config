@@ -271,7 +271,7 @@ in {
                 hooksPath = "/Users/${user}/.config/git/hooks";
               };
               # Use SSH for pushes but HTTPS for fetches/clones
-              # This keeps compatibility with tools like Zed that expect HTTPS URLs
+              # This keeps compatibility with tools that expect HTTPS URLs
               url."git@github.com:".pushInsteadOf = "https://github.com/";
               commit.gpgsign = false;
               diff.colorMoved = "zebra";
