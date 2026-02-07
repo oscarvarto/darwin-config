@@ -47,7 +47,6 @@ def main [
                 "jira-tools",
                 "lazyvim",
                 "emacs",
-                "zed",
                 "zellij-theme-management",
                 "kitty",
                 "ghostty",
@@ -94,7 +93,7 @@ def main [
             if ($failed_packages | length) == 0 {
                 print "\n✅ All stow packages deployed successfully!"
                 print $"📂 Scripts are now available in ($env.HOME)/.local/share/bin/"
-                print $"🎨 Editor configs deployed to ~/.config/nvim/ and ~/.config/zed/"
+                print $"🎨 Editor config deployed to ~/.config/nvim/"
                 print $"🖼️  Theme management tools deployed to ~/.local/bin/"
             } else {
                 print $"\n⚠️  Deployment completed with ($failed_packages | length) failures:"
@@ -122,7 +121,6 @@ def main [
                 "zellij-theme-management",
                 "lazyvim",
                 "emacs",
-                "zed",
                 "cargo-tools",
                 "nodejs-tools",
                 "dotnet-tools",
@@ -154,7 +152,6 @@ def main [
                 "zellij-theme-management",
                 "lazyvim",
                 "emacs",
-                "zed",
                 "cargo-tools",
                 "nodejs-tools",
                 "dotnet-tools",
@@ -247,7 +244,6 @@ def main [
             print "  • dotnet-tools     - .NET SDK and global tools"
             print "  • lazyvim          - Neovim LazyVim configuration"
             print "  • emacs            - Emacs configuration (~/.emacs.d)"
-            print "  • zed              - Zed editor configuration"
             print "  • zellij-theme-management - Zellij theme switching tools"
             print "  • kitty            - Kitty terminal configuration and automation"
             print "  • ghostty          - Ghostty terminal configuration overrides"
@@ -256,7 +252,6 @@ def main [
             print "📂 Deployment Targets:"
             print "  • Scripts → ~/.local/share/bin/ (as symlinks)"
             print "  • LazyVim → ~/.config/nvim/ (as symlinks)"
-            print "  • Zed → ~/.config/zed/ (as symlinks)"
             print "  • Kitty → ~/.config/kitty/ + ~/.local/share/bin/ (as symlinks)"
             print "  • AeroSpace → ~/.aerospace.toml (as symlink)"
             print "  • Theme Tools → ~/.local/bin/ (as symlinks)"

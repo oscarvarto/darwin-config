@@ -52,8 +52,8 @@ in {
     # Start Emacs daemon manually with: emacs --daemon
     ALTERNATE_EDITOR = "false";
     EDITOR = "nvim";
-    VISUAL = "zed -w";
-    GIT_EDITOR = "zed -w";
+    VISUAL = "code-insiders -w";
+    GIT_EDITOR = "code-insiders -w";
     LANG = "en_US.UTF-8";
     LC_ALL = "en_US.UTF-8";
     BAT_THEME = "ansi";
@@ -264,7 +264,7 @@ in {
               # user.name and user.email handled by conditional includes
               init.defaultBranch = "main";
               core = {
-                editor = "zed --wait";
+                editor = "code-insiders -w";
                 autocrlf = false;
                 eol = "lf";
                 ignorecase = false;

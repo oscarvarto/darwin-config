@@ -23,8 +23,6 @@ stow/
 │   └── .config/nvim/    # LazyVim configuration files
 ├── emacs/                # Emacs configuration
 │   └── .emacs.d/         # Emacs configuration files
-├── zed/                  # Zed editor configuration
-│   └── .config/zed/     # Zed configuration files
 ├── zellij-theme-management/ # Zellij theme switcher
 │   └── .local/bin/      # Theme scripts
 ├── kitty/                # Kitty terminal configuration
@@ -53,7 +51,6 @@ stow -t ~ nodejs-tools     # Deploy Node.js tools management
 stow -t ~ dotnet-tools     # Deploy .NET tools management
 stow -t ~ lazyvim          # Deploy LazyVim configuration
 stow -t ~ emacs            # Deploy Emacs configuration
-stow -t ~ zed              # Deploy Zed configuration
 stow -t ~ zellij-theme-management # Deploy Zellij themes
 stow -t ~ kitty            # Deploy Kitty configuration
 stow -t ~ nix-scripts      # Deploy Nix utility scripts

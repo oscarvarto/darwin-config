@@ -1,27 +1,6 @@
-# Zed, VS Code, and Cursor Integration
+# VS Code and Cursor Integration
 
-Use Yazelix tools (Nushell, zoxide, starship, lazygit, etc.) directly from your editor's built-in terminal with dedicated Zed and VS Code/Cursor launchers.
-
-## Zed Integrated Terminal
-
-Zed launches shells directly, so point it at Bash and let `yzx env` take over:
-
-```json
-{
-  "terminal": {
-    "shell": {
-      "with_arguments": {
-        "program": "bash",
-        "args": ["-ic", "yzx env"]
-      }
-    }
-  }
-}
-```
-
-- `-i` makes Bash interactive, so it sources your `~/.bashrc` (where `yzx` is typically defined).
-- `yzx env` hands control to the shell configured in `yazelix.toml` (defaults to Nushell via `nushell/scripts/core/yazelix.nu:214`).
-- Prefer to stay in Zed's original shell? Swap the command for `yzx env --no-shell`.
+Use Yazelix tools (Nushell, zoxide, starship, lazygit, etc.) directly from your editor's built-in terminal.
 
 ## VS Code and Cursor Integrated Terminal
 

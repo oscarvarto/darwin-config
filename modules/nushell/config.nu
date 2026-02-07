@@ -1053,7 +1053,7 @@ def reload_config [] {
 alias xsh = pixi-gt run xonsh
 
 $env.EDITOR = "nvim"
-$env.VISUAL = "zed --wait"
+$env.VISUAL = "code-insiders -w"
 # Do not allow emacsclient to auto-start a background daemon
 $env.ALTERNATE_EDITOR = "false"
 

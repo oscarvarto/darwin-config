@@ -117,7 +117,7 @@
           nativeBuildInputs = with pkgs; [bashInteractive git];
           shellHook = ''
             export EDITOR=nvim
-            export VISUAL="zed --wait"
+            export VISUAL="code-insiders -w"
           '';
         };
     };

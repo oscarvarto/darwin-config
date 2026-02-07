@@ -97,7 +97,7 @@
     # Start Emacs daemon manually with: emacs --daemon
     export ALTERNATE_EDITOR="false"
     export EDITOR="nvim"
-    export VISUAL="zed --wait"
+    export VISUAL="code-insiders -w"
     export DARWIN_CONFIG_PATH="${darwinConfigPath}"
 
     # Load theme from cache file set by catppuccin theme switcher

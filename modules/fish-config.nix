@@ -69,7 +69,7 @@ in {
         # Editor configuration (matching zsh)
         set -gx ALTERNATE_EDITOR "false"
         set -gx EDITOR "nvim"
-        set -gx VISUAL "zed --wait"
+        set -gx VISUAL "code-insiders -w"
 
         ${fishSecretsLoader}
 

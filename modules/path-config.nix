@@ -22,6 +22,7 @@
     # "/usr/local/my-app/bin"
     # "$HOME/apache-maven-4.0.0-rc-5/bin"
     "$HOME/git-repos/vcpkg"
+    "$HOME/go/bin"
     "$HOME/.emacs.d/.cache/lsp/eclipse.jdt.ls/bin"
     "$HOME/.opencode/bin"
     "/opt/homebrew/opt/grep/libexec/gnubin"

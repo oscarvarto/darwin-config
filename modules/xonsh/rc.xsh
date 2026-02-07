@@ -21,7 +21,7 @@ $COLORTERM = "truecolor"
 
 # Development tools
 $EDITOR = "nvim"
-$VISUAL = "zed --wait"
+$VISUAL = "code-insiders -w"
 $GIT_EDITOR = "emacsclient -t"
 $BAT_THEME = "ansi"
 

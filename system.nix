@@ -171,7 +171,6 @@ in {
 
   # Global nixpkgs configuration to silence evaluation warnings
   nixpkgs.config = {
-    allowAliases = false; # Disable package aliases to prevent warnings
     allowBroken = true; # Allow broken packages to work around SDK issues
   };
 

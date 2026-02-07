@@ -79,7 +79,7 @@ There's much to be done yet. Infinite possibilities. But some rather closer than
   - All flags are composable for maximum flexibility while maintaining a clean interface
 - **IDE integration enhancements**: Added quiet mode to `yzx env` for seamless IDE terminal integration:
   - Suppresses verbose output when `YAZELIX_ENV_ONLY=true`
-  - Clean, minimal output suitable for IDE/editor terminals (Zed, DataGrip, etc.)
+  - Clean, minimal output suitable for IDE/editor terminals (DataGrip, VS Code, Cursor, etc.)
   - Eliminates ASCII art and chatty setup messages in quiet mode
 - **Enhanced yzx env functionality**: Improved shell handling and user experience:
   - Now launches configured shell by default (more intuitive than keeping current shell)

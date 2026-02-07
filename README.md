@@ -665,7 +665,6 @@ control and easy deployment.
 |-----------------------------|----------------------------------------|-----------------------|
 | **aux-scripts**             | Utility scripts and tools              | `~/.local/share/bin/` |
 | **lazyvim**                 | Neovim LazyVim configuration           | `~/.config/nvim/`     |
-| **zed**                     | Zed editor configuration               | `~/.config/zed/`      |
 | **zellij-theme-management** | Zellij theme switcher + helpers        | `~/.local/bin/`       |
 | **kitty**                   | Kitty terminal themes + scripts        | `~/.config/kitty/`    |
 | **ghostty**                 | Ghostty terminal configuration         | `~/.config/ghostty/`  |
@@ -687,7 +686,6 @@ manage-stow-packages deploy
 
 # Deploy specific packages
 stow -t ~ lazyvim                # Deploy LazyVim config
-stow -t ~ zed                    # Deploy Zed config
 stow -t ~ aux-scripts            # Deploy utility scripts
 
 # Remove packages
@@ -714,7 +712,7 @@ manage-dotnet-tools install   # Install .NET SDK from dotnet-tools.toml
 **Use Stow for:**
 
 - Complex shell scripts that are hard to escape in Nix
-- Editor configurations with many files (LazyVim, Zed, custom Emacs setups)
+- Editor configurations with many files (LazyVim, custom Emacs setups)
 - Raycast scripts that need specific file locations
 - Development tool management scripts
 
@@ -1050,7 +1048,7 @@ git add . && git commit -m "Update LazyVim config"
 
 ### Editor Management with Stow
 
-Both editor configurations use the stow system for deployment and management.
+Editor configurations use the stow system for deployment and management.
 
 #### Deploying Editor Configurations
 
@@ -1060,7 +1058,6 @@ manage-stow-packages deploy
 
 # Deploy specific editor
 stow -t ~ lazyvim       # Deploy LazyVim config
-stow -t ~ zed           # Deploy Zed config
 
 # Check deployment status
 manage-stow-packages status
@@ -1071,7 +1068,6 @@ manage-stow-packages status
 ```bash
 # Remove specific editor config (preserves files)
 stow -D -t ~ lazyvim
-stow -D -t ~ zed
 
 # Remove all stow packages
 manage-stow-packages remove
@@ -1711,7 +1707,6 @@ flake.nix              # Main flake with inputs, hostConfigs, and apps
     ├── aux-scripts/        # Helper scripts deployed to ~/.local/share/bin
     ├── emacs/              # Configuration using elpaca
     ├── lazyvim/            # Configuration
-    ├── zed/                # Configuration
     ├── zellij-theme-management/ # Zellij theme switcher scripts
     ├── kitty/              # Kitty terminal theme + helper scripts
     ├── raycast-scripts/    # Raycast automation scripts

@@ -11,8 +11,7 @@
   "context_servers": {
     "mcp-server-context7": {
       "enabled": true,
-      "settings": {
-      },
+      "settings": {},
     },
     // Usage with Codex CLI
     // codex mcp add sequential-thinking npx -y @modelcontextprotocol/server-sequential-thinking
@@ -51,9 +50,6 @@
     },
     "play_sound_when_agent_done": true,
   },
-  "features": {
-    "edit_prediction_provider": "zed",
-  },
   "language_models": {
     "ollama": {
       "api_url": "http://localhost:11434",
@@ -63,15 +59,14 @@
     "diagnostics": true,
     "metrics": true,
   },
-  "vim_mode": false,
   "ui_font_family": "PragmataPro Liga",
   "ui_font_size": 18,
-  "buffer_font_family": "MonoLisaVariable Nerd Font",
+  "buffer_font_family": "PragmataPro Mono Liga",
   "buffer_font_size": 20.0,
   "buffer_font_features": { "calt": true },
   "buffer_line_height": "standard",
   "terminal": {
-    "font_family": "MonoLisaVariable Nerd Font",
+    "font_family": "PragmataPro Mono Liga",
     "font_size": 18.0,
     "line_height": "standard",
     "shell": {
